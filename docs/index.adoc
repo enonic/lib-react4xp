@@ -1,0 +1,277 @@
+= Building an XP library
+
+A library for Enonic XP allows packaging resources to be reused across different applications.
+
+Libraries can contain JavaScript functions to be used from _controllers_, but also _Assets_ or _Content Types_.
+They can also be used to bridge code calling Java from JavaScript.
+
+This guide shows how to easily create libs and how to write JavaScript code that interfaces with Java.
+
+
+== Setting up a project
+
+=== Starter lib
+
+To get started, use the `init-project` toolbox script to initialize your project.
+Specify ``starter-lib`` as the base repository.
+
+[source,bash]
+----
+mkdir new-project
+cd new-project
+[$XP_INSTALL]/toolbox/toolbox.sh init-project -n com.example.name -r starter-lib
+----
+
+The http://xp.readthedocs.io/en/stable/reference/toolbox/init-project.html[init-project] tool will create a new application project structure for building a library.
+
+The project directory generated will contain some example files: _JavaScript_ code, _Java_ code and a _Content Type_.
+These are meant as placeholders. You can just delete the ones not needed, and keep or rename the ones to be used.
+
+In the project there are also some test files, as an example of how to write unit tests for a library.
+
+=== Gradle build
+
+To build the new library project use the Gradle tool, which is included in the Starter lib.
+
+There are 2 files used by Gradle to build the target library.
+
+* ``gradle.properties``: Contains properties to define the library artifact name and version, and to specify the XP version it is based on.
+* ``build.gradle``: The build script defining the tasks and dependencies needed for the project.
+
+This is a minimal ``build.gradle`` file for an XP library without extra dependencies:
+
+[source,groovy]
+----
+plugins {
+    id 'java'
+    id 'maven'
+}
+
+repositories {
+    mavenLocal()
+    jcenter()
+    maven {
+        url 'http://repo.enonic.com/public'
+    }
+}
+
+dependencies {
+    compile "com.enonic.xp:script-api:${xpVersion}"
+    // add other compile dependencies here
+    testCompile "com.enonic.xp:testing:${xpVersion}"
+    testCompile 'junit:junit:4.12'
+}
+----
+
+If you used the init-project for starter-lib (see previous step) you don't need to make any changes to the gradle files.
+
+Run this command to build the project in OSX/Linux:
+[source,bash]
+----
+./gradlew build
+----
+
+Run this command to build the project in Windows:
+[source,bash]
+----
+gradlew.bat deploy
+----
+
+== Assets and schemas
+
+Assets and schemas (content types, mixins, etc.) defined in a library will be added to an application when the app includes the library.
+
+To add assets or schema files to a library simply add the files with the same path as they would be used in the application.
+
+== JavaScript code
+
+An XP library project may contain several JavaScript library files. Each of those files can be imported independently to use the functions exported.
+
+To create a new JavaScript library simply create a file with extension ``.js`` inside the project directory with path ``src/main/resources/lib/<org>/<name>/index.js``
+
+A JavaScript library is similar to a NodeJs module. It may contain a number of functions and variables.
+Functions and variables declared in the global scope in the JavaScript file are considered internal. To expose functions or variables they must be set on the ``exports`` object.
+
+Example
+[source,javascript]
+----
+var internalValue = 'foo';  # <1>
+
+var helperFunction = function () { # <2>
+    // do something
+};
+
+exports.MAGIC_VALUE = 42; # <3>
+
+exports.sayHello = function(name) { # <4>
+    helperFunction();
+    log.info('Hello ' + name);
+}
+----
+<1> Internal variable
+<2> Internal private function
+<3> Exported variable
+<4> Exported function, i.e. public function
+
+== Java code
+
+An XP library is just a standard Java Archive ``.jar`` file. That means it can also contain Java classes.
+
+Java packages and classes should be placed under path ``src/main/java``. They will be compiled and included in the library by Gradle.
+
+NOTE: There is a small performance gain by coding in Java instead of JavaScript, but most of the time it is not worth it. JavaScript code in XP is compiled to bytecode and executed natively on the JVM.
+
+The main reason for using Java in a library is to do things that are not directly available with JavaScript, like accessing the network or using 3rd party Java libraries.
+
+=== Instantiate Java class
+
+If you want to use some functionality implemented in Java from XP controllers, you will need to call Java code from a JavaScript library.
+To do that you first need to instantiate a Java object, after that you can access its fields and methods.
+
+- To instantiate a Java object from a _.js_ file you need to call the built-in function `__.newBean`, passing the Java class full name.
+- You will obtain an instance of the Java object.
+- You can then call any public method in the class, from JavaScript.
+
+[source,javascript]
+----
+exports.doSomething = function () {
+    var bean = __.newBean('com.enonic.lib.mylib.MyClass');
+
+    return bean.execute();
+};
+----
+
+=== Passing parameters to Java
+
+There are 2 ways to pass parameters to a Java method, from JavaScript:
+
+- Passing the parameters in the method call
+- Setting the parameters as properties in the Java object, and then calling the method without parameters
+
+The first one is recommended when there are few parameters (1 or 2) and of simple types.
+The second one is better when there are multiple parameters, or some of them are optional.
+
+[source,javascript]
+----
+exports.doSomething = function (param1, param2) {
+    var bean = __.newBean('com.enonic.lib.mylib.MyClass');
+
+    return bean.execute(param1, param2);
+};
+
+exports.doSomethingElse = function (params) {
+    var bean = __.newBean('com.enonic.lib.mylib.MyClass');
+
+    bean.text = __.nullOrValue(params.text) || '';
+    bean.size = __.nullOrValue(params.size) || 250;
+
+    return bean.execute();
+};
+----
+
+TIP: Note, when passing values that might be `null` or `undefined` it is recommended to filter them using the `__.nullOrValue` built-in function.
+This function converts any value that is `null` or `undefined` in JavaScript to `null` in Java. Otherwise returns the input value without changes.
+
+To be able to set property values as in the 2nd example above, the Java object must implement a setter method for each field.
+
+The Java class used in the example above looks like this:
+
+[source,java]
+----
+package com.enonic.lib.mylib;
+
+public final class MyClass {
+    private String text;
+    private Long size;
+
+    public String something( String param1, Long param2 ) {
+        return "Parameters: " + param1 + " " + param2;
+    }
+
+    public String somethingElse() {
+        return "Parameters: " + this.text + " " + this.size;
+    }
+
+    public void setText( String text ) {
+        this.text = text;
+    }
+
+    public void setSize( Long size ) {
+        this.size = size;
+    }
+}
+----
+
+=== Parameter conversions
+
+There are some type conversions that are made when calling from JavaScript to Java:
+
+- when passing a JavaScript `string`, the Java method should expect a Java `String`
+- when passing a JavaScript `boolean`, the Java method should expect a Java `Boolean`
+- when passing a JavaScript `number`, the Java method should expect a Java `Long`, `Integer` or `Double`
+- when passing a JavaScript `array`, the Java method should expect a Java `List`
+- when passing a JavaScript `object`, the Java method should expect a Java `Map<String, Object>`
+
+=== Returning results from Java
+
+When returning simple values from Java to a JavaScript caller, the same type conversions applies.
+
+To return complex object values, you should create a specific Java class to make the mapping. This class should implement the ``MapSerializable`` interface.
+It will implement the ``serialize`` method, which allows generating a JSON object.
+
+You can see an example here:
+
+[source,javascript]
+----
+include::../src/main/java/com/enonic/lib/mylib/ExampleObjectMapper.java[]
+----
+
+Finally, for returning values of type binary stream from Java, it should be wrapped on a https://google.github.io/guava/releases/19.0/api/docs/com/google/common/io/ByteSource.html[ByteSource] object.
+This is required by XP to allow returning it from an HTTP request, or add it as a content attachment.
+
+
+== Libraries and Applications
+
+When a library is included in an application, the content of the `src/main/resources` directory in the library will be extracted over the same directory in the application.
+This is done during build time of the app, so the source code of the application is not modified, just the generated application ``.jar`` file.
+
+It is important to name JavaScript files correctly, to avoid conflicts with existing files in the applications or from other libraries.
+If a file with the same path exists in the application or in another included library, one of them would be overwritten, making it fail when the application code is executed.
+
+It is a best practice to place ``.js`` library files inside a folder with the name of the organization or author, to make sure there won't be any conflicts.
+
+The recommended pattern is ``src/main/resources/lib/<organization>/<library-name>/index.js`` .
+
+For example: ``src/main/resources/lib/acme/fancy-lib/index.js`` .
+
+
+If the library contains Java code, the compiled classes will be included in the application. In this case the standard package namespacing is normally enough to avoid conflicts.
+
+
+== Using the library
+
+To use the newly created library in an XP application, first we need to add the dependency and repository from the library to the app ``build.gradle`` file:
+
+[source,groovy]
+----
+dependencies {
+    ...
+    include "com.enonic.lib:mylib:1.0.0"
+}
+----
+
+The library can then be used from any JavaScript controller by just requiring the lib and calling the exported functions:
+
+[source,js]
+----
+var myLib = require('/lib/example/my-lib');
+
+exports.get = function (req) {
+    var something = myLib.doSomething('abc', 250);
+
+    return {
+        body: something
+    }
+};
+----
+
