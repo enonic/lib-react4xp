@@ -22,12 +22,6 @@ dependencies {
     include group: 'org.jdom', name: 'jdom', version: '2.0.2'
     include group: 'org.json', name: 'json', version: '20180813'
     include group: 'jaxen', name: 'jaxen', version: '1.1.6'
-
-    // add other compile dependencies here
-    // compile "com.foo.mypackage:artifact-name:1.0.0"
-
-    //testCompile "com.enonic.xp:testing:${xpVersion}"
-    //testCompile 'junit:junit:4.12'
 }
 
 
@@ -39,6 +33,30 @@ repositories {
         url 'http://repo.enonic.com/public'
     }
 }
+
+npmInstall.inputs.file("package.json")
+npmInstall.inputs.file("package-lock.json")
+npmInstall.outputs.dir("node_modules")
+
+
+task babelXP(type: NodeTask) {
+    script = file('node_modules/babel-cli/bin/babel.js')
+    args = ["src/main/resources", "--out-dir", "build/resources/main"]
+
+    inputs.dir 'src/main/resources'
+    outputs.dir("build/resources/main")
+}
+babelXP.dependsOn += 'processResources'
+
+
+
+jar.dependsOn 'babelXP'
+jar.outputs.dir('build/libs')
+
+
+
+
+
 
 /*
 def deploySource = 'build/libs/lib-apibuilder-' + version + '.jar';

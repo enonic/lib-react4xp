@@ -1,0 +1,42 @@
+{
+  "name": "lib-react4xp-runtime",
+  "version": "0.0.1",
+  "description": "XP serverside runtime, handles the bulk of the React4xp work: server-side rendering, and handling and serving of client-side components and dependency chunks to the client, including the React4xp front-end rendering wrapper itself.\"",
+  "main": "src/main/resources/lib/enonic/react4xp/index.es6",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enonic/lib-react4xp-runtime.git"
+  },
+  "keywords": [
+    "React4xp"
+  ],
+  "author": "Espen Norderud",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/enonic/lib-react4xp-runtime/issues"
+  },
+  "homepage": "https://github.com/enonic/lib-react4xp-runtime#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "babel-register": "^6.26.0"
+  },
+  "babel": {
+    "presets": [
+      "es2015",
+      "stage-0"
+    ],
+    "plugins": [
+      "transform-object-rest-spread"
+    ]
+  }
+}
