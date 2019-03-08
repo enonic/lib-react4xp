@@ -2,17 +2,21 @@
 
 var ioLib = require('/lib/xp/io');
 var utilLib = require('/lib/enonic/util');
+var react4xpUtilsLib = require('/lib/enonic/react4xp/utils');
 var cacheLib = require('/lib/cache');
 
 // expected to be copied to the correct build folder by e.g. gradle. Must match the file name of the generated file.
-const CONFIG = require('/lib/enonic/react4xp/react4xp_constants.json');
+const {
+    R4X_TARGETSUBDIR, ASSET_URL_ROOT, ENTRIES_FILENAME
+} = require('/lib/enonic/react4xp/react4xp_constants.json');
 
-const R4X = CONFIG.R4X_TARGETSUBDIR;
 
-// react4xp is correct to hardcode here instead of reading from the constants file.
-const SERVICE_ROOT = `/_/service/${app.name}/react4xp/`;
+const SERVICE_ROOT = react4xpUtilsLib.getAssetRoot(ASSET_URL_ROOT);
+
+
 log.info("SERVICE_ROOT: " + JSON.stringify(SERVICE_ROOT, null, 2));
-const REACT4XP_ROOT = `/${R4X}/`;
+
+const REACT4XP_ROOT = `/${R4X_TARGETSUBDIR}/`;
 
 
 
@@ -26,7 +30,7 @@ const react4xpCache = cacheLib.newCache({
 // For content-hashed chunks, Cache-Control should be "public, max-age=31536000". For others, ETag and no-cache?  Use the commonChunks files to figure this out.
 const ENTRIES = JSON.parse(
     ioLib.readLines(
-        ioLib.getResource(REACT4XP_ROOT + "entries.json").getStream()
+        ioLib.getResource(REACT4XP_ROOT + ENTRIES_FILENAME).getStream()
     ).join(" ")
 ).map(entry => `${entry}.js`);
 

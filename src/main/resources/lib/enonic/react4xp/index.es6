@@ -1,4 +1,6 @@
 const utilLib = require('/lib/enonic/util');
+const react4xpUtils = require('./utils');
+
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
 
@@ -8,10 +10,7 @@ const {
     NASHORNPOLYFILLS_FILENAME, CLIENT_CHUNKS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME, ENTRIES_FILENAME, ASSET_URL_ROOT
 } = require('./react4xp_constants.json');;
 
-let ASSET_ROOT = ASSET_URL_ROOT.replace(/\$\{app\.name\}/g, app.name);
-if (!ASSET_ROOT.endsWith('/')) {
-    ASSET_ROOT += '/';
-}
+const ASSET_ROOT = react4xpUtils.getAssetRoot(ASSET_URL_ROOT);
 
 const BASE_PATHS = {
     part: "parts",
@@ -22,8 +21,9 @@ const BASE_PATHS = {
 
 const SCRIPTS_HOME = `/${R4X_TARGETSUBDIR}`;
 const CHUNKFILES_HOME = `/${R4X_TARGETSUBDIR}/`;
+const NASHORNPOLYFILLS_FILENAME_JS = `${NASHORNPOLYFILLS_FILENAME}.js`;
 
-SSRreact4xp.setConfig(SCRIPTS_HOME, LIBRARY_NAME, CHUNKFILES_HOME, NASHORNPOLYFILLS_FILENAME, ENTRIES_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME);
+SSRreact4xp.setConfig(SCRIPTS_HOME, LIBRARY_NAME, CHUNKFILES_HOME, NASHORNPOLYFILLS_FILENAME_JS, ENTRIES_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME);
 
 
 /** Reads and parses file names from webpack-generated JSON files that list up contenthashed bundle chunk names. */
