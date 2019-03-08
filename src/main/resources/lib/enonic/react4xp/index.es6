@@ -2,32 +2,34 @@ const utilLib = require('/lib/enonic/util');
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
 
-// expected to be copied to the correct build folder during a build step. Also, MUST have a fixed name!
-const CONFIG = require('./react4xp_constants.json');
+// Expects a constants file to be copied to this lib folder in build, during a build step. Must have this name. See
+const {
+    LIBRARY_NAME, R4X_TARGETSUBDIR,
+    NASHORNPOLYFILLS_FILENAME, CLIENT_CHUNKS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME, ENTRIES_FILENAME, ASSET_URL_ROOT
+} = require('./react4xp_constants.json');;
 
-const R4X = CONFIG.R4X_TARGETSUBDIR;
-const LIBRARY_NAME = CONFIG.LIBRARY_NAME;
+let ASSET_ROOT = ASSET_URL_ROOT.replace(/\$\{app\.name\}/g, app.name);
+if (!ASSET_ROOT.endsWith('/')) {
+    ASSET_ROOT += '/';
+}
 
-const SERVICES_ROOT = `/_/service/${app.name}/react4xp/`;
 const BASE_PATHS = {
     part: "parts",
     page: "pages",
-    layout: "layouts",
+    layout: "layouts",  // <-- experimental
 };
 
-// TODO: Should come from the config file, right?
-const NASHORNPOLYFILLS_FILENAME = "nashornPolyfills.js";
-const FRONTENDCHUNKS_FILENAME = "chunks.client.json";
-const EXTERNALS_CHUNKS_FILENAME = "chunks.externals.json";
-const ENTRIESSOURCE = "entries.json";
-const COMPONENT_CHUNKS_FILENAME = "chunks.json";
 
-const ENTRIES = require(`/${R4X}/${ENTRIESSOURCE}`);
+const SCRIPTS_HOME = `/${R4X_TARGETSUBDIR}`;
+const CHUNKFILES_HOME = `/${R4X_TARGETSUBDIR}/`;
 
+SSRreact4xp.setConfig(SCRIPTS_HOME, LIBRARY_NAME, CHUNKFILES_HOME, NASHORNPOLYFILLS_FILENAME, ENTRIES_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME);
 
 
 /** Reads and parses file names from webpack-generated JSON files that list up contenthashed bundle chunk names. */
 const buildBasicPageContributions = (chunkHashFiles) => {
+    const entries = require(`/${R4X_TARGETSUBDIR}/${ENTRIES_FILENAME}`);
+
     const pageContributions = {};
 
     chunkHashFiles.forEach(chunkFile => {
@@ -36,7 +38,7 @@ const buildBasicPageContributions = (chunkHashFiles) => {
         Object.keys(chunks).forEach(chunkName => {
 
             // We're only looking for dependencies here, not entry files (components and such).
-            if (ENTRIES.indexOf(chunkName) === -1) {
+            if (entries.indexOf(chunkName) === -1) {
                 //log.info("chunkName: " + JSON.stringify(chunkName, null, 2));
                 let chunk = chunks[chunkName].js;
                 //log.info("chunk: " + JSON.stringify(chunk, null, 2));
@@ -51,11 +53,10 @@ const buildBasicPageContributions = (chunkHashFiles) => {
                 if (chunk.startsWith('/')) {
                     chunk = chunk.substring(1);
                 }
-                //log.info("chunk: " + JSON.stringify(chunk, null, 2));
 
                 pageContributions.bodyEnd = [
                     ...(pageContributions.bodyEnd || []),
-                    `<script src="${SERVICES_ROOT}${chunk}" ></script>`
+                    `<script src="${ASSET_ROOT}${chunk}" ></script>`
                 ];
             };
         });
@@ -70,25 +71,12 @@ const buildBasicPageContributions = (chunkHashFiles) => {
 const PAGE_CONTRIBUTIONS = buildBasicPageContributions(
     [
         EXTERNALS_CHUNKS_FILENAME,
-        FRONTENDCHUNKS_FILENAME,
+        CLIENT_CHUNKS_FILENAME,
         COMPONENT_CHUNKS_FILENAME
     ].map(
-    fileName => `/${R4X}/${fileName}`
+        fileName => `/${R4X_TARGETSUBDIR}/${fileName}`
     )
 );
-
-const SCRIPTS_HOME = `/${R4X}`;
-const CHUNKFILES_HOME = `/${R4X}/`;
-
-/*
-log.info("CONFIG (" + typeof CONFIG + "): " + JSON.stringify(CONFIG, null, 2));
-log.info("R4X (" + typeof R4X + "): " + JSON.stringify(R4X, null, 2));
-log.info("SCRIPTS_HOME (" + typeof SCRIPTS_HOME + "): " + JSON.stringify(SCRIPTS_HOME, null, 2));
-log.info("LIBRARY_NAME (" + typeof LIBRARY_NAME + "): " + JSON.stringify(LIBRARY_NAME, null, 2));
-log.info("CHUNKFILES_HOME (" + typeof CHUNKFILES_HOME + "): " + JSON.stringify(CHUNKFILES_HOME, null, 2));
-//*/
-SSRreact4xp.setConfig(SCRIPTS_HOME, LIBRARY_NAME, CHUNKFILES_HOME, NASHORNPOLYFILLS_FILENAME, ENTRIESSOURCE, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME);
-
 
 
 
@@ -378,7 +366,7 @@ class React4xp {
         return mergePageContributions(pageContributions, {
             bodyEnd: [
                 // Browser-runnable script reference for the "naked" react component:
-                `<script src="${SERVICES_ROOT}${this.jsxPath}.js"></script>`,
+                `<script src="${ASSET_ROOT}${this.jsxPath}.js"></script>`,
 
                 // That script will expose to the browser an element or function that can be handled by React4Xp._CLIENT_.render. Trigger that, along with the target container ID, and props, if any:
                 `<script defer>${LIBRARY_NAME}._CLIENT_.render(${LIBRARY_NAME}['${this.jsxPath}'].default, ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
@@ -400,7 +388,7 @@ class React4xp {
         return mergePageContributions(pageContributions, {
             bodyEnd: [
                 // Browser-runnable script reference for the "naked" react component:
-                `<script src="${SERVICES_ROOT}${this.jsxPath}.js"></script>`,
+                `<script src="${ASSET_ROOT}${this.jsxPath}.js"></script>`,
 
                 // That script will expose to the browser an element or function that can be handled by React4Xp._CLIENT_.render. Trigger that, along with the target container ID, and props, if any:
                 `<script defer>${LIBRARY_NAME}._CLIENT_.hydrate(${LIBRARY_NAME}['${this.jsxPath}'].default, ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`

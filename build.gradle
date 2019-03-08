@@ -1,3 +1,6 @@
+// Build library: gradlew build
+// Install library locally for development with: gradlew install
+
 plugins {
     id 'java'
     id 'maven'
@@ -52,24 +55,3 @@ babelXP.dependsOn += 'processResources'
 
 jar.dependsOn 'babelXP'
 jar.outputs.dir('build/libs')
-
-
-
-
-
-
-/*
-def deploySource = 'build/libs/lib-apibuilder-' + version + '.jar';
-def deployTarget = System.getenv('XP_HOME') + '/deploy/';
-
-task post(type: Copy) {
-    doFirst {
-        println 'Deploying: ' + deploySource + ' --> ' + deployTarget
-    }
-
-    inputs.files(deploySource)
-    from(deploySource)
-    into(deployTarget)
-}
-deploy.dependsOn 'build'
-//*/
