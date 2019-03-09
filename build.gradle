@@ -52,6 +52,7 @@ task babelXP(type: NodeTask) {
 babelXP.dependsOn += 'processResources'
 
 def ROOT = new File("").absolutePath + "/"
+
 task nashornPolyfills(type: NodeTask) {
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
@@ -63,8 +64,26 @@ task nashornPolyfills(type: NodeTask) {
 }
 nashornPolyfills.dependsOn += 'babelXP'
 
+task client(type: NodeTask) {
+    script = file('node_modules/webpack/bin/webpack.js')
+    args = [
+            '--config', 'node_modules/react4xp-runtime-client/webpack.config.js',
+            '--env.LIBRARY_NAME=__REACT4XP__RUNTIME__CLIENT__LIBRARY__NAME__PLACEHOLDER__',
+            '--env.BUILD_R4X=' + ROOT + 'build/resources/main/services/react4xp-client',
+            '--env.BUILD_ENV=production',
+            '--env.CHUNK_CONTENTHASH=[name].js',
+            '--env.CLIENT_CHUNKS_FILENAME=__delete_me_im_redundant__'
+    ]
+
+    doLast {
+        def file = new File(ROOT + 'build/resources/main/services/react4xp-client/__delete_me_im_redundant__')
+        file.delete()
+    }
+}
+client.dependsOn += 'babelXP'
 
 
 
-jar.dependsOn 'nashornPolyfills'
+jar.dependsOn += 'nashornPolyfills'
+jar.dependsOn += 'client'
 jar.outputs.dir('build/libs')

@@ -1,5 +1,6 @@
-const utilLib = require('/lib/enonic/util');
 const react4xpUtils = require('./utils');
+
+const { mergePageContributions } = require('./pageContributions');
 
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
@@ -9,76 +10,28 @@ const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer')
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
 const {
     LIBRARY_NAME, R4X_TARGETSUBDIR,
-    NASHORNPOLYFILLS_FILENAME, CLIENT_CHUNKS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME, ENTRIES_FILENAME, ASSET_URL_ROOT
+    NASHORNPOLYFILLS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME, ENTRIES_FILENAME, ASSET_URL_ROOT
 } = require('./react4xp_constants.json');;
 
 const ASSET_ROOT = react4xpUtils.getAssetRoot(ASSET_URL_ROOT);
+
+
+
+SSRreact4xp.setConfig(
+    `/${R4X_TARGETSUBDIR}`,
+    LIBRARY_NAME,
+    `/${R4X_TARGETSUBDIR}/`,
+    `${NASHORNPOLYFILLS_FILENAME}.js`,
+    ENTRIES_FILENAME,
+    EXTERNALS_CHUNKS_FILENAME,
+    COMPONENT_CHUNKS_FILENAME);
+
 
 const BASE_PATHS = {
     part: "parts",
     page: "pages",
     layout: "layouts",  // <-- experimental
 };
-
-
-const SCRIPTS_HOME = `/${R4X_TARGETSUBDIR}`;
-const CHUNKFILES_HOME = `/${R4X_TARGETSUBDIR}/`;
-const NASHORNPOLYFILLS_FILENAME_JS = `${NASHORNPOLYFILLS_FILENAME}.js`;
-
-SSRreact4xp.setConfig(SCRIPTS_HOME, LIBRARY_NAME, CHUNKFILES_HOME, NASHORNPOLYFILLS_FILENAME_JS, ENTRIES_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME);
-
-
-/** Reads and parses file names from webpack-generated JSON files that list up contenthashed bundle chunk names. */
-const buildBasicPageContributions = (chunkHashFiles) => {
-    const entries = require(`/${R4X_TARGETSUBDIR}/${ENTRIES_FILENAME}`);
-
-    const pageContributions = {};
-
-    chunkHashFiles.forEach(chunkFile => {
-        const chunks = require(chunkFile);
-        //log.info("chunks: " + JSON.stringify(chunks, null, 2));
-        Object.keys(chunks).forEach(chunkName => {
-
-            // We're only looking for dependencies here, not entry files (components and such).
-            if (entries.indexOf(chunkName) === -1) {
-                //log.info("chunkName: " + JSON.stringify(chunkName, null, 2));
-                let chunk = chunks[chunkName].js;
-                //log.info("chunk: " + JSON.stringify(chunk, null, 2));
-
-                while (Array.isArray(chunk)) {
-                    if (chunk.length > 1) {
-                        throw Error(`Unexpected value in ${chunkFile}: [${chunkName}].js is an array with more than 1 array: ${JSON.stringify(chunk, null, 2)}`);
-                    }
-                    chunk = chunk[0];
-                }
-
-                if (chunk.startsWith('/')) {
-                    chunk = chunk.substring(1);
-                }
-
-                pageContributions.bodyEnd = [
-                    ...(pageContributions.bodyEnd || []),
-                    `<script src="${ASSET_ROOT}${chunk}" ></script>`
-                ];
-            };
-        });
-    });
-    return pageContributions;
-};
-
-
-
-// Use the json files built by webpack to fetch the contenthashed filenames for commonChunks.
-// Then use those to build a set of basic page contributions common to all components:
-const PAGE_CONTRIBUTIONS = buildBasicPageContributions(
-    [
-        EXTERNALS_CHUNKS_FILENAME,
-        CLIENT_CHUNKS_FILENAME,
-        COMPONENT_CHUNKS_FILENAME
-    ].map(
-        fileName => `/${R4X_TARGETSUBDIR}/${fileName}`
-    )
-);
 
 
 
@@ -92,57 +45,6 @@ const bodyHasContainer = (body, react4xpId) => {
 
 
 const buildContainer = (react4xpId, content) => `<div id="${react4xpId}">${content || ''}</div>`;
-
-
-const getUniqueEntries = (arrayOfArrays, controlSet) => {
-    const uniqueEntries = [];
-    arrayOfArrays.forEach(arr => {
-        utilLib.data.forceArray(arr).forEach(item => {
-            if (controlSet.indexOf(item) === -1) {
-                uniqueEntries.push(item);
-                controlSet.push(item);
-            }
-        })
-    });
-    return uniqueEntries;
-}
-
-
-/** Merges different pageContributions objects into one. Prevents duplicates: no single pageContribution entry is
-  * repeated, this prevents resource-wasting by loading/running the same script twice).
-  *
-  * @param incomingPgContrib incoming pageContributions (from other components / outside / previous this rendering)
-  * @param newPgContrib pageContributions that this specific component will add.
-  *
-  * Also part of the merge: PAGE_CONTRIBUTIONS, the common standard React4xp page contributions
-  */
-const mergePageContributions = (incomingPgContrib, newPgContrib) => {
-    if (!incomingPgContrib && !newPgContrib) {
-        return {...PAGE_CONTRIBUTIONS};
-    }
-    incomingPgContrib = incomingPgContrib || {};
-    newPgContrib = newPgContrib || {};
-    const controlSet = [];
-    return {
-        headBegin: getUniqueEntries([PAGE_CONTRIBUTIONS.headBegin, incomingPgContrib.headBegin, newPgContrib.headBegin], controlSet),
-        headEnd: getUniqueEntries([PAGE_CONTRIBUTIONS.headEnd, incomingPgContrib.headEnd, newPgContrib.headEnd], controlSet),
-        bodyBegin: getUniqueEntries([PAGE_CONTRIBUTIONS.bodyBegin, incomingPgContrib.bodyBegin, newPgContrib.bodyBegin], controlSet),
-        bodyEnd: getUniqueEntries([PAGE_CONTRIBUTIONS.bodyEnd, incomingPgContrib.bodyEnd, newPgContrib.bodyEnd], controlSet)
-    };
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
