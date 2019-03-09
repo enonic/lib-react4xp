@@ -56,7 +56,28 @@ public class EngineFactory {
             scriptList.add("POLYFILL_BASICS");
 
             LinkedList<String> transpiledDependencies = new com.enonic.lib.react4xp.ssr.ChunkDependencyParser().getScriptDependencies(CHUNKS_SOURCES, ENTRIES_SOURCE);
-            transpiledDependencies.addFirst(NASHORNPOLYFILLS_FILENAME);
+
+            try {
+                if (NASHORNPOLYFILLS_FILENAME == null && NASHORNPOLYFILLS_FILENAME.trim() == "") {
+                    throw new IllegalArgumentException("NASHORNPOLYFILLS_FILENAME is empty or missing.");
+                }
+                String file = CHUNKFILES_HOME + NASHORNPOLYFILLS_FILENAME;
+                String content = ResourceHandler.readResource(file);
+                scripts.put(file, content);
+                scriptList.add(file);
+
+            } catch (Exception e) {
+                System.out.println(e.getClass().getSimpleName() + " while trying to polyfill Nashorn for React4xp (NASHORNPOLYFILLS_FILENAME = " + NASHORNPOLYFILLS_FILENAME + "): " + e.getMessage());
+                e.printStackTrace();
+
+                // Fallback: try to use the pre-built nashornPolyfills from react4xp-runtime-nashornpolyfills:
+                String file = "/lib/enonic/react4xp/fallback/nashornPolyfills.js";
+                String content = ResourceHandler.readResource(file);
+                scripts.put(file, content);
+                scriptList.add(file);
+                System.out.println("Using fallback script from react4xp-runtime-nashornpolyfills");
+            }
+
             for (String scriptFile : transpiledDependencies) {
                 String file = CHUNKFILES_HOME + scriptFile;
                 scripts.put(file, ResourceHandler.readResource(file));

@@ -11,7 +11,7 @@ This library lets [Enonic XP](https://enonic.com/developer-tour) run it: exposes
 
 ## Jump to:
   - [Install](#install)
-  - [How to use](#how-to-use)
+  - [How to use: quick overview](#how-to-use-quick-overview)
 
 
 
@@ -41,13 +41,9 @@ dependencies {
 (Note: the `0.0.1-SNAPSHOT` part in the line above is the version of this library that you ask your project to import. It must match the actual library version that you built and installed - see `gradle.properties` in the library folder)
 
 
-## How to use
+## How to use: quick overview
 
-
-
-## Quick overview
-
-
+This runtime relies on components built by [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components), or a built file structure compatible with it. The server-side  
 
 
 

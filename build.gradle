@@ -51,7 +51,20 @@ task babelXP(type: NodeTask) {
 }
 babelXP.dependsOn += 'processResources'
 
+def ROOT = new File("").absolutePath + "/"
+task nashornPolyfills(type: NodeTask) {
+    script = file('node_modules/webpack/bin/webpack.js')
+    args = [
+            '--config', 'node_modules/react4xp-runtime-nashornpolyfills/webpack.config.js',
+            '--env.SOURCE=' + ROOT + 'node_modules/react4xp-runtime-nashornpolyfills/nashornPolyfills.es6',
+            '--env.BUILD_R4X=' + ROOT + 'build/resources/main/lib/enonic/react4xp/fallback',
+            '--env.NASHORNPOLYFILLS_FILENAME=nashornPolyfills'
+    ]
+}
+nashornPolyfills.dependsOn += 'babelXP'
 
 
-jar.dependsOn 'babelXP'
+
+
+jar.dependsOn 'nashornPolyfills'
 jar.outputs.dir('build/libs')

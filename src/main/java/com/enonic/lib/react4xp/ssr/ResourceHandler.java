@@ -44,5 +44,4 @@ public class ResourceHandler {
         //System.out.println("\tOK");
         return sb.toString();
     }
-
 }
