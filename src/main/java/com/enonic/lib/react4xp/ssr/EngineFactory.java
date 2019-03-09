@@ -68,10 +68,9 @@ public class EngineFactory {
 
             } catch (Exception e) {
                 System.out.println(e.getClass().getSimpleName() + " while trying to polyfill Nashorn for React4xp (NASHORNPOLYFILLS_FILENAME = " + NASHORNPOLYFILLS_FILENAME + "): " + e.getMessage());
-                e.printStackTrace();
 
                 // Fallback: try to use the pre-built nashornPolyfills from react4xp-runtime-nashornpolyfills:
-                String file = "/lib/enonic/react4xp/fallback/nashornPolyfills.js";
+                String file = "/lib/enonic/react4xp/fallback/react4xp-runtime-nashornpolyfills.js";
                 String content = ResourceHandler.readResource(file);
                 scripts.put(file, content);
                 scriptList.add(file);

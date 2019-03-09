@@ -58,7 +58,7 @@ task nashornPolyfills(type: NodeTask) {
             '--config', 'node_modules/react4xp-runtime-nashornpolyfills/webpack.config.js',
             '--env.SOURCE=' + ROOT + 'node_modules/react4xp-runtime-nashornpolyfills/nashornPolyfills.es6',
             '--env.BUILD_R4X=' + ROOT + 'build/resources/main/lib/enonic/react4xp/fallback',
-            '--env.NASHORNPOLYFILLS_FILENAME=nashornPolyfills'
+            '--env.NASHORNPOLYFILLS_FILENAME=react4xp-runtime-nashornpolyfills'
     ]
 }
 nashornPolyfills.dependsOn += 'babelXP'
