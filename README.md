@@ -1,14 +1,62 @@
-# React project starter for Enonic XP
+# lib-react4xp-runtime
 
-## React4xp: easy React in XP! 
+**React for XP: handling and rendering of pre-built React components in Enonic XP**
 
-This starter abstracts away some complexity and makes React play nice with Enonic XP. The goal is to have a low threshold to get started and React components running, while also exposing some flexible functionality to allow a variety of use cases.
+So you have a React4xp-ready file structure of compiled [React](https://reactjs.org/) components, maybe some dependency chunks, a config file and a few JSON chunk files.
 
-It renders standard JSX files: they have a `.jsx` file extension, and they export as `default` a function with a `props` argument (exporting pure HTML element in JSX works too).
+This library lets [Enonic XP](https://enonic.com/developer-tour) run it: exposes methods for client- and server-side rendering, and effectively handles built dependencies.  
+    
+**If you're just getting started, that's okay**. There's a whole suite of tools (available from NPM) to build this structure for you from your source files. Should be flexible and easy to use. More on that below, but you might want to look at to the [React4xp introduction](FIXME_THERES_NO_LINK_HERE_YET_BOOO).
 
-There's Babel support out of the box, for writing everything in glorious ES6.
+
+## Jump to:
+  - [Install](#install)
+  - [How to use](#how-to-use)
+
+
+
+## Install
+
+_This library is a work in progress at the moment_. The aim is to do it in the standard simple Enonic XP-lib way - published on [Enonic Market](https://market.enonic.com/), using Gradle to import it into your XP project. 
+
+If you still want to try it out right now, here's how:
+  - Assuming you have Enonic XP nicely installed, and you have an XP project/app set up for it (the project in which you want to use this lib), 
+  - Clone or otherwise download [the source code](https://github.com/enonic/lib-react4xp-runtime.git) for this lib (into a different folder, not into XP or the project folder)
+  - From the lib root folder, run:
+  
+```bash
+gradlew build install
+``` 
+
+Gradle will build the library and install it into the local cache, available for other projects.
+
+  - Now go to your project folder and insert into `build.gradle`, under `dependencies`:
+  
+```groovy
+dependencies {
+    include 'com.enonic.lib:lib_react4xp_runtime:0.0.1-SNAPSHOT'
+}
+```
+
+(Note: the `0.0.1-SNAPSHOT` part in the line above is the version of this library that you ask your project to import. It must match the actual library version that you built and installed - see `gradle.properties` in the library folder)
+
 
 ## How to use
+
+
+
+## Quick overview
+
+
+
+
+
+
+
+
+
+
+
 
 ### Example: Hello World
 

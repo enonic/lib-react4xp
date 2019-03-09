@@ -4,7 +4,9 @@ const react4xpUtils = require('./utils');
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
 
-// Expects a constants file to be copied to this lib folder in build, during a build step. Must have this name. See
+// react4xp_constants.json is not part of lib-react4xp-runtime,
+// it's an external shared-constants file expected to exist in the build directory of this index.es6.
+// Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
 const {
     LIBRARY_NAME, R4X_TARGETSUBDIR,
     NASHORNPOLYFILLS_FILENAME, CLIENT_CHUNKS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME, ENTRIES_FILENAME, ASSET_URL_ROOT
