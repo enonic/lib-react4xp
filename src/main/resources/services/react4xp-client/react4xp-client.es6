@@ -15,6 +15,7 @@ exports.get = (req) => {
     if (!RESPONSE) {
         log.info("Init service react4xp-client");
 
+        // TODO: ADD SUPPORT FOR BUILT-AND-HASHED CHUNK, NOT JUST THE FALLBACK!
         const resource = ioLib.getResource('/services/react4xp-client/react4xpClient.js');
         if (!resource || !resource.exists()) {
             throw Error(`File not found: /services/react4xp-client/react4xpClient.js`);

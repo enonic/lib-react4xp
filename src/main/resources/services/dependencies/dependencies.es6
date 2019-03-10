@@ -2,8 +2,7 @@
 //   - 'dependencies/urls' returns an array of dependency URLS.
 //   - just 'dependencies' will return them as HTML script tags.
 
-var { getPageContributions } = require('/lib/enonic/react4xp/pageContributions');
-
+var { getPageContributions, STATIC_CLIENT_URL } = require('/lib/enonic/react4xp/pageContributions');
 
 let DEPENDENCY_URLS = null;
 let DEPENDENCY_TAGS = null;
@@ -20,7 +19,8 @@ exports.get = (req) => {
             ...(pageContributions.bodyBegin || []),
             ...(pageContributions.bodyEnd || [])
 
-        ];
+        // This service is intended to be used by an exposed client method, and the client already has a statically available URL. Remove the client URL item(s).
+        ].filter( scriptLine => scriptLine.indexOf(STATIC_CLIENT_URL) === -1);
 
         DEPENDENCY_HTML = DEPENDENCY_TAGS.join("\n");
         log.info("DEPENDENCY_HTML (" + typeof DEPENDENCY_HTML + "): " + JSON.stringify(DEPENDENCY_HTML));

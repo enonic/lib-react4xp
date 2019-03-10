@@ -11,8 +11,7 @@ const {
 
 const ASSET_ROOT = getAssetRoot(ASSET_URL_ROOT);
 
-
-
+const STATIC_CLIENT_URL = `/_/service/${app.name}/react4xp-client`;
 
 // ---------------------------------------------------------
 
@@ -87,12 +86,9 @@ const buildBasicPageContributions = () => {
 
     } catch (e) {
         log.info(e);
+        log.info(`Falling back to built-in react4xp-runtime-client: ${STATIC_CLIENT_URL}`);
 
-        const url = `/_/service/${app.name}/react4xp-client`;
-        log.info(`Falling back to built-in react4xp-runtime-client: ${url}`);
-
-
-        appendBodyEnd(url, pageContributions);
+        appendBodyEnd(STATIC_CLIENT_URL, pageContributions);
     }
 
     return pageContributions;
@@ -150,5 +146,6 @@ let PAGE_CONTRIBUTIONS = buildBasicPageContributions();
 
 module.exports = {
     getPageContributions: ()=> PAGE_CONTRIBUTIONS,
-    mergePageContributions
+    mergePageContributions,
+    STATIC_CLIENT_URL
 };
