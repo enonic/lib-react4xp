@@ -1,19 +1,46 @@
 var { getPageContributions } = require('/lib/enonic/react4xp/pageContributions');
 
 
-let DEPENDENCIES = null;
+let DEPENDENCY_URLS = null;
+let DEPENDENCY_TAGS = null;
+let DEPENDENCY_HTML = null;
 
 exports.get = (req) => {
-    if (!DEPENDENCIES) {
-        log.info("Init service dependencies");
+    if (!DEPENDENCY_TAGS) {
         const pageContributions = getPageContributions();
-        DEPENDENCIES = pageContributions.bodyEnd.map( scriptLine => scriptLine
-            .replace(/\n<script src="/g, '')
-            .replace(/" ><\/script>/g, '')
-        )
+        log.info("pageContributions (" + typeof pageContributions + "): " + JSON.stringify(pageContributions, null, 2));
+        DEPENDENCY_TAGS = [
+            ...(pageContributions.headBegin || []),
+            ...(pageContributions.headEnd || []),
+            ...(pageContributions.bodyBegin || []),
+            ...(pageContributions.bodyEnd || [])
 
-        log.info("dependencies: " + JSON.stringify(DEPENDENCIES));
+        ];
+        log.info("DEPENDENCY_TAGS (" + typeof DEPENDENCY_TAGS + "): " + JSON.stringify(DEPENDENCY_TAGS, null, 2));
+
+        DEPENDENCY_HTML = DEPENDENCY_TAGS.join("\n");
+        log.info("DEPENDENCY_HTML (" + typeof DEPENDENCY_HTML + "): " + JSON.stringify(DEPENDENCY_HTML, null, 2));
     }
 
-    return {body: JSON.stringify(DEPENDENCIES) };
+    if ((req.path || "").endsWith("urls")) {
+        if (!DEPENDENCY_URLS) {
+            log.info("Init service dependencies: DEPENDENCY_URLS");
+            DEPENDENCY_URLS = DEPENDENCY_TAGS.map( scriptLine => scriptLine
+
+                // Remove HTML and leave only the URL after 'src='  behind
+                    .replace(/\s*<\s*script\s+src\s*=\s*["']/g, '')
+                    .replace(/["']\s*>\s*<\/script\s*>\s*/g, '')
+            );
+
+            log.info("Pure dependencies: " + JSON.stringify(DEPENDENCY_URLS));
+        }
+
+        return {body: JSON.stringify(DEPENDENCY_URLS) };
+
+    } else {
+        return {
+            body: DEPENDENCY_HTML
+        };
+    }
+
 };
