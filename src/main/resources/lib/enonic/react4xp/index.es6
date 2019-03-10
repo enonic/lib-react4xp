@@ -138,7 +138,7 @@ class React4xp {
         }
 
         return react4xp;
-    }
+    };
 
 
     //---------------------------------------------------------------
@@ -197,32 +197,45 @@ class React4xp {
 
     //---------------------------------------------------------------
 
-    /** When you want to use a JSX component file in the XP component folder, but the JSX file has a different file name
-      * than the part, initialize the React4XP with the XP component (extrapolates the path) and then call this method
-      * with only the file name.
-      * @returns The react4xp component itself, for builder-like telescoping pattern.
+    /** When you've initialized the React4xp object with an XP component, but want to use a different JSX file than the
+      * standard option (a JSX file in the same folder as the XP component, with the same name as the folder).
+      *
+      * @param jsxFileName (string, mandatory) Name of a JSX file. If it starts with "/" it will be interpreted as a full, absolute JSX path.
+      *        If not, interpreted as a relative path, and the full path will be extrapolated relative to the XP
+      *        component folder. jsxFileName MAY NOT START WITH "." !
+      *
+      * @returns The React4xp object itself, for builder-like telescoping pattern.
       */
     setJsxFileName(jsxFileName) {
-        if (!this.component) {
-            throw Error("This React4xp component has already been initialized with a jsxPath. Use that in the constructor to set a Jsx file name.");
+        // Enforce a clean jsxPath - it's not just a file reference, but a react4xp component name!
+        if (
+            (jsxFileName || "").trim() === "" ||
+            jsxFileName.startsWith('.') ||
+            jsxFileName.indexOf('..') !== -1 ||
+            jsxFileName.indexOf('/./') !== -1 ||
+            jsxFileName.indexOf('//') !== -1)
+        {
+            throw Error(`React4xp.setJsxFileName: invalid jsxFileName (${JSON.stringify(jsxFileName)}). It can't be missing/empty, or contain '..', '//', '/./' or start with '.' since that messes things up! Use a clean, full, absolute jsxPath starting with '/' or a relative file reference inside the XP component folder.${this.component ? ` Component:\n${JSON.stringify(this.component)}`: ''}`);
         }
 
-        if ((jsxFileName || "").trim() === "") {
-            throw Error(`Empty React4xp jsx component name is not allowed: ${JSON.stringify(jsxFileName, null, 2)}`);
-        }
-
-        // Strip away leading './' and trailing file extensions
-        if (jsxFileName.startsWith('./')) {
-            jsxFileName = jsxFileName.substring(2);
-        }
+        // Strip away trailing file extensions
         jsxFileName = (jsxFileName.endsWith('.jsx') || jsxFileName.endsWith('.es6')) ?
             jsxFileName.slice(0, -4) :
             (jsxFileName.endsWith('.js')) ?
                 jsxFileName.slice(0, -3) :
                 jsxFileName;
 
-        const compName = this.component.descriptor.split(":")[1];
-        this.jsxPath = `site/${BASE_PATHS[this.component.type]}/${compName}/${jsxFileName}`;
+        if (jsxFileName.startsWith('/')) {
+            this.jsxPath = jsxFileName.substring(1);
+
+        } else {
+            if (!this.component) {
+                throw Error(`React4xp.setJsxFileName: trying to set a relative jsxPath on a React4xp component that hasn't been initialized with an XP component. Use the constructor to set a component before calling this method, or set jsxPath directly in the constructor.`);
+            }
+            const compName = this.component.descriptor.split(":")[1];
+            this.jsxPath = `site/${BASE_PATHS[this.component.type]}/${compName}/${jsxFileName}`;
+        }
+
         return this;
     }
 
