@@ -71,8 +71,8 @@ const buildBasicPageContributions = () => {
     try {
         addPageContributionsFromChunkfile(`/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}`, pageContributions, entries);
     } catch (e) {
-        log.warn(e);
-        log.warn(`No externals were found (chunkfile reference: /${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}). That's probably okay.`);
+        log.warning(e);
+        log.warning(`No externals were found (chunkfile reference: /${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}). That's probably okay.`);
     }
 
     addPageContributionsFromChunkfile(`/${R4X_TARGETSUBDIR}/${COMPONENT_CHUNKS_FILENAME}`, pageContributions, entries);
