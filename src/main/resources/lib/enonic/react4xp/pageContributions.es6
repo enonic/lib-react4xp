@@ -18,8 +18,8 @@ const STATIC_CLIENT_URL = `/_/service/${app.name}/react4xp-client`;
 const appendBodyEnd = (url, pageContributions) => {
     pageContributions.bodyEnd = [
         ...(pageContributions.bodyEnd || []),
-        `
-<script src="${url}" ></script>`,
+        `<script src="${url}" ></script>
+`,
     ];
 };
 
@@ -138,14 +138,24 @@ const mergePageContributions = (incomingPgContrib, newPgContrib) => {
 
 
 
-
 // ------------------------------------------------------------------
 
-// Standard, basic page contributions - singleton:
-let PAGE_CONTRIBUTIONS = buildBasicPageContributions();
+// Standard, basic-dependencies page contributions:
+const PAGE_CONTRIBUTIONS = buildBasicPageContributions();
 
+// Every basic-dependencies page contribution in a single list:
+const buildBasicPageContributionsAsList = pageContributions => [
+    ...(pageContributions.headBegin || []),
+    ...(pageContributions.headEnd || []),
+    ...(pageContributions.bodyBegin || []),
+    ...(pageContributions.bodyEnd || [])
+];
+const PAGE_CONTRIBUTIONS_ASLIST = buildBasicPageContributionsAsList(PAGE_CONTRIBUTIONS);
+const PAGE_CONTRIBUTIONS_HTML = PAGE_CONTRIBUTIONS_ASLIST.join("");
 module.exports = {
-    getPageContributions: ()=> PAGE_CONTRIBUTIONS,
     mergePageContributions,
+    PAGE_CONTRIBUTIONS,
+    PAGE_CONTRIBUTIONS_ASLIST,
+    PAGE_CONTRIBUTIONS_HTML,
     STATIC_CLIENT_URL
 };

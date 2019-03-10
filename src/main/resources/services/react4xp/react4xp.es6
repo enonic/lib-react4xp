@@ -38,7 +38,7 @@ const ENTRIES = JSON.parse(
 // Handle all GET requests
 exports.get = function (req) {
     if ((req.path || "").startsWith(SERVICE_ROOT)) {
-        const target = (req.path.substring(SERVICE_ROOT.length) || "").trim();
+        let target = (req.path.substring(SERVICE_ROOT.length) || "").trim();
         if (!target) {
             return {
                 status: 400,
@@ -47,12 +47,20 @@ exports.get = function (req) {
 
         log.info("React4xp target: " + JSON.stringify(target, null, 2));
 
-        const resource = ioLib.getResource(REACT4XP_ROOT + target);
+        let resource = ioLib.getResource(REACT4XP_ROOT + target);
         if (!resource || !resource.exists()) {
-            log.warning(`File not found: ${REACT4XP_ROOT + target}`);
-            return {
-                status: 404,
+            resource = ioLib.getResource(REACT4XP_ROOT + target + '.js');
+
+            if (!resource || !resource.exists()) {
+                log.warning(`File not found: ${REACT4XP_ROOT + target}`);
+                return {
+                    status: 404,
+                }
+
+            } else {
+                target += ".js";
             }
+
         }
 
         if (ENTRIES.indexOf(target) === -1) {
