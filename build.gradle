@@ -68,7 +68,7 @@ task client(type: NodeTask) {
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
             '--config', 'node_modules/react4xp-runtime-client/webpack.config.js',
-            '--env.LIBRARY_NAME=__REACT4XP__RUNTIME__CLIENT__LIBRARY__NAME__PLACEHOLDER__',
+            '--env.LIBRARY_NAME=__REACT4XP__RUNTIME__CLIENT__LIBRARY__NAME__PLACEHOLDER__', // Placeholder used in services/react4xp-client/react4xp-client.es6. Keep up to date!
             '--env.BUILD_R4X=' + ROOT + 'build/resources/main/services/react4xp-client',
             '--env.BUILD_ENV=production',
             '--env.CHUNK_CONTENTHASH=[name].js',
@@ -76,8 +76,8 @@ task client(type: NodeTask) {
     ]
 
     doLast {
-        def file = new File(ROOT + 'build/resources/main/services/react4xp-client/__delete_me_im_redundant__')
-        file.delete()
+        def f = new File(ROOT + 'build/resources/main/services/react4xp-client/__delete_me_im_redundant__')
+        f.delete()
     }
 }
 client.dependsOn += 'babelXP'

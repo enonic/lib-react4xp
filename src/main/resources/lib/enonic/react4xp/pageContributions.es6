@@ -1,4 +1,6 @@
 const utilLib = require('/lib/enonic/util');
+var ioLib = require('/lib/xp/io');
+var { getAssetRoot } = require('/lib/enonic/react4xp/utils');
 
 // react4xp_constants.json is not part of lib-react4xp-runtime,
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
@@ -7,7 +9,7 @@ const {
     R4X_TARGETSUBDIR, CLIENT_CHUNKS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME, ENTRIES_FILENAME, ASSET_URL_ROOT
 } = require('./react4xp_constants.json');
 
-const ASSET_ROOT = react4xpUtils.getAssetRoot(ASSET_URL_ROOT);
+const ASSET_ROOT = getAssetRoot(ASSET_URL_ROOT);
 
 
 
@@ -83,7 +85,7 @@ const buildBasicPageContributions = () => {
     } catch (e) {
         log.info(e);
 
-        const url = `_/services/${app.name}/react4xp-client`;
+        const url = `_/service/${app.name}/react4xp-client`;
         log.info(`Falling back to built-in react4xp-runtime-client: ${url}`);
 
 
