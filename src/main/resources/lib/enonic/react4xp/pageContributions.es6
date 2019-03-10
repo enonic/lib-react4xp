@@ -66,16 +66,19 @@ const addPageContributionsFromChunkfile = (chunkFile, pageContributions, entries
 /** Reads and parses file names from webpack-generated JSON files that list up contenthashed bundle chunk names. */
 const buildBasicPageContributions = () => {
     const clientChunksFilename = CLIENT_CHUNKS_FILENAME;
-    const chunkHashFiles = [
-        EXTERNALS_CHUNKS_FILENAME,
-        COMPONENT_CHUNKS_FILENAME
-    ];
 
     const entries = require(`/${R4X_TARGETSUBDIR}/${ENTRIES_FILENAME}`);
     const pageContributions = {};
 
-    chunkHashFiles.forEach(chunkFile => addPageContributionsFromChunkfile(`/${R4X_TARGETSUBDIR}/${chunkFile}`, pageContributions, entries));
+    // This should not break if there are no added externals. Externals should be optional.
+    try {
+        addPageContributionsFromChunkfile(`/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}`, pageContributions, entries);
+    } catch (e) {
+        log.warn(e);
+        log.warn(`No externals were found (chunkfile reference: /${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}). That's probably okay.`);
+    }
 
+    addPageContributionsFromChunkfile(`/${R4X_TARGETSUBDIR}/${COMPONENT_CHUNKS_FILENAME}`, pageContributions, entries);
 
     // Special case: if there is a chunkfile for a client wrapper, use that the same way as above. If not, fall back to
     // a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
@@ -85,7 +88,7 @@ const buildBasicPageContributions = () => {
     } catch (e) {
         log.info(e);
 
-        const url = `_/service/${app.name}/react4xp-client`;
+        const url = `/_/service/${app.name}/react4xp-client`;
         log.info(`Falling back to built-in react4xp-runtime-client: ${url}`);
 
 
@@ -146,11 +149,6 @@ const mergePageContributions = (incomingPgContrib, newPgContrib) => {
 let PAGE_CONTRIBUTIONS = buildBasicPageContributions();
 
 module.exports = {
-    getPageContributions: ()=> {
-        if (!PAGE_CONTRIBUTIONS) {
-            PAGE_CONTRIBUTIONS = buildBasicPageContributions();
-        }
-        return PAGE_CONTRIBUTIONS;
-    },
+    getPageContributions: ()=> PAGE_CONTRIBUTIONS,
     mergePageContributions
 };

@@ -21,7 +21,7 @@ log.info("SERVICE_ROOT: " + JSON.stringify(SERVICE_ROOT, null, 2));
 const REACT4XP_ROOT = `/${R4X_TARGETSUBDIR}/`;
 
 
-const react4xpCache = cacheLib.newCache({
+const componentsCache = cacheLib.newCache({
     size: 100,
     expire: 108000 // 30 hours
 });
@@ -56,13 +56,13 @@ exports.get = function (req) {
         }
 
         if (ENTRIES.indexOf(target) === -1) {
-            return react4xpCache.get(target, function() {
+            return componentsCache.get(target, function() {
                 log.info("Caching React4XP component: " + target);
                 return getReact4xpHashedChunk(resource);
             });
 
         } else {
-            return react4xpCache.get(target, function() {
+            return componentsCache.get(target, function() {
                 log.info("Caching React4XP entry: " + target);
                 return getReact4xpEntry(resource);
             });
