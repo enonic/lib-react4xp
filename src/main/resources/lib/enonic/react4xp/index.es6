@@ -47,7 +47,15 @@ const bodyHasContainer = (body, react4xpId) => {
 const buildContainer = (react4xpId, content) => `<div id="${react4xpId}">${content || ''}</div>`;
 
 
-
+const buildErrorContainer = (jsxPath, react4xpId) => '\n' +
+    '<div class="react4xp-error" style="border: 1px solid #8B0000; padding: 15px; background-color: #FFB6C1">\n' +
+    "    <h2>React4xp component error</h2>\n" +
+    '    <div class="react4xp-component-name">' +
+    '       <p><strong>Component name / ID:</strong></p>\n' +
+    '       <p>' + jsxPath + ' / ' + react4xpId + '</p>\n' +
+    '    </div>\n' +
+    '    <p class="react4xp-error-message">See the log for details.</p>\n' +
+    '</div>\n';
 
 
 //////////////////////////////////////////////////////////////////////
@@ -181,6 +189,9 @@ class React4xp {
     setId(react4xpId) {
         this.checkIdLock();
         this.react4xpId = react4xpId;
+        if (this.props) {
+            this.props.react4xpId = react4xpId;
+        }
         return this;
     }
 
@@ -188,9 +199,7 @@ class React4xp {
       * @returns The react4xp component itself, for builder-like telescoping pattern.
       */
     uniqueId() {
-        this.checkIdLock();
-        this.react4xpId = (this.react4xpId || "") + "_" + Math.floor(Math.random() * 99999999);
-        return this;
+        return this.setId((this.react4xpId || "") + "_" + Math.floor(Math.random() * 99999999));
     }
 
 
@@ -253,6 +262,9 @@ class React4xp {
             throw Error("Top-level props must be a string-serializeable object.");
         }
         this.props = props;
+        if (this.react4xpId) {
+            this.props.react4xpId = this.react4xpId;
+        }
         return this;
     }
 
@@ -323,7 +335,7 @@ class React4xp {
      * @param content {string} HTML content that, if included, is inserted into the container with the matching Id.
      * @returns {string} adjusted or generated HTML body with rendered react component.
      */
-    renderBody(body, content) {
+    renderTargetContainer(body, content) {
         this.ensureAndLockId();
 
         // If no (or empty) body is supplied: generate a minimal container body with only a target container element.
@@ -345,24 +357,24 @@ class React4xp {
     }
 
 
-    /** Renders a static HTML markup (SSR) and inserts it into an ID-matching target container in an HTML body. If a
-      * matching-ID container (or a body) is missing, it will be generated.
-      * @param body {string} Existing HTML body, for example rendered from thymeleaf.
-      * @returns {string} adjusted or generated HTML body with rendered react component.
-      */
-    renderIntoBody(body) {
-        const markup = this.renderToString();
-        return this.renderBody(body, markup);
-    }
-
     /** Renders a pure static HTML markup of the react component, without a surrounding HTML markup. Can override
       * props that have previously been added to this component. This presumably improves rendering performance,
       * although that hasn't been tested thoroughly.
       */
-    renderToString = (overrideProps) => {
+    renderComponentString = (overrideProps) => {
         return SSRreact4xp.renderToString(this.jsxPath, JSON.stringify(overrideProps || this.props));
     };
 
+
+    /** SSR: Renders a static HTML markup and inserts it into an ID-matching target container in an HTML body. If a
+     * matching-ID container (or a body) is missing, it will be generated.
+     * @param body {string} Existing HTML body, for example rendered from thymeleaf.
+     * @returns {string} adjusted or generated HTML body with rendered react component.
+     */
+    renderComponentIntoContainer(body) {
+        const componentString = this.renderComponentString();
+        return this.renderTargetContainer(body, componentString);
+    }
 
 
 
@@ -380,51 +392,44 @@ class React4xp {
 
     ///////////////////////////////////////////////// STATIC ALL-IN-ONE RENDERERS
 
-    /** All-in-one client-renderer. Returns a dynamic client-side-running response object that can be directly returned from an XP controller.
+    /** Safety renderer. More thorough fallback and failure reporting, and avoids server-side rendering - except in edit
+     *  mode, where client-side rendering is the bigger hazard.
+     *
+     *  Returns a response object that can be directly returned from an XP controller.
      *  @param params {object} See .render for parameter details.
      *  @returns {object} Object with body and pageContributions. Body will contain a target container element for the react component. PageContributions will contain scripts referred by URL for running the component client-side and the component's dependencies, as well as an inline trigger script for starting the react frontend rendering into the target container. Duplicates in pageContributions will be removed, to avoid running identical scripts twice.
      */
-    static renderClient = (params) => {
-        const react4xp = React4xp.buildFromParams(params);
-        const {body, pageContributions} = params || {};
-        return {
-            body: react4xp.renderBody(body),
-            pageContributions: react4xp.renderClientPageContributions(pageContributions)
+    static renderSafe = (request, params) => {
+        let react4xp;
+        try {
+            react4xp = React4xp.buildFromParams(params);
+            const {body, pageContributions} = params || {};
+
+            return (request.mode === 'edit') ?
+                {
+                    body: react4xp.renderComponentIntoContainer(body),
+                    pageContributions
+                } :
+                {
+                    body: react4xp.renderTargetContainer(body),
+                    pageContributions: react4xp.renderClientPageContributions(pageContributions)
+                };
+
+        } catch (e) {
+            log.error(e);
+            log.error("Params: " + JSON.stringify(params, null, 2));
+            return {
+                body: buildErrorContainer((react4xp || {}).jsxPath, (react4xp || {}).react4xpId)
+            }
         }
     };
 
 
 
-    /** All-in-one serverside-renderer. Returns a static HTML response object that can be directly returned from an XP controller.
-     *  @param params {object} See .render for parameter details.
-     *  @returns {object} Object with body and pageContributions. Body will contain a target container element with the rendered react component inside. PageContributions will pass through unchanged.
-     */
-    static renderSSR = (params) => {
-        const react4xp = React4xp.buildFromParams(params);
-        const {body, pageContributions} = params || {};
-        return {
-            body: react4xp.renderIntoBody(body),
-            pageContributions
-        };
-    };
 
-    
-    /** All-in-one serverside renderer that adds scripts that afterwards activate (hydrates) the component in the client.
-     *  Returns a response object that can be directly returned from an XP controller.
-     *  @param params {object} See .render for parameter details.
-     */
-    static renderMarkupAndHydrate = (params) => {
-        const react4xp = React4xp.buildFromParams(params);
-        let {body, pageContributions} = params || {};
-        return {
-            body: react4xp.renderIntoBody(body),
-            pageContributions: react4xp.renderHydrationPageContributions(pageContributions)
-        }
-    };
-
-
-
-    /** All-in-one renderer. Returns a response object that can be directly returned from an XP controller.
+    /** All-in-one best-practice renderer. Renders server-side if it can, adds hydration logic for the client-side.
+      * On problems, falls back to renderSafe.
+      * Returns a response object that can be directly returned from an XP controller.
       * @param request {object} XP request object.
       * @param params {object} must include EITHER jsxPath or component! All other parameters are optional:
       *      - component {object} XP component object (used to extrapolate component part, sufficient if JSX entry file is in the same folder and has the same name).
@@ -438,18 +443,19 @@ class React4xp {
       * Renders dynamic/client-side react in XP preview and live mode, and static/server-side in edit mode (XP content studio). See .renderClient and .renderSSR for parameter and return details.
       */
     static render = (request, params) => {
-        const react4xp = React4xp.buildFromParams(params);
-        const {body, pageContributions} = params || {};
-        return (request.mode === "edit") ?
-            {
-                body: react4xp.renderIntoBody(body),
-                pageContributions
-            } :
-            {
-                body: react4xp.renderBody(body),
-                pageContributions: react4xp.renderClientPageContributions(pageContributions)
-            }
+        try {
+            const react4xp = React4xp.buildFromParams(params);
+            const {body, pageContributions} = params || {};
+            return {
+                body: react4xp.renderComponentIntoContainer(body),
+                pageContributions: (request.mode === "edit") ?
+                    pageContributions :
+                    react4xp.renderHydrationPageContributions(pageContributions)
+            };
+
+        } catch (e) {
+            return React4xp.renderSafe(request, params);
+        }
     };
 }
-
 module.exports = React4xp;

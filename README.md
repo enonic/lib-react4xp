@@ -145,9 +145,9 @@ This React4xp instance has the following methods:
   - `.setJsxFileName(fileName)`: Adjusts the jsxPath by changing the file name. Useful for different-named jsx files when using the component shortcut.
   - `.setProps(props)`: Sets the component's top-level props.
   - `.renderClientPageContributions(pageContributions)`: Renders only the needed pageContributions for running the component on the client side. Includes dependency chunks, the component script, and the trigger. If a `pageContributions` argument is added, the rendered pageContributions are added to it, removing any duplicate scripts.
-  - `.renderBody(body, content)`: Generates an HTML body string (or modifies it, if included as a `body` parameter) with a target container element with the ID of this component - into which the component will be rendered. If the component HTML already has been rendered (e.g. by `.renderToString`), add it as the `content` argument, and it will be inserted into the container.
+  - `.renderTargetContainer(body, content)`: Generates an HTML body string (or modifies it, if included as a `body` parameter) with a target container element with the ID of this component - into which the component will be rendered. If the component HTML already has been rendered (e.g. by `.renderToString`), add it as the `content` argument, and it will be inserted into the container.
   - `.renderToString(overrideProps)`: Renders a pure static HTML string of the react component, without a body / other surrounding HTML. If `overrideProps` is added, any props previously added to the instance are ignored.
-  - `.renderIntoBody(body)`: Shorthand method, combining `renderToString` and `renderBody` for a full serverside HTML string rendering of the instance. 
+  - `.renderIntoBody(body)`: Shorthand method, combining `renderToString` and `renderTargetContainer` for a full serverside HTML string rendering of the instance. 
 
 The **examples** branch in this repo should have more on how to use this library in controllers.
 
