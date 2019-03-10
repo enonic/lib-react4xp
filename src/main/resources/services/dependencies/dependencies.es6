@@ -11,8 +11,9 @@ let DEPENDENCY_HTML = null;
 
 exports.get = (req) => {
     if (!DEPENDENCY_TAGS) {
+        log.info("Init service dependencies: DEPENDENCY_HTML");
+
         const pageContributions = getPageContributions();
-        log.info("pageContributions (" + typeof pageContributions + "): " + JSON.stringify(pageContributions, null, 2));
         DEPENDENCY_TAGS = [
             ...(pageContributions.headBegin || []),
             ...(pageContributions.headEnd || []),
@@ -20,10 +21,9 @@ exports.get = (req) => {
             ...(pageContributions.bodyEnd || [])
 
         ];
-        log.info("DEPENDENCY_TAGS (" + typeof DEPENDENCY_TAGS + "): " + JSON.stringify(DEPENDENCY_TAGS, null, 2));
 
         DEPENDENCY_HTML = DEPENDENCY_TAGS.join("\n");
-        log.info("DEPENDENCY_HTML (" + typeof DEPENDENCY_HTML + "): " + JSON.stringify(DEPENDENCY_HTML, null, 2));
+        log.info("DEPENDENCY_HTML (" + typeof DEPENDENCY_HTML + "): " + JSON.stringify(DEPENDENCY_HTML));
     }
 
     if ((req.path || "").endsWith("urls")) {
@@ -36,15 +36,17 @@ exports.get = (req) => {
                     .replace(/["']\s*>\s*<\/script\s*>\s*/g, '')
             );
 
-            log.info("Pure dependencies: " + JSON.stringify(DEPENDENCY_URLS));
+            log.info("DEPENDENCY_URLS (" + typeof DEPENDENCY_URLS + "): " + JSON.stringify(DEPENDENCY_URLS));
         }
 
-        return {body: JSON.stringify(DEPENDENCY_URLS) };
+        return {
+            body: DEPENDENCY_URLS,
+            contentType: 'application/json'
+        };
 
     } else {
         return {
             body: DEPENDENCY_HTML
         };
     }
-
 };
