@@ -1,3 +1,7 @@
+// The service /dependencies has two modes:
+//   - 'dependencies/urls' returns an array of dependency URLS.
+//   - just 'dependencies' will return them as HTML script tags.
+
 var { getPageContributions } = require('/lib/enonic/react4xp/pageContributions');
 
 
