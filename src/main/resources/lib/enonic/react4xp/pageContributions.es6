@@ -64,8 +64,6 @@ const addPageContributionsFromChunkfile = (chunkFile, pageContributions, entries
 // Then use those to build a set of basic page contributions common to all components:
 /** Reads and parses file names from webpack-generated JSON files that list up contenthashed bundle chunk names. */
 const buildBasicPageContributions = () => {
-    const clientChunksFilename = CLIENT_CHUNKS_FILENAME;
-
     const entries = require(`/${R4X_TARGETSUBDIR}/${ENTRIES_FILENAME}`);
     const pageContributions = {};
 
@@ -82,7 +80,8 @@ const buildBasicPageContributions = () => {
     // Special case: if there is a chunkfile for a client wrapper, use that the same way as above. If not, fall back to
     // a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
     try {
-        addPageContributionsFromChunkfile(clientChunksFilename, pageContributions, entries);
+        addPageContributionsFromChunkfile(`/${R4X_TARGETSUBDIR}/${CLIENT_CHUNKS_FILENAME}`, pageContributions, entries);
+
 
     } catch (e) {
         log.info(e);

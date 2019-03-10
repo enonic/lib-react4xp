@@ -21,7 +21,7 @@ exports.get = (req) => {
             throw Error(`File not found: /services/react4xp-client/react4xpClient.js`);
         }
 
-        const RESPONSE = getReact4xpEntry(resource);
+        RESPONSE = getReact4xpEntry(resource);
 
         // Placeholder defined in build.gradle. Keep up to date!
         RESPONSE.body = RESPONSE.body.replace(/__REACT4XP__RUNTIME__CLIENT__LIBRARY__NAME__PLACEHOLDER__/g, LIBRARY_NAME);
@@ -29,4 +29,3 @@ exports.get = (req) => {
     }
     return RESPONSE;
 };
-
