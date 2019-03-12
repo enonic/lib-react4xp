@@ -7,6 +7,12 @@ var { PAGE_CONTRIBUTIONS_ASLIST, PAGE_CONTRIBUTIONS_HTML } = require('/lib/enoni
 let DEPENDENCY_URLS = null;
 
 exports.get = (req) => {
+    NEEDS TO HAPPEN:
+        Step0: Add this capability to the client: https://www.oreilly.com/library/view/high-performance-javascript/9781449382308/ch01.html#dynamic_script_elements
+        Step1: "/" should be a get-urls-from-all-dependencies service
+        Step2: "/<entryName>" should return a list of urls for dependencies for that entryName. See dependency tracking with STATS, e.g. https://github.com/FormidableLabs/webpack-stats-plugin
+        OR URLS? 
+
     if ((req.path || "").endsWith("urls")) {
         if (!DEPENDENCY_URLS) {
             log.info("Init service dependencies: DEPENDENCY_URLS");
@@ -25,9 +31,6 @@ exports.get = (req) => {
             contentType: 'application/json'
         };
 
-    } else {
-        return {
-            body: PAGE_CONTRIBUTIONS_HTML
-        };
     }
+
 };
