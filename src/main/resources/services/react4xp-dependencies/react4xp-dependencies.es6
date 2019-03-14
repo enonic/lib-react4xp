@@ -30,7 +30,5 @@ exports.get = (req) => {
             body: DEPENDENCY_URLS,
             contentType: 'application/json'
         };
-
     }
-
 };
