@@ -2,16 +2,16 @@
 //   - 'dependencies/urls' returns an array of dependency URLS.
 //   - just 'dependencies' will return them as HTML script tags.
 
-var { PAGE_CONTRIBUTIONS_ASLIST, PAGE_CONTRIBUTIONS_HTML } = require('/lib/enonic/react4xp/pageContributions');
+var { PAGE_CONTRIBUTIONS_ASLIST, PAGE_CONTRIBUTIONS_HTML } = require('/lib/enonic/react4xp/dependencies');
 
 let DEPENDENCY_URLS = null;
 
 exports.get = (req) => {
-    NEEDS TO HAPPEN:
+    /*NEEDS TO HAPPEN:
         Step0: Add this capability to the client: https://www.oreilly.com/library/view/high-performance-javascript/9781449382308/ch01.html#dynamic_script_elements
         Step1: "/" should be a get-urls-from-all-dependencies service
         Step2: "/<entryName>" should return a list of urls for dependencies for that entryName. See dependency tracking with STATS, e.g. https://github.com/FormidableLabs/webpack-stats-plugin
-        OR URLS? 
+        OR URLS?*/
 
     if ((req.path || "").endsWith("urls")) {
         if (!DEPENDENCY_URLS) {

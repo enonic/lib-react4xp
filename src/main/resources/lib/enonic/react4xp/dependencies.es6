@@ -6,14 +6,94 @@ var { getAssetRoot } = require('/lib/enonic/react4xp/utils');
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
 const {
-    R4X_TARGETSUBDIR, CLIENT_CHUNKS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME, ENTRIES_FILENAME, ASSET_URL_ROOT
+    R4X_TARGETSUBDIR, CLIENT_CHUNKS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME, ENTRIES_FILENAME, ASSET_URL_ROOT, BUILD_R4X
 } = require('./react4xp_constants.json');
+
+const BUILD_STATS_ENTRYPOINTS = require(`${BUILD_R4X}/stats.json`).entrypoints;
 
 const ASSET_ROOT = getAssetRoot(ASSET_URL_ROOT);
 
 const STATIC_CLIENT_URL = `/_/service/${app.name}/react4xp-client`;
 
-// ---------------------------------------------------------
+
+
+
+// --------------------------------------------------------- New school
+
+
+/** Takes an array of entry names and returns an array of (hashed) dependency file names, the complete set of chunks required for the entries to run.
+ *  ASSUMES that stats.json.entrypoints is an object where the keys are entry names without file extensions, mapping to values that are objects,
+ *  which in turn have an "assets" key, under which are the full file names of the entry's dependencies.
+ *  If the input array is empty or null, returns ALL dependency chunk names. */
+const getDependencies = (entryNames) => {
+    if (!entryNames || !Array.isArray(entryNames) || entryNames.length === 0) {
+        entryNames = Object.keys(BUILD_STATS_ENTRYPOINTS);
+    }
+
+    const output = [];
+    let errors = null;
+
+    entryNames.forEach( entry => {
+        let data = BUILD_STATS_ENTRYPOINTS[entry];
+        while (entry.length > 0 && !data) {
+            if (entry.endsWith('.js') {
+                entry = entry.slice(0, -3);
+            }
+            data = BUILD_STATS_ENTRYPOINTS[entry];
+            if (!data && entry.endsWith('.jsx') {
+                entry = entry.slice(0, -4);
+            }
+            data = BUILD_STATS_ENTRYPOINTS[entry];
+        }
+        if (!data)
+            errors = `${(errors || "")}Couldn't find dependencies for entry: ${entry}}\n`);
+            continue;
+        }
+
+        TODO HERE: enter data.assets, add all chunk names not already in <output> and not ending in .map and not same name as the entry
+    });
+
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// --------------------------------------------------------  Old school
 
 const appendBodyEnd = (url, pageContributions) => {
     pageContributions.bodyEnd = [

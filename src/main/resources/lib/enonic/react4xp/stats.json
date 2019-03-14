@@ -1,0 +1,69 @@
+{
+  "errors": [],
+  "warnings": [],
+  "outputPath": "/Users/espenjobb/source/xp/apps/react4xp/build/resources/main/react4xp",
+  "entrypoints": {
+    "Greeter": {
+      "chunks": [
+        "vendors",
+        "sharedComps",
+        "redux",
+        "Greeter"
+      ],
+      "assets": [
+        "vendors.8c116bc45.js",
+        "vendors.8c116bc45.js.map",
+        "sharedComps.94432343f.js",
+        "sharedComps.94432343f.js.map",
+        "redux.b11b36f8c.js",
+        "redux.b11b36f8c.js.map",
+        "Greeter.js",
+        "Greeter.js.map"
+      ],
+      "children": {},
+      "childAssets": {}
+    },
+    "SimpleGreeter": {
+      "chunks": [
+        "SimpleGreeter"
+      ],
+      "assets": [
+        "SimpleGreeter.js",
+        "SimpleGreeter.js.map"
+      ],
+      "children": {},
+      "childAssets": {}
+    },
+    "site/parts/clientReduxed/clientReduxed": {
+      "chunks": [
+        "vendors",
+        "sharedComps",
+        "redux",
+        "site/parts/clientReduxed/clientReduxed"
+      ],
+      "assets": [
+        "vendors.8c116bc45.js",
+        "vendors.8c116bc45.js.map",
+        "sharedComps.94432343f.js",
+        "sharedComps.94432343f.js.map",
+        "redux.b11b36f8c.js",
+        "redux.b11b36f8c.js.map",
+        "site/parts/clientReduxed/clientReduxed.js",
+        "site/parts/clientReduxed/clientReduxed.js.map"
+      ],
+      "children": {},
+      "childAssets": {}
+    },
+    "site/parts/example/example": {
+      "chunks": [
+        "site/parts/example/example"
+      ],
+      "assets": [
+        "site/parts/example/example.js",
+        "site/parts/example/example.js.map"
+      ],
+      "children": {},
+      "childAssets": {}
+    }
+  }
+}

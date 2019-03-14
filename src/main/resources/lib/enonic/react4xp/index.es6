@@ -1,6 +1,6 @@
 const react4xpUtils = require('./utils');
 
-const { mergePageContributions } = require('./pageContributions');
+const { mergePageContributions } = require('./dependencies');
 
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
