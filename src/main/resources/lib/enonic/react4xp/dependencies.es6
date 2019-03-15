@@ -38,11 +38,11 @@ const getDependencies = (entryNames) => {
     }
 
     const output = [];
-    let errors = null;
+    const missing = [];
 
     entryNames.forEach( entry => {
         entry = entry.trim();
-         
+
         // log.info("\n\n\nentry: " + JSON.stringify(entry, null, 2));
         let data = BUILD_STATS_ENTRYPOINTS[entry];
         if (!data) {
@@ -66,41 +66,32 @@ const getDependencies = (entryNames) => {
             }
         }
         if (!data) {
-            errors = `${(errors || "")}Couldn't find dependencies for entry '${entry}'\n`;
-            //log.warning("errors: " + JSON.stringify(errors, null, 2));
+            missing.push(`'${entry}'`);
             return;
         }
         if (!Array.isArray(data.assets)) {
-            errors = `${(errors || "")}Bad format under dependencies for entry '${entry}': assets = ${JSON.stringify(data.assets)}\n`;
-            //log.warning("errors: " + JSON.stringify(errors, null, 2));
+            throw Error(`Bad format under dependencies for entry '${entry}': assets = ${JSON.stringify(data.assets)}`);
             return;
         }
         // log.info("\ndata.assets: " + JSON.stringify(data.assets, null, 2));
 
-        try {
-            const myself = entry + '.js';
-            // log.info("myself: " + JSON.stringify(myself, null, 2));
-            data.assets
-                .filter( asset => !asset.endsWith('.map') && asset !== myself)
-                .forEach (asset => {
-                    // // log.info("\tasset: " + JSON.stringify(asset, null, 2));
-                    if (output.indexOf(asset) === -1) {
-                        // // log.info("\t\tpushing.");
-                        output.push(asset);
-                    }
-                });
+        const myself = entry + '.js';
+        data.assets
+            .filter( asset => !asset.endsWith('.map') && asset !== myself)
+            .forEach (asset => {
+                // // log.info("\tasset: " + JSON.stringify(asset, null, 2));
+                if (output.indexOf(asset) === -1) {
+                    // // log.info("\t\tpushing.");
+                    output.push(asset);
+                }
+            });
 
-        } catch (e) {
-            errors = `${(errors || "")}${e.message}\n`;
-            //log.warning("errors: " + JSON.stringify(errors, null, 2));
-            return;
-        }
+
     });
-    // log.info("errors: " + JSON.stringify(errors, null, 2));
     // log.info("output: " + JSON.stringify(output, null, 2));
 
-    if (errors) {
-        throw new Error(errors);
+    if (missing.length > 0) {
+        throw Error(`Couldn't find dependencies for entries: ${missing.join(', ')}`);
     }
 
     return output;

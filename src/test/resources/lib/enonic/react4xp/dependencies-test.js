@@ -73,6 +73,6 @@ exports.test_getDependencies_multipleNonmatchingArgs_should_failAndIdeallyReport
         t.assertTrue(false, "Unexpectedly, got a result instead of an error:\n" + JSON.stringify(result, null, 2));  
 
     } catch (e) {
-        log.info("Error, as expected:\n" + e.message);  
+        log.info("Error report, as expected:\n" + e.message);  
     }
 }
