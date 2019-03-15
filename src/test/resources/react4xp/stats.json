@@ -6,17 +6,11 @@
     "Greeter": {
       "chunks": [
         "vendors",
-        "sharedComps",
-        "redux",
         "Greeter"
       ],
       "assets": [
         "vendors.8c116bc45.js",
         "vendors.8c116bc45.js.map",
-        "sharedComps.94432343f.js",
-        "sharedComps.94432343f.js.map",
-        "redux.b11b36f8c.js",
-        "redux.b11b36f8c.js.map",
         "Greeter.js",
         "Greeter.js.map"
       ],
@@ -42,8 +36,6 @@
         "site/parts/clientReduxed/clientReduxed"
       ],
       "assets": [
-        "vendors.8c116bc45.js",
-        "vendors.8c116bc45.js.map",
         "sharedComps.94432343f.js",
         "sharedComps.94432343f.js.map",
         "redux.b11b36f8c.js",
@@ -59,6 +51,8 @@
         "site/parts/example/example"
       ],
       "assets": [
+        "redux.b11b36f8c.js",
+        "redux.b11b36f8c.js.map",
         "site/parts/example/example.js",
         "site/parts/example/example.js.map"
       ],
