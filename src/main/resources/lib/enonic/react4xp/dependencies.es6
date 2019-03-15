@@ -36,24 +36,47 @@ const getDependencies = (entryNames) => {
     entryNames.forEach( entry => {
         let data = BUILD_STATS_ENTRYPOINTS[entry];
         while (entry.length > 0 && !data) {
-            if (entry.endsWith('.js') {
-                entry = entry.slice(0, -3);
+            if (entry.endsWith('.js')) {
+                const replacement = entry.slice(0, -3);
+                console.warn(`Dependency not found for entry '${entry}'. Trying '${replacement}...`);
+                entry = replacement;
             }
             data = BUILD_STATS_ENTRYPOINTS[entry];
-            if (!data && entry.endsWith('.jsx') {
-                entry = entry.slice(0, -4);
+            if (!data && entry.endsWith('.jsx')) {
+                const replacement = entry.slice(0, -4);
+                console.warn(`Dependency not found for entry '${entry}'. Trying '${replacement}'...`);
+                entry = replacement;
             }
             data = BUILD_STATS_ENTRYPOINTS[entry];
         }
-        if (!data)
-            errors = `${(errors || "")}Couldn't find dependencies for entry: ${entry}}\n`);
-            continue;
+        if (!data) {
+            errors = `${(errors || "")}Couldn't find dependencies for entry '${entry}'\n`;
+            return;
+        }
+        if (!Array.isArray(data.assets)) {
+            errors = `${(errors || "")}Bad format under dependencies for entry '${entry}': assets = ${JSON.stringify(data.assets)}\n`;
+            return;
         }
 
-        TODO HERE: enter data.assets, add all chunk names not already in <output> and not ending in .map and not same name as the entry
+        try {
+            const myself = entry + '.js';
+            data.assets
+                .filter( asset => !asset.endsWith('.map') && !asset === myself)
+                .forEach (asset => {
+                    if (output.indexOf(asset) === -1) {
+                        output.push(asset);
+                    }
+                });
+        } catch (e) {
+            errors = `${(errors || "")}${e.message}\n`;
+        }
     });
 
+    if (errors) {
+        throw Error(errors);
+    }
 
+    return output;
 };
 
 
@@ -232,6 +255,7 @@ const buildBasicPageContributionsAsList = pageContributions => [
 const PAGE_CONTRIBUTIONS_ASLIST = buildBasicPageContributionsAsList(PAGE_CONTRIBUTIONS);
 const PAGE_CONTRIBUTIONS_HTML = PAGE_CONTRIBUTIONS_ASLIST.join("");
 module.exports = {
+    getDependencies,
     mergePageContributions,
     PAGE_CONTRIBUTIONS,
     PAGE_CONTRIBUTIONS_ASLIST,
