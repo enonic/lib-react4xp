@@ -1,6 +1,6 @@
 const react4xpUtils = require('./utils');
 
-const { mergePageContributions } = require('./dependencies');
+const { getAndMergePageContributions } = require('./dependencies');
 
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
@@ -292,7 +292,7 @@ class React4xp {
     renderClientPageContributions = (pageContributions) => {
         this.ensureAndLockBeforeRendering();
 
-        return mergePageContributions(pageContributions, {
+        return getAndMergePageContributions(this.jsxPath, pageContributions, {
             bodyEnd: [
                 // Browser-runnable script reference for the "naked" react component:
                 `<script src="${ASSET_ROOT}${this.jsxPath}.js"></script>`,
@@ -314,7 +314,7 @@ class React4xp {
     renderHydrationPageContributions = (pageContributions) => {
         this.ensureAndLockBeforeRendering();
 
-        return mergePageContributions(pageContributions, {
+        return getAndMergePageContributions(this.jsxPath, pageContributions, {
             bodyEnd: [
                 // Browser-runnable script reference for the "naked" react component:
                 `<script src="${ASSET_ROOT}${this.jsxPath}.js"></script>`,
@@ -391,6 +391,8 @@ class React4xp {
 
 
     ///////////////////////////////////////////////// STATIC ALL-IN-ONE RENDERERS
+
+
 
     /** Safety renderer. More thorough fallback and failure reporting, and avoids server-side rendering - except in edit
      *  mode, where client-side rendering is the bigger hazard.
