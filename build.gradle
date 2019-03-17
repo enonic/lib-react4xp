@@ -49,6 +49,7 @@ task babelXP(type: NodeTask) {
     outputs.dir("build/resources/main")
 }
 babelXP.dependsOn += 'processResources'
+babelXP.dependsOn += 'npmInstall'
 
 def ROOT = new File("").absolutePath + "/"
 

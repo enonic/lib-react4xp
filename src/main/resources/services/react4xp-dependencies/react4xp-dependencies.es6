@@ -45,6 +45,4 @@ exports.get = (req) => {
             contentType: 'text/plain'
         }
     }
-
-    // NEEDS TO HAPPEN: Add this capability to the client: https://www.oreilly.com/library/view/high-performance-javascript/9781449382308/ch01.html#dynamic_script_elements
 };

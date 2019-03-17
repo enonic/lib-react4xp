@@ -131,7 +131,7 @@ const getExternalsUrls = () => dependenciesCache.get(FULL_EXTERNALS_CHUNKS_FILEN
 
     } catch (e) {
         log.warning(e);
-        log.warning(`No optional externals were found (chunkfile reference: ${FULL_EXTERNALS_CHUNKS_FILENAME}). That's probably okay.`);
+        log.warning(`No optional externals were found (chunkfile reference: ${FULL_EXTERNALS_CHUNKS_FILENAME}). That might be okay, or a problem.`);
         return [];
     }
 });
@@ -146,7 +146,7 @@ const getClientUrls = () => dependenciesCache.get(FULL_CLIENT_CHUNKS_FILENAME, (
 
     } catch (e) {
         log.warning(e);
-        log.warning(`No optional clientwrapper were found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's probably okay.`);
+        log.warning(`No optional clientwrapper were found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's okay, we got a fallback one at: ${STATIC_CLIENT_URL}`);
         return [STATIC_CLIENT_URL];
     }
 });

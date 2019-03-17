@@ -20,7 +20,6 @@ exports.get = (req) => {
             const externalsNames = getNamesFromChunkfile(`/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}`);
 
             let fileContents = [];
-            let ETags = [];
 
             externalsNames.forEach( name => {
                 const resource = ioLib.getResource(`/${R4X_TARGETSUBDIR}/${name}`);
@@ -28,26 +27,30 @@ exports.get = (req) => {
                     throw Error(`File not found: /${R4X_TARGETSUBDIR}/${name}`);
                 }
 
-                const fileContent = getResourceAsString(resource);
-                fileContents.push(fileContent);
-                ETags.push(hash(fileContent));
+                fileContents.push(getResourceAsString(resource));
             });
 
+            const fileContent = fileContents.join("\n///////\n");
+
             RESPONSE = {
-                body: fileContents.join("\n///////\n"),
+                body: fileContent,
                 headers: {
                     'Content-Type': 'application/javascript;charset=utf-8',
                     'Cache-Control': 'no-cache',
-                    ETag: ETags.join(""),
+                    ETag: hash(fileContent),
                 }
             };
 
         } catch(e) {
-            log.error(e);
-            return {
-                contentType: 'text/plain',
-                status: 500,
-                body: `Failed to resolve the Externals code (/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}). See log for details.`
+            const warning = `No optional externals was found (timestamp: ${new Date()})`;
+            log.warning(e);
+            log.warning(`React4xp-externals service: ${warning} Chunkfile reference: ${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}`);
+
+            RESPONSE = {
+                body: `// ${warning} See the server log for details.`,
+                headers: {
+                    'Content-Type': 'application/javascript;charset=utf-8',
+                }
             }
         }
     }
