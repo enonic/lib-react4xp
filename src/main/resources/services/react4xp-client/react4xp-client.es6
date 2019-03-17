@@ -1,13 +1,7 @@
+/** Service that always delivers the out-of-the-box frontend client */
 var ioLib = require('/lib/xp/io');
 var { getReact4xpEntry } = require('/lib/enonic/react4xp/clientCacheResources');
 
-
-// react4xp_constants.json is not part of lib-react4xp-runtime,
-// it's an external shared-constants file expected to exist in the react4xp lib build directory.
-// Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
-const {
-    LIBRARY_NAME
-} = require('/lib/enonic/react4xp/react4xp_constants.json');
 
 let RESPONSE = null;
 
@@ -22,6 +16,14 @@ exports.get = (req) => {
         }
 
         RESPONSE = getReact4xpEntry(resource);
+
+
+        // react4xp_constants.json is not part of lib-react4xp-runtime,
+        // it's an external shared-constants file expected to exist in the react4xp lib build directory.
+        // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
+        const {
+            LIBRARY_NAME
+        } = require('/lib/enonic/react4xp/react4xp_constants.json');
 
         // Placeholder defined in build.gradle. Keep up to date!
         RESPONSE.body = RESPONSE.body.replace(/__REACT4XP__RUNTIME__CLIENT__LIBRARY__NAME__PLACEHOLDER__/g, LIBRARY_NAME);

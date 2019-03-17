@@ -127,7 +127,7 @@ const getExternalsUrls = () => dependenciesCache.get(FULL_EXTERNALS_CHUNKS_FILEN
 
     // This should not break if there are no added externals. Externals should be optional.
     try {
-        return getUrlsFromChunkfile(FULL_EXTERNALS_CHUNKS_FILENAME);
+        return getNamesFromChunkfile(FULL_EXTERNALS_CHUNKS_FILENAME).map( name => ASSET_ROOT + name);
 
     } catch (e) {
         log.warning(e);
@@ -142,12 +142,11 @@ const getClientUrls = () => dependenciesCache.get(FULL_CLIENT_CHUNKS_FILENAME, (
     // Special case: if there is a chunkfile for a client wrapper, use that. If not, fall back to
     // a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
     try {
-        return getUrlsFromChunkfile(FULL_CLIENT_CHUNKS_FILENAME);
+        return getNamesFromChunkfile(FULL_CLIENT_CHUNKS_FILENAME).map( name => ASSET_ROOT + name);
 
     } catch (e) {
-        // // log.info(e);
-        // // log.info(`Falling back to built-in react4xp-runtime-client: ${STATIC_CLIENT_URL}`);
-
+        log.warning(e);
+        log.warning(`No optional clientwrapper were found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's probably okay.`);
         return [STATIC_CLIENT_URL];
     }
 });
@@ -160,8 +159,9 @@ const getAllUrls = (entries) => [
 ];
 
 
-/** Open a chunkfile, read the contents and return the domain-relative urls for non-entry JS file references in the chunk file */
-const getUrlsFromChunkfile = (chunkFile) => {
+/** Open a chunkfile, read the contents and return the domain-relative urls for non-entry JS file references in the chunk file.
+  * Throws an error if not found or if unexpected format. */
+const getNamesFromChunkfile = (chunkFile) => {
     const chunks = require(chunkFile);
     //// // log.info("chunks: " + JSON.stringify(chunks, null, 2));
     return Object.keys(chunks).map(chunkName => {
@@ -187,7 +187,7 @@ const getUrlsFromChunkfile = (chunkFile) => {
             throw Error(`React4xp dependency chunk not found: /${R4X_TARGETSUBDIR}/${chunk}`);
         }
 
-        return ASSET_ROOT + chunk;
+        return chunk;
     });
 };
 
@@ -200,6 +200,7 @@ module.exports = {
     getComponentChunkNames,
     getComponentChunkUrls,
     getClientUrls,
+    getNamesFromChunkfile,
     getExternalsUrls,
     getAllUrls,
     STATIC_CLIENT_URL
