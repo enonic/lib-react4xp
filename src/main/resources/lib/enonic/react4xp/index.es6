@@ -1,6 +1,6 @@
 const react4xpUtils = require('./utils');
 
-const { getAndMergePageContributions } = require('./dependencies');
+const { getAndMergePageContributions } = require('./pageContributions');
 
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
@@ -153,7 +153,7 @@ class React4xp {
 
     checkIdLock() {
         if (this.react4xpIdLocked) {
-            throw Error("This component has already been used to generate a body or pageContributions. " +
+            throw Error("This component has already been used to generate a body or pageContributions.es6. " +
                 "Container ID can't be changed now.");
         }
     }
@@ -282,7 +282,7 @@ class React4xp {
 
     //----------------------------------------------------------  RENDERING METHODS:
 
-    /** Generates or modifies existing enonic XP pageContributions. Adds client-side dependency chunks (core React4xp frontend,
+    /** Generates or modifies existing enonic XP pageContributions.js. Adds client-side dependency chunks (core React4xp frontend,
      * shared libs and components etc, as well as the entry component scripts.
      * Also returns/adds small scripts that trigger the component scripts. Prevents duplicate references to dependencies.
      *
@@ -304,7 +304,7 @@ class React4xp {
     };
 
 
-    /** Generates or modifies existing enonic XP pageContributions. Adds client-side dependency chunks (core React4xp frontend,
+    /** Generates or modifies existing enonic XP pageContributions.js. Adds client-side dependency chunks (core React4xp frontend,
       * shared libs and components etc, as well as the entry component scripts.
       * Also returns/adds small scripts that trigger the component scripts. Prevents duplicate references to dependencies.
       *
@@ -399,7 +399,7 @@ class React4xp {
      *
      *  Returns a response object that can be directly returned from an XP controller.
      *  @param params {object} See .render for parameter details.
-     *  @returns {object} Object with body and pageContributions. Body will contain a target container element for the react component. PageContributions will contain scripts referred by URL for running the component client-side and the component's dependencies, as well as an inline trigger script for starting the react frontend rendering into the target container. Duplicates in pageContributions will be removed, to avoid running identical scripts twice.
+     *  @returns {object} Object with body and pageContributions.js. Body will contain a target container element for the react component. PageContributions will contain scripts referred by URL for running the component client-side and the component's dependencies, as well as an inline trigger script for starting the react frontend rendering into the target container. Duplicates in pageContributions.js will be removed, to avoid running identical scripts twice.
      */
     static renderSafe = (request, params) => {
         let react4xp;
@@ -441,7 +441,7 @@ class React4xp {
       *      - id {string} sets the target container element id. If this matches an ID in an input body, the react component will be rendered there. If not, a container with this ID will be added.
       *      - uniqueId {boolean|string} If set, ensures that the ID is unique. If id is set (previous param), a random integer will be postfixed to it. If uniqueId is a string, this is the prefix before the random postfix. If the id param is used in addition to a uniqueId string, uniqueId takes presedence and overrides id.
       *      - body {string} Existing HTML body, for example rendered from thymeleaf. If it already has a matching-ID target container, body passes through unchanged (use this option and the setId method to control where in the body the react component should be inserted). If it doesn't have a matching container, a matching <div> will be inserted at the end of the body, inside the root element. If body is missing, a pure-target-container body is generated and returned.
-      *      - pageContributions {object} Pre-existing pageContributions.
+      *      - pageContributions.js {object} Pre-existing pageContributions.js.
       * Renders dynamic/client-side react in XP preview and live mode, and static/server-side in edit mode (XP content studio). See .renderClient and .renderSSR for parameter and return details.
       */
     static render = (request, params) => {
