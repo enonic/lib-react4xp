@@ -6,7 +6,7 @@ const pageContributionsCache = cacheLib.newCache({
     expire: 10800 // 30 hours
 });
 
-const { getExternalsUrls, getComponentChunkUrls, getClientUrls } = require('./dependencies');
+const { normalizeEntryNames, getAllUrls } = require('./dependencies');
 
 
 /** Wraps a url in a script tag and appends it to pageContributions.js.bodyEnd with an async tag. The reason for choosing
@@ -31,13 +31,7 @@ const appendToBodyEnd = (url, pageContributions) => {
  * @returns an object ready to be returned as a pageContributions.js from an XP component. Puts dependencies into the bodyEnd attribute. */
 const buildPageContributions = (entries) => {
 
-    const chunkUrls = [];
-
-    chunkUrls.push(
-        ...getExternalsUrls(),
-        ...getComponentChunkUrls(entries),
-        ...getClientUrls()
-    );
+    const chunkUrls = getAllUrls(entries);
 
     const pageContributions = {};
     chunkUrls.forEach(chunkUrl => appendToBodyEnd(chunkUrl, pageContributions));
@@ -73,8 +67,8 @@ const getUniqueEntries = (arrayOfArrays, controlSet) => {
  * Also part of the merge: PAGE_CONTRIBUTIONS, the common standard React4xp page contributions
  */
 const getAndMergePageContributions = (entryNames, incomingPgContrib, newPgContrib) => {
-    entryNames.sort();
-    const entriesPgContrib = pageContributionsCache.get(entryNames.join("?"), ()=> buildPageContributions(entryNames));
+    entryNames = normalizeEntryNames(entryNames);
+    const entriesPgContrib = pageContributionsCache.get(entryNames.join("*"), ()=> buildPageContributions(entryNames));
 
     if (!incomingPgContrib && !newPgContrib) {
         return entriesPgContrib;
@@ -87,7 +81,7 @@ const getAndMergePageContributions = (entryNames, incomingPgContrib, newPgContri
 
     return {
         headBegin: getUniqueEntries([entriesPgContrib.headBegin, incomingPgContrib.headBegin, newPgContrib.headBegin], controlSet),
-        headEnd: getUniqueEntries([entriesPgContrib.bodyEnd, incomingPgContrib.bodyEnd, newPgContrib.bodyEnd], controlSet),
+        headEnd: getUniqueEntries([entriesPgContrib.headEnd, incomingPgContrib.headEnd, newPgContrib.headEnd], controlSet),
         bodyBegin: getUniqueEntries([entriesPgContrib.bodyBegin, incomingPgContrib.bodyBegin, newPgContrib.bodyBegin], controlSet),
         bodyEnd: getUniqueEntries([entriesPgContrib.bodyEnd, incomingPgContrib.bodyEnd, newPgContrib.bodyEnd], controlSet)
     };

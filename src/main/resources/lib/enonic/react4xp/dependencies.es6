@@ -27,20 +27,24 @@ const FULL_EXTERNALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_
 const FULL_CLIENT_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${CLIENT_CHUNKS_FILENAME}`;
 
 
-/** Takes entry names (array or a single string) and returns an array of (hashed) dependency file names, the complete set of chunks required for the entries to run.
- *  ASSUMES that stats.json.entrypoints is an object where the keys are entry names without file extensions, mapping to values that are objects,
- *  which in turn have an "assets" key, under which are the full file names of the entry's dependencies.
- *  If the input array is empty or null, returns ALL dependency chunk names. */
-const getComponentChunkNames = (entryNames) => {
-
-    entryNames = entryNames || [];
+const normalizeEntryNames = (entryNames = []) => {
     if (typeof entryNames === "string") {
         const trimmed = entryNames.trim();
         entryNames = (trimmed === "") ? [] : [trimmed];
     } else {
         entryNames.sort();
     }
-    const entryNamesKey = entryNames.join("?");
+    return entryNames;
+};
+
+
+/** Takes entry names (array or a single string) and returns an array of (hashed) dependency file names, the complete set of chunks required for the entries to run.
+ *  ASSUMES that stats.json.entrypoints is an object where the keys are entry names without file extensions, mapping to values that are objects,
+ *  which in turn have an "assets" key, under which are the full file names of the entry's dependencies.
+ *  If the input array is empty or null, returns ALL dependency chunk names. */
+const getComponentChunkNames = (entryNames) => {
+    entryNames = normalizeEntryNames(entryNames);
+    const entryNamesKey = entryNames.join("*");
 
     return dependenciesCache.get(entryNamesKey, ()=>{
         log.info(`Caching component chunk names for key: ${entryNamesKey}`);
@@ -48,7 +52,7 @@ const getComponentChunkNames = (entryNames) => {
         if (!BUILD_STATS_ENTRYPOINTS) {
             const STATS = require(`/${R4X_TARGETSUBDIR}/stats.json`);
             BUILD_STATS_ENTRYPOINTS = STATS.entrypoints;
-            log.info("BUILD_STATS_ENTRYPOINTS (" + typeof BUILD_STATS_ENTRYPOINTS + "): " + JSON.stringify(BUILD_STATS_ENTRYPOINTS, null, 2));
+            //log.info("BUILD_STATS_ENTRYPOINTS (" + typeof BUILD_STATS_ENTRYPOINTS + "): " + JSON.stringify(BUILD_STATS_ENTRYPOINTS, null, 2));
         }
 
         if (entryNames.length === 0) {
@@ -134,7 +138,7 @@ const getExternalsUrls = () => dependenciesCache.get(FULL_EXTERNALS_CHUNKS_FILEN
 
 
 /** Returns the asset-via-service URL for the frontend client */
-const getClientUrls = dependenciesCache.get(FULL_CLIENT_CHUNKS_FILENAME, ()=> {
+const getClientUrls = () => dependenciesCache.get(FULL_CLIENT_CHUNKS_FILENAME, ()=> {
     // Special case: if there is a chunkfile for a client wrapper, use that. If not, fall back to
     // a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
     try {
@@ -148,11 +152,19 @@ const getClientUrls = dependenciesCache.get(FULL_CLIENT_CHUNKS_FILENAME, ()=> {
     }
 });
 
+
+const getAllUrls = (entries) => [
+    ...getExternalsUrls(),
+    ...getComponentChunkUrls(entries),
+    ...getClientUrls()
+];
+
+
 /** Open a chunkfile, read the contents and return the domain-relative urls for non-entry JS file references in the chunk file */
 const getUrlsFromChunkfile = (chunkFile) => {
     const chunks = require(chunkFile);
     //// // log.info("chunks: " + JSON.stringify(chunks, null, 2));
-    return Object.keys(chunks).forEach(chunkName => {
+    return Object.keys(chunks).map(chunkName => {
 
         //// // log.info("chunkName: " + JSON.stringify(chunkName, null, 2));
         let chunk = chunks[chunkName].js;
@@ -184,9 +196,11 @@ const getUrlsFromChunkfile = (chunkFile) => {
 // ------------------------------------------------------------------
 
 module.exports = {
+    normalizeEntryNames,
     getComponentChunkNames,
     getComponentChunkUrls,
     getClientUrls,
     getExternalsUrls,
+    getAllUrls,
     STATIC_CLIENT_URL
 };
