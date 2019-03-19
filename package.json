@@ -31,7 +31,7 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
-    "react4xp-runtime-client": "^0.1.8",
+    "react4xp-runtime-client": "^0.1.9",
     "react4xp-runtime-nashornpolyfills": "^0.1.1",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3"

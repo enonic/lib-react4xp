@@ -13,7 +13,7 @@ const {
     NASHORNPOLYFILLS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME, ENTRIES_FILENAME, ASSET_URL_ROOT
 } = require('./react4xp_constants.json');;
 
-const ASSET_ROOT = react4xpUtils.getAssetRoot(ASSET_URL_ROOT);
+const ASSET_ROOT = react4xpUtils.insertAppName(ASSET_URL_ROOT);
 
 
 

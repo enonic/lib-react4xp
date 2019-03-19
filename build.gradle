@@ -68,11 +68,14 @@ task client(type: NodeTask) {
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
             '--config', 'node_modules/react4xp-runtime-client/webpack.config.js',
-            '--env.LIBRARY_NAME=__REACT4XP__RUNTIME__CLIENT__LIBRARY__NAME__PLACEHOLDER__', // Placeholder used in services/react4xp-client/react4xp-client.es6. Keep up to date!
             '--env.BUILD_R4X=' + ROOT + 'build/resources/main/services/react4xp-client',
             '--env.BUILD_ENV=production',
             '--env.CHUNK_CONTENTHASH=[name].js',
-            '--env.CLIENT_CHUNKS_FILENAME=__delete_me_im_redundant__'
+            '--env.CLIENT_CHUNKS_FILENAME=__delete_me_im_redundant__',
+
+            // Placeholders used in services/react4xp-client/react4xp-client.es6. Keep up to date!
+            '--env.LIBRARY_NAME=__REACT4XP__RUNTIME__CLIENT__LIBRARY_NAME__PLACEHOLDER__',
+            '--env.SERVICE_ROOT_URL=__REACT4XP__RUNTIME__CLIENT__SERVICE_ROOT_URL__PLACEHOLDER__'
     ]
 
     doLast {

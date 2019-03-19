@@ -3,7 +3,8 @@ var t = require('/lib/xp/testing');
 t.mock('/lib/enonic/react4xp/react4xp_constants.json',
     {
         R4X_TARGETSUBDIR: '/react4xp',
-        ASSET_URL_ROOT: 'somethingorother'
+        ASSET_URL_ROOT: 'somethingorother',
+        COMPONENT_STATS_FILENAME: 'test.stats.json'
     }
 );
 

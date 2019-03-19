@@ -2,19 +2,18 @@
 const ioLib = require('/lib/xp/io');
 
 
-const { getAssetRoot } = require('/lib/enonic/react4xp/utils');
+const { insertAppName } = require('/lib/enonic/react4xp/utils');
 
 // react4xp_constants.json is not part of lib-react4xp-runtime,
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
 const {
-    R4X_TARGETSUBDIR, CLIENT_CHUNKS_FILENAME, EXTERNALS_CHUNKS_FILENAME, ASSET_URL_ROOT
+    R4X_TARGETSUBDIR, CLIENT_CHUNKS_FILENAME, EXTERNALS_CHUNKS_FILENAME, ASSET_URL_ROOT, COMPONENT_STATS_FILENAME, SERVICE_ROOT_URL,
 } = require('./react4xp_constants.json');
 
 let BUILD_STATS_ENTRYPOINTS;
-const ASSET_ROOT = getAssetRoot(ASSET_URL_ROOT);
-
-const STATIC_CLIENT_URL = `/_/service/${app.name}/react4xp-client`;
+const ASSET_ROOT = insertAppName(ASSET_URL_ROOT);
+const STATIC_CLIENT_URL = insertAppName(`${SERVICE_ROOT_URL}/react4xp-client`);
 
 
 const cacheLib = require('/lib/cache');
@@ -50,7 +49,7 @@ const getComponentChunkNames = (entryNames) => {
         log.info(`Caching component chunk names for key: ${entryNamesKey}`);
 
         if (!BUILD_STATS_ENTRYPOINTS) {
-            const STATS = require(`/${R4X_TARGETSUBDIR}/stats.json`);
+            const STATS = require(`/${R4X_TARGETSUBDIR}/${COMPONENT_STATS_FILENAME}`);
             BUILD_STATS_ENTRYPOINTS = STATS.entrypoints;
             //log.info("BUILD_STATS_ENTRYPOINTS (" + typeof BUILD_STATS_ENTRYPOINTS + "): " + JSON.stringify(BUILD_STATS_ENTRYPOINTS, null, 2));
         }

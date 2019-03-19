@@ -1,7 +1,7 @@
 // React4xp static-asset file server, with specified cache control headers
 
 var ioLib = require('/lib/xp/io');
-var { getAssetRoot } = require('/lib/enonic/react4xp/utils');
+var { insertAppName } = require('/lib/enonic/react4xp/utils');
 var { getReact4xpEntry, getReact4xpHashedChunk } = require('/lib/enonic/react4xp/clientCacheResources');
 var cacheLib = require('/lib/cache');
 
@@ -13,7 +13,7 @@ const {
 } = require('/lib/enonic/react4xp/react4xp_constants.json');
 
 
-const SERVICE_ROOT = getAssetRoot(ASSET_URL_ROOT);
+const SERVICE_ROOT = insertAppName(ASSET_URL_ROOT);
 
 
 log.info("SERVICE_ROOT: " + JSON.stringify(SERVICE_ROOT, null, 2));
