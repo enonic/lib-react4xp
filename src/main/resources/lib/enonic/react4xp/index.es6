@@ -297,8 +297,8 @@ class React4xp {
                 // Browser-runnable script reference for the "naked" react component:
                 `<script src="${ASSET_ROOT}${this.jsxPath}.js"></script>`,
 
-                // That script will expose to the browser an element or function that can be handled by React4Xp._CLIENT_.render. Trigger that, along with the target container ID, and props, if any:
-                `<script defer>${LIBRARY_NAME}._CLIENT_.render(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
+                // That script will expose to the browser an element or function that can be handled by React4Xp.CLIENT.render. Trigger that, along with the target container ID, and props, if any:
+                `<script defer>${LIBRARY_NAME}.CLIENT.render(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
             ]
         });
     };
@@ -319,8 +319,8 @@ class React4xp {
                 // Browser-runnable script reference for the "naked" react component:
                 `<script src="${ASSET_ROOT}${this.jsxPath}.js"></script>`,
 
-                // That script will expose to the browser an element or function that can be handled by React4Xp._CLIENT_.render. Trigger that, along with the target container ID, and props, if any:
-                `<script defer>${LIBRARY_NAME}._CLIENT_.hydrate(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
+                // That script will expose to the browser an element or function that can be handled by React4Xp.CLIENT.render. Trigger that, along with the target container ID, and props, if any:
+                `<script defer>${LIBRARY_NAME}.CLIENT.hydrate(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
             ]
         });
     };
