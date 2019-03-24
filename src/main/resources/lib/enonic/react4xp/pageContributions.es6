@@ -49,11 +49,11 @@ const getUniqueEntries = (arrayOfArrays, controlSet) => {
     arrayOfArrays.forEach(arr => {
         utilLib.data.forceArray(arr).forEach(item => {
             if (controlSet.indexOf(item) === -1) {
-        uniqueEntries.push(item);
-        controlSet.push(item);
-    }
-})
-});
+                uniqueEntries.push(item);
+                controlSet.push(item);
+            }
+        });
+    });
     return uniqueEntries;
 };
 
