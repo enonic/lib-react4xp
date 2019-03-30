@@ -2,7 +2,7 @@ var utilLib = require('/lib/enonic/util');
 var ioLib = require('/lib/xp/io');
 
 // Adjusted from https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
-const hash = (string) => {
+exports.hash = (string) => {
     var hash = 0, i, chr;
     if (string.length === 0) return hash;
     for (i = 0; i < string.length; i++) {
@@ -13,7 +13,7 @@ const hash = (string) => {
     return (Math.abs(hash)).toString(36);
 };
 
-const getResourceAsString = (resource) => utilLib.data.forceArray(
+exports.getResourceAsString = (resource) => utilLib.data.forceArray(
     ioLib.readLines(
         resource.getStream()
     )
@@ -22,8 +22,8 @@ const getResourceAsString = (resource) => utilLib.data.forceArray(
 
 exports.getReact4xpEntry = (resource) => {
     //const then = new Date().getTime();
-    const fileContent = getResourceAsString(resource);
-    const ETag = hash(fileContent);
+    const fileContent = exports.getResourceAsString(resource);
+    const ETag = exports.hash(fileContent);
     //const now = new Date().getTime();
     //.info(`ETag '${ETag}' in ${now - then} ms.`);
     return {
@@ -38,7 +38,7 @@ exports.getReact4xpEntry = (resource) => {
 
 
 exports.getReact4xpHashedChunk = (resource) => {
-    const fileContent = getResourceAsString(resource);
+    const fileContent = exports.getResourceAsString(resource);
     return {
         body: fileContent,
         headers: {

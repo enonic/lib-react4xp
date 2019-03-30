@@ -1,21 +1,37 @@
-const react4xpUtils = require('./utils');
+const { insertAppName } = require('./utils');
 
-const { mergePageContributions } = require('./pageContributions');
+const { getAndMergePageContributions } = require('./pageContributions');
 
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
 
-// react4xp_constants.json is not part of lib-react4xp-runtime,
+// react4xp_constants.json is not part of lib-react4xp-runtime:
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
 const {
     LIBRARY_NAME, R4X_TARGETSUBDIR,
-    NASHORNPOLYFILLS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME, ENTRIES_FILENAME, ASSET_URL_ROOT
+    NASHORNPOLYFILLS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_STATS_FILENAME, ENTRIES_FILENAME, SERVICE_ROOT_URL
 } = require('./react4xp_constants.json');;
 
-const ASSET_ROOT = react4xpUtils.getAssetRoot(ASSET_URL_ROOT);
+const ASSET_ROOT = `${insertAppName(SERVICE_ROOT_URL)}react4xp/`;
+
+/*
+log.info("Constants: " + JSON.stringify({
+    LIBRARY_NAME, R4X_TARGETSUBDIR,
+    NASHORNPOLYFILLS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_STATS_FILENAME, ENTRIES_FILENAME, ASSET_ROOT
+}, null, 2));
 
 
+log.info("SSRreact4xp.setConfig: " + JSON.stringify({
+    "/${R4X_TARGETSUBDIR}": `/${R4X_TARGETSUBDIR}`,
+    LIBRARY_NAME,
+    "/${R4X_TARGETSUBDIR}/": `/${R4X_TARGETSUBDIR}/`,
+    "${NASHORNPOLYFILLS_FILENAME}.js": `${NASHORNPOLYFILLS_FILENAME}.js`,
+    ENTRIES_FILENAME,
+    EXTERNALS_CHUNKS_FILENAME,
+    COMPONENT_STATS_FILENAME
+}, null, 2));
+*/
 
 SSRreact4xp.setConfig(
     `/${R4X_TARGETSUBDIR}`,
@@ -24,13 +40,12 @@ SSRreact4xp.setConfig(
     `${NASHORNPOLYFILLS_FILENAME}.js`,
     ENTRIES_FILENAME,
     EXTERNALS_CHUNKS_FILENAME,
-    COMPONENT_CHUNKS_FILENAME);
-
+    COMPONENT_STATS_FILENAME);
 
 const BASE_PATHS = {
     part: "parts",
     page: "pages",
-    layout: "layouts",  // <-- experimental
+    layout: "layouts",  // <-- experimental. Might not work.
 };
 
 
@@ -153,7 +168,7 @@ class React4xp {
 
     checkIdLock() {
         if (this.react4xpIdLocked) {
-            throw Error("This component has already been used to generate a body or pageContributions. " +
+            throw Error("This component has already been used to generate a body or pageContributions.es6. " +
                 "Container ID can't be changed now.");
         }
     }
@@ -275,14 +290,9 @@ class React4xp {
 
 
 
-
-
-
-
-
     //----------------------------------------------------------  RENDERING METHODS:
 
-    /** Generates or modifies existing enonic XP pageContributions. Adds client-side dependency chunks (core React4xp frontend,
+    /** Generates or modifies existing enonic XP pageContributions.js. Adds client-side dependency chunks (core React4xp frontend,
      * shared libs and components etc, as well as the entry component scripts.
      * Also returns/adds small scripts that trigger the component scripts. Prevents duplicate references to dependencies.
      *
@@ -292,19 +302,21 @@ class React4xp {
     renderClientPageContributions = (pageContributions) => {
         this.ensureAndLockBeforeRendering();
 
-        return mergePageContributions(pageContributions, {
+        return getAndMergePageContributions(this.jsxPath, pageContributions, {
             bodyEnd: [
                 // Browser-runnable script reference for the "naked" react component:
                 `<script src="${ASSET_ROOT}${this.jsxPath}.js"></script>`,
 
-                // That script will expose to the browser an element or function that can be handled by React4Xp._CLIENT_.render. Trigger that, along with the target container ID, and props, if any:
-                `<script defer>${LIBRARY_NAME}._CLIENT_.render(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
+                // That script will expose to the browser an element or function that can be handled by React4Xp.CLIENT.render. Trigger that, along with the target container ID, and props, if any:
+                `<script defer>${LIBRARY_NAME}.CLIENT.render(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
             ]
         });
     };
 
 
-    /** Generates or modifies existing enonic XP pageContributions. Adds client-side dependency chunks (core React4xp frontend,
+
+
+    /** Generates or modifies existing enonic XP pageContributions.js. Adds client-side dependency chunks (core React4xp frontend,
       * shared libs and components etc, as well as the entry component scripts.
       * Also returns/adds small scripts that trigger the component scripts. Prevents duplicate references to dependencies.
       *
@@ -314,13 +326,13 @@ class React4xp {
     renderHydrationPageContributions = (pageContributions) => {
         this.ensureAndLockBeforeRendering();
 
-        return mergePageContributions(pageContributions, {
+        return getAndMergePageContributions(this.jsxPath, pageContributions, {
             bodyEnd: [
                 // Browser-runnable script reference for the "naked" react component:
                 `<script src="${ASSET_ROOT}${this.jsxPath}.js"></script>`,
 
-                // That script will expose to the browser an element or function that can be handled by React4Xp._CLIENT_.render. Trigger that, along with the target container ID, and props, if any:
-                `<script defer>${LIBRARY_NAME}._CLIENT_.hydrate(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
+                // That script will expose to the browser an element or function that can be handled by React4Xp.CLIENT.render. Trigger that, along with the target container ID, and props, if any:
+                `<script defer>${LIBRARY_NAME}.CLIENT.hydrate(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
             ]
         });
     };
@@ -392,12 +404,14 @@ class React4xp {
 
     ///////////////////////////////////////////////// STATIC ALL-IN-ONE RENDERERS
 
+
+
     /** Safety renderer. More thorough fallback and failure reporting, and avoids server-side rendering - except in edit
      *  mode, where client-side rendering is the bigger hazard.
      *
      *  Returns a response object that can be directly returned from an XP controller.
      *  @param params {object} See .render for parameter details.
-     *  @returns {object} Object with body and pageContributions. Body will contain a target container element for the react component. PageContributions will contain scripts referred by URL for running the component client-side and the component's dependencies, as well as an inline trigger script for starting the react frontend rendering into the target container. Duplicates in pageContributions will be removed, to avoid running identical scripts twice.
+     *  @returns {object} Object with body and pageContributions.js. Body will contain a target container element for the react component. PageContributions will contain scripts referred by URL for running the component client-side and the component's dependencies, as well as an inline trigger script for starting the react frontend rendering into the target container. Duplicates in pageContributions.js will be removed, to avoid running identical scripts twice.
      */
     static renderSafe = (request, params) => {
         let react4xp;
@@ -439,7 +453,7 @@ class React4xp {
       *      - id {string} sets the target container element id. If this matches an ID in an input body, the react component will be rendered there. If not, a container with this ID will be added.
       *      - uniqueId {boolean|string} If set, ensures that the ID is unique. If id is set (previous param), a random integer will be postfixed to it. If uniqueId is a string, this is the prefix before the random postfix. If the id param is used in addition to a uniqueId string, uniqueId takes presedence and overrides id.
       *      - body {string} Existing HTML body, for example rendered from thymeleaf. If it already has a matching-ID target container, body passes through unchanged (use this option and the setId method to control where in the body the react component should be inserted). If it doesn't have a matching container, a matching <div> will be inserted at the end of the body, inside the root element. If body is missing, a pure-target-container body is generated and returned.
-      *      - pageContributions {object} Pre-existing pageContributions.
+      *      - pageContributions.js {object} Pre-existing pageContributions.js.
       * Renders dynamic/client-side react in XP preview and live mode, and static/server-side in edit mode (XP content studio). See .renderClient and .renderSSR for parameter and return details.
       */
     static render = (request, params) => {

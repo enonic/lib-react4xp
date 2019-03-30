@@ -6,58 +6,95 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 
 /** Reads and parses file names from webpack-generated JSON files that list up contenthashed bundle chunk names. */
 public class ChunkDependencyParser {
-    private static LinkedList<String> entries = null;
 
-    private void addDependenciesFromFile(String chunkFile, LinkedList<String> accumulator) throws IOException {
-        String json = ResourceHandler.readResource(chunkFile);
-        JSONObject fileContentData = new JSONObject(json);
+    private JSONObject getJSON(String fileName) throws IOException {
+        String json = ResourceHandler.readResource(fileName);
+        return new JSONObject(json);
+    }
+
+    private LinkedList<String> getDependencyNamesFromChunkFile(String chunkFile) throws IOException {
+        LinkedList<String> accumulator = new LinkedList<>();
+
+        JSONObject fileContentData = getJSON(chunkFile);
 
         Iterator<String> keys = fileContentData.keys();
         while(keys.hasNext()) {
             String chunkName = keys.next();
 
-            // We're only looking for dependencies here, not entry files (components and such).
-            if (!entries.contains(chunkName)) {
+            JSONObject chunk = (JSONObject)fileContentData.get(chunkName);
 
-                JSONObject chunk = (JSONObject)fileContentData.get(chunkName);
+            Object fetchedChunk = null;
+            String fileName;
+            try {
+                fetchedChunk = chunk.get("js");
+                fileName = (String)fetchedChunk;
+            } catch (Exception e1) {
 
-                Object fetchedChunk = null;
-                String fileName;
                 try {
-                    fetchedChunk = chunk.get("js");
-                    fileName = (String)fetchedChunk;
-                } catch (Exception e1) {
-
-                    try {
-                        JSONArray arr = (JSONArray)fetchedChunk;
-                        if (arr.length() != 1) {
-                            throw new JSONException("Unexpected JSON chunk format, expected exactly 1 item in array.");
-                        }
-                        fileName = (String) arr.get(0);
-
-                    } catch (Exception e2) {
-                        System.err.println("File: " + chunkFile);
-                        System.err.print("Chunk (");
-                        System.err.print(chunk.getClass().getSimpleName());
-                        System.err.print("): ");
-                        System.err.println(chunk);
-
-                        throw e2;
+                    JSONArray arr = (JSONArray)fetchedChunk;
+                    if (arr.length() != 1) {
+                        throw new JSONException("Unexpected JSON chunk format, expected exactly 1 item in array.");
                     }
-                }
+                    fileName = (String) arr.get(0);
 
-                accumulator.add(fileName);
+                } catch (Exception e2) {
+                    System.err.println("File: " + chunkFile);
+                    System.err.print("Chunk (");
+                    System.err.print(chunk.getClass().getSimpleName());
+                    System.err.print("): ");
+                    System.err.println(chunk);
+
+                    throw e2;
+                }
             }
+
+            accumulator.add(fileName);
         }
+
+        return accumulator;
     }
 
-    private void setEntries(String entryFile) throws IOException {
-        entries = new LinkedList<>();
+    private LinkedList<String> getDependencyNamesFromStatsFile(String statsFile, LinkedList<String> entries, boolean eagerlyLoadEntries) throws IOException {
+        LinkedList<String> accumulator = new LinkedList<>();
+
+        JSONObject fileContentData = getJSON(statsFile);
+
+        Object entryObj = fileContentData.get("entrypoints");
+        if (entryObj == null) {
+            return accumulator;
+        }
+
+        JSONObject entrypoints = (JSONObject)entryObj;
+        Iterator<String> entryKeys = entrypoints.keys();
+        while(entryKeys.hasNext()) {
+            String entryName = entryKeys.next();
+            JSONObject entryData = (JSONObject)entrypoints.get(entryName);
+            JSONArray assets = (JSONArray)entryData.get("assets");
+            for (Object obj : assets) {
+                String fileName = (String)obj;
+                if (
+                        (eagerlyLoadEntries || !entries.contains(fileName)) &&
+                        !fileName.endsWith(".map")
+                ) {
+                    accumulator.add(fileName);
+                }
+            }
+        }
+
+        return accumulator;
+    }
+
+    private LinkedList<String> getEntriesList(String entryFile) throws IOException {
+        LinkedList<String> entries = new LinkedList<>();
+        if (entryFile == null || entryFile.trim().isEmpty()) {
+            return entries;
+        }
 
         String json = ResourceHandler.readResource(entryFile);
         JSONArray fileContentData = new JSONArray(json);
@@ -65,17 +102,19 @@ public class ChunkDependencyParser {
         while (it.hasNext()) {
             entries.add((String)it.next());
         }
+
+        return entries;
     }
 
-    public LinkedList<String> getScriptDependencies(List<String> chunkFiles, String entryFile) throws IOException {
-        if (entries == null) {
-            setEntries(entryFile);
+    public LinkedHashSet<String> getScriptDependencyNames(String statsFile, List<String> chunkFiles, String entryFile, boolean eagerlyLoadEntries) throws IOException {
+        LinkedList<String> entries = getEntriesList(entryFile);
+
+        LinkedHashSet<String> dependencyScripts = new LinkedHashSet<>();
+        for (String chunkFile : chunkFiles) {
+            dependencyScripts.addAll(getDependencyNamesFromChunkFile(chunkFile));
         }
 
-        LinkedList<String> dependencyScripts = new LinkedList<>();
-        for (String chunkFile : chunkFiles) {
-            addDependenciesFromFile(chunkFile, dependencyScripts);
-        }
+        dependencyScripts.addAll(getDependencyNamesFromStatsFile(statsFile, entries, eagerlyLoadEntries));
 
         return dependencyScripts;
     }

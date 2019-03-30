@@ -2,16 +2,17 @@
 
 **React for XP: handling and rendering of pre-built React components in Enonic XP**
 
-So you have a React4xp-ready file structure of compiled [React](https://reactjs.org/) components, maybe some dependency chunks, a config file and a few JSON chunk files.
-
-This library lets [Enonic XP](https://enonic.com/developer-tour) run it: exposes methods for client- and server-side rendering, and effectively handles built dependencies.  
+This library runs on [Enonic XP](https://enonic.com/developer-tour) server side, and provides:
+  - services that serve pre-compiled React components and their dependency scripts to the browser, from a specific file structure. The package [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components) builds this structure from React source files. These services also provide headers for caching components and dependencies in the browser.
+  - library of XP controller functions, that make it easy to blend React into XP components, in a variety of ways
+  - server-side rendering option in XP, through the controller functions  
+  - client-side wrapper tailored for use with the services - itself available to the browser through one of the services. 
     
-**If you're just getting started, that's okay**. There's a whole suite of tools (available from NPM) to build this structure for you from your source files. Should be flexible and easy to use. More on that below, but you might want to look at to the [React4xp introduction](FIXME_THERES_NO_LINK_HERE_YET_BOOO).
-
+  
 
 ## Jump to:
   - [Install](#install)
-  - [How to use: quick overview](#how-to-use-quick-overview)
+  - [Overview](#overview)
 
 
 
@@ -21,8 +22,8 @@ _This library is a work in progress at the moment_. The aim is to do it in the s
 
 If you still want to try it out right now, here's how:
   - Assuming you have Enonic XP nicely installed, and you have an XP project/app set up for it (the project in which you want to use this lib), 
-  - Clone or otherwise download [the source code](https://github.com/enonic/lib-react4xp-runtime.git) for this lib (into a different folder, not into XP or the project folder)
-  - From the lib root folder, run:
+  - Clone or otherwise download [the source code](https://github.com/enonic/lib-react4xp-runtime.git) for this lib into its own root folder (not into XP or the project folder). From that folder, run:
+  
   
 ```bash
 gradlew build install
@@ -30,7 +31,7 @@ gradlew build install
 
 Gradle will build the library and install it into the local cache, available for other projects.
 
-  - Now go to your project folder and insert into `build.gradle`, under `dependencies`:
+  - Now go to your XP main project folder and insert into `build.gradle`, under `dependencies` (the `0.0.1-SNAPSHOT` part is the version of this library that you ask your project to import. It must of course match the actual version that you built and installed):
   
 ```groovy
 dependencies {
@@ -38,12 +39,18 @@ dependencies {
 }
 ```
 
-(Note: the `0.0.1-SNAPSHOT` part in the line above is the version of this library that you ask your project to import. It must match the actual library version that you built and installed - see `gradle.properties` in the library folder)
+  - Finally, [use react4xp-build-components as documented there](https://www.npmjs.com/package/react4xp-build-components) to turn component source code in the project folder into the structure expected by this library. Or make your own building routine as long as the components structurally match the react4xp-build-components output.   
 
+## Overview
 
-## How to use: quick overview
+There are 3 main ways to use this library with XP:
 
-This runtime relies on components built by [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components), or a built file structure compatible with it. The server-side  
+1. React components **directly inside XP components in Content Studio** (parts and pages for now, although layouts _might_ work). That is, the React component is part of an XP component's view, and handled and referred in the XP component's controller. This approach is made to be easy to use, and lets the controller fetch data in regular XP ways (portalLib's `.getComponent`, `.getContent` etc), and also has methods for server-side rendering and client-side hydration - as well as automatically adding headers for effective client-side caching of the resources. This mode can also automate the HTML side of things if you want - handling the React insertion container by itself, even without a specific HTML view file for the part/page if necessary.
+
+2. React components in web pages that are rendered by XP controllers, but **outside the XP Content Studio flow** - for example when getting a page from an XP webapp or a service. This approach also has access to XP's serverside logic and the React4xp helper methods of this library, but makes a manual reference to the React component (this can also be done in the first component-oriented approach, if needed).
+
+3. **Standalone client-side mode**. In this case, an HTML file loads the react4xp client script from the `/react4xp-client` service. This exposes methods that a browser can call. It can either manually trigger rendering of already-loaded components, or use a method that automates it: just list the React4xp component names, their target container IDs and their props, and let the client call the services in _this_ lib to first find URLs for the dependency resources needed, download and run them, and finally trigger their rendering. This requires this library to provide the services, but otherwise uses the [react4xp-runtime-client package](https://www.npmjs.com/package/react4xp-runtime-client)  (**included in this library, no need for a separate installation**) - look there for docs and examples on the standalone mode.
+
 
 
 

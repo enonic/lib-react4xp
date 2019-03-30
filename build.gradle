@@ -4,7 +4,7 @@
 plugins {
     id 'java'
     id 'maven'
-    id 'com.enonic.xp.app' version '1.0.17'
+    id 'com.enonic.xp.app' version '1.1.0'
     id "com.moowork.node" version "1.1.1"
 }
 
@@ -21,20 +21,19 @@ dependencies {
 
     include 'com.enonic.lib:util:1.3.0'
     include 'com.enonic.lib:lib-cache:1.1.0'
-
+    
     include group: 'org.jdom', name: 'jdom', version: '2.0.2'
     include group: 'org.json', name: 'json', version: '20180813'
     include group: 'jaxen', name: 'jaxen', version: '1.1.6'
+    
+    testCompile "com.enonic.xp:testing:${xpVersion}"
 }
 
 
 repositories {
+    xp.enonicRepo()
     mavenLocal()
     jcenter()
-    xp.enonicRepo()
-    maven {
-        url 'http://repo.enonic.com/public'
-    }
 }
 
 npmInstall.inputs.file("package.json")
@@ -50,6 +49,7 @@ task babelXP(type: NodeTask) {
     outputs.dir("build/resources/main")
 }
 babelXP.dependsOn += 'processResources'
+babelXP.dependsOn += 'npmInstall'
 
 def ROOT = new File("").absolutePath + "/"
 
@@ -68,11 +68,14 @@ task client(type: NodeTask) {
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
             '--config', 'node_modules/react4xp-runtime-client/webpack.config.js',
-            '--env.LIBRARY_NAME=__REACT4XP__RUNTIME__CLIENT__LIBRARY__NAME__PLACEHOLDER__', // Placeholder used in services/react4xp-client/react4xp-client.es6. Keep up to date!
             '--env.BUILD_R4X=' + ROOT + 'build/resources/main/services/react4xp-client',
             '--env.BUILD_ENV=production',
             '--env.CHUNK_CONTENTHASH=[name].js',
-            '--env.CLIENT_CHUNKS_FILENAME=__delete_me_im_redundant__'
+            '--env.CLIENT_CHUNKS_FILENAME=__delete_me_im_redundant__',
+
+            // Placeholders used in services/react4xp-client/react4xp-client.es6. Keep up to date!
+            '--env.LIBRARY_NAME=__REACT4XP__RUNTIME__CLIENT__LIBRARY_NAME__PLACEHOLDER__',
+            '--env.SERVICE_ROOT_URL=__REACT4XP__RUNTIME__CLIENT__SERVICE_ROOT_URL__PLACEHOLDER__'
     ]
 
     doLast {
