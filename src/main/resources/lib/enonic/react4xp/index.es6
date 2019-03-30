@@ -1,23 +1,24 @@
-const react4xpUtils = require('./utils');
+const { insertAppName } = require('./utils');
 
 const { getAndMergePageContributions } = require('./pageContributions');
 
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
 
-// react4xp_constants.json is not part of lib-react4xp-runtime,
+// react4xp_constants.json is not part of lib-react4xp-runtime:
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
 const {
     LIBRARY_NAME, R4X_TARGETSUBDIR,
-    NASHORNPOLYFILLS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME, ENTRIES_FILENAME, SERVICE_ROOT_URL
+    NASHORNPOLYFILLS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_STATS_FILENAME, ENTRIES_FILENAME, SERVICE_ROOT_URL
 } = require('./react4xp_constants.json');;
 
-const ASSET_ROOT = react4xpUtils.insertAppName(SERVICE_ROOT_URL) + "/react4xp";
+const ASSET_ROOT = `${insertAppName(SERVICE_ROOT_URL)}react4xp/`;
 
+/*
 log.info("Constants: " + JSON.stringify({
     LIBRARY_NAME, R4X_TARGETSUBDIR,
-    NASHORNPOLYFILLS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_CHUNKS_FILENAME, ENTRIES_FILENAME, ASSET_ROOT
+    NASHORNPOLYFILLS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_STATS_FILENAME, ENTRIES_FILENAME, ASSET_ROOT
 }, null, 2));
 
 
@@ -28,10 +29,9 @@ log.info("SSRreact4xp.setConfig: " + JSON.stringify({
     "${NASHORNPOLYFILLS_FILENAME}.js": `${NASHORNPOLYFILLS_FILENAME}.js`,
     ENTRIES_FILENAME,
     EXTERNALS_CHUNKS_FILENAME,
-    COMPONENT_CHUNKS_FILENAME
+    COMPONENT_STATS_FILENAME
 }, null, 2));
-
-ERROR FORDI COMPONENT_CHUNKS_FILENAME MANGLER! ENDRE LOGIKK I BEANSA, NÅ MED STATS!
+*/
 
 SSRreact4xp.setConfig(
     `/${R4X_TARGETSUBDIR}`,
@@ -40,12 +40,12 @@ SSRreact4xp.setConfig(
     `${NASHORNPOLYFILLS_FILENAME}.js`,
     ENTRIES_FILENAME,
     EXTERNALS_CHUNKS_FILENAME,
-    COMPONENT_CHUNKS_FILENAME);
+    COMPONENT_STATS_FILENAME);
 
 const BASE_PATHS = {
     part: "parts",
     page: "pages",
-    layout: "layouts",  // <-- experimental
+    layout: "layouts",  // <-- experimental. Might not work.
 };
 
 
@@ -290,11 +290,6 @@ class React4xp {
 
 
 
-
-
-
-
-
     //----------------------------------------------------------  RENDERING METHODS:
 
     /** Generates or modifies existing enonic XP pageContributions.js. Adds client-side dependency chunks (core React4xp frontend,
@@ -317,6 +312,8 @@ class React4xp {
             ]
         });
     };
+
+
 
 
     /** Generates or modifies existing enonic XP pageContributions.js. Adds client-side dependency chunks (core React4xp frontend,

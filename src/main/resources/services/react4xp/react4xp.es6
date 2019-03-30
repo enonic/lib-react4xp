@@ -9,15 +9,11 @@ var cacheLib = require('/lib/cache');
 // it's an external shared-constants file expected to exist in the react4xp lib build directory.
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
 const {
-    R4X_TARGETSUBDIR, ASSET_URL_ROOT, ENTRIES_FILENAME
+    R4X_TARGETSUBDIR, SERVICE_ROOT_URL, ENTRIES_FILENAME
 } = require('/lib/enonic/react4xp/react4xp_constants.json');
 
 
-const SERVICE_ROOT = insertAppName(ASSET_URL_ROOT);
-
-
-log.info("SERVICE_ROOT: " + JSON.stringify(SERVICE_ROOT, null, 2));
-
+const SERVICE_ROOT = `${insertAppName(SERVICE_ROOT_URL)}react4xp/`;
 const REACT4XP_ROOT = `/${R4X_TARGETSUBDIR}/`;
 
 
@@ -60,7 +56,6 @@ exports.get = function (req) {
             } else {
                 target += ".js";
             }
-
         }
 
         if (ENTRIES.indexOf(target) === -1) {
@@ -75,7 +70,6 @@ exports.get = function (req) {
                 return getReact4xpEntry(resource);
             });
         }
-
 
     } else {
         return {

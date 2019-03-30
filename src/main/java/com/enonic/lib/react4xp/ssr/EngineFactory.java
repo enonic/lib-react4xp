@@ -7,6 +7,7 @@ import javax.script.ScriptException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 public class EngineFactory {
@@ -43,19 +44,19 @@ public class EngineFactory {
      * Scripts found in chunks.json depend on the previous and must be the last!
      * nashornPolyfills.js script is the basic dependency, and will be added at the very beginning
      * outside of this list. */
-    public static NashornScriptEngine getEngine(String CHUNKFILES_HOME, String NASHORNPOLYFILLS_FILENAME, String ENTRIES_SOURCEFILENAME, ArrayList<String> CHUNK_SOURCEFILENAMES) throws IOException, ScriptException {
+    public static NashornScriptEngine getEngine(String CHUNKFILES_HOME, String NASHORNPOLYFILLS_FILENAME, String ENTRIES_SOURCEFILENAME, String COMPONENT_STATS_FILENAME, ArrayList<String> CHUNK_SOURCEFILENAMES) throws IOException, ScriptException {
         if (engineInstance == null) {
 
             setConfig(CHUNKFILES_HOME, ENTRIES_SOURCEFILENAME, CHUNK_SOURCEFILENAMES);
 
-            // Sequence matters! Use ordered collection for iteration! Hashmaps are not ordered!
+            // Sequence matters! Use ordered scriptList collection for iteration because hashmaps are not ordered!
             LinkedList<String> scriptList = new LinkedList<>();
             HashMap<String, String> scripts = new HashMap<>();
 
             scripts.put("POLYFILL_BASICS", POLYFILL_BASICS);
             scriptList.add("POLYFILL_BASICS");
 
-            LinkedList<String> transpiledDependencies = new com.enonic.lib.react4xp.ssr.ChunkDependencyParser().getScriptDependencies(CHUNKS_SOURCES, ENTRIES_SOURCE);
+            LinkedHashSet<String> transpiledDependencies = new ChunkDependencyParser().getScriptDependencyNames(CHUNKFILES_HOME + COMPONENT_STATS_FILENAME, CHUNKS_SOURCES, ENTRIES_SOURCE, true);
 
             try {
                 if (NASHORNPOLYFILLS_FILENAME == null && NASHORNPOLYFILLS_FILENAME.trim() == "") {

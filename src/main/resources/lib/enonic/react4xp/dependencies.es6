@@ -8,12 +8,12 @@ const { insertAppName } = require('/lib/enonic/react4xp/utils');
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
 const {
-    R4X_TARGETSUBDIR, CLIENT_CHUNKS_FILENAME, EXTERNALS_CHUNKS_FILENAME, ASSET_URL_ROOT, COMPONENT_STATS_FILENAME, SERVICE_ROOT_URL,
+    R4X_TARGETSUBDIR, CLIENT_CHUNKS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_STATS_FILENAME, SERVICE_ROOT_URL,
 } = require('./react4xp_constants.json');
 
 let BUILD_STATS_ENTRYPOINTS;
-const ASSET_ROOT = insertAppName(ASSET_URL_ROOT);
-const STATIC_CLIENT_URL = insertAppName(`${SERVICE_ROOT_URL}/react4xp-client`);
+const ASSET_ROOT = `${insertAppName(SERVICE_ROOT_URL)}react4xp/`;
+const STATIC_CLIENT_URL = `${insertAppName(SERVICE_ROOT_URL)}react4xp-client/`;
 
 
 const cacheLib = require('/lib/cache');
