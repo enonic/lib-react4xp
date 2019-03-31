@@ -9,7 +9,7 @@ const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer')
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
 const {
-    LIBRARY_NAME, R4X_TARGETSUBDIR,
+    LIBRARY_NAME, R4X_TARGETSUBDIR, BUILD_R4X,
     NASHORNPOLYFILLS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_STATS_FILENAME, ENTRIES_FILENAME, SERVICE_ROOT_URL
 } = require('./react4xp_constants.json');;
 
@@ -122,22 +122,27 @@ class React4xp {
 
     /** Optional initializer: returns a React4xp component instance initialized from a single set of parameters instead of
      *  the class approach.
-     *  @param params {object} must include EITHER jsxPath or component! All other parameters are optional:
+     *  @param params {object} MUST include jsxPath or component. All other parameters are optional. If component is included, the jsxPath is automatically inserted to point to a JSX file in the XP component folder, with the same name. This file must exist. If component AND jsxPath are included, jsxPath will override the component name.
      *      - component {object} XP component object (used to extrapolate component part, sufficient if JSX entry file is in the same folder and has the same name).
-     *      - jsxPath {string} path to react component entry, see available paths in build/main/resources/react4xp/entries.json
-     *      - jsxFileName {string} for using a jsx entry in a XP component folder, but with a different file name than the XP component itself. No file extension.
+     *      - jsxPath {string} path to react component entry, see available paths in build/main/resources/react4xp/entries.json after building. These are NAMES, not relative paths. So jsxPath can't contain '..', '//', '/./' or start with '.' or '/'.
      *      - props {object} react props sent in to the component
      *      - id {string} sets the target container element id. If this matches an ID in an input body, the react component will be rendered there. If not, a container with this ID will be added.
      *      - uniqueId {boolean|string} If set, ensures that the ID is unique. If id is set (previous param), a random integer will be postfixed to it. If uniqueId is a string, this is the prefix before the random postfix. If the id param is used in addition to a uniqueId string, uniqueId takes presedence and overrides id.
      */
     static buildFromParams = (params) => {
-        const {jsxPath, component, jsxFileName, props, id, uniqueId} = params || {};
+        const {jsxPath, component, id, uniqueId, props} = params || {};
 
-        if (jsxPath && component) {
-            throw Error("Can't render React4xp for client: ambiguent parameters - use jsxPath or component, not both.");
-        } else if (!jsxPath && !component) {
-            throw Error("Can't render React4xp for client: need jsxPath or component (but not both)");
-        }
+        if (!component) {
+            if (!jsxPath) {
+                throw Error("Can't render React4xp for client: need 'jsxPath' or 'component' parameter");
+            }
+            if (
+                ((id || "") + "").trim() === "" &&
+                ((uniqueId || "") + "").trim() === "") {
+                throw Error("Can't render React4xp for client: without a 'component' parameter, either an 'id' or a non-falsy 'uniqueId' parameter is needed.");
+            }
+        };
+
 
         const react4xp = new React4xp(component || jsxPath);
 
@@ -156,8 +161,8 @@ class React4xp {
             react4xp.uniqueId();
         }
 
-        if (jsxFileName) {
-            react4xp.setJsxFileName(jsxFileName);
+        if (jsxPath) {
+            react4xp.setJsxPath(jsxPath);
         }
 
         return react4xp;
@@ -221,44 +226,44 @@ class React4xp {
 
     //---------------------------------------------------------------
 
-    /** When you've initialized the React4xp object with an XP component, but want to use a different JSX file than the
-      * standard option (a JSX file in the same folder as the XP component, with the same name as the folder).
+    /** When you want to use a particular JSX file (other than the default, a JSX file in the same folder as the XP component,
+      * with the same name as the folder).
       *
-      * @param jsxFileName (string, mandatory) Name of a JSX file. If it starts with "/" it will be interpreted as a full, absolute JSX path.
-      *        If not, interpreted as a relative path, and the full path will be extrapolated relative to the XP
-      *        component folder. jsxFileName MAY NOT START WITH "." !
+      * @param jsxPath (string, mandatory) Name of a JSX file, will be interpreted as a full, absolute JSX path. NOTE
+      *        that these are component NAME strings, not file paths that can be relative. So avoid stuff like "..", "//", "./", etc.
+      *        After building the parent project with react4xp-build-components,
+      *        the available entry jsxPaths can be seen in build/main/resources/react4xp/entries.json.
       *
       * @returns The React4xp object itself, for builder-like telescoping pattern.
       */
-    setJsxFileName(jsxFileName) {
+    setJsxPath(jsxPath) {
         // Enforce a clean jsxPath - it's not just a file reference, but a react4xp component name!
         if (
-            (jsxFileName || "").trim() === "" ||
-            jsxFileName.startsWith('.') ||
-            jsxFileName.indexOf('..') !== -1 ||
-            jsxFileName.indexOf('/./') !== -1 ||
-            jsxFileName.indexOf('//') !== -1)
-        {
-            throw Error(`React4xp.setJsxFileName: invalid jsxFileName (${JSON.stringify(jsxFileName)}). It can't be missing/empty, or contain '..', '//', '/./' or start with '.' since that messes things up! Use a clean, full, absolute jsxPath starting with '/' or a relative file reference inside the XP component folder.${this.component ? ` Component:\n${JSON.stringify(this.component)}`: ''}`);
+            (jsxPath || "").trim() === "" ||
+            jsxPath.startsWith('.') ||
+            jsxPath.startsWith('/') ||
+            jsxPath.indexOf('..') !== -1 ||
+            jsxPath.indexOf('/./') !== -1 ||
+            jsxPath.indexOf('//') !== -1 ||
+            jsxPath.indexOf('\\.\\') !== -1 ||
+            jsxPath.indexOf('\\\\') !== -1 ||
+            jsxPath.startsWith("\\")
+        ) {
+            throw Error(`React4xp.setJsxFileName: invalid jsxPath (${JSON.stringify(jsxPath)}). This is a NAME, not a relative path, so it can't be missing/empty, or contain '..', '//', '/./' or start with '.' or '/'.${this.component ? ` Component: ${JSON.stringify(this.component)}`: ''}`);
         }
 
         // Strip away trailing file extensions
-        jsxFileName = (jsxFileName.endsWith('.jsx') || jsxFileName.endsWith('.es6')) ?
-            jsxFileName.slice(0, -4) :
-            (jsxFileName.endsWith('.js')) ?
-                jsxFileName.slice(0, -3) :
-                jsxFileName;
+        jsxPath = (jsxPath.endsWith('.jsx') || jsxPath.endsWith('.es6')) ?
+            jsxPath.slice(0, -4) :
+            (jsxPath.endsWith('.js')) ?
+                jsxPath.slice(0, -3) :
+                jsxPath;
 
-        if (jsxFileName.startsWith('/')) {
-            this.jsxPath = jsxFileName.substring(1);
-
-        } else {
-            if (!this.component) {
-                throw Error(`React4xp.setJsxFileName: trying to set a relative jsxPath on a React4xp component that hasn't been initialized with an XP component. Use the constructor to set a component before calling this method, or set jsxPath directly in the constructor.`);
-            }
-            const compName = this.component.descriptor.split(":")[1];
-            this.jsxPath = `site/${BASE_PATHS[this.component.type]}/${compName}/${jsxFileName}`;
+        while (jsxPath.startsWith('/')) {
+            jsxPath = jsxPath.substring(1);
         }
+
+        this.jsxPath = jsxPath;
 
         return this;
     }
@@ -266,7 +271,7 @@ class React4xp {
 
 
 
-    //---------------------------------------------------------------
+    //--------------------------------------------------------------- Props
 
     /** Sets the react4xp component's top-level props.
       * @param props {object} Props to be stored in the component. Must be a string-serializeable object!
@@ -287,56 +292,10 @@ class React4xp {
 
 
 
+    //////////////////////////////////////////////////////  RENDERING  //////////////////////////////////////////////////
 
 
-
-    //----------------------------------------------------------  RENDERING METHODS:
-
-    /** Generates or modifies existing enonic XP pageContributions.js. Adds client-side dependency chunks (core React4xp frontend,
-     * shared libs and components etc, as well as the entry component scripts.
-     * Also returns/adds small scripts that trigger the component scripts. Prevents duplicate references to dependencies.
-     *
-     * @param pageContributions PageContributions object that the new scripts will be added to. If no input, new ones
-     * are instantiated.
-     */
-    renderClientPageContributions = (pageContributions) => {
-        this.ensureAndLockBeforeRendering();
-
-        return getAndMergePageContributions(this.jsxPath, pageContributions, {
-            bodyEnd: [
-                // Browser-runnable script reference for the "naked" react component:
-                `<script src="${ASSET_ROOT}${this.jsxPath}.js"></script>`,
-
-                // That script will expose to the browser an element or function that can be handled by React4Xp.CLIENT.render. Trigger that, along with the target container ID, and props, if any:
-                `<script defer>${LIBRARY_NAME}.CLIENT.render(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
-            ]
-        });
-    };
-
-
-
-
-    /** Generates or modifies existing enonic XP pageContributions.js. Adds client-side dependency chunks (core React4xp frontend,
-      * shared libs and components etc, as well as the entry component scripts.
-      * Also returns/adds small scripts that trigger the component scripts. Prevents duplicate references to dependencies.
-      *
-      * @param pageContributions PageContributions object that the new scripts will be added to. If no input, new ones
-      * are instantiated.
-      */
-    renderHydrationPageContributions = (pageContributions) => {
-        this.ensureAndLockBeforeRendering();
-
-        return getAndMergePageContributions(this.jsxPath, pageContributions, {
-            bodyEnd: [
-                // Browser-runnable script reference for the "naked" react component:
-                `<script src="${ASSET_ROOT}${this.jsxPath}.js"></script>`,
-
-                // That script will expose to the browser an element or function that can be handled by React4Xp.CLIENT.render. Trigger that, along with the target container ID, and props, if any:
-                `<script defer>${LIBRARY_NAME}.CLIENT.hydrate(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
-            ]
-        });
-    };
-
+    // -----------------------------  RENDERING the body and/or container  --------------------------------
 
     /** Generates or modifies an HTML body, with a target container whose ID matches this component's react4xpId.
      * @param body {string} Existing HTML body, for example rendered from thymeleaf.
@@ -369,21 +328,20 @@ class React4xp {
     }
 
 
-    /** Renders a pure static HTML markup of the react component, without a surrounding HTML markup. Can override
-      * props that have previously been added to this component. This presumably improves rendering performance,
-      * although that hasn't been tested thoroughly.
+    /** Renders a pure static HTML markup of ONLY the react component, without a surrounding HTML markup or container.
+      * Can override props that have previously been added to this component.
       */
     renderComponentString = (overrideProps) => {
         return SSRreact4xp.renderToString(this.jsxPath, JSON.stringify(overrideProps || this.props));
     };
 
 
-    /** SSR: Renders a static HTML markup and inserts it into an ID-matching target container in an HTML body. If a
+    /** Server-side rendering: Renders a static HTML markup and inserts it into an ID-matching target container in an HTML body. If a
      * matching-ID container (or a body) is missing, it will be generated.
      * @param body {string} Existing HTML body, for example rendered from thymeleaf.
      * @returns {string} adjusted or generated HTML body with rendered react component.
      */
-    renderComponentIntoContainer(body) {
+    renderSSRIntoContainer(body) {
         const componentString = this.renderComponentString();
         return this.renderTargetContainer(body, componentString);
     }
@@ -394,6 +352,58 @@ class React4xp {
 
 
 
+
+
+
+
+
+
+    //--------------------------------  RENDERING page contributions for importing entry / dependency chunks  --------------
+
+    /** Generates or modifies existing enonic XP pageContributions.js. Adds client-side dependency chunks (core React4xp frontend,
+     * shared libs and components etc, as well as the entry component scripts.
+     * Also returns/adds small scripts that trigger the component scripts. Prevents duplicate references to dependencies.
+     *
+     * @param pageContributions PageContributions object that the new scripts will be added to. If no input, new ones
+     * are instantiated.
+     */
+    renderClientPageContributions = (pageContributions) => {
+        this.ensureAndLockBeforeRendering();
+
+        return getAndMergePageContributions(this.jsxPath, pageContributions, {
+            bodyEnd: [
+                // Browser-runnable script reference for the "naked" react component:
+                `<script src="${ASSET_ROOT}${this.jsxPath}.js"></script>`,
+
+                // That script will expose to the browser an element or function that can be handled by React4Xp.CLIENT.render. Trigger that, along with the target container ID, and props, if any:
+                `<script defer>${LIBRARY_NAME}.CLIENT.render(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
+            ]
+        });
+    };
+
+
+
+
+    /** Generates or modifies existing enonic XP pageContributions.js. Adds client-side dependency chunks (core React4xp frontend,
+     * shared libs and components etc, as well as the entry component scripts.
+     * Also returns/adds small scripts that trigger the component scripts. Prevents duplicate references to dependencies.
+     *
+     * @param pageContributions PageContributions object that the new scripts will be added to. If no input, new ones
+     * are instantiated.
+     */
+    renderHydrationPageContributions = (pageContributions) => {
+        this.ensureAndLockBeforeRendering();
+
+        return getAndMergePageContributions(this.jsxPath, pageContributions, {
+            bodyEnd: [
+                // Browser-runnable script reference for the "naked" react component:
+                `<script src="${ASSET_ROOT}${this.jsxPath}.js"></script>`,
+
+                // That script will expose to the browser an element or function that can be handled by React4Xp.CLIENT.render. Trigger that, along with the target container ID, and props, if any:
+                `<script defer>${LIBRARY_NAME}.CLIENT.hydrate(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
+            ]
+        });
+    };
 
 
 
@@ -421,7 +431,7 @@ class React4xp {
 
             return (request.mode === 'edit') ?
                 {
-                    body: react4xp.renderComponentIntoContainer(body),
+                    body: react4xp.renderSSRIntoContainer(body),
                     pageContributions
                 } :
                 {
@@ -441,27 +451,28 @@ class React4xp {
 
 
 
-    /** All-in-one best-practice renderer. Renders server-side if it can, adds hydration logic for the client-side.
+    /** All-in-one best-practice renderer. Renders server-side if it can, adds hydration logic for the client-side. Renders
+      * dynamic/client-side react in XP preview and live mode, and static/server-side in edit mode (XP content studio).
       * On problems, falls back to renderSafe.
-      * Returns a response object that can be directly returned from an XP controller.
+      *
       * @param request {object} XP request object.
-      * @param params {object} must include EITHER jsxPath or component! All other parameters are optional:
-      *      - component {object} XP component object (used to extrapolate component part, sufficient if JSX entry file is in the same folder and has the same name).
-      *      - jsxPath {string} path to react component entry, see available paths in build/main/resources/react4xp/entries.json
-      *      - jsxFileName {string} for using a jsx entry in a XP component folder, but with a different file name than the XP component itself. No file extension.
-      *      - props {object} react props sent in to the component
-      *      - id {string} sets the target container element id. If this matches an ID in an input body, the react component will be rendered there. If not, a container with this ID will be added.
+      * @param params {object} MUST include jsxPath or component. And if not component, either an id OR a non-falsy uniqueId parameter is needed. If component is included, the jsxPath is automatically inserted to point to a JSX file in the XP component folder, with the same name. This file must exist. If component AND jsxPath are included, jsxPath will override the component name.
+      *      - component {object} XP component object (used to extrapolate component part and target container ID). This is sufficient if the JSX entry file is in the same folder and has the same name, and the react component doesn't need to be rendered into a particular pre-existing HTML container element.
+      *      - jsxPath {string} path to react component entry, see available paths in build/main/resources/react4xp/entries.json after building the parent project with react4xp-build-components. These are NAMES, not relative paths. So jsxPath can't contain '..', '//', '/./' or start with '.' or '/'.
+      *      - id {string} sets the target container element id (overrides the extrapolated id if component was set). If this matches an ID in an input body, the react component will be rendered there. If not, a container with this ID will be added.
       *      - uniqueId {boolean|string} If set, ensures that the ID is unique. If id is set (previous param), a random integer will be postfixed to it. If uniqueId is a string, this is the prefix before the random postfix. If the id param is used in addition to a uniqueId string, uniqueId takes presedence and overrides id.
-      *      - body {string} Existing HTML body, for example rendered from thymeleaf. If it already has a matching-ID target container, body passes through unchanged (use this option and the setId method to control where in the body the react component should be inserted). If it doesn't have a matching container, a matching <div> will be inserted at the end of the body, inside the root element. If body is missing, a pure-target-container body is generated and returned.
-      *      - pageContributions.js {object} Pre-existing pageContributions.js.
-      * Renders dynamic/client-side react in XP preview and live mode, and static/server-side in edit mode (XP content studio). See .renderClient and .renderSSR for parameter and return details.
+      *      - props {object, optional} react props sent in to the component
+      *      - body {string, optional} Existing HTML body, for example rendered from thymeleaf. If it already has a matching-ID target container, body passes through unchanged (use this option and the setId method to control where in the body the react component should be inserted). If it doesn't have a matching container, a matching <div> will be inserted at the end of the body, inside the root element. If body is missing, a pure-target-container body is generated and returned.
+      *      - pageContributions.js {object, optional} Pre-existing pageContributions.js.
+      *
+      * @returns a response object that can be directly returned from an XP controller.
       */
     static render = (request, params) => {
         try {
             const react4xp = React4xp.buildFromParams(params);
             const {body, pageContributions} = params || {};
             return {
-                body: react4xp.renderComponentIntoContainer(body),
+                body: react4xp.renderSSRIntoContainer(body),
                 pageContributions: (request.mode === "edit") ?
                     pageContributions :
                     react4xp.renderHydrationPageContributions(pageContributions)

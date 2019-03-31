@@ -31,13 +31,15 @@ gradlew build install
 
 Gradle will build the library and install it into the local cache, available for other projects.
 
-  - Now go to your XP main project folder and insert into `build.gradle`, under `dependencies` (the `0.0.1-SNAPSHOT` part is the version of this library that you ask your project to import. It must of course match the actual version that you built and installed):
+  - Now go to your XP main project folder and insert into `build.gradle`, under `dependencies` (the `0.1.0-SNAPSHOT` part is the version of this library that you ask your project to import. It must of course match the actual version that you built and installed):
   
 ```groovy
 dependencies {
-    include 'com.enonic.lib:lib_react4xp_runtime:0.0.1-SNAPSHOT'
+    include 'com.enonic.lib:lib_react4xp_runtime:0.1.0-SNAPSHOT'
 }
 ```
+
+  - The parent project's `build.gradle` 
 
   - Finally, [use react4xp-build-components as documented there](https://www.npmjs.com/package/react4xp-build-components) to turn component source code in the project folder into the structure expected by this library. Or make your own building routine as long as the components structurally match the react4xp-build-components output.   
 

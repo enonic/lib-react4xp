@@ -84,9 +84,15 @@ const getComponentChunkNames = (entryNames) => {
                     entry = replacement;
                     data = BUILD_STATS_ENTRYPOINTS[entry];
                 }
+                while (!data && entry.startsWith('/')) {
+                    const replacement = entry.substring(1);
+                    log.warning(`Dependency not found for entry '${entry}'. Trying '${replacement}'...`);
+                    entry = replacement;
+                    data = BUILD_STATS_ENTRYPOINTS[entry];
+                }
             }
             if (!data) {
-                missing.push(`'${entry}'`);
+                missing.push(entry);
                 return;
             }
             if (!Array.isArray(data.assets)) {
@@ -109,7 +115,7 @@ const getComponentChunkNames = (entryNames) => {
         // log.info("output: " + JSON.stringify(output, null, 2));
 
         if (missing.length > 0) {
-            throw Error(`Couldn't find dependencies for entries: ${missing.join(', ')}`);
+            throw Error(`Couldn't find dependencies for entries: '${missing.join(', ')}'`);
         }
 
         return output;
