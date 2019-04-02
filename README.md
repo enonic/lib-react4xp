@@ -42,15 +42,17 @@ devDependencies: {
 	"react4xp-buildconstants": "0.6.0",
 	"react4xp-build-components": "0.2.0",
 	"react4xp-runtime-externals": "0.1.0",
-	"react4xp-runtime-client": "0.2.5",
-	"react4xp-runtime-nashornpolyfills": "0.1.1",
   }
 ```
-The last 3 of these are optional. Depends on whether you use them in `build.gradle` in step 6 below. The `...-externals` package is used in these instructions, while `...-client` and `...-nashornpolyfills` are commented out. 
+The last one of these are optional. Depends on whether you use it in `build.gradle` in step 6 below - it is used in these instructions.
 
-Also add any peer dependencies you might be missing in the parent project.
+Two other NPM packages are mentioned/commented out in step 6, but already included in this library. You only need to install those here if you need to use other or customized versions:
+  - `react4xp-runtime-client` (included version: 0.2.5)
+  - `react4xp-runtime-nashornpolyfills` (included version: 0.1.1)
 
-##### Package docs are here:
+Remember to add any peer dependencies you might be missing in the parent project.
+
+###### All package docs:
   - [react4xp-buildconstants](https://www.npmjs.com/package/react4xp-buildconstants)
   - [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components)
   - [react4xp-runtime-externals](https://www.npmjs.com/package/react4xp-runtime-externals)
