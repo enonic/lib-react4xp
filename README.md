@@ -22,20 +22,20 @@ _This library is a work in progress at the moment_. The install process will be 
 
 If you still want to try it out right now, here's how:
 
-##### 1: Prerequisites
+#### 1: Prerequisites
 Assuming you have Enonic XP nicely installed, and you have an **XP parent project** app set up for it (a project where you want to use React4xp). Look for a React4xp starter in Enonic Market.
   
-##### 2: Download
+#### 2: Download
 Clone or otherwise download [the source code for this lib](https://github.com/enonic/lib-react4xp-runtime.git) into _its own root folder_ (not into XP_INSTALL or the parent project folder). 
   
-##### 3: Install this lib locally
+#### 3: Install this lib locally
 From that folder, run:
 ```bash
 gradlew build install
 ```
 Gradle will build the library and install it into the local cache, available for other projects.
 
-##### 4: NPM: import packages in the parent project 
+#### 4: NPM: import packages in the parent project 
 Now go to the _parent XP project folder_. Either add these packages to `package.json` as `devDependencies`, or install them from your command line (`npm add --save-dev ...`):
 ```json
 devDependencies: {
@@ -48,9 +48,9 @@ devDependencies: {
 ```
 The last 3 of these are optional. Depends on whether you use them in `build.gradle` in step 6 below. The `...-externals` package is used in these instructions, while `...-client` and `...-nashornpolyfills` are commented out. 
 
-Alos add any peer dependencies you might be missing in the parent project.
+Also add any peer dependencies you might be missing in the parent project.
 
-###### Package docs are here:
+##### Package docs are here:
   - [react4xp-buildconstants](https://www.npmjs.com/package/react4xp-buildconstants)
   - [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components)
   - [react4xp-runtime-externals](https://www.npmjs.com/package/react4xp-runtime-externals)
@@ -58,7 +58,7 @@ Alos add any peer dependencies you might be missing in the parent project.
   - [react4xp-runtime-nashornpolyfills](https://www.npmjs.com/package/react4xp-runtime-nashornpolyfills)
 
  
-##### 5: Gradle: import the installed lib in the parent project 
+#### 5: Gradle: import the installed lib in the parent project 
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
@@ -67,7 +67,7 @@ dependencies {
 ```
 The `0.1.0-SNAPSHOT` part is of course the version of this library, and must match the actual version that you built and installed in step 2 and 3.
 
-##### 6: Gradle: set up the build steps using the lib
+#### 6: Gradle: set up the build steps using the lib
 Your parent project needs two important gradle tasks: 
   - `config_react4xp` sets up a master config file, defining the project structure and React4xp's place in it. This config file is heavily used in both build- and runtime.
   - `webpack_react4xp` builds your parent project's React components and other necessary parts, into pieces that will be run by this library.
@@ -135,7 +135,7 @@ webpack_react4xp.dependsOn += 'config_react4xp'
 jar.dependsOn += 'webpack_react4xp'
 ```
 
-##### 7: XP component transpilation (optional)
+#### 7: XP component transpilation (optional)
 
 If you want Babel (etc) transpilation for your XP controllers, **this needs to be done separately from the build tasks in step 5!** 
 
@@ -165,7 +165,7 @@ jar.dependsOn += 'babelXP'
         }
 ```
 
-##### 8: Build and run it all
+#### 8: Build and run it all
 And voilà! Such easy! From the parent project, this can now be run as a regular XP app:
 ```bash
 $ cd <project folder>
