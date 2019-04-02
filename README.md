@@ -91,7 +91,7 @@ def CONFIG = {}
 // Override config values to taste with a JSON-parseable string. See the react4xp-buildconstants docs:
 def REACT4XP_OVERRIDES = '{"outputFileName": "' + ROOT + '/' + REACT4XP_CONFIG_FILE + '"}'
 
-// Build the master config JSON file:
+// Build the master config JSON file and the copy:
 task config_react4xp(type: NodeTask) {
     script = file('node_modules/react4xp-buildconstants/cli.js')
     args = [ ROOT, REACT4XP_OVERRIDES ]
