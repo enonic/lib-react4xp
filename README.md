@@ -118,7 +118,7 @@ task webpack_react4xp(type: NodeTask) {
         '--config', 'node_modules/react4xp-build-components/webpack.config.js',			// <-- This step compiles the components added in this project into runnable/renderable components. See react4xp-build-components docs.
         
         // 3 OPTIONAL STEPS:
-        //'--config', 'node_modules/react4xp-runtime-client/webpack.config.js',   		// <-- Activate this line to override the client wrapper version. See react4xp-runtime-client docs.
+        //'--config', 'node_modules/react4xp-runtime-client/webpack.config.js',   		// <-- Activate this line to override the included clientside wrapper (included in lib-react4xp-runtime) - see the react4xp-runtime-client docs.
         //'--config', 'node_modules/react4xp-runtime-nashornpolyfills/webpack.config.js',  	// <-- Activate this line to roll your own nashorn polyfill instead of the included one. See react4xp-runtime-nashornpolyfills docs.       
         '--config', 'node_modules/react4xp-runtime-externals/webpack.config.js',  		// <-- This line supplies dependencies declared in the EXTERNALS config constant - see the react4xp-runtime-externals docs. If you remove this line, you can/must add react@16 and react-dom@16 on all your HTML pages yourself - e.g. from a CDN.
 
