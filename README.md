@@ -18,30 +18,163 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
 
 ## Install
 
-_This library is a work in progress at the moment_. The aim is to do it in the standard simple Enonic XP-lib way - published on [Enonic Market](https://market.enonic.com/), using Gradle to import it into your XP project. 
+_This library is a work in progress at the moment_. The install process will be simplified before long, in particular publishing this lib on [Enonic Market](https://market.enonic.com/), and using a Gradle plugin to import it into your XP project. 
 
 If you still want to try it out right now, here's how:
-  - Assuming you have Enonic XP nicely installed, and you have an XP project/app set up for it (the project in which you want to use this lib), 
-  - Clone or otherwise download [the source code](https://github.com/enonic/lib-react4xp-runtime.git) for this lib into its own root folder (not into XP or the project folder). From that folder, run:
+
+##### 1: Prerequisites
+Assuming you have Enonic XP nicely installed, and you have an **XP parent project** app set up for it (a project where you want to use React4xp). Look for a React4xp starter in Enonic Market.
   
+##### 2: Download
+Clone or otherwise download [the source code for this lib](https://github.com/enonic/lib-react4xp-runtime.git) into _its own root folder_ (not into XP_INSTALL or the parent project folder). 
   
+##### 3: Install this lib locally
+From that folder, run:
 ```bash
 gradlew build install
-``` 
-
+```
 Gradle will build the library and install it into the local cache, available for other projects.
 
-  - Now go to your XP main project folder and insert into `build.gradle`, under `dependencies` (the `0.1.0-SNAPSHOT` part is the version of this library that you ask your project to import. It must of course match the actual version that you built and installed):
-  
+##### 4: NPM: import packages in the parent project 
+Now go to the _parent XP project folder_. Either add these packages to `package.json` as `devDependencies`, or install them from your command line (`npm add --save-dev ...`):
+```json
+devDependencies: {
+	"react4xp-buildconstants": "0.6.0",
+	"react4xp-build-components": "0.2.0",
+	"react4xp-runtime-externals": "0.1.0",
+	"react4xp-runtime-client": "0.2.5",
+	"react4xp-runtime-nashornpolyfills": "0.1.1",
+  }
+```
+The last 3 of these are optional. Depends on whether you use them in `build.gradle` in step 6 below. The `...-externals` package is used in these instructions, while `...-client` and `...-nashornpolyfills` are commented out. 
+
+Alos add any peer dependencies you might be missing in the parent project.
+
+###### Package docs are here:
+  - [react4xp-buildconstants](https://www.npmjs.com/package/react4xp-buildconstants)
+  - [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components)
+  - [react4xp-runtime-externals](https://www.npmjs.com/package/react4xp-runtime-externals)
+  - [react4xp-runtime-client](https://www.npmjs.com/package/react4xp-runtime-client)
+  - [react4xp-runtime-nashornpolyfills](https://www.npmjs.com/package/react4xp-runtime-nashornpolyfills)
+
+ 
+##### 5: Gradle: import the installed lib in the parent project 
+Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
     include 'com.enonic.lib:lib_react4xp_runtime:0.1.0-SNAPSHOT'
 }
 ```
+The `0.1.0-SNAPSHOT` part is of course the version of this library, and must match the actual version that you built and installed in step 2 and 3.
 
-  - The parent project's `build.gradle` 
+##### 6: Gradle: set up the build steps using the lib
+Your parent project needs two important gradle tasks: 
+  - `config_react4xp` sets up a master config file, defining the project structure and React4xp's place in it. This config file is heavily used in both build- and runtime.
+  - `webpack_react4xp` builds your parent project's React components and other necessary parts, into pieces that will be run by this library.
+  
+Add this section or similar to the parent project's `build.gradle`:
+  
+```groovy
+import groovy.json.JsonSlurper
 
-  - Finally, [use react4xp-build-components as documented there](https://www.npmjs.com/package/react4xp-build-components) to turn component source code in the project folder into the structure expected by this library. Or make your own building routine as long as the components structurally match the react4xp-build-components output.   
+// Config file name for buildtime. Note that the runtime needs a copy of it in the folder of the react4xp lib - a location predicted by the constants defined in the config file itself. This is magically handled by the react4xp-buildconstants script package:
+def REACT4XP_CONFIG_FILE = "build/react4xp_constants.json"
+
+// Resolves the project folder root
+def ROOT = new File("").absolutePath
+
+// Necessary placeholder, will be filled during build
+def CONFIG = {}
+
+// Override config values to taste with a JSON-parseable string. See the react4xp-buildconstants docs:
+def REACT4XP_OVERRIDES = '{"outputFileName": "' + ROOT + '/' + REACT4XP_CONFIG_FILE + '"}'
+
+// Build the master config JSON file:
+task config_react4xp(type: NodeTask) {
+    script = file('node_modules/react4xp-buildconstants/cli.js')
+    args = [ ROOT, REACT4XP_OVERRIDES ]
+
+    // After the above script has run and created the config file, use the constructed values from the script to update the configuration of the next task(s):
+    doLast {
+        // Read the file content into an object
+        def configFile = new File(REACT4XP_CONFIG_FILE)
+        CONFIG = new JsonSlurper().parseText(configFile.text)
+
+        tasks['webpack_react4xp'].configure {
+            inputs.dir(CONFIG.SRC_SITE)        
+            inputs.dir(CONFIG.SRC_R4X)
+            outputs.dir(CONFIG.BUILD_R4X)
+        }
+    }
+}
+config_react4xp.dependsOn += 'npmInstall'
+
+
+// Compile:
+task webpack_react4xp(type: NodeTask) {
+    script = file('node_modules/webpack/bin/webpack.js')
+    args = [
+        // 1 MANDATORY STEP:
+        '--config', 'node_modules/react4xp-build-components/webpack.config.js',			// <-- This step compiles the components added in this project into runnable/renderable components. See react4xp-build-components docs.
+        
+        // 3 OPTIONAL STEPS:
+        //'--config', 'node_modules/react4xp-runtime-client/webpack.config.js',   		// <-- Activate this line to override the client wrapper version. See react4xp-runtime-client docs.
+        //'--config', 'node_modules/react4xp-runtime-nashornpolyfills/webpack.config.js',  	// <-- Activate this line to roll your own nashorn polyfill instead of the included one. See react4xp-runtime-nashornpolyfills docs.       
+        '--config', 'node_modules/react4xp-runtime-externals/webpack.config.js',  		// <-- This line supplies dependencies declared in the EXTERNALS config constant - see the react4xp-runtime-externals docs. If you remove this line, you can/must add react@16 and react-dom@16 on all your HTML pages yourself - e.g. from a CDN.
+
+        '--env.REACT4XP_CONFIG_FILE=' + ROOT + '/' + REACT4XP_CONFIG_FILE, 			// <-- Tells all of the steps here where to find the master config file
+        '--progress', '--color'  								// <-- Just pretty
+    ]
+
+    inputs.file(REACT4XP_CONFIG_FILE)
+    inputs.file("package.json")
+    inputs.file("package-lock.json")
+}
+webpack_react4xp.dependsOn += 'config_react4xp'
+
+jar.dependsOn += 'webpack_react4xp'
+```
+
+##### 7: XP component transpilation (optional)
+
+If you want Babel (etc) transpilation for your XP controllers, **this needs to be done separately from the build tasks in step 5!** 
+
+(Why? For simple development after everything's set up, React4xp encourages you to keep React entry components in the same folders as the corresponding XP components that uses them. But both build- and runtime handles React and XP components very differently. For that reason **they must have different file extensions**: .JSX and .ES6, respectively. Typescript support should be fairly easy to add)
+
+This can be done in the regular XP way, but here's an example gradle task that both aligns xp transpilation with eventual tweaks in the config file, as well as makes sure not to mix up XP and React components:   
+
+```groovy
+task babelXP(type: NodeTask) {
+    script = file('node_modules/babel-cli/bin/babel.js')
+    args = ["src/main/resources", "--out-dir", "build/resources/main", "--ignore", "**/*.jsx"]      // <-- Ignoring JSX in the XP structure is important!
+
+    inputs.dir 'src/main/resources'
+    outputs.dir("build/resources/main")
+}
+babelXP.dependsOn += 'config_react4xp'
+babelXP.dependsOn += 'processResources'
+
+jar.dependsOn += 'babelXP'
+```
+
+...and add this at the end of the `doLast` block in the `config_react4xp` gradle task:
+```groovy
+        tasks['babelXP'].configure {
+            args = ["src/main/resources", "--out-dir", CONFIG.BUILD_MAIN, "--ignore", "**/*.jsx"]  // <-- Still ignoring JSX in the XP structure
+            outputs.dir(CONFIG.BUILD_MAIN)
+        }
+```
+
+##### 8: Build and run it all
+And voilà! Such easy! From the parent project, this can now be run as a regular XP app:
+```bash
+$ cd <project folder>
+$ gradlew deploy
+$ cd <XP server folder>
+$ bin/server
+```
+
+    
 
 ## Overview
 
