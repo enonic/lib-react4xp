@@ -178,7 +178,8 @@ $ bin/server
 
     
 
-## Overview
+## Usage
+### Overview
 
 There are 3 main ways to use this library with XP:
 
@@ -191,26 +192,21 @@ There are 3 main ways to use this library with XP:
 
 
 
+### Examples: Hello World
 
+#### 1. Content Studio-ready Component
 
-
-
-
-
-
-### Example: Hello World
-
-Similar to how things are otherwise handled in Enonic XP, add a JSX react file to the same folder as an XP part or page. File names matter - use the same name as the part or page, and a `.jsx` file extension.
+Similar-looking to how things are otherwise handled in Enonic XP components, add a JSX react file to the same folder as an XP part or page. File names matter - use the same name as the part or page, and a `.jsx` file extension.
 
 ```jsx harmony
 // site/parts/example/example.jsx:
 
 import React from 'react';
 
-export default () => <p>Hello world!</p>;
+export default (props) => <p>Hello {props.greetee}!</p>;
 ```
 
-Use the `React4xp` library in the part controller, give it the request and the part's component object (needs to be wrapped in a separate object), and return the rendered output directly from the controller:
+Import the `React4xp` library in the part controller, and let it use the `request` and the part's `component` data - here wrapped in a `params` object along with the React `props`.  
 
 ```jsx harmony
 // site/parts/example/example.es6:
@@ -219,14 +215,175 @@ const portal = require('/lib/xp/portal');
 const React4xp = require('/lib/enonic/react4xp');
 
 exports.get = function(request) {
-    const component = portal.getComponent();
-    return React4xp.render(request, { component });
+    const params = {
+        component: portal.getComponent(),
+        props: { greetee: "world"}
+    };
+    
+    return React4xp.render(request, params);
 };
 ```
 
-Apart from this you only need the part definition, `site/parts/example/example.xml`. Now add the part to a page in XP content studio, and enjoy as the world is being greeted!
+`React4xp.render` returns a response object ready to be returned directly from the controller: just like in a regular XP controller, it will contain some HTML under `body` (component server-side rendered with the initial props into a container). It will also have some `pageContributions` that makes the browser contact the server and download and run the compiled scripts for the component itself, and its dependencies (notably for hydrating the component on the client side).
 
-A slightly expanded version of this example is in the source code, at that path. 
+That's it. Add the part to a page in XP content studio, and rejoice as the world is greeted!
+
+
+#### 2. From an XP controller outside of Content Studio
+
+Just like in a vanilla React setup, you could just make a regular HTML document that refers by URL to the component and its dependencies, and let XP serve these as simple static assets, as long as they've been compiled previously.
+
+However, React4xp aims to make this easier in use, and deliver some performance gain while we're at it. 
+
+##### JsxPath
+_The one important concept to note here is **the jsxPath**, which is React4xp's internal name for each React entry component_. This name is derived at build time from the path of the transpiled react component, relative to a particular target folder in the JAR artifact of your app - but make no mistake, `jsxPath` is a _name string_, not a path that can be used relatively! This is described better below, but in short: 
+
+- If a JSX source file is inside an XP component folder, the jsxPath will be _the XP-relative path to the source file, without the file extension_ - the same way as you would import it elsewhere in XP. When you have the jsxPath, you can use the component from anywhere in React4xp - including a standalone HTML file. 
+    - For example, `example.jsx` from the first example, is in `<projectFolder>/src/main/resources/site/parts/example/example.jsx` and will get the jsxPath `site/parts/example/example`. 
+- If a JSX file is independent from XP components too, it should be put below a special source folder in order to work: `<projectFolder>/src/main/react4xp/_components`. The jsxPath will then be the path-and-name of the source file relative to that folder (still without file extension) (the path to this magic folder can be adjusted with the React4xp config file)
+    - So `SimpleGreeter` in the example below is the jsxPath of an independent React component built from `<projectFolder>/src/main/react4xp/_components/SimpleGreeter.jsx` (but we could just as well have used the `site/parts/example/example` jsxPath). 
+    
+And so on.
+ 
+##### Okay, get to the example already:
+The `react4xp` service at the URL `<domain>/_/service/<xp.parent.app.name>/react4xp` serves runnable assets to the browser - both the component itself and its dependencies. So the runnable code for e.g. the `SimpleGreeter` component is available at: `<domain>/_/service/<xp.parent.app.name>/react4xp/SimpleGreeter`. We can also use a single controller function from this library, `dependencies.getAllUrls(jsxPath)`, to check if the component has any dependencies, and get an array of service urls for those, if there are any (`.getAllUrls` also accepts an array of jsxPaths, which will automatically prevent duplicate downloads of shared dependencies).
+
+That's all the client needs. In this case, we use thymeleaf to insert the URLs into an HTML document from a standalone XP controller: 
+
+```jsx harmony
+// The controller, main.es6:
+
+const thymeleaf = require('/lib/xp/thymeleaf');
+const view = resolve('main.html');
+
+const dependencies = require('/lib/enonic/react4xp/dependencies');
+
+exports.get = req => {
+
+	const urls = dependencies.getAllUrls('SimpleGreeter');
+	const componentUrl = `/_/service/${app.name}/react4xp/SimpleGreeter`;
+	
+	// Note that the order matters! The component must be loaded AFTER its dependencies, so we add it last in the url array. 
+	urls.push(componentUrl);
+	
+	const model = { urls };
+	return {
+		body: thymeleaf.render(view, model)    
+	}
+};
+```
+
+What happens when the browser runs the component and dependency scripts? One of the dependency urls we got from `getAllUrls` from will be the React4xp client wrapper (at `/_/service/<app.name>/react4xp-client`). When this is run, the wrapper is exposed to the browser as `CLIENT` in a global object `React4xp`. 
+
+The component script is also downloaded and run, and adds the React component `SimpleGreeter` to the same `React4xp` object: 
+
+```jsx harmony
+// src/main/react4xp/_components/SimpleGreeter.jsx:
+
+import React from 'react';
+
+export default (props) => <p>Hello {props.worldOrWhatever}!</p>;
+```
+
+`React4xp.CLIENT` exposes the method `.render(component, targetElementId, props)` to the browser:
+
+```html
+<!-- main.html: -->
+
+<html>
+<head>
+    <title>Hey world</title>    
+    
+        <!-- You can get React and ReactDOM from CDN like this, if you want to skip the react4xp-runtime-externals step in build.gradle: --
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+        -->
+        
+</head>
+<body>
+    <div id="targetContainer"></div>
+
+    <script data-th-each="url: ${urls}" data-th-src="${url}"></script>
+
+    <script defer>
+        React4xp.CLIENT.render(React4xp.SimpleGreeter, 'targetContainer', {worldOrWhatever: "World"});
+    </script>
+
+    </body>
+</html>
+```
+
+
+#### 3. Completely standalone HTML
+If you need or want to use React4xp without a controller, the services offer the same functionality clean from HTML. All you need is the URL for the client wrapper as mentioned above, and the jsxPaths for the components you want to render. 
+
+After the browser has run the client, use `React4xp.CLIENT.renderWithDependencies(entries, callback)`, where `entries` is an object where the keys are component jsxPaths and each of the values are: `targetId` (target id to container DOM element) and `props`. The `callback` is an optional function that will be called at the end of the chain of scripts downloaded and run:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>React4xp standalone page 2</title>
+
+    <!-- OPTION: You can get React and ReactDOM from CDN like this, if you want to skip the react4xp-runtime-externals step in build.gradle: -->
+        <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+
+    <!-- The client wrapper is needed either way: -->
+    <script src="/_/service/<app.name>/react4xp-client"></script>
+
+</head>
+<body>
+
+    <div id="simple_target"></div>
+    <div id="reduxed_target"></div>
+    
+    <script>
+
+            // Actual rendering:
+            React4xp.CLIENT.renderWithDependencies(
+                {
+                    SimpleGreeter: {
+                        targetId: 'simple_target',
+                        props: {worldOrSomething: "worldie"}
+                    },
+
+                    'site/parts/clientReduxed/clientReduxed': {
+                        targetId: 'reduxed_target',
+                        props: {
+                            react4xpId: "yup",
+                            greetings: {
+                                greetingsCount: 1,
+                                greeteeCount: 1,
+                                greetee: "different world"
+                            },
+                        },
+                    },
+
+                },
+
+                // Demo callback:
+                function() { console.log("This is inserted and called after rendering the SimpleGreeter."); }
+            );
+    </script>
+    </body>
+</html>
+
+```
+
+
+
+
+
+
+
+    
+---
+
+EVERYTHING BELOW HERE NEEDS SOME EDITING, SOME DETAILS MAY BE DEPRECATED/EXPIRED: 
+------
+
 
 
 ### Easy and direct rendering with `React4xp.render` 
