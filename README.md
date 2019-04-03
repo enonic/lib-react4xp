@@ -346,13 +346,13 @@ After the browser has run the client, use `React4xp.CLIENT.renderWithDependencie
                 {
                     SimpleGreeter: {
                         targetId: 'simple_target',
-                        props: {worldOrSomething: "worldie"}
+                        props: {worldOrWhatever: "whatever"}
                     },
 
                     'site/parts/clientReduxed/clientReduxed': {
                         targetId: 'reduxed_target',
                         props: {
-                            react4xpId: "yup",
+                            react4xpId: "12345",
                             greetings: {
                                 greetingsCount: 1,
                                 greeteeCount: 1,
@@ -364,7 +364,7 @@ After the browser has run the client, use `React4xp.CLIENT.renderWithDependencie
                 },
 
                 // Demo callback:
-                function() { console.log("This is inserted and called after rendering the SimpleGreeter."); }
+                function() { console.log("This is inserted and called after rendering the components."); }
             );
     </script>
     </body>
