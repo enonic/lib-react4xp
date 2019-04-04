@@ -8,7 +8,6 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
   - server-side rendering option in XP, through the controller functions  
   - client-side wrapper tailored for use with the services - itself available to the browser through one of the services. 
     
-  
 
 ## Jump to:
   - [Install](#install)
@@ -21,12 +20,18 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
     - [7: Optional: transpiling XP components](#7-xp-component-transpilation-optional)
     - [8: Build and deploy the parent app](#8-build-and-run-it-all)
     
-  - [Usage: 3 modes](#overview)
+  - [Overview](#overview)
+    - [Usage: 3 main ways to render](#usage-3-main-ways-to-render)
+    - [jsxPath: how to refer to a component](#jsxpath-how-to-refer-to-a-react4xp-component)
+    - [Entries and Chunks](#entries-and-dependency-chunks) 
+      - [Control your structure](#how-to-control-your-entrychunk-structure)
     
-  - [Examples: Hello World](#examples-hello-world)
+  - [Examples: Hello World in the 3 main ways](#examples-hello-world)
     - [From a Content Studio ready component](#1-content-studio-ready-component)
     - [From an XP controller outside of Content Studio](#2-from-an-xp-controller-outside-of-content-studio)
 	- [From the client: standalone HTML page](#3-completely-standalone-html) 
+
+  - [Advanced use, technical stuff](#advanced-use-and-other-technical-stuff)
 
 ## Install
 
@@ -190,8 +195,11 @@ $ bin/server
 
     
 
-## Usage 
-### Overview
+## Overview
+
+Taking a look at the 3 main approaches to rendering with React4xp, as well as two important concepts: the `jsxPath`, and _entries_.
+
+### Usage: 3 main ways to render
 
 There are 3 main ways to use this library with XP:
 
@@ -202,15 +210,61 @@ There are 3 main ways to use this library with XP:
 3. **Standalone client-side mode**. In this case, an HTML file loads the react4xp client script from the `/react4xp-client` service. This exposes methods that a browser can call. It can either manually trigger rendering of already-loaded components, or use a method that automates it: just list the React4xp component names, their target container IDs and their props, and let the client call the services in _this_ lib to first find URLs for the dependency resources needed, download and run them, and finally trigger their rendering. This requires this library to provide the services, but otherwise uses the [react4xp-runtime-client package](https://www.npmjs.com/package/react4xp-runtime-client)  (**included in this library, no need for a separate installation**) - look there for docs and examples on the standalone mode.
 
 
+### jsxPath: how to refer to a React4xp component
+**The jsxPath** is React4xp's internal name for each [Entry](#jsxpath-how-to-refer-to-a-react4xp-component) component. When you have the jsxPath, you can use the component from anywhere in a lot of React4xp's methods - including a standalone HTML file.
+
+The name is derived at build time, from the path of the transpiled react component, relative to a particular target folder in the JAR artifact of your app. But make no mistake, `jsxPath` is a _name string_, not a path that can be used relatively! In short: 
+
+- A JSX source file can be **bound to an XP component**, that is, the source file is inside the folder of an XP component, under `<projectFolder>/src/main/resources/site/<component-type>/<component-name>/`. The jsxPath will then be _the XP-relative path to the JSX file_ (starts with `site/...`), without the file extension. 
+
+- If a JSX file is **independent from XP components**, the source file should be put below a special source folder in order for all the automatics to work: `<projectFolder>/src/main/react4xp/_components/` (*). The jsxPath will then be the path-and-name of the source file relative to that folder (still without file extension) (the path to this magic folder can be adjusted with the React4xp config file)
+
+
+**So in the examples below**...
+ - the XP-component-bound file `<projectFolder>/src/main/resources/site/parts/example/example.jsx`. It will get the jsxPath `"site/parts/example/example"`, 
+ - while `<projectFolder>/src/main/react4xp/_components/SimpleGreeter.jsx` is independent and will get the jsxPath `"SimpleGreeter"`. 
+ 
+When your app is built by [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components), it creates an overview file of all the available components and their jsxPaths: see `<projectFolder>/build/main/resources/react4xp/entries.json` (*). You can use this file for lookup, but don't edit or delete it - it's an active part of the runtime.
+
+_(*) The location of these magic folders can be tweaked and adjusted. This is controlled by the master config file built by [react4xp-buildconstants](https://www.npmjs.com/package/react4xp-buildconstants)._
+
+### Entries and dependency chunks
+React4xp components can import other components or JS core (and more), and imported stuff like this can be used by more than one React component, as shared components. Even shared code sections can share even deeper levels of code. 
+
+For both cleanliness and performance, it's a good idea to separate out shared components in deeper **chunks** that are loaded separately from the components that use them - and since they are often used in more than one place on a website, the chunks can be cached in the browser ([client-side HTTP caching](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching)) for fast access.
+
+**React4xp does this automatically in build time**, using [Webpack code splitting](https://webpack.js.org/guides/code-splitting/) to _layer_ the transpiled output / static assets it produces: 
+
+- On the top level are the **Entry Components**. These are the components that are directly renderable and available to React4xp. These are the only components that have a [jsxPath](#jsxpath-how-to-refer-to-a-react4xp-component). They are not put into chunks, and not cached, and for that reason it's a good idea to keep them as minimal as possible - leave heavy lifting to bigger chunks. React4xp Entry source files must have a `.jsx` file extension (currently - we might add Typescript later). Technically, an Entry will be a react app in itself in runtime - so memory management is likely to be another argument for using heavy chunks and lightweight entries.
+ 
+- One level down are the dependency **Chunks**, the bigger, organized collections of code that's used and import by at least one Entry. Their names are content-hashed for cache-busting. This means their runtime names are unpredictable at buildtime, so React4xp services do some housekeeping to keep track of the produced chunk names as well as which Entries use which Chunks. As long as you use the jsxPaths of the entries and the methods in this lib for fetching the dependencies, you won't need to think about chunks, hashing or caching.
+
+#### How to control your Entry/Chunk structure
+_TL;DR: put your code that's shared by React4xp components under `<projectFolder>/src/main/react4xp/<chunk-name>/`._
+
+What code will be transpiled into Chunks? And what will become Entries? This is determined by [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components), by where you put the source files.
+
+  - **Entries** are built from source files in either `<projectFolder>/src/main/react4xp/_components` (JSX, JS or ES6 file extensions) or `<projectFolder>/src/main/resources/site/<component-type>/<component-name>/` (where `<component-type>` can be `pages` or `parts` at the moment - or `layouts`, but that's experimental for now. Here, only JSX file extensions are allowed). 
+  
+  - **Chunks** are built and named from any code in the folders `<projectFolder>/src/main/react4xp/<chunk-name>/` - and only code that's imported and used by at least one Entry. Use this to organize your chunks.
+  
+  - Code that's imported by Entries from _other folders_ than that, will be compiled into the Entry and increase the size of the downloaded, non-cached component!
+  
+  - Non-Entry code that's not imported will be ignored.
+
+These will all be built and transpiled to regular minified JS assets in `<projectFolder>/build/main/resources/react4xp/`. Also note that these magic folder names can be adjusted - see [react4xp-buildconstants](https://www.npmjs.com/package/react4xp-buildconstants).
+
 
 
 ## Examples: Hello World
 
-The following are the simplest-case rendering for the three main usages:
+The part you've been waiting for, or skipped to if you're impatiently inclined: the simplest-case rendering for the [3 main usage approaches](#usage-3-main-ways-to-render):
 
 ### 1. Content Studio-ready Component
 
-Similar-looking to how things are otherwise handled in Enonic XP components, add a JSX react file to the same folder as an XP part or page. File names matter - use the same name as the part or page, and a `.jsx` file extension.
+[Entry](#entries-and-dependency-chunks) JSX files in XP-component folders can be rendered **very easily** (and if that use case doesn't suit you, there are many ways to tweak this), in a similar way to what you're used to from other XP controllers.
+
+Add a JSX react file to the same folder as an XP part or page. File names matter (if you want it to be as simple as this) - use the same name as the part or page, and a `.jsx` file extension:
 
 ```jsx harmony
 // site/parts/example/example.jsx:
@@ -220,7 +274,7 @@ import React from 'react';
 export default (props) => <p>Hello {props.greetee}!</p>;
 ```
 
-Import the `React4xp` library in the part controller, and let it use the `request` and the part's `component` data - here wrapped in a `params` object along with the React `props`.  
+Import the `React4xp` library in the part controller, and let it use the `request` and the part's `component` data - here wrapped in a `params` object along with some React `props`.  
 
 ```jsx harmony
 // site/parts/example/example.es6:
@@ -247,22 +301,13 @@ That's it. Add the part to a page in XP content studio, and rejoice as the world
 
 Just like in a vanilla React setup, you could just make a regular HTML document that refers by URL to the component and its dependencies, and let XP serve these as simple static assets, as long as they've been compiled previously.
 
-However, React4xp aims to make this easier in use, and deliver some performance gain while we're at it. 
+However, React4xp aims to make this easier in use, and deliver some performance gain while we're at it. In this approach (and the next), the browser uses [the jsxPath references](#jsxpath-how-to-refer-to-a-react4xp-component) and lets the client use React4xp's handy services.
 
-#### JsxPath
-_The one important concept to note here is **the jsxPath**, which is React4xp's internal name for each React entry component_. This name is derived at build time from the path of the transpiled react component, relative to a particular target folder in the JAR artifact of your app - but make no mistake, `jsxPath` is a _name string_, not a path that can be used relatively! This is described better below, but in short: 
+The `react4xp` service at the URL `<domain>/_/service/<xp.parent.app.name>/react4xp` serves runnable assets to the browser - both the component itself and its dependencies. So the runnable code for e.g. the `SimpleGreeter` component is available at: `<domain>/_/service/<xp.parent.app.name>/react4xp/SimpleGreeter`. We can also use a single controller function from this library, `dependencies.getAllUrls(jsxPath)`, to check if the component has any dependencies, and get an array of service urls for those, if there are any (`.getAllUrls` accepts a single jsxPath  string or an array. Either way, it will automatically prevent duplicate downloads of shared dependencies).
 
-- If a JSX source file is inside an XP component folder, the jsxPath will be _the XP-relative path to the source file, without the file extension_ - the same way as you would import it elsewhere in XP. When you have the jsxPath, you can use the component from anywhere in React4xp - including a standalone HTML file. 
-    - For example, `example.jsx` from the first example, is in `<projectFolder>/src/main/resources/site/parts/example/example.jsx` and will get the jsxPath `site/parts/example/example`. 
-- If a JSX file is independent from XP components too, it should be put below a special source folder in order to work: `<projectFolder>/src/main/react4xp/_components`. The jsxPath will then be the path-and-name of the source file relative to that folder (still without file extension) (the path to this magic folder can be adjusted with the React4xp config file)
-    - So `SimpleGreeter` in the example below is the jsxPath of an independent React component built from `<projectFolder>/src/main/react4xp/_components/SimpleGreeter.jsx` (but we could just as well have used the `site/parts/example/example` jsxPath). 
-    
-And so on.
- 
-#### Okay, get to the example already:
-The `react4xp` service at the URL `<domain>/_/service/<xp.parent.app.name>/react4xp` serves runnable assets to the browser - both the component itself and its dependencies. So the runnable code for e.g. the `SimpleGreeter` component is available at: `<domain>/_/service/<xp.parent.app.name>/react4xp/SimpleGreeter`. We can also use a single controller function from this library, `dependencies.getAllUrls(jsxPath)`, to check if the component has any dependencies, and get an array of service urls for those, if there are any (`.getAllUrls` also accepts an array of jsxPaths, which will automatically prevent duplicate downloads of shared dependencies).
+That's all the client needs. In this case, we use thymeleaf to insert the URLs into an HTML document from a standalone XP controller. 
 
-That's all the client needs. In this case, we use thymeleaf to insert the URLs into an HTML document from a standalone XP controller: 
+Actually, let's render _two_ different components into the page - in addition to SimpleGreeter, we'll also use `example.jsx` from the previous example, now with its jsxPath, `"site/parts/example/example"`: 
 
 ```jsx harmony
 // The controller, main.es6:
@@ -280,8 +325,10 @@ exports.get = req => {
 		'site/parts/example/example'
 	]);
     	
-	// After this (order matters! These two components must be loaded AFTER their dependencies so we add them last), we add the URLs for the component entries:
+	// After the dependencies (order matters! These two components must be loaded AFTER their dependencies so we add them last), 
+	// we add the URLs to fetch the component entries' own scripts:
 	urls.push(`/_/service/${app.name}/react4xp/SimpleGreeter`);
+	urls.push(`/_/service/${app.name}/react4xp/site/parts/example/example`);
 	
 	const model = { urls };
 	return {
@@ -290,9 +337,9 @@ exports.get = req => {
 };
 ```
 
-What happens when the browser runs the component and dependency scripts? One of the dependency urls we got from `getAllUrls` from will be the React4xp client wrapper (at `/_/service/<app.name>/react4xp-client`). When this is run, the wrapper is exposed to the browser as `CLIENT` in a global object `React4xp`. 
+What happens when the browser runs the component and dependency scripts? One of the dependency urls we got from `getAllUrls` from will be the React4xp client wrapper (at `/_/service/<app.name>/react4xp-client`). When this is run, the wrapper is exposed to the browser as `CLIENT` in a global object `React4xp`, with a rendering method: `React4xp.CLIENT.render(component, targetElementId, props)`.
 
-The component script is also downloaded and run, and adds the React component `SimpleGreeter` to the same `React4xp` object - as `React4xp.SimpleGreeter`: 
+The component scripts are also downloaded and run, and adds the React components to the same `React4xp` object - e.g. as `React4xp.SimpleGreeter`: 
 
 ```jsx harmony
 // src/main/react4xp/_components/SimpleGreeter.jsx:
@@ -302,27 +349,25 @@ import React from 'react';
 export default (props) => <p>Hello {props.worldOrWhatever}!</p>;
 ```
 
-The method `React4xp.CLIENT.render(component, targetElementId, props)` is now exposed to the browser:
+
 
 ```html
 <!-- main.html: -->
 
 <html>
 <head>
-    <title>Hey world</title>    
-    
-        <!-- You can get React and ReactDOM from CDN like this, if you want to skip the react4xp-runtime-externals step in build.gradle: --
-    <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
-        -->
-        
+    <title>Hey world</title>
 </head>
 <body>
     <div id="simple_target"></div>
     <div id="example_target"></div>
 
+	<!-- The client wrapper and the externals chunk carrying both React and ReactDOM are part of the URLs from getAllUrls. If you want to skip lib-runtime-react4xp's built-in react and react-dom chunk, remove react4xp-runtime-externals from build.gradle in your parent app (or remove them from EXTERNALS in the master config). Then you can use React and ReactDOM from CDN e.g. like this: ->        <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script><script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>         <!- More docs about EXTERNALS elsewhere in the lib-react4xp-runtime README. -->
+        
+	<!-- Load all the dependency scripts: -->
     <script data-th-each="url: ${urls}" data-th-src="${url}"></script>
 
+	<!-- Call the rendering of each entry component: -->
     <script defer>
         React4xp.CLIENT.render(React4xp.SimpleGreeter, 'simple_target', {worldOrWhatever: "World"});
         React4xp.CLIENT.render(React4xp['site/parts/example/example'], 'example_target', { greetee: "different world" });
@@ -341,7 +386,7 @@ on the page.
 
 
 ### 3. Completely standalone HTML
-If you need or want to use React4xp without a controller, the services offer the same functionality clean from HTML. All you need is the URL for the client wrapper as mentioned above, and the jsxPaths for the components you want to render. 
+If you need or want to use React4xp without a controller, the services offer the same functionality clean from HTML. All you need is the URL for the client wrapper as mentioned above, and the [jsxPaths](#jsxpath-how-to-refer-to-a-react4xp-component) for the components you want to render. 
 
 After the browser has run the client, use `React4xp.CLIENT.renderWithDependencies(entries, callback)`, where `entries` is an object where the keys are component jsxPaths and each of the values are: `targetId` (target id to container DOM element) and `props`. The `callback` is an optional function that will be called at the end of the chain of scripts downloaded and run.
 
@@ -408,6 +453,7 @@ EVERYTHING BELOW HERE NEEDS SOME EDITING, SOME DETAILS MAY BE DEPRECATED/EXPIRED
 ------
 
 
+## Advanced use and other technical stuff
 
 ### Easy and direct rendering with `React4xp.render` 
 
@@ -420,36 +466,12 @@ The `request` argument is used to determine the context of the rendering:
 The `params` argument is an object that must include EITHER `component` or  `jsxPath`. All other parameters are optional:
   - `component` (object) XP component object (used to extrapolate a jsxPath - sufficient if JSX entry file is in the same folder and has the same name).
   - `jsxPath` (string) path to react component entry, see available paths in `build/main/resources/react4xp/entries.json` after building. Think of this as the name of the component path.
-  - `jsxFileName` (string) For using a JSX entry that's in a XP component folder but with a different file name than the XP component itself. No file extension. Untested: can probably also be used as a relative path to the XP component path?
   - `props` (object) React props to send in to the react component
   - `id` (string) Sets the target container HTML element ID. If this matches an ID in a `body` in params, the react component will be rendered there. If not, a container with this ID will be added. If `id` is missing, the `component` path is used, or a unique ID is generated if there's no component.
   - `uniqueId` (boolean or string) If set, ensures that the ID is unique. If the `id` param is set, a random integer will be postfixed to it. If `uniqueId` is a string, that will be the prefix before the random postfix. If the `id` param is used in addition to a `uniqueId` string, `uniqueId` takes presedence and overrides `id`.
   - `body` (string) Existing HTML body for adding the react component into. For example rendered from thymeleaf. If it already has a matching-ID target container, `body` passes through unchanged in client-side rendering, and has the react component added to the container in server-side rendering. Use this matching-ID option and set the `id` param to control where in the body the react component should be inserted. If there's no matching container, a matching <div> will be inserted at the end of the body, inside the root element of `body`. If `body` is missing, a pure-target-container body is generated and returned.
   - `pageContributions` (object) Pre-existing pageContributions.
 
-
-## Technical overview and advanced use
-
-### Build
-
-An important part of the the work happens at build time, mainly by [webpack](https://webpack.js.org/). It's automated and currently set up around a particular file and directory structure:   
-
-Webpack detects JSX component entry files (see below) and **transpiles** them to es5 under `build/resources/main/react4xp` (and `react4xp/` in the deployed JAR). The same transpiled code is run by both the browser (client side rendering) or by Nashorn (server side rendering).
-
-Webpack uses [code splitting](https://webpack.js.org/guides/code-splitting/) and layers the transpiled output.  
-  - **Entries**: minimal JS files that are one "app" each: a top-level React component. These are what will be fed into the React renderer, available to and runnable by the browser and importing other components. JSX files will be interpreted as React entries if the source files are found under the common XP structire (`src/main/resources/site`) or under a designated directory in React4xp itself (`src/main/react4xp/_components`).
-  - **Chunks**: second-level bundles/libraries of shared React (or other) components, importable by the entries. You can force shared code to be bundled into a chunk without changing the webpack.config files: simply put the shared code into `.es6` or `.jsx` files in subdirectories below `src/main/react4xp` and import it from your entries. The build does the rest.
-  - **Externals**: third-level and third-party libraries such as React itself, needed both at client and server side. At this level might also be a **vendors** chunk: the leftover, non-externals common deplendencies from `node_modules/`. Use the EXTERNALS object in `webpack.config.constants.json` to separate between externals and vendors chunks.
-  
-This is done for performance by [client-side HTTP caching](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching): the chunks/externals/vendors bundle frequently used common dependencies into one, or a few, files that can be loaded client-side ideally just once, and be cached there for fast responsive pages (no need for PWA caching). Everything except the entries get a **content-dependent hash** added to the file name, so it only changes on actual updates to the dependencies. These hashes are exported by webpack to `chunks.*.json` files, which are used by XP to resolve the dependency file names. There's also a built `entries.json` file, which both allows developers to look up available entries, and lets the library exclude the entries from the hashed-name handling.
-
-Because the layers are differently used and have different needs for chunking and hashing strategies, there are 4 webpack steps, each triggered by separate gradle tasks and each with their own `webpack.config.*.js`. In addition to entries, chunks and externals, there's the React4xp frontend-only Core and the backend-only Nashorn polyfills. 
-  
-### Entries and Core
-
-React component entries can be used by XP by referring to their entry paths (`jsxPath`, unless the XP component is used as a shortcut like in the example). This path is both part of the URL for the component file, and the reference to the component in the client-side script. The global client-side `React4xp` object has some basic `Reac4xp.Core` code that wraps the React renderer, as well as entry path attributes that expose the react components. Reac4xp.Core is built from `src/main/react4xp/clientsideRendering.es6`.
-
-For example, in the hello-world example above, the entry path of `example.jsx` is `"site/parts/example/example"`, so it could also have been rendered with `React4xp.render(request, "site/parts/example/example"):`. Either way, the browser downloads ...`_/service/com.enonic.starter.react/react4xp/site/parts/example/example.js` and calls `React4xp.Core.render` with `React4xp['site/parts/example/example'].default`.       
 
 
 ### The library: `lib/enonic/react4xp/index.es6` 
@@ -500,17 +522,9 @@ While most react components so far seem to run fine, there may be some cases whe
 The JS support in Nashorn varies between different JVMs. Enonic XP 6 runs the java 8 JVM, while XP 7 will run java 11, which has better support - including ES6 natively. There may still be uncovered areas and unsupported functions, though.
 
 
-## Other & misc.:
-
 ### Component-less entries
 
 If a JSX file is found under `src/main/react4xp/_components` or below, it will keep that relative path and be transpiled to an entry component. Good for component entries that shouldn't belong to a particular XP part/page. This approach is untested and not focused on, but should allow pure-app use. Files will be transpiled to the `/react4xp/` root folder, and their entry names will be the file path under `_components`, i.e. without "_components" or "site" (or file extension) in the name.
-
-### Controllable chunking
-
-Add other subfolders under `src/main/react4xp/`: All other subfolders than _component under src/main/react4xp will be collected to chunks of their own, where the chunk name will be the same as the subfolder, plus a content hash. This includes both JSX and ES6 source files.
-
-Note that source files that aren't imported by entries will not be transpiled to the build folder. If you add source files right on the `src/main/react4xp/` root folder, they will be bundled into the entry file instead of a chunk - increasing the entry's size!
 
 ### Stateful class components
 
