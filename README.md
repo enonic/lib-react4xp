@@ -33,6 +33,8 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
 
   - [Advanced use, technical stuff](#advanced-use-and-other-technical-stuff)
 
+
+
 ## Install
 
 _This library is a work in progress at the moment_. The install process will be simplified before long, in particular publishing this lib on [Enonic Market](https://market.enonic.com/), and using a Gradle plugin to import it into your XP project. 
@@ -228,8 +230,9 @@ When your app is built by [react4xp-build-components](https://www.npmjs.com/pack
 
 _(*) The location of these magic folders can be tweaked and adjusted. This is controlled by the master config file built by [react4xp-buildconstants](https://www.npmjs.com/package/react4xp-buildconstants)._
 
+
 ### Entries and dependency chunks
-React4xp components can import other components or JS core (and more), and imported stuff like this can be used by more than one React component, as shared components. Even shared code sections can share even deeper levels of code. 
+React4xp components can import other components or JS code (and more), and imported stuff like this can be used by more than one React component, as shared components. Even shared code sections can share even deeper levels of code. 
 
 For both cleanliness and performance, it's a good idea to separate out shared components in deeper **chunks** that are loaded separately from the components that use them - and since they are often used in more than one place on a website, the chunks can be cached in the browser ([client-side HTTP caching](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching)) for fast access.
 
@@ -443,17 +446,13 @@ In this example, we're fetching two react components
 
 
 
+## Advanced use and other technical stuff
 
-
-
-    
 ---
 
-EVERYTHING BELOW HERE NEEDS SOME EDITING, SOME DETAILS MAY BE DEPRECATED/EXPIRED: 
-------
+# EVERYTHING BELOW HERE NEEDS SOME EDITING, SOME DETAILS MAY BE DEPRECATED/EXPIRED: 
 
-
-## Advanced use and other technical stuff
+---
 
 ### Easy and direct rendering with `React4xp.render` 
 
@@ -471,7 +470,6 @@ The `params` argument is an object that must include EITHER `component` or  `jsx
   - `uniqueId` (boolean or string) If set, ensures that the ID is unique. If the `id` param is set, a random integer will be postfixed to it. If `uniqueId` is a string, that will be the prefix before the random postfix. If the `id` param is used in addition to a `uniqueId` string, `uniqueId` takes presedence and overrides `id`.
   - `body` (string) Existing HTML body for adding the react component into. For example rendered from thymeleaf. If it already has a matching-ID target container, `body` passes through unchanged in client-side rendering, and has the react component added to the container in server-side rendering. Use this matching-ID option and set the `id` param to control where in the body the react component should be inserted. If there's no matching container, a matching <div> will be inserted at the end of the body, inside the root element of `body`. If `body` is missing, a pure-target-container body is generated and returned.
   - `pageContributions` (object) Pre-existing pageContributions.
-
 
 
 ### The library: `lib/enonic/react4xp/index.es6` 
@@ -525,6 +523,7 @@ The JS support in Nashorn varies between different JVMs. Enonic XP 6 runs the ja
 ### Component-less entries
 
 If a JSX file is found under `src/main/react4xp/_components` or below, it will keep that relative path and be transpiled to an entry component. Good for component entries that shouldn't belong to a particular XP part/page. This approach is untested and not focused on, but should allow pure-app use. Files will be transpiled to the `/react4xp/` root folder, and their entry names will be the file path under `_components`, i.e. without "_components" or "site" (or file extension) in the name.
+
 
 ### Stateful class components
 
