@@ -37,8 +37,15 @@ exports.get = (req) => {
                 .replace(/__REACT4XP__RUNTIME__CLIENT__LIBRARY_NAME__PLACEHOLDER__/g, LIBRARY_NAME)
                 .replace(/__REACT4XP__RUNTIME__CLIENT__SERVICE_ROOT_URL__PLACEHOLDER__\//g, CLIENT_ROOT_URL);
 
+            // FIXME: ETAG not working, using standard client cache instead, limited to 1 hour since it's not hashed
+            RESPONSE.headers = {
+                'Content-Type': 'application/javascript;charset=utf-8',
+                'Cache-Control': 'public, max-age=3600'
+            };
+
         } catch (e) {
             log.error(e);
+            RESPONSE = null;
             return {
                 contentType: 'text/plain',
                 status: 500,

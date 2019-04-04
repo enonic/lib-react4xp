@@ -34,10 +34,14 @@ exports.get = (req) => {
 
             RESPONSE = {
                 body: fileContent,
-                headers: {
+                /*headers: {
                     'Content-Type': 'application/javascript;charset=utf-8',
                     'Cache-Control': 'no-cache',
-                    ETag: hash(fileContent),
+                    ETag: hash(fileContent),        // FIXME: ETAG not working, using standard client cache instead, limited to 1 hour since it's not hashed
+                }*/
+                headers: {
+                    'Content-Type': 'application/javascript;charset=utf-8',
+                    'Cache-Control': 'public, max-age=3600'
                 }
             };
 

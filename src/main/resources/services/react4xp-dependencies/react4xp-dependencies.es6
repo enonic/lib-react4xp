@@ -35,7 +35,12 @@ exports.get = (req) => {
     try {
         return {
             body: getComponentChunkUrls(entryNames),
-            contentType: 'application/json'
+            contentType: 'application/json',
+            // FIXME: ETAG not working, using standard client cache instead, limited to 1 hour since it's not hashed
+            headers: {
+                'Content-Type': 'application/javascript;charset=utf-8',
+                'Cache-Control': 'public, max-age=3600'
+            }
         };
 
     } catch (e) {
