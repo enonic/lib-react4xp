@@ -1,5 +1,7 @@
 # lib-react4xp-runtime
 
+0.1.0-beta
+
 **React for XP: handling and rendering of pre-built React components in Enonic XP**
 
 This library runs on [Enonic XP](https://enonic.com/developer-tour) server side, and provides:
@@ -43,10 +45,10 @@ If you still want to try it out right now, here's how:
 
 ### 1: Prerequisites
 Assuming you have Enonic XP nicely installed, and you have an **XP parent project** app set up for it (a project where you want to use React4xp). Look for a React4xp starter in Enonic Market.
-  
+
 ### 2: Download
 Clone or otherwise download [the source code for this lib](https://github.com/enonic/lib-react4xp-runtime.git) into _its own root folder_ (not into XP_INSTALL or the parent project folder). 
-  
+
 ### 3: Install this lib locally
 From that folder, run:
 ```bash
@@ -78,15 +80,14 @@ Remember to add any peer dependencies you might be missing in the parent project
   - [react4xp-runtime-client](https://www.npmjs.com/package/react4xp-runtime-client)
   - [react4xp-runtime-nashornpolyfills](https://www.npmjs.com/package/react4xp-runtime-nashornpolyfills)
 
- 
 ### 5: Gradle: import the installed lib in the parent project 
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
-    include 'com.enonic.lib:lib_react4xp_runtime:0.1.0-SNAPSHOT'
+    include 'com.enonic.lib:lib_react4xp_runtime:0.1.0-beta'
 }
 ```
-The `0.1.0-SNAPSHOT` part is of course the version of this library, and must match the actual version that you built and installed in step 2 and 3.
+The `0.1.0-beta` part is of course the version of this library, and must match the actual version that you built and installed in step 2 and 3.
 
 ### 6: Gradle: set up the build steps using the lib
 Your parent project needs two important gradle tasks: 
@@ -160,7 +161,7 @@ jar.dependsOn += 'webpack_react4xp'
 
 If you want Babel (etc) transpilation for your XP controllers, **this needs to be done separately from the build tasks in step 5!** 
 
-(Why? For simple development after everything's set up, React4xp encourages you to keep React entry components in the same folders as the corresponding XP components that uses them. But both build- and runtime handles React and XP components very differently. For that reason **they must have different file extensions**: .JSX and .ES6, respectively. Typescript support should be fairly easy to add)
+(Why? For simple development after everything's set up, React4xp encourages you to keep React entry components in the same folders, with the same names, as the corresponding XP components that use them. But both build- and runtime handles React and XP components very differently. For that reason **they must have different file extensions**: .JSX and .ES6, respectively. Typescript support should be fairly easy to add)
 
 This can be done in the regular XP way, but here's an example gradle task that both aligns xp transpilation with eventual tweaks in the config file, as well as makes sure not to mix up XP and React components:   
 
@@ -196,6 +197,8 @@ $ bin/server
 ```
 
     
+
+
 
 ## Overview
 

@@ -442,8 +442,9 @@ class React4xp {
         } catch (e) {
             log.error(e);
             log.error("Params: " + JSON.stringify(params, null, 2));
+            const r = react4xp || {};
             return {
-                body: buildErrorContainer((react4xp || {}).jsxPath, (react4xp || {}).react4xpId)
+                body: buildErrorContainer(r.jsxPath, r.react4xpId)
             }
         }
     };
