@@ -1,6 +1,6 @@
 # lib-react4xp-runtime
 
-0.1.0-beta
+Beta: 0.1.0
 
 **React for XP: handling and rendering of pre-built React components in Enonic XP**
 
@@ -51,7 +51,7 @@ Assuming you have Enonic XP nicely installed, and you have an **XP parent projec
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
-	include 'com.enonic.lib:lib_react4xp_runtime:0.1.0-beta'
+	include 'com.enonic.lib:lib_react4xp_runtime:0.1.0'
 }
 ```
 
@@ -63,7 +63,7 @@ If you need / want to build the lib yourself instead of downloading it with Grad
 ```bash
 gradlew build install
 ```
-Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.1.0-beta`.
+Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.1.0`.
 
 
 ## Setting up the parent project
