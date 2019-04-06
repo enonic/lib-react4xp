@@ -34,7 +34,8 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
     - [From an XP controller outside of Content Studio](#2-from-an-xp-controller-outside-of-content-studio)
 	- [From the client: standalone HTML page](#3-completely-standalone-html) 
 
-  - [Advanced use, technical stuff](#advanced-use-and-other-technical-stuff)
+  - [Advanced use and technical stuff](#advanced-use-and-technical-stuff)
+    - [Library: index.es6](#library-libenonicreact4xpindexes6)
 
 
 
@@ -223,7 +224,9 @@ There are 3 main ways to use this library with XP:
 ### jsxPath: how to refer to a React4xp component
 **The jsxPath** is React4xp's internal name for each [Entry](#jsxpath-how-to-refer-to-a-react4xp-component) component. When you have the jsxPath, you can use the component from anywhere in a lot of React4xp's methods - including a standalone HTML file.
 
-The name is derived at build time, from the path of the transpiled react component, relative to a particular target folder in the JAR artifact of your app. But make no mistake, `jsxPath` is a _name string_, not a path that can be used relatively! In short: 
+The name is derived at build time, from the path of the transpiled react component, relative to a particular target folder in the JAR artifact of your app. But make no mistake, _a jsxPath is a name string_, not a path that can be used relatively (i.e. a jsxPath can't contain `..`, `//`, `/./` or start with `/` or `.`).
+
+In short: 
 
 - A JSX source file can be **bound to an XP component**, that is, the source file is inside the folder of an XP component, under `<projectFolder>/src/main/resources/site/<component-type>/<component-name>/`. The jsxPath will then be _the XP-relative path to the JSX file_ (starts with `site/...`), without the file extension. 
 
@@ -234,7 +237,7 @@ The name is derived at build time, from the path of the transpiled react compone
  - the XP-component-bound file `<projectFolder>/src/main/resources/site/parts/example/example.jsx`. It will get the jsxPath `"site/parts/example/example"`, 
  - while `<projectFolder>/src/main/react4xp/_components/SimpleGreeter.jsx` is independent and will get the jsxPath `"SimpleGreeter"`. 
  
-When your app is built by [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components), it creates an overview file of all the available components and their jsxPaths: see `<projectFolder>/build/main/resources/react4xp/entries.json` (*). You can use this file for lookup, but don't edit or delete it - it's an active part of the runtime.
+**PROTIP:** When your app is built by [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components), it creates an overview file of all the available components and their jsxPaths: see `<projectFolder>/build/main/resources/react4xp/entries.json` (*). You can use this file for lookup, but don't edit or delete it - it's an active part of the runtime.
 
 _(*) The location of these magic folders can be tweaked and adjusted. This is controlled by the master config file built by [react4xp-buildconstants](https://www.npmjs.com/package/react4xp-buildconstants)._
 
@@ -454,13 +457,59 @@ In this example, we're fetching two react components
 
 
 
-## Advanced use and other technical stuff
+## Advanced use and technical stuff
+
+### Library: `lib/enonic/react4xp/index.es6`
+The main functionality, used in XP component controllers (parts, pages and maybe layouts). Aims to make rendering as easy and flexible to use as possible! Handles the interplay between backend and frontend, mainly using the [jsxPaths](#jsxpath-how-to-refer-to-a-react4xp-component) of the [entry components](#entries-and-dependency-chunks).
+
+#### Direct rendering
+Two rendering functions are directly available, with the same signature: 
+  - `.render(request, params)`: the basic, best-practice wrapper for rendering. Server-side-renders the react component from its initial props, into a HTML string, and adds the necessary pageContributions that activates (hydrates) the component into a functioning react component on the client side (except in XP Content Studio's **edit mode**: here, an activated react component messes with the Content Studio edit logic, so only the static HTML renderings are displayed. In other words: the component pageContributions are skipped in edit mode). 
+  - `.renderSafe(request, params)`: this has two purposes. First, it's the fallback renderer that's used if `.render` runs into problems. Second, it renders without server-side rendering: only delivering a target container element to the client, and pageContributions that make the client mount the React component in the target container (except in edit mode, just like in edit mode for `.render`. Here, the pageContributions are still skipped. But since the pageContributions constitute the entire visualization, React4xp will _try_ to server-side render the component in edit mode in order to have something to show).
+  
+**Parameters for both functions:** 
+
+`request` (object, mandatory) is the request object passed into controller methods (used to determine if the component is being rendered in edit mode).
+
+`params` (object, mandatory) configures the React component being rendered. **NOTE:** `params` must include a `component` attribute, **or** if that is missing: the attributes `jsxPath` **and** `id` (or a non-empty, non-falsy `uniqueId`). If `component` is included, it's used to extrapolate `jsxPath` and `id`. All other attributes in `params`are optional.
+
+All `params` attributes are: 
+  - `component` (object): XP component object used to extrapolate component part (pointing it to a JSX component in the same folder and with the same file name as the XP component) and target container ID (using the component `_path`). This is enough if the JSX entry file is in the same folder and has the same name, and the react component doesn't need to be rendered into a particular pre-existing HTML container element.
+  - `jsxPath` (string): [jsxPath](#jsxpath-how-to-refer-to-a-react4xp-component) to react component entry. Overrides the extrapolated jsxPath if `component` was set.
+  - `id` (string): sets the target container element id (overrides the extrapolated id if component was set). If this matches an element ID in the HTML `body` attribute, the react component will be rendered there. If not, a container with this ID will be added at the end of `body`.
+  - `uniqueId` (boolean or string): ensures that the ID is unique. Adds a random integer postfix to the end of `id`. If `uniqueId` is a string, this is treated as a prefix before the random postfix. If `uniqueId` is a string _and_ `id` is also set (or extrapolated), `uniqueId` overrides `id`.
+  - `props` (object): React props sent in to the component for the initial rendering. Serializable values only.
+  - `body` (string): an existing HTML body (e.g. rendered from Thymeleaf), into which the rendered React component will be inserted. If it already contains a matching-`id` target container element, the `body` value won't be changed (apart from the react component being inserted if server-side rendering is used). If however `body` does not have a matching-`id` container, it will be built (as a `<div>` element) and inserted at the end of the `body` string, inside the root element. If `body` is missing, that matching-`id` target container element is built and used as `body` - with the react component inserted into it.
+  - `pageContributions` (object) Pre-existing pageContributions in standard XP format.
+ 
+Both functions return a standard-XP-format response object that can be directly returned from an XP controller. If the rendering fails, they will display an error placeholder.
+
+
+##### Examples of direct rendering:
+
+```json
+// Illegal comment, annoying the lazy author into writing on from here.
+```
 
 ---
 
 # EVERYTHING BELOW HERE NEEDS SOME EDITING, SOME DETAILS MAY BE DEPRECATED/EXPIRED: 
 
 ---
+#### Rendering via a data-holder React4xp object
+
+The functions above use a temporary data holder object under the hood: a **React4xp instance**. For advanced use and fine-grained control, it's available to use.
+  
+This React4xp instance has the following methods:
+  - `.setId(id)`: Sets the ID of the target container the component will be rendered into, or deletes it if omitted.
+  - `.uniqueId()`: Makes sure the container ID is uinique, using a random postfix.
+  - `.setJsxFileName(fileName)`: Adjusts the jsxPath by changing the file name. Useful for different-named jsx files when using the component shortcut.
+  - `.setProps(props)`: Sets the component's top-level props.
+  - `.renderClientPageContributions(pageContributions)`: Renders only the needed pageContributions for running the component on the client side. Includes dependency chunks, the component script, and the trigger. If a `pageContributions` argument is added, the rendered pageContributions are added to it, removing any duplicate scripts.
+  - `.renderTargetContainer(body, content)`: Generates an HTML body string (or modifies it, if included as a `body` parameter) with a target container element with the ID of this component - into which the component will be rendered. If the component HTML already has been rendered (e.g. by `.renderToString`), add it as the `content` argument, and it will be inserted into the container.
+  - `.renderToString(overrideProps)`: Renders a pure static HTML string of the react component, without a body / other surrounding HTML. If `overrideProps` is added, any props previously added to the instance are ignored.
+  - `.renderIntoBody(body)`: Shorthand method, combining `renderToString` and `renderTargetContainer` for a full serverside HTML string rendering of the instance. 
+
 
 ### Easy and direct rendering with `React4xp.render` 
 
@@ -479,27 +528,6 @@ The `params` argument is an object that must include EITHER `component` or  `jsx
   - `body` (string) Existing HTML body for adding the react component into. For example rendered from thymeleaf. If it already has a matching-ID target container, `body` passes through unchanged in client-side rendering, and has the react component added to the container in server-side rendering. Use this matching-ID option and set the `id` param to control where in the body the react component should be inserted. If there's no matching container, a matching <div> will be inserted at the end of the body, inside the root element of `body`. If `body` is missing, a pure-target-container body is generated and returned.
   - `pageContributions` (object) Pre-existing pageContributions.
 
-
-### The library: `lib/enonic/react4xp/index.es6` 
-
-Used in XP controllers. Relies on webpack having done its job (setting up the entry paths, the hashed chunk names and the correct placement of all the files), and handles the interplay between backend and frontend mainly using the entry paths. In addition to the `.render` method from the hello-world example are some other options:
-  - `React4xp.renderSSR(params)`: Same as React4xp.render, but without the `request`, and always renders static server-side markup. No need for a `request` argument. Worth noting: the first server-side rendering in Nashorn is much slower than repeated calls to the same component. The component is cached as a function, so re-calling it even with different props will be much more performant. 
-  - `React4xp.renderClient(params)`: Same as React4xp.renderSSR, but always renders active client-side react. Might nota always work so well in XP content studio's edit mode).
-  - `React4xp.renderMarkupAndHydrate(params)`: Same as React4xp.renderSSR, but also tries to activate the component (hydrate; populate the previously rendered DOM with active react functionality). As above, your mileage might vary when it comes to how it behaves in XP content studio's edit mode.
-  
-For more fine-grained control, build a **React4xp instance**. This can be done in two ways:
-  - `new React4xp(initParam);`, the basic constructor where `initParam` is either the XP component object, or an entry path string, or
-  - `React4xp.buildFromParams(params)`, an all-in-one builder where `params` are the same as for `.renderSSR` and `.renderClient`, except for the `body` and `pageContributions` fields which aren't used here. 
-  
-This React4xp instance has the following methods:
-  - `.setId(id)`: Sets the ID of the target container the component will be rendered into, or deletes it if omitted.
-  - `.uniqueId()`: Makes sure the container ID is uinique, using a random postfix.
-  - `.setJsxFileName(fileName)`: Adjusts the jsxPath by changing the file name. Useful for different-named jsx files when using the component shortcut.
-  - `.setProps(props)`: Sets the component's top-level props.
-  - `.renderClientPageContributions(pageContributions)`: Renders only the needed pageContributions for running the component on the client side. Includes dependency chunks, the component script, and the trigger. If a `pageContributions` argument is added, the rendered pageContributions are added to it, removing any duplicate scripts.
-  - `.renderTargetContainer(body, content)`: Generates an HTML body string (or modifies it, if included as a `body` parameter) with a target container element with the ID of this component - into which the component will be rendered. If the component HTML already has been rendered (e.g. by `.renderToString`), add it as the `content` argument, and it will be inserted into the container.
-  - `.renderToString(overrideProps)`: Renders a pure static HTML string of the react component, without a body / other surrounding HTML. If `overrideProps` is added, any props previously added to the instance are ignored.
-  - `.renderIntoBody(body)`: Shorthand method, combining `renderToString` and `renderTargetContainer` for a full serverside HTML string rendering of the instance. 
 
 The **examples** branch in this repo should have more on how to use this library in controllers.
 
