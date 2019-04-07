@@ -44,8 +44,8 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
 	  - [The Externals provider: /react4xp-externals](#the-externals-provider-react4xp-externals)
 	  - [The dependency chunk tracker: /react4xp-dependencies](#the-dependency-chunk-tracker-react4xp-dependencies)
     - [React state: using class components](#react-state-rendering-class-components)
-  - [Technical details](#technical-details)
-    - [How does this work?](#how-does-this-thing-work)
+  - [Technical stuff](#technical-stuff)
+    - [How it works](#how-it-works)
     - [Nashorn server-side rendering](#nashorn-server-side-rendering)
 	- [Independent, component-less entries](#component-less-entries)
 	
@@ -102,14 +102,6 @@ Two other NPM packages are mentioned but commented out in step 2. They are alrea
 ```bash
 npm add -D react4xp-runtime-client react4xp-runtime-nashornpolyfills 
 ```
-
-#### React4xp package overview:
-  - [react4xp-buildconstants](https://www.npmjs.com/package/react4xp-buildconstants) - builds a master config file that defines project constants for the build and runtime
-  - [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components) - transpiles your react components
-  - [react4xp-runtime-externals](https://www.npmjs.com/package/react4xp-runtime-externals) - provides external dependencies according to the EXTERNALS project constant: React and ReactDOM out of the box.
-  - [react4xp-runtime-client](https://www.npmjs.com/package/react4xp-runtime-client) - the client-side rendering wrapper. Included in this lib.
-  - [react4xp-runtime-nashornpolyfills](https://www.npmjs.com/package/react4xp-runtime-nashornpolyfills) - polyfilling the Nashorn engine for running the server-side rendering. Included in this lib.
-
 
 ### 2: Gradle: basic setup
 _This should be turned into a simple-to-use gradle plugin before long!_ For now, you need to add these steps to set up two important gradle tasks: 
@@ -224,7 +216,9 @@ $ bin/server
 
 ## Overview
 
-Taking a look at the 3 main approaches to rendering with React4xp, as well as two important concepts: the `jsxPath`, and _entries_.
+Introducing the 3 main approaches to rendering with React4xp, as well as two important concepts: the `jsxPath`, and _entries_. 
+
+For more technicalities, see [How It Works](#how-it-works).
 
 ### Usage: 3 main ways to render
 
@@ -477,7 +471,7 @@ In this example, we're fetching two react components
 
 ### The library 
 
-`lib/enonic/react4xp/index.es6`
+  - Source: `lib/enonic/react4xp/index.es6`
 
 The main functionality, used in XP component controllers (parts, pages and maybe layouts). Aims to make rendering as easy and flexible to use as possible! Handles the interplay between backend and frontend, mainly using the [jsxPaths](#jsxpath-how-to-refer-to-a-react4xp-component) of the [entry components](#entries-and-dependency-chunks).
 
@@ -677,29 +671,68 @@ SOME DETAILS MAY BE DEPRECATED/EXPIRED!
 
 ---
 
-### The services
+### The services 
 
 #### The asset fetcher: /react4xp
 
-Used to fetch all transpiled JS files - entries and dependency chunks - by entry path, i.e. the path of the transpiled file below `build/resources/main/react4xp` (or `/react4xp/` in the JAR). Handles headers for efficient clientside HTTP caching, also caches everything to memory on the server for performance. 
+  - Source: `/services/react4xp/react4xp.es6`
+  - URI: `<domain>/_/service/<app.name>/react4xp/<asset-path-and-name>`
+
+Used to fetch all static assets - JS files transpiled by [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components) below the folder `build/resources/main/react4xp` (or `/react4xp/` in the JAR). Both entries and dependency chunks are fetched by adding their relative path below that folder. For [entry assets](#entries-and-dependency-chunks), that corresponds to the [jsxPath](#jsxpath-how-to-refer-to-a-react4xp-component). Dependency chunks with hashed names are also fetched with the transpiled file name, which you can get with [the /react4xp-dependencies service](#the-dependency-chunk-tracker-react4xp-dependencies). The service adds headers for efficient clientside HTTP caching, and also caches everything to memory on the server for performance.
 
 #### The client wrapper: /react4xp-client
 
-TODO
+  - Source: `/services/react4xp-client/react4xp-client.es6`
+  - URI: `<domain>/_/service/<app.name>/react4xp-client`
+
+Delivers the client-side rendering wrapper, which exposes `React4xp.CLIENT` to the browser when run. Client-side cached.
 
 #### The Externals provider: /react4xp-externals
 
-TODO
+  - Source: `/services/react4xp-client/react4xp-externals.es6`
+  - URI: `<domain>/_/service/<app.name>/react4xp-externals`
+
+If the parent app is [built](#setting-up-the-parent-project) with [react4xp-build-externals](https://www.npmjs.com/package/react4xp-runtime-externals), _and_ the `EXTERNALS` attribute in the master config file (usually `/lib/enonic/react4xp/react4xp_constants.json` - see the [react4xp-buildconstants](https://www.npmjs.com/package/react4xp-buildconstants)) is [set](https://www.npmjs.com/package/react4xp-runtime-externals#usage), the libraries specified in `EXTERNALS` are separated out from the dependency chunks and made available through this service - to everything running on the browser. Client-side cached.
 
 #### The dependency chunk tracker: /react4xp-dependencies
 
-TODO
+  - Source: `/services/react4xp-client/react4xp-dependencies.es6`
+  - URI: `<domain>/_/service/<app.name>/react4xp-dependencies?jsxPath1&jsxPath2&jsxPath3`
+  
+Takes as URI parameters one or more [jsxPath](#jsxpath-how-to-refer-to-a-react4xp-component) references to [entries](#entries-and-dependency-chunks), separated by ampersand `&`. Returns a JSON array with full asset URLs ([the /react4xp service](#the-asset-fetcher-react4xp)) to all dependency chunks needed to render all the entries. Client-side cached.
+
+
 
 ---
 
-## Technical details
+## Technical stuff
 
-### How does this thing work?
+### How it works
+A quick-ish summary of everything. Look in the docs of each of the [NPM packages](#npm-package-overview) to go more into the details.
+
+[react4xp-buildconstants](https://www.npmjs.com/package/react4xp-buildconstants) builds a master config file that tells the buildtime where to look for user components, how and where to transpile them and the runtime where to look for everything - most of the magic file and folder locations mentioned here can be adjusted if you need to adapt your setup.
+
+At buildtime, [react4xp-build-components](https://www.npmjs.com/package/react4xp-buildconstants) looks for [entry](#entries-and-dependency-chunks) JSX files under `src/main/resources/site/` and under the special source folder `src/main/resources/react4xp/_components`. It will transpile _both_ sets of sources to JS files in the `build/resources/main/react4xp/` output folder. Anything that's imported by those entries is included in the transpiled files, except if the source files are put below other subfolders under `src/main/resources/react4xp/`. For example, all code in files inside the folder `src/main/resources/react4xp/myChunk/...` that is imported by other entries, will be collected in `build/resources/main/react4xp/myChunk.<some-content-hash>.js`. These chunks need to be imported by the browser along with the transpiled entry, for every entry that uses it. Along with client-side caching of these reused resources, this aims to increase performance of the page.
+
+The relative location under `build/resources/main/react4xp/` is where the runtime will look for everything - that location is called the [jsxPath](#jsxpath-how-to-refer-to-a-react4xp-component). The runtime includes some tools that use the jsxPath to wrap most of the complications: the [services](#the-services) provide the browser with ways of finding these resources from the client, and caching them for effective re-use. The [library](#the-library) does the same for the XP controllers, and simplifies things even more since it can use the component itself to find co-located react components that follow the XP naming conventions - in addition to generating an HTML body with `<script>` tags that deliver the components and dependencies to the browser.
+
+Since some of the files have dynamically hashed names, the buildtime makes records of the built names and which entries need which chunks, and puts those records in that same output folder: 
+  - `chunks.externals.json`
+  - `chunks.client.json`
+  - `entries.json`
+  - `stats.components.json`
+
+Regular XP components are not touched by React4xp, and follow the normal XP build and runtime flow. That means that XP components that are co-located with react component in the source files, are transpiled to different places. 
+
+The XP controllers have access to server-side rendering functionality, which uses the exact same transpiled JS resources; both entries, dependency chunks and libraries alike are run in the [Nashorn engine](#nashorn-support-versions-and-polyfilling).
+ 
+#### NPM package overview
+  - [react4xp-buildconstants](https://www.npmjs.com/package/react4xp-buildconstants) - builds a master config file that defines project constants for the build and runtime
+  - [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components) - transpiles your react components and summarizes dynamic file names and dependency relations
+  - [react4xp-runtime-externals](https://www.npmjs.com/package/react4xp-runtime-externals) - provides external dependencies according to the EXTERNALS project constant: React and ReactDOM out of the box.
+  - [react4xp-runtime-client](https://www.npmjs.com/package/react4xp-runtime-client) - the client-side rendering wrapper. Included in this lib.
+  - [react4xp-runtime-nashornpolyfills](https://www.npmjs.com/package/react4xp-runtime-nashornpolyfills) - polyfilling the Nashorn engine for running the server-side rendering. Included in this lib.
+
 
 ### Nashorn server-side rendering
 
@@ -713,7 +746,7 @@ Errors on serverside are logged thoroughly for developers, and a minimal error m
 
 Nashorn server-side rendering is recommended in the edit mode of XP content studio, to isolate away active scripts (which may interfere with the editing) while still keeping a visual representation of the component. The basic `.render` method selects this automatically.
 
-#### Support, versions and polyfilling
+#### Nashorn support, versions and polyfilling
 
 While most react components so far seem to run fine, there may be some cases where the Nashorn engine will complain. If so, you could: 
   - adapt your component code,

@@ -24,7 +24,7 @@ exports.get = (req) => {
     //   .../react4xp-dependencies?entry1&entry2&entry3
     // Parameters that have values will not be interpreted as an entry name request.
     const params = req.params || {};
-    log.info("params (" + typeof params + "): " + JSON.stringify(params, null, 2));
+    //log.info("params (" + typeof params + "): " + JSON.stringify(params, null, 2));
     const entryNames = Object.keys(params).filter( key => params[key] != null && ((params[key] || "") + "").trim() === "");
     relativePath.split("&").forEach(entryName => {
         if (entryName.trim() !== "" && entryNames.indexOf(entryName) === -1) {
