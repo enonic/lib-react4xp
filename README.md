@@ -240,11 +240,11 @@ In short:
 
 - A JSX source file can be **bound to an XP component**, that is, the source file is inside the folder of an XP component, under `<projectFolder>/src/main/resources/site/<component-type>/<component-name>/`. The jsxPath will then be _the XP-relative path to the JSX file_ (starts with `site/...`), without the file extension. 
 
-- If a JSX file is **independent from XP components**, the source file should be put below a special source folder in order for all the automatics to work: `<projectFolder>/src/main/react4xp/_components/` (*). The jsxPath will then be the path-and-name of the source file relative to that folder (still without file extension) (the path to this magic folder can be adjusted with the React4xp config file)
+- If a JSX file is **independent from XP components**, the source file should be put below a special source folder in order for all the automatics to work: `<projectFolder>/src/main/react4xp/_components/` (*). The jsxPath will then be the _path-and-name of the source file_, relative to that folder (still without file extension).
 
 
 **So in the examples below**...
- - the XP-component-bound file `<projectFolder>/src/main/resources/site/parts/example/example.jsx`. It will get the jsxPath `"site/parts/example/example"`, 
+ - the XP-component-bound file `<projectFolder>/src/main/resources/site/parts/example/example.jsx` will get the jsxPath `"site/parts/example/example"`, 
  - while `<projectFolder>/src/main/react4xp/_components/SimpleGreeter.jsx` is independent and will get the jsxPath `"SimpleGreeter"`. 
  
 **PROTIP:** When your app is built by [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components), it creates an overview file of all the available components and their jsxPaths: see `<projectFolder>/build/main/resources/react4xp/entries.json` (*). You can use this file for lookup, but don't edit or delete it - it's an active part of the runtime.
