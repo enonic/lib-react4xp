@@ -36,6 +36,8 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
 
   - [Advanced use and technical stuff](#advanced-use-and-technical-stuff)
     - [Library: index.es6](#library-libenonicreact4xpindexes6)
+      - [Direct rendering in controllers](#direct-rendering-in-controllers)
+      - [Rendering a React4xp data holder instance](#rendering-a-data-holder-react4xp-object)
 
 
 
@@ -463,12 +465,12 @@ In this example, we're fetching two react components
 ### Library: `lib/enonic/react4xp/index.es6`
 The main functionality, used in XP component controllers (parts, pages and maybe layouts). Aims to make rendering as easy and flexible to use as possible! Handles the interplay between backend and frontend, mainly using the [jsxPaths](#jsxpath-how-to-refer-to-a-react4xp-component) of the [entry components](#entries-and-dependency-chunks).
 
-#### Direct rendering
-Two rendering functions are directly available, with the same signature: 
+#### Direct rendering in controllers
+Two rendering functions are directly available to XP controllers, with the same signature: 
   - `.render(request, params)`: the basic, best-practice wrapper for rendering. Server-side-renders the react component from its initial props, into a HTML string, and adds the necessary pageContributions that activates (hydrates) the component into a functioning react component on the client side (except in XP Content Studio's **edit mode**: here, an activated react component messes with the Content Studio edit logic, so only the static HTML renderings are displayed. In other words: the component pageContributions are skipped in edit mode). 
   - `.renderSafe(request, params)`: this has two purposes. First, it's the fallback renderer that's used if `.render` runs into problems. Second, it renders without server-side rendering: only delivering a target container element to the client, and pageContributions that make the client mount the React component in the target container (except in edit mode, just like in edit mode for `.render`. Here, the pageContributions are still skipped. But since the pageContributions constitute the entire visualization, React4xp will _try_ to server-side render the component in edit mode in order to have something to show).
   
-**Parameters for both functions:** 
+_Parameters for both functions:_ 
 
 `request` (object, mandatory) is the request object passed into controller methods (used to determine if the component is being rendered in edit mode).
 
@@ -481,16 +483,143 @@ All `params` attributes are:
   - `uniqueId` (boolean or string): ensures that the ID is unique. Adds a random integer postfix to the end of `id`. If `uniqueId` is a string, this is treated as a prefix before the random postfix. If `uniqueId` is a string _and_ `id` is also set (or extrapolated), `uniqueId` overrides `id`.
   - `props` (object): React props sent in to the component for the initial rendering. Serializable values only.
   - `body` (string): an existing HTML body (e.g. rendered from Thymeleaf), into which the rendered React component will be inserted. If it already contains a matching-`id` target container element, the `body` value won't be changed (apart from the react component being inserted if server-side rendering is used). If however `body` does not have a matching-`id` container, it will be built (as a `<div>` element) and inserted at the end of the `body` string, inside the root element. If `body` is missing, that matching-`id` target container element is built and used as `body` - with the react component inserted into it.
-  - `pageContributions` (object) Pre-existing pageContributions in standard XP format.
+  - `pageContributions` (object) Pre-existing page contributions in [standard XP format](https://xp.readthedocs.io/en/stable/developer/site/contributions.html).
  
-Both functions return a standard-XP-format response object that can be directly returned from an XP controller. If the rendering fails, they will display an error placeholder.
+Both functions return a full [standard XP-format response object](https://xp.readthedocs.io/en/stable/developer/ssjs/http-response.html) that can be directly returned from an XP controller. If the rendering fails, they will display an error placeholder.
 
+Also worth noting: `.render` and `.renderSafe` always send the `id` (or `uniqueId`) to the component, as `props.react4xpId`.
 
-##### Examples of direct rendering:
+##### Examples of direct rendering
 
-```json
-// Illegal comment, annoying the lazy author into writing on from here.
+[Example 1 above](#1-content-studio-ready-component), using only the `params.component` and `params.props` attributes.
+
+A more complex example with an XP controller that renders a React component from a different folder into a particular container, which in turn was pre-rendered with Thymeleaf:
+
+src/main/resources/site/parts/the-part/the-view.html
+```html
+<div>
+	<h1>Header</h1>
+	<div data-th-class="${someDynamicClass}" id="myTargetContainer"></div>
+	<div>And now for something completely different</div>
+</div>
 ```
+
+
+
+src/main/resources/site/parts/other-folder/other-file.jsx:
+```jsx harmony
+import React from 'react';
+
+export default (props) => <h2>Howdy globe!</h2>;
+```
+
+
+
+src/main/resources/site/parts/the-part/the-controller.es6:
+```jsx harmony
+const thymeleaf = require('/lib/xp/thymeleaf');
+const React4xp = require('/lib/enonic/react4xp');
+
+exports.get = function(request) {
+    const view = resolve('the-view.html');
+    const model = {
+        someDynamicClass: 'class-for-target-container'
+    };
+    const body = thymeleaf.render(view, model);
+    
+    const params = {
+        jsxPath: 'site/parts/other-folder/other-file',
+        id: 'myTargetContainer',
+        body: body
+    };
+    
+    return React4xp.render(request, params);
+};
+```
+
+
+
+#### Rendering with a data-holder React4xp object
+
+The functions above use a temporary data holder object under the hood: a **React4xp instance**. For advanced use and fine-grained control, it's available to use in the component: 
+
+##### Construction
+
+A React4xp instance object can be built with `.buildFromParams(params)`, where `params` is the same as for `.render` and `.renderSafe` ([see above](#direct-rendering-in-controllers)) - except for `body` and `pageContributions`. 
+
+```jsx harmony
+const React4xp = require('/lib/enonic/react4xp');
+
+const reactComp = React4xp.buildFromParams({
+	jsxPath: 'site/parts/other-folder/other-file',
+	id: 'myTargetContainer'
+});
+```
+
+There's also a handy constructor that autodetects if it's argument is a `component` or `jsxPath` attribute:
+
+```jsx harmony
+const portal = require('/lib/xp/portal');
+
+const reactComp2 = new  React4xp('site/parts/other-folder/other-file');
+
+const reactComp3 = new  React4xp(portal.getComponent());
+```
+
+##### Adjustment
+After it's been constructed (or built from params), an instance object can be adjusted using a [builder pattern](https://medium.com/@modestofiguereo/design-patterns-2-the-builder-pattern-and-the-telescoping-constructor-anti-pattern-60a33de7522e) with these optional methods:
+
+```jsx harmony
+reactComp3
+	.setJsxPath('site/parts/other-folder/other-file')
+	.setId('myTargetContainer')
+	.uniqueId()
+	.setProps({greetee: 'world'});
+```
+
+##### Rendering
+The instance object renders the HTML body and the activating [page contributions](https://xp.readthedocs.io/en/stable/developer/site/contributions.html) separately. In both steps previous body and pageContributions can be added as input and have the results added to them. This allows rendering _chains_. 
+
+The HTML:
+
+ - `.renderComponentString(overrideProps)` returns a static HTML string of the instance, server-side-rendered with the instance's existing props - or with `overrideProps` if they are included. This is just the component in it's 'naked' state - no container element or other surrounding HTML.
+
+ - `.renderTargetContainer(body, content)`: returns an HTML string with a target container with an element ID that matches the ID of the instance object. 
+   - `body` (HTML string, optional): if missing, a new container element will be created. If `body` is included but there's no element in it with a matching ID in it, a matching-ID element will be created and added at the end of `body`, in its root.  If there is already an included matching ID element, `body` will be used as-is (and if `content` is missing too, it will be returned unchanged). 
+   - `content` (HTML string, optional): if included, this HTML will be inserted into the target container.
+   
+ - `.renderSSRIntoContainer(body)` returns an HTML string with the instance server-side-rendered into the `body` (if included - in not, a new container is created, along the logic from `.renderComponentString`) with its current props. This is just a shorthand combination of the two previous methods.
+ 
+The pageContributions:
+
+  - `.renderClientPageContributions(pageContributions)`: uses the [jsxPath](#jsxpath-how-to-refer-to-a-react4xp-component) set in the instance to track which dependency chunks are needed to render the instance component - and then returns the `<script>` elements needed on the output page for rendering the component (`ReactDOM.render`). If the `pageContributions` (pageContributions object or stringparameter is set, it's added to the output (preventing duplicates).
+  
+  - `.renderHydrationPageContributions(pageContributions)`: works the same way as `.renderClientPageContributions`, but triggers `ReactDOM.hydrate` instead of .render. This makes the client [activate a server-side-rendered React component](https://reactjs.org/docs/react-dom.html#hydrate). 
+
+
+A server-side-rendered example, chain-rendering the instance objects from the preious examples:
+```jsx harmony
+exports.get = req => {
+    
+	// ...continuing from above:
+	
+	let body = reactComp.renderSSRIntoContainer();
+	body = reactComp2.renderSSRIntoContainer(body);
+	body = reactComp3.renderSSRIntoContainer(body);
+	
+	let pageContributions = reactComp.renderHydrationPageContributions();
+	pageContributions = reactComp2.renderHydrationPageContributions(pageContributions);
+	pageContributions = reactComp3.renderHydrationPageContributions(pageContributions);    
+	
+	return {
+	    body: body,
+	    pageContributions: pageContributions
+	};
+};
+
+```
+
+
 
 ---
 

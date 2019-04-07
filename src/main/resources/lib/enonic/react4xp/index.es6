@@ -331,9 +331,7 @@ class React4xp {
     /** Renders a pure static HTML markup of ONLY the react component, without a surrounding HTML markup or container.
       * Can override props that have previously been added to this component.
       */
-    renderComponentString = (overrideProps) => {
-        return SSRreact4xp.renderToString(this.jsxPath, JSON.stringify(overrideProps || this.props));
-    };
+    renderComponentString = (overrideProps) => SSRreact4xp.renderToString(this.jsxPath, JSON.stringify(overrideProps || this.props));
 
 
     /** Server-side rendering: Renders a static HTML markup and inserts it into an ID-matching target container in an HTML body. If a
