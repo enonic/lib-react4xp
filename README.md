@@ -597,7 +597,7 @@ The pageContributions:
   - `.renderHydrationPageContributions(pageContributions)`: works the same way as `.renderClientPageContributions`, but triggers `ReactDOM.hydrate` instead of .render. This makes the client [activate a server-side-rendered React component](https://reactjs.org/docs/react-dom.html#hydrate). 
 
 
-A server-side-rendered example, chain-rendering the instance objects from the preious examples:
+Completing the example above, with server-side-rendering:
 ```jsx harmony
 exports.get = req => {
     
@@ -616,10 +616,21 @@ exports.get = req => {
 	    pageContributions: pageContributions
 	};
 };
-
 ```
 
+In this example, chaining is used to let a single XP part display multiple React entries. It's of course also possible to let several XP parts share a common React4xp entry, and even display them on the same page simultaneously.
 
+The same instance objects could of course be used for pure client-side rendering instead, e.g:
+
+```jsx harmony
+exports.get = req => {
+	// ...    
+	let body = reactComp.renderTargetContainer();
+	// ...
+	let pageContributions = reactComp.renderClientPageContributions();
+	// ...
+};
+```
 
 ---
 
