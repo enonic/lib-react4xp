@@ -34,12 +34,24 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
     - [From an XP controller outside of Content Studio](#2-from-an-xp-controller-outside-of-content-studio)
 	- [From the client: standalone HTML page](#3-completely-standalone-html) 
 
-  - [Advanced use and technical stuff](#advanced-use-and-technical-stuff)
-    - [Library: index.es6](#library-libenonicreact4xpindexes6)
+  - [Advanced use](#advanced-use)
+    - [Using the library from the controllers](#the-library)
       - [Direct rendering in controllers](#direct-rendering-in-controllers)
       - [Rendering with a React4xp data holder instance](#rendering-with-a-data-holder-react4xp-object)
+	- [Using the services from the client](#the-services)
+	  - [The asset fetcher: /react4xp](#the-asset-fetcher-react4xp)
+	  - [The client wrapper: /react4xp-client](#the-client-wrapper-react4xp-client)
+	  - [The Externals provider: /react4xp-externals](#the-externals-provider-react4xp-externals)
+	  - [The dependency chunk tracker: /react4xp-dependencies](#the-dependency-chunk-tracker-react4xp-dependencies)
+    - [React state: using class components](#react-state-rendering-class-components)
+  - [Technical details](#technical-details)
+    - [How does this work?](#how-does-this-thing-work)
+    - [Nashorn server-side rendering](#nashorn-server-side-rendering)
+	- [Independent, component-less entries](#component-less-entries)
+	
 
 
+---
 
 ## Installing the library
 
@@ -68,6 +80,7 @@ gradlew build install
 ```
 Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.2.0`.
 
+---
 
 ## Setting up the parent project
 This is a runtime lib, so it doesn't provide any tools required for building/transpiling your parent project and your React components there. Add these steps in your parent project to get all the moving parts up and running:
@@ -207,7 +220,7 @@ $ bin/server
 
     
 
-
+---
 
 ## Overview
 
@@ -271,7 +284,7 @@ What code will be transpiled into Chunks? And what will become Entries? This is 
 
 These will all be built and transpiled to regular minified JS assets in `<projectFolder>/build/main/resources/react4xp/`. Also note that these magic folder names can be adjusted - see [react4xp-buildconstants](https://www.npmjs.com/package/react4xp-buildconstants).
 
-
+---
 
 ## Examples: Hello World
 
@@ -458,11 +471,14 @@ In this example, we're fetching two react components
 ```
 
 
+---
 
+## Advanced use
 
-## Advanced use and technical stuff
+### The library 
 
-### Library: `lib/enonic/react4xp/index.es6`
+`lib/enonic/react4xp/index.es6`
+
 The main functionality, used in XP component controllers (parts, pages and maybe layouts). Aims to make rendering as easy and flexible to use as possible! Handles the interplay between backend and frontend, mainly using the [jsxPaths](#jsxpath-how-to-refer-to-a-react4xp-component) of the [entry components](#entries-and-dependency-chunks).
 
 #### Direct rendering in controllers
@@ -632,79 +648,9 @@ exports.get = req => {
 };
 ```
 
----
+### React state: rendering class components
 
-# EVERYTHING BELOW HERE NEEDS SOME EDITING, SOME DETAILS MAY BE DEPRECATED/EXPIRED: 
-
----
-#### Rendering via a data-holder React4xp object
-
-The functions above use a temporary data holder object under the hood: a **React4xp instance**. For advanced use and fine-grained control, it's available to use.
-  
-This React4xp instance has the following methods:
-  - `.setId(id)`: Sets the ID of the target container the component will be rendered into, or deletes it if omitted.
-  - `.uniqueId()`: Makes sure the container ID is uinique, using a random postfix.
-  - `.setJsxFileName(fileName)`: Adjusts the jsxPath by changing the file name. Useful for different-named jsx files when using the component shortcut.
-  - `.setProps(props)`: Sets the component's top-level props.
-  - `.renderClientPageContributions(pageContributions)`: Renders only the needed pageContributions for running the component on the client side. Includes dependency chunks, the component script, and the trigger. If a `pageContributions` argument is added, the rendered pageContributions are added to it, removing any duplicate scripts.
-  - `.renderTargetContainer(body, content)`: Generates an HTML body string (or modifies it, if included as a `body` parameter) with a target container element with the ID of this component - into which the component will be rendered. If the component HTML already has been rendered (e.g. by `.renderToString`), add it as the `content` argument, and it will be inserted into the container.
-  - `.renderToString(overrideProps)`: Renders a pure static HTML string of the react component, without a body / other surrounding HTML. If `overrideProps` is added, any props previously added to the instance are ignored.
-  - `.renderIntoBody(body)`: Shorthand method, combining `renderToString` and `renderTargetContainer` for a full serverside HTML string rendering of the instance. 
-
-
-### Easy and direct rendering with `React4xp.render` 
-
-`React4xp.render(request, params)` generates an object with `body` and `pageContribution` attributes, ready for being returned as-is from an XP controller. The HTML `body` will contain a target container for the rendered component, inside an HTML body if one was was included in the `params` argument object, or generated if not. 
-
-The `request` argument is used to determine the context of the rendering: 
-  - If the rendering happens in the _edit_ mode of XP Content Studio, the react component is rendered server-side as static HTML. In this mode, any pageContributions from the `params` are just passed through unchanged.  
-  - If the rendering is in _preview_ or _live_ mode: client-side rendering. The body is ensured to contain a matching-ID target container for rendering in the browser, while the pageContributions get scripts for this rendering - inline and referred by autogenerated URLs.
-  
-The `params` argument is an object that must include EITHER `component` or  `jsxPath`. All other parameters are optional:
-  - `component` (object) XP component object (used to extrapolate a jsxPath - sufficient if JSX entry file is in the same folder and has the same name).
-  - `jsxPath` (string) path to react component entry, see available paths in `build/main/resources/react4xp/entries.json` after building. Think of this as the name of the component path.
-  - `props` (object) React props to send in to the react component
-  - `id` (string) Sets the target container HTML element ID. If this matches an ID in a `body` in params, the react component will be rendered there. If not, a container with this ID will be added. If `id` is missing, the `component` path is used, or a unique ID is generated if there's no component.
-  - `uniqueId` (boolean or string) If set, ensures that the ID is unique. If the `id` param is set, a random integer will be postfixed to it. If `uniqueId` is a string, that will be the prefix before the random postfix. If the `id` param is used in addition to a `uniqueId` string, `uniqueId` takes presedence and overrides `id`.
-  - `body` (string) Existing HTML body for adding the react component into. For example rendered from thymeleaf. If it already has a matching-ID target container, `body` passes through unchanged in client-side rendering, and has the react component added to the container in server-side rendering. Use this matching-ID option and set the `id` param to control where in the body the react component should be inserted. If there's no matching container, a matching <div> will be inserted at the end of the body, inside the root element of `body`. If `body` is missing, a pure-target-container body is generated and returned.
-  - `pageContributions` (object) Pre-existing pageContributions.
-
-
-The **examples** branch in this repo should have more on how to use this library in controllers.
-
-
-### The service: `services/react4xp/react4xp.es6`
-
-Used to fetch all transpiled JS files - entries and dependency chunks - by entry path, i.e. the path of the transpiled file below `build/resources/main/react4xp` (or `/react4xp/` in the JAR). Handles headers for efficient clientside HTTP caching, also caches everything to memory on the server for performance. 
-
-
-### Nashorn server-side rendering
-
-The serverside-oriented rendering methods in the library pass the transpiled component by name (entry path / jsxPath) to some java code that loads and runs the component in Nashorn. The Nashorn engine is pre-polyfilled using some other pre-transpiled code (see `src/main/react4xp/_nashornPolyfills_.es6`). 
-
-Each specific component is stored in the nashorn engine by name on first access, as a function that takes props as argument. This way, the components are slow on the first rendering (around 1 second in the test cases) but much faster on repeated access, even with different props (2 - 30 ms).
-
-Some other java code, HTMLInserter, is responsible for inserting HTML into other HTML. This is used for adding a container element to an existing body if it's missing a maching-ID target container, and to insert a rendered component into a target container in a preexisting body.
-
-Errors on serverside are logged thoroughly for developers, and a minimal error message is returned as HTML for visible frontend output. When errors happen, the component in question is cleared from the engine's component cache.
-
-Nashorn server-side rendering is recommended in the edit mode of XP content studio, to isolate away active scripts (which may interfere with the editing) while still keeping a visual representation of the component. The basic `.render` method selects this automatically.
-
-#### Support, versions and polyfilling
-
-While most react components so far seem to run fine, there may be some cases where the Nashorn engine will complain. If so, adapt your code, or add polyfilling to `src/main/react4xp/_nashornPolyfills_.es6`.
-
-The JS support in Nashorn varies between different JVMs. Enonic XP 6 runs the java 8 JVM, while XP 7 will run java 11, which has better support - including ES6 natively. There may still be uncovered areas and unsupported functions, though.
-
-
-### Component-less entries
-
-If a JSX file is found under `src/main/react4xp/_components` or below, it will keep that relative path and be transpiled to an entry component. Good for component entries that shouldn't belong to a particular XP part/page. This approach is untested and not focused on, but should allow pure-app use. Files will be transpiled to the `/react4xp/` root folder, and their entry names will be the file path under `_components`, i.e. without "_components" or "site" (or file extension) in the name.
-
-
-### Stateful class components
-
-For rendering stateful class components, they must be wrapped during the export:
+For rendering stateful class components, simply wrap them at the export:
 
 ```jsx harmony
 import React from 'react';
@@ -724,6 +670,60 @@ class WorldGreeter expands React.Component {
 export default (props) => <WorldGreeter {...props} />;
 ```
 
-## More examples
+---
 
-See the examples branches.
+# EVERYTHING BELOW HERE IS ABOUT TO BE EDITED/REWRITTEN! 
+SOME DETAILS MAY BE DEPRECATED/EXPIRED! 
+
+---
+
+### The services
+
+#### The asset fetcher: /react4xp
+
+Used to fetch all transpiled JS files - entries and dependency chunks - by entry path, i.e. the path of the transpiled file below `build/resources/main/react4xp` (or `/react4xp/` in the JAR). Handles headers for efficient clientside HTTP caching, also caches everything to memory on the server for performance. 
+
+#### The client wrapper: /react4xp-client
+
+TODO
+
+#### The Externals provider: /react4xp-externals
+
+TODO
+
+#### The dependency chunk tracker: /react4xp-dependencies
+
+TODO
+
+---
+
+## Technical details
+
+### How does this thing work?
+
+### Nashorn server-side rendering
+
+The serverside-oriented rendering methods in the library pass the transpiled component by name (entry path / jsxPath) to some java code that loads and runs the component in Nashorn. The Nashorn engine is pre-polyfilled using some other pre-transpiled code (see `src/main/react4xp/_nashornPolyfills_.es6`). 
+
+Each specific component is stored in the nashorn engine by name on first access, as a function that takes props as argument. This way, the components are fairly slow on the first rendering (around 1 second in the test cases) but much faster on repeated access, even with different props (2 - 30 ms). Whether all, or none, or a selection of components should be pre-called and cached on server startup (instead of on the first user access) is up to the parent app developer!
+
+Some other java code, HTMLInserter, is responsible for inserting HTML into other HTML. This is used for adding a container element to an existing body if it's missing a maching-ID target container, and to insert a rendered component into a target container in a preexisting body.
+
+Errors on serverside are logged thoroughly for developers, and a minimal error message is returned as HTML for visible frontend output. When errors happen, the component in question is cleared from the engine's component cache.
+
+Nashorn server-side rendering is recommended in the edit mode of XP content studio, to isolate away active scripts (which may interfere with the editing) while still keeping a visual representation of the component. The basic `.render` method selects this automatically.
+
+#### Support, versions and polyfilling
+
+While most react components so far seem to run fine, there may be some cases where the Nashorn engine will complain. If so, you could: 
+  - adapt your component code,
+  - [tell us about it](https://github.com/enonic/react4xp-runtime-nashornpolyfills/issues), 
+  - fork [react4xp-runtime-nashornpolyfills](https://github.com/enonic/react4xp-runtime-nashornpolyfills) and add your own polyfilling.
+
+The JS support in Nashorn varies between different JVMs. Enonic XP 6 runs the java 8 JVM, while XP 7 will run java 11, which has better support - including ES6 natively. There may still be uncovered areas and unsupported functions, though.
+
+
+### Component-less entries
+
+If a JSX file is found under `src/main/react4xp/_components` or below, it will keep that relative path and be transpiled to an entry component. Good for component entries that shouldn't belong to a particular XP part/page. Files will be transpiled to the `/react4xp/` root folder, and their entry names will be the file path under `_components`, i.e. without "_components" or "site" (or file extension) in the name.
+
