@@ -37,7 +37,7 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
   - [Advanced use and technical stuff](#advanced-use-and-technical-stuff)
     - [Library: index.es6](#library-libenonicreact4xpindexes6)
       - [Direct rendering in controllers](#direct-rendering-in-controllers)
-      - [Rendering a React4xp data holder instance](#rendering-a-data-holder-react4xp-object)
+      - [Rendering with a React4xp data holder instance](#rendering-with-a-data-holder-react4xp-object)
 
 
 
@@ -561,9 +561,9 @@ There's also a handy constructor that autodetects if it's argument is a `compone
 ```jsx harmony
 const portal = require('/lib/xp/portal');
 
-const reactComp2 = new  React4xp('site/parts/other-folder/other-file');
+const reactComp2 = new React4xp('site/parts/other-folder/other-file');
 
-const reactComp3 = new  React4xp(portal.getComponent());
+const reactComp3 = new React4xp(portal.getComponent());
 ```
 
 ##### Adjustment
