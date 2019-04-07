@@ -724,9 +724,10 @@ Since some of the files have dynamically hashed names, the buildtime makes recor
 
 Regular XP components are not touched by React4xp, and follow the normal XP build and runtime flow. That means that XP components that are co-located with react component in the source files, are transpiled to different places. 
 
-The XP controllers have access to server-side rendering functionality, which uses the exact same transpiled JS resources; both entries, dependency chunks and libraries alike are run in the [Nashorn engine](#nashorn-support-versions-and-polyfilling).
+The XP controllers have access to server-side rendering functionality, which uses the exact same transpiled JS resources; both entries, dependency chunks and libraries alike are run in the [Nashorn engine](#nashorn-support-versions-and-polyfilling). Since the standard React functionality for server-side rendering was written for Node.js, some standard Node functionality and namespace had to be polyfilled to work. 
  
 #### NPM package overview
+Several key parts have been split out to separate NPM packages. The intention is that if some part of the React4xp way of doing things doesn't fit your setup it should be possible to replace or modify that part of the setup in your parent app, and keep the rest. 
   - [react4xp-buildconstants](https://www.npmjs.com/package/react4xp-buildconstants) - builds a master config file that defines project constants for the build and runtime
   - [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components) - transpiles your react components and summarizes dynamic file names and dependency relations
   - [react4xp-runtime-externals](https://www.npmjs.com/package/react4xp-runtime-externals) - provides external dependencies according to the EXTERNALS project constant: React and ReactDOM out of the box.
