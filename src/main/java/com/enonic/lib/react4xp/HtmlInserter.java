@@ -8,6 +8,8 @@ import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
 import org.jdom2.xpath.XPathExpression;
 import org.jdom2.xpath.XPathFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.xpath.XPathException;
 import java.io.IOException;
@@ -16,6 +18,8 @@ import java.util.List;
 
 
 public class HtmlInserter {
+    private final static Logger LOG = LoggerFactory.getLogger( HtmlInserter.class );
+
     private static SAXBuilder saxBuilder = new SAXBuilder();
     private static XMLOutputter outputter = new XMLOutputter();
     static {
@@ -41,8 +45,7 @@ public class HtmlInserter {
             return outputter.outputString(bodyDoc);
 
         } catch (JDOMException | IOException e) {
-            e.printStackTrace();
-            System.err.println("\n\n" +
+            LOG.error("\n\n" +
                     "ERROR: [ " + e.getClass().getName() + " ] ...when trying to insert HTML" +
                     (payload.length() < 1000 ?
                             "...\n\n" + payload + "\n\n..." :
@@ -51,7 +54,7 @@ public class HtmlInserter {
                     (body.length() < 1000 ?
                             ":\n\n" + body + "\n\n" :
                             "") +
-                    "\nReturning the submitted body unchanged.");
+                    "\nReturning the submitted body unchanged.", e);
         }
         return body;
     }
@@ -80,8 +83,7 @@ public class HtmlInserter {
             return outputter.outputString(bodyDoc);
 
         } catch (JDOMException | IOException | XPathException e) {
-            e.printStackTrace();
-            System.err.print("\n\n" +
+            LOG.error("\n\n" +
                     "ERROR: [ " + e.getClass().getName() + " ] ...when trying to insert HTML" +
                     (payload.length() < 1000 ?
                             "...\n\n" + payload + "\n\n..." :
@@ -90,7 +92,7 @@ public class HtmlInserter {
                     (body.length() < 1000 ?
                             ":\n\n" + body + "\n\n" :
                             "") +
-                    "\nReturning the submitted body unchanged.");
+                    "\nReturning the submitted body unchanged.", e);
         }
         return body;
     }

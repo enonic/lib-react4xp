@@ -46,12 +46,11 @@ const getComponentChunkNames = (entryNames) => {
     const entryNamesKey = entryNames.join("*");
 
     return dependenciesCache.get(entryNamesKey, ()=>{
-        log.info(`Caching component chunk names for key: ${entryNamesKey}`);
+        //log.info(`Caching component chunk names for key: ${entryNamesKey}`);
 
         if (!BUILD_STATS_ENTRYPOINTS) {
             const STATS = require(`/${R4X_TARGETSUBDIR}/${COMPONENT_STATS_FILENAME}`);
             BUILD_STATS_ENTRYPOINTS = STATS.entrypoints;
-            //log.info("BUILD_STATS_ENTRYPOINTS (" + typeof BUILD_STATS_ENTRYPOINTS + "): " + JSON.stringify(BUILD_STATS_ENTRYPOINTS, null, 2));
         }
 
         if (entryNames.length === 0) {
@@ -63,7 +62,6 @@ const getComponentChunkNames = (entryNames) => {
         entryNames.forEach( entry => {
             entry = entry.trim();
 
-            // log.info("\n\n\nentry: " + JSON.stringify(entry, null, 2));
             let data = BUILD_STATS_ENTRYPOINTS[entry];
             if (!data) {
                 while (entry.endsWith('/')) {
@@ -99,20 +97,16 @@ const getComponentChunkNames = (entryNames) => {
                 throw Error(`Bad format under dependencies for entry '${entry}': assets = ${JSON.stringify(data.assets)}`);
                 return;
             }
-            // log.info("\ndata.assets: " + JSON.stringify(data.assets, null, 2));
 
             const myself = entry + '.js';
             data.assets
                 .filter( asset => !asset.endsWith('.map') && asset !== myself)
                 .forEach (asset => {
-                    // // log.info("\tasset: " + JSON.stringify(asset, null, 2));
                     if (output.indexOf(asset) === -1) {
-                        // // log.info("\t\tpushing.");
                         output.push(asset);
                     }
                 });
         });
-        // log.info("output: " + JSON.stringify(output, null, 2));
 
         if (missing.length > 0) {
             throw Error(`Couldn't find dependencies for entries: '${missing.join(', ')}'`);
@@ -171,9 +165,7 @@ const getNamesFromChunkfile = (chunkFile) => {
     //// // log.info("chunks: " + JSON.stringify(chunks, null, 2));
     return Object.keys(chunks).map(chunkName => {
 
-        //// // log.info("chunkName: " + JSON.stringify(chunkName, null, 2));
         let chunk = chunks[chunkName].js;
-        //// // log.info("chunk: " + JSON.stringify(chunk, null, 2));
 
         while (Array.isArray(chunk)) {
             if (chunk.length > 1) {

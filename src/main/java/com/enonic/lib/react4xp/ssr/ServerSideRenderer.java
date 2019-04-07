@@ -3,6 +3,8 @@ package com.enonic.lib.react4xp.ssr;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.script.ScriptException;
 import java.io.IOException;
@@ -12,6 +14,7 @@ import java.util.Set;
 
 
 public class ServerSideRenderer {
+    private final static Logger LOG = LoggerFactory.getLogger( ServerSideRenderer.class );
 
     private static String SCRIPTS_HOME = null;
     private static String LIBRARY_NAME = null;
@@ -50,7 +53,7 @@ public class ServerSideRenderer {
         StringBuilder script = new StringBuilder();
         try {
             if (!componentScripts.contains(component)) {
-                System.out.println("Initializing ServerSideRenderer component: " + component);
+                LOG.debug("Initializing component: " + component);
                 String componentScript = ResourceHandler.readResource(SCRIPTS_HOME + "/" + component + ".js");
                 componentScripts.add(component);
                 script.append(componentScript);
@@ -63,12 +66,11 @@ public class ServerSideRenderer {
             return (String)obj.get("rendered");
 
         } catch (ScriptException e) {
-            e.printStackTrace();
-            System.err.println("ERROR: " + ServerSideRenderer.class.getName() + ".renderToString:\n" +
+            LOG.error("ERROR: " + ServerSideRenderer.class.getName() + ".renderToString:\n" +
                     "Message: " + e.getMessage() + "\n" +
                     "Component: " + component + "\n" +
                     "Props: " + props + "\n" +
-                    "Script:\n---------------------------------\n\n" + script.toString() + "\n\n---------------------------------------");
+                    "Script:\n---------------------------------\n\n" + script.toString() + "\n\n---------------------------------------", e);
 
             componentScripts.remove(component);
             engine.eval("delete " + LIBRARY_NAME + "['" + component + "']");

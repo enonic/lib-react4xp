@@ -9,7 +9,7 @@ let RESPONSE = null;
 exports.get = (req) => {
     if (!RESPONSE) {
         try {
-            log.info("Init service react4xp-client");
+            //log.info("Init service react4xp-client");
 
             // TODO: ADD SUPPORT FOR BUILT-AND-HASHED CHUNK, NOT JUST THE FALLBACK!
             const resource = ioLib.getResource('/services/react4xp-client/react4xpClient.js');
@@ -19,7 +19,7 @@ exports.get = (req) => {
 
             RESPONSE = getReact4xpEntry(resource);
 
-            log.info("RESPONSE (" + typeof RESPONSE + "): " + JSON.stringify(RESPONSE, null, 2));
+            //log.info("RESPONSE (" + typeof RESPONSE + "): " + JSON.stringify(RESPONSE, null, 2));
 
 
             // react4xp_constants.json is not part of lib-react4xp-runtime,
@@ -30,7 +30,7 @@ exports.get = (req) => {
             } = require('/lib/enonic/react4xp/react4xp_constants.json');
 
             const CLIENT_ROOT_URL = insertAppName(SERVICE_ROOT_URL);
-            log.info("CLIENT_ROOT_URL (" + typeof CLIENT_ROOT_URL + "): " + JSON.stringify(CLIENT_ROOT_URL, null, 2));
+            //log.info("CLIENT_ROOT_URL (" + typeof CLIENT_ROOT_URL + "): " + JSON.stringify(CLIENT_ROOT_URL, null, 2));
 
             // Placeholders defined in build.gradle. Keep up to date!
             RESPONSE.body = RESPONSE.body

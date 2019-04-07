@@ -3,6 +3,8 @@ package com.enonic.lib.react4xp.ssr;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -12,6 +14,7 @@ import java.util.List;
 
 /** Reads and parses file names from webpack-generated JSON files that list up contenthashed bundle chunk names. */
 public class ChunkDependencyParser {
+    private final static Logger LOG = LoggerFactory.getLogger( ChunkDependencyParser.class );
 
     private JSONObject getJSON(String fileName) throws IOException {
         String json = ResourceHandler.readResource(fileName);
@@ -44,12 +47,8 @@ public class ChunkDependencyParser {
                     fileName = (String) arr.get(0);
 
                 } catch (Exception e2) {
-                    System.err.println("File: " + chunkFile);
-                    System.err.print("Chunk (");
-                    System.err.print(chunk.getClass().getSimpleName());
-                    System.err.print("): ");
-                    System.err.println(chunk);
-
+                    LOG.error("File: " + chunkFile);
+                    LOG.error("Chunk (" + chunk.getClass().getSimpleName() + "): " + chunk);
                     throw e2;
                 }
             }

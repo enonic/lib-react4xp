@@ -1,6 +1,8 @@
 package com.enonic.lib.react4xp.ssr;
 
 import jdk.nashorn.api.scripting.NashornScriptEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -11,6 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 public class EngineFactory {
+    private final static Logger LOG = LoggerFactory.getLogger( EngineFactory.class );
 
     // Basic-level polyfills. For some reason, this must be run from here, not from nashornPolyfills.js.
     private final static String POLYFILL_BASICS = "" +
@@ -68,14 +71,14 @@ public class EngineFactory {
                 scriptList.add(file);
 
             } catch (Exception e) {
-                System.out.println(e.getClass().getSimpleName() + " while trying to polyfill Nashorn for React4xp (NASHORNPOLYFILLS_FILENAME = " + NASHORNPOLYFILLS_FILENAME + "): " + e.getMessage());
+                LOG.warn(e.getClass().getSimpleName() + " while trying to polyfill Nashorn for React4xp (NASHORNPOLYFILLS_FILENAME = " + NASHORNPOLYFILLS_FILENAME + "): " + e.getMessage());
 
                 // Fallback: try to use the pre-built nashornPolyfills from react4xp-runtime-nashornpolyfills:
                 String file = "/lib/enonic/react4xp/fallback/react4xp-runtime-nashornpolyfills.js";
                 String content = ResourceHandler.readResource(file);
                 scripts.put(file, content);
                 scriptList.add(file);
-                System.out.println("Using fallback script from react4xp-runtime-nashornpolyfills");
+                LOG.warn("Using fallback script from react4xp-runtime-nashornpolyfills");
             }
 
             for (String scriptFile : transpiledDependencies) {
@@ -95,7 +98,7 @@ public class EngineFactory {
                 for (String scriptFile : scriptList) {
                     chunkLabel = scriptFile;
                     chunkScript = scripts.get(chunkLabel);
-                    System.out.println("Initializing ServerSideRenderer engine: " + chunkLabel);
+                    LOG.debug("Initializing ServerSideRenderer engine: " + chunkLabel);
                     script.append(chunkScript);
                 }
 
@@ -114,12 +117,12 @@ public class EngineFactory {
                     }
 
                 } catch (ScriptException specificError) {
-                    System.err.println(EngineFactory.class.getCanonicalName() + " INIT SCRIPT FAILED (" + chunkLabel + "):\n---------------------------------\n\n" + chunkScript + "\n\n---------------------------------------");
+                    LOG.error("INIT SCRIPT FAILED (" + chunkLabel + "):\n---------------------------------\n\n" + chunkScript + "\n\n---------------------------------------");
                     throw specificError;
                 }
 
                 // Fallback if unravelling failed
-                System.err.println(EngineFactory.class.getCanonicalName() + " INIT SCRIPTS FAILED (script interaction?):\n---------------------------------\n\n" + script.toString() + "\n\n---------------------------------------");
+                LOG.error("INIT SCRIPTS FAILED (script interaction?):\n---------------------------------\n\n" + script.toString() + "\n\n---------------------------------------");
                 throw bloatedError;
             }
         }

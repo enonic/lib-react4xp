@@ -41,7 +41,7 @@ exports.get = function (req) {
             }
         }
 
-        log.info("React4xp target: " + JSON.stringify(target, null, 2));
+        //log.info("React4xp target: " + JSON.stringify(target, null, 2));
 
         let resource = ioLib.getResource(REACT4XP_ROOT + target);
         if (!resource || !resource.exists()) {
@@ -60,13 +60,13 @@ exports.get = function (req) {
 
         if (ENTRIES.indexOf(target) === -1) {
             return componentsCache.get(target, function() {
-                log.info("Caching React4XP component: " + target);
+                //log.info("Caching React4XP component: " + target);
                 return getReact4xpHashedChunk(resource);
             });
 
         } else {
             return componentsCache.get(target, function() {
-                log.info("Caching React4XP entry: " + target);
+                //log.info("Caching React4XP entry: " + target);
                 return getReact4xpEntry(resource);
             });
         }
