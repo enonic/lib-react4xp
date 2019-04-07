@@ -664,12 +664,6 @@ class WorldGreeter expands React.Component {
 export default (props) => <WorldGreeter {...props} />;
 ```
 
----
-
-# EVERYTHING BELOW HERE IS ABOUT TO BE EDITED/REWRITTEN! 
-SOME DETAILS MAY BE DEPRECATED/EXPIRED! 
-
----
 
 ### The services 
 
