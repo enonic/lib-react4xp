@@ -1,4 +1,4 @@
-const utilLib = require('/lib/enonic/util');
+const utilLib = require('/lib/util');
 
 const cacheLib = require('/lib/cache');
 const pageContributionsCache = cacheLib.newCache({

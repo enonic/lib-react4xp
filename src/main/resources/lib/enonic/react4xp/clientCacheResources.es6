@@ -1,4 +1,4 @@
-var utilLib = require('/lib/enonic/util');
+var utilLib = require('/lib/util');
 var ioLib = require('/lib/xp/io');
 
 // Adjusted from https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
