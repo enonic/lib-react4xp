@@ -1,6 +1,6 @@
 # lib-react4xp-runtime
 
-Beta: 0.2.1
+Beta: 0.3.0 (XP7 compatible)
 
 **React for XP: handling and rendering of pre-built React components in Enonic XP**
 
@@ -144,6 +144,7 @@ task config_react4xp(type: NodeTask) {
     }
 }
 config_react4xp.dependsOn += 'npmInstall'
+config_react4xp.dependsOn += 'processResources'
 
 
 // Compile:
@@ -188,7 +189,6 @@ task babelXP(type: NodeTask) {
     outputs.dir("build/resources/main")
 }
 babelXP.dependsOn += 'config_react4xp'
-babelXP.dependsOn += 'processResources'
 
 jar.dependsOn += 'babelXP'
 ```
