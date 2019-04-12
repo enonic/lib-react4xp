@@ -1,6 +1,10 @@
 # lib-react4xp-runtime
 
-Beta: 0.2.1
+Beta: 0.2.1 
+
+XP6 compatible. For XP7, see the [master branch](https://github.com/enonic/lib-react4xp-runtime)
+
+---
 
 **React for XP: handling and rendering of pre-built React components in Enonic XP**
 
