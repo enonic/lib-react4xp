@@ -144,6 +144,7 @@ task config_react4xp(type: NodeTask) {
     }
 }
 config_react4xp.dependsOn += 'npmInstall'
+config_react4xp.dependsOn += 'processResources'
 
 
 // Compile:
@@ -188,7 +189,6 @@ task babelXP(type: NodeTask) {
     outputs.dir("build/resources/main")
 }
 babelXP.dependsOn += 'config_react4xp'
-babelXP.dependsOn += 'processResources'
 
 jar.dependsOn += 'babelXP'
 ```
