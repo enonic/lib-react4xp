@@ -3,11 +3,12 @@
 //   - just 'dependencies' will return them as HTML script tags.
 
 const { insertAppName } = require('/lib/enonic/react4xp/utils');
+const portal = require('/lib/xp/portal');
 var { getComponentChunkUrls } = require('/lib/enonic/react4xp/dependencies');
 
 const { SERVICE_ROOT_URL } = require('/lib/enonic/react4xp/react4xp_constants.json');
 
-const MYSELF_ROOT = `${insertAppName(SERVICE_ROOT_URL)}react4xp-dependencies/`;
+const MYSELF_ROOT = portal.serviceUrl({service: 'react4xp-dependencies/'}); //`${insertAppName(SERVICE_ROOT_URL)}react4xp-dependencies/`;
 const MYSELF_ROOTLENGTH = MYSELF_ROOT.length;
 
 exports.get = (req) => {

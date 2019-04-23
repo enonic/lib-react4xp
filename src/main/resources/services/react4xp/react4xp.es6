@@ -1,9 +1,10 @@
 // React4xp static-asset file server, with specified cache control headers
 
-var ioLib = require('/lib/xp/io');
-var { insertAppName } = require('/lib/enonic/react4xp/utils');
-var { getReact4xpEntry, getReact4xpHashedChunk } = require('/lib/enonic/react4xp/clientCacheResources');
-var cacheLib = require('/lib/cache');
+const ioLib = require('/lib/xp/io');
+const { insertAppName } = require('/lib/enonic/react4xp/utils');
+const { getReact4xpEntry, getReact4xpHashedChunk } = require('/lib/enonic/react4xp/clientCacheResources');
+const cacheLib = require('/lib/cache');
+const portal = require('/lib/xp/portal');
 
 // react4xp_constants.json is not part of lib-react4xp-runtime,
 // it's an external shared-constants file expected to exist in the react4xp lib build directory.
@@ -13,7 +14,9 @@ const {
 } = require('/lib/enonic/react4xp/react4xp_constants.json');
 
 
-const SERVICE_ROOT = `${insertAppName(SERVICE_ROOT_URL)}react4xp/`;
+const SERVICE_ROOT = portal.serviceUrl({service: 'react4xp/'});
+log.info("SERVICE_ROOT (" + typeof SERVICE_ROOT + "): " + JSON.stringify(SERVICE_ROOT, null, 2));
+
 const REACT4XP_ROOT = `/${R4X_TARGETSUBDIR}/`;
 
 
@@ -33,6 +36,7 @@ const ENTRIES = JSON.parse(
 
 // Handle all GET requests
 exports.get = function (req) {
+    log.info("react4xp GET req (" + typeof req + "): " + JSON.stringify(req, null, 2));
     if ((req.path || "").startsWith(SERVICE_ROOT)) {
         let target = (req.path.substring(SERVICE_ROOT.length) || "").trim();
         if (!target) {

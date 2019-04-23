@@ -1,6 +1,6 @@
-# lib-react4xp-runtime
+# lib-react4xp
 
-Beta: 0.2.1 
+Beta: 0.2.2 
 
 XP6 compatible. For XP7, see the [master branch](https://github.com/enonic/lib-react4xp-runtime)
 
@@ -70,7 +70,7 @@ Assuming you have Enonic XP nicely installed, and you have an **XP parent projec
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
-	include 'com.enonic.lib:lib_react4xp_runtime:0.2.1'
+	include 'com.enonic.lib:lib-react4xp:0.2.2'
 }
 ```
 

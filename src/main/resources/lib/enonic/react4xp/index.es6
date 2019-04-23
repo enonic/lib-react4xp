@@ -1,4 +1,5 @@
 const { insertAppName } = require('./utils');
+const portal = require('/lib/xp/portal');
 
 const { getAndMergePageContributions } = require('./pageContributions');
 
@@ -13,7 +14,8 @@ const {
     NASHORNPOLYFILLS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_STATS_FILENAME, ENTRIES_FILENAME, SERVICE_ROOT_URL
 } = require('./react4xp_constants.json');;
 
-const ASSET_ROOT = `${insertAppName(SERVICE_ROOT_URL)}react4xp/`;
+// TODO: XP asset system handles unhashed client-side caching and should be the handler of choice instead of the custom react4xp service
+const ASSET_ROOT = portal.serviceUrl({service: 'react4xp/'});
 
 SSRreact4xp.setConfig(
     `/${R4X_TARGETSUBDIR}`,

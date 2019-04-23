@@ -2,6 +2,7 @@
 var ioLib = require('/lib/xp/io');
 var { getReact4xpEntry } = require('/lib/enonic/react4xp/clientCacheResources');
 const { insertAppName } = require('/lib/enonic/react4xp/utils');
+const portal = require('/lib/xp/portal');
 
 
 let RESPONSE = null;
@@ -29,8 +30,8 @@ exports.get = (req) => {
                 LIBRARY_NAME, SERVICE_ROOT_URL
             } = require('/lib/enonic/react4xp/react4xp_constants.json');
 
-            const CLIENT_ROOT_URL = insertAppName(SERVICE_ROOT_URL);
-            //log.info("CLIENT_ROOT_URL (" + typeof CLIENT_ROOT_URL + "): " + JSON.stringify(CLIENT_ROOT_URL, null, 2));
+            const CLIENT_ROOT_URL =  portal.serviceUrl({service: ""}); // insertAppName(SERVICE_ROOT_URL);
+            log.info("CLIENT_ROOT_URL (" + typeof CLIENT_ROOT_URL + "): " + JSON.stringify(CLIENT_ROOT_URL, null, 2));
 
             // Placeholders defined in build.gradle. Keep up to date!
             RESPONSE.body = RESPONSE.body
