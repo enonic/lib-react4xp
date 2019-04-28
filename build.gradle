@@ -13,12 +13,18 @@ app {
     systemVersion = "${xpVersion}"
 }
 
+jar {
+    baseName = "${projectName}"
+}
+
 dependencies {
     compile "com.enonic.xp:script-api:${xpVersion}"
     include "com.enonic.xp:lib-io:${xpVersion}"
+    include "com.enonic.xp:lib-context:${xpVersion}"
     include "com.enonic.xp:lib-repo:${xpVersion}"
     include "com.enonic.xp:lib-node:${xpVersion}"
     compile "com.enonic.xp:core-api:${xpVersion}"
+    include "com.enonic.xp:lib-portal:${xpVersion}"
 
     include 'com.enonic.lib:util:1.3.0'
     include 'com.enonic.lib:lib-cache:1.1.0'
