@@ -31,13 +31,13 @@ const ENTRIES = JSON.parse(
 
 // Handle all GET requests
 exports.get = function (req) {
-    log.info("/react4xp/ service: GET req (" + typeof req + "): " + JSON.stringify(req, null, 2));
+    //log.info("/react4xp/ service: GET req (" + typeof req + "): " + JSON.stringify(req, null, 2));
     try {
         let target = getSuffix(req.path, 'react4xp').trim();
-        log.info("React4xp service target asset: " + JSON.stringify(target, null, 2));
+        //log.info("React4xp service target asset: " + JSON.stringify(target, null, 2));
 
         if (!target) {
-            throw Error(`Missing target asset in URL. Path = '${req.path}'`);
+            throw Error(`Missing target asset in URL ('${req.path}')`);
         }
 
         let resource = ioLib.getResource(REACT4XP_ROOT + target);
@@ -48,6 +48,8 @@ exports.get = function (req) {
                 log.warning(`STATUS 404: file not found: ${REACT4XP_ROOT + target}`);
                 return {
                     status: 404,
+                    body: `File not found: ${target}`,
+                    contentType: 'text/plain'
                 }
 
             } else {
@@ -72,6 +74,8 @@ exports.get = function (req) {
         log.warning(`STATUS 400: ${e.message}`);
         return {
             status: 400,
+            body: e.message,
+            contentType: 'text/plain'
         }
     }
 };

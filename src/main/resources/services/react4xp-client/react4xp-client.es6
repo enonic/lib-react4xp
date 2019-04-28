@@ -3,9 +3,9 @@ var ioLib = require('/lib/xp/io');
 import { getReact4xpEntry } from '/lib/enonic/react4xp/clientCacheResources';
 import { getServiceRoot } from '/lib/enonic/react4xp/serviceRoots';
 
-let RESPONSE = null;
+let RESPONSE;
 exports.get = (req) => {
-    if (!RESPONSE) {
+    if (RESPONSE === undefined) {
         try {
             //log.info("Init service react4xp-client");
 
@@ -38,12 +38,8 @@ exports.get = (req) => {
 
         } catch (e) {
             log.error(e);
-            RESPONSE = null;
-            return {
-                contentType: 'text/plain',
-                status: 500,
-                body: 'Failed to resolve the react4xp client wrapper. See server log for details.'
-            }
+            RESPONSE = undefined;
+            throw e;
         }
     }
     return RESPONSE;

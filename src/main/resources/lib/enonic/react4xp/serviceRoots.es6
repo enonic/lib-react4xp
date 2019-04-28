@@ -2,7 +2,7 @@ const portal = require('/lib/xp/portal');
 
 const initServiceUrlRoot = (serviceName, label) => {
     const url = portal.serviceUrl({service: serviceName}) + '/';
-    log.info("Init " + label + ": " + JSON.stringify(url, null, 2));
+    //log.info("Init " + label + ": " + JSON.stringify(url, null, 2));
     return url;
 };
 
@@ -61,6 +61,7 @@ const stripSlashes = suffix => {
 // Throws an error if the path doesn't match any known variation of the service path.
 // Logs a warning when the fallback is used.
 const SERVICE_ROOTS = {};
+let LOGGEDWARNING = false;
 const getSuffix = (path, serviceName) => {
     const standardRoot = SERVICE_ROOTS[serviceName] = (
         SERVICE_ROOTS[serviceName] ||
@@ -75,7 +76,10 @@ const getSuffix = (path, serviceName) => {
     const fallbackRoot = `/_/service/${app.name}/${serviceName}`;
     location = path.indexOf(fallbackRoot);
     if (location !== -1) {
-        log.warning(`Fallback: matched path '${path}' with service name '${serviceName}', returning suffix after service name.`);
+        if (!LOGGEDWARNING) {
+            log.warning(`Fallback: matched path '${path}' with service name '${serviceName}', returning suffix after service name. This will not be logged again.`);
+            LOGGEDWARNING = true;
+        }
         return stripSlashes(path.substring(location + fallbackRoot.length));
     }
 

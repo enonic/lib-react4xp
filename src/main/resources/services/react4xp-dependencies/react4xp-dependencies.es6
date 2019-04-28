@@ -7,7 +7,18 @@ var { getDependenciesRoot, getSuffix } = require('/lib/enonic/react4xp/serviceRo
 const SERVICE_NAME = 'react4xp-dependencies';
 
 exports.get = (req) => {
-    const relativePath = getSuffix((req.path || "").trim(), SERVICE_NAME);
+    let relativePath;
+    try {
+        relativePath = getSuffix((req.path || "").trim(), SERVICE_NAME);
+
+    } catch (e) {
+        log.warning(`STATUS 400: ${e.message}`);
+        return {
+            status: 400,
+            body: e.message,
+            contentType: 'text/plain'
+        }
+    }
 
     // Gets parameter entryNames. Legal syntaxes: both
     //   .../react4xp-dependencies/entry1&entry2&entry3
@@ -18,7 +29,7 @@ exports.get = (req) => {
     const entryNames = Object.keys(params).filter( key => params[key] != null && ((params[key] || "") + "").trim() === "");
     relativePath.split("&").forEach(entryName => {
         if (entryName.trim() !== "" && entryNames.indexOf(entryName) === -1) {
-            log.info("entryName (" + typeof entryName + "): " + JSON.stringify(entryName, null, 2));
+            //log.info("entryName (" + typeof entryName + "): " + JSON.stringify(entryName, null, 2));
             entryNames.push(entryName);
         }
     });
@@ -35,7 +46,7 @@ exports.get = (req) => {
         };
 
     } catch (e) {
-        log.warning(e.message);
+        log.warning(`STATUS 404: ${e.message}`);
         return {
             status: 404,
             body: e.message,
