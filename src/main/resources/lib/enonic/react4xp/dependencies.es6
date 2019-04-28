@@ -1,24 +1,18 @@
-
 const ioLib = require('/lib/xp/io');
+const cacheLib = require('/lib/cache');
 
-
-const { insertAppName } = require('/lib/enonic/react4xp/utils');
-const portal = require('/lib/xp/portal');
+import { getAssetRoot, getClientRoot } from './serviceRoots';
 
 // react4xp_constants.json is not part of lib-react4xp-runtime,
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
 const {
-    R4X_TARGETSUBDIR, CLIENT_CHUNKS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_STATS_FILENAME, SERVICE_ROOT_URL,
+    R4X_TARGETSUBDIR, CLIENT_CHUNKS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_STATS_FILENAME,
 } = require('./react4xp_constants.json');
 
 let BUILD_STATS_ENTRYPOINTS;
-const ASSET_ROOT = portal.serviceUrl({service: 'react4xp'}); /*/`${insertAppName(SERVICE_ROOT_URL)}react4xp/`; //*/
-log.info("ASSET_ROOT (" + typeof ASSET_ROOT + "): " + JSON.stringify(ASSET_ROOT, null, 2));
-const STATIC_CLIENT_URL = portal.serviceUrl({service: 'react4xp-client'}) + '/'; /*/`${insertAppName(SERVICE_ROOT_URL)}react4xp-client/`; //*/
 
 
-const cacheLib = require('/lib/cache');
 const dependenciesCache = cacheLib.newCache({
     size: 100,
     expire: 10800 // 30 hours
@@ -119,8 +113,7 @@ const getComponentChunkNames = (entryNames) => {
 
 };
 
-
-const getComponentChunkUrls = entries => getComponentChunkNames(entries).map(name => ASSET_ROOT + name);
+const getComponentChunkUrls = entries => getComponentChunkNames(entries).map(name => getAssetRoot() + name);
 
 
 /** Returns the asset-via-service URL for the externals chunk */
@@ -128,7 +121,7 @@ const getExternalsUrls = () => dependenciesCache.get(FULL_EXTERNALS_CHUNKS_FILEN
 
     // This should not break if there are no added externals. Externals should be optional.
     try {
-        return getNamesFromChunkfile(FULL_EXTERNALS_CHUNKS_FILENAME).map( name => ASSET_ROOT + name);
+        return getNamesFromChunkfile(FULL_EXTERNALS_CHUNKS_FILENAME).map( name => getAssetRoot() + name);
 
     } catch (e) {
         log.warning(e);
@@ -143,12 +136,12 @@ const getClientUrls = () => dependenciesCache.get(FULL_CLIENT_CHUNKS_FILENAME, (
     // Special case: if there is a chunkfile for a client wrapper, use that. If not, fall back to
     // a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
     try {
-        return getNamesFromChunkfile(FULL_CLIENT_CHUNKS_FILENAME).map( name => ASSET_ROOT + name);
+        return getNamesFromChunkfile(FULL_CLIENT_CHUNKS_FILENAME).map( name => getAssetRoot() + name);
 
     } catch (e) {
         log.warning(e);
-        log.warning(`No optional clientwrapper were found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's okay, we got a fallback one at: ${STATIC_CLIENT_URL}`);
-        return [STATIC_CLIENT_URL];
+        log.warning(`No optional clientwrapper were found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's okay, we got a fallback one at: ${getClientRoot()}`);
+        return [getClientRoot()];
     }
 });
 
@@ -202,5 +195,5 @@ module.exports = {
     getNamesFromChunkfile,
     getExternalsUrls,
     getAllUrls,
-    STATIC_CLIENT_URL
+    getAssetRoot
 };

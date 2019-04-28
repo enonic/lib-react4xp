@@ -1,7 +1,5 @@
-const { insertAppName } = require('./utils');
-const portal = require('/lib/xp/portal');
-
 const { getAndMergePageContributions } = require('./pageContributions');
+const { getAssetRoot } = require('./serviceRoots');
 
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
@@ -10,12 +8,10 @@ const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer')
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
 const {
-    LIBRARY_NAME, R4X_TARGETSUBDIR, BUILD_R4X,
-    NASHORNPOLYFILLS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_STATS_FILENAME, ENTRIES_FILENAME, SERVICE_ROOT_URL
+    LIBRARY_NAME, R4X_TARGETSUBDIR,
+    NASHORNPOLYFILLS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_STATS_FILENAME, ENTRIES_FILENAME
 } = require('./react4xp_constants.json');;
 
-// TODO: XP asset system handles unhashed client-side caching and should be the handler of choice instead of the custom react4xp service
-const ASSET_ROOT = portal.serviceUrl({service: 'react4xp/'});
 
 SSRreact4xp.setConfig(
     `/${R4X_TARGETSUBDIR}`,
@@ -355,7 +351,7 @@ class React4xp {
         return getAndMergePageContributions(this.jsxPath, pageContributions, {
             bodyEnd: [
                 // Browser-runnable script reference for the "naked" react component:
-                `<script src="${ASSET_ROOT}${this.jsxPath}.js"></script>`,
+                `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
 
                 // That script will expose to the browser an element or function that can be handled by React4Xp.CLIENT.render. Trigger that, along with the target container ID, and props, if any:
                 `<script defer>${LIBRARY_NAME}.CLIENT.render(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
@@ -379,7 +375,7 @@ class React4xp {
         return getAndMergePageContributions(this.jsxPath, pageContributions, {
             bodyEnd: [
                 // Browser-runnable script reference for the "naked" react component:
-                `<script src="${ASSET_ROOT}${this.jsxPath}.js"></script>`,
+                `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
 
                 // That script will expose to the browser an element or function that can be handled by React4Xp.CLIENT.render. Trigger that, along with the target container ID, and props, if any:
                 `<script defer>${LIBRARY_NAME}.CLIENT.hydrate(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`

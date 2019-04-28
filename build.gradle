@@ -20,6 +20,7 @@ jar {
 dependencies {
     compile "com.enonic.xp:script-api:${xpVersion}"
     include "com.enonic.xp:lib-io:${xpVersion}"
+    include "com.enonic.xp:lib-context:${xpVersion}"
     include "com.enonic.xp:lib-repo:${xpVersion}"
     include "com.enonic.xp:lib-node:${xpVersion}"
     compile "com.enonic.xp:core-api:${xpVersion}"
