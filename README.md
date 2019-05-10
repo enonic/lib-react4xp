@@ -1,6 +1,6 @@
 # lib-react4xp
 
-Beta: 0.2.2 
+Beta: 0.2.3 
 
 XP6 compatible. For XP7, see the [master branch](https://github.com/enonic/lib-react4xp)
 
@@ -70,7 +70,7 @@ Assuming you have Enonic XP nicely installed, and you have an **XP parent projec
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
-	include 'com.enonic.lib:lib-react4xp:0.2.2'
+	include 'com.enonic.lib:lib-react4xp:0.2.3'
 }
 ```
 
@@ -83,7 +83,7 @@ If you need / want to build the lib yourself instead of downloading it with Grad
 ```bash
 gradlew build install
 ```
-Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.2.2`.
+Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.2.3`.
 
 ---
 
