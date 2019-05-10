@@ -49,6 +49,10 @@ npmInstall.outputs.dir("node_modules")
 
 
 task babelXP(type: NodeTask) {
+    group 'React4xp runtime lib'
+    description 'Compile server-side XP components from ES6'
+
+
     script = file('node_modules/babel-cli/bin/babel.js')
     args = ["src/main/resources", "--out-dir", "build/resources/main"]
 
@@ -61,6 +65,9 @@ babelXP.dependsOn += 'npmInstall'
 def ROOT = new File("").absolutePath + "/"
 
 task nashornPolyfills(type: NodeTask) {
+    group 'React4xp runtime lib'
+    description 'Build polyfill resopurces, allowing XP to do React server-side rendering in Nashorn'
+
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
             '--config', 'node_modules/react4xp-runtime-nashornpolyfills/webpack.config.js',
@@ -72,6 +79,9 @@ task nashornPolyfills(type: NodeTask) {
 nashornPolyfills.dependsOn += 'babelXP'
 
 task client(type: NodeTask) {
+    group 'React4xp runtime lib'
+    description 'Include the client rendering wrapper in the lib'
+
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
             '--config', 'node_modules/react4xp-runtime-client/webpack.config.js',
