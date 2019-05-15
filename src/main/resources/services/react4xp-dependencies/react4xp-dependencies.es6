@@ -1,8 +1,8 @@
 // The service /dependencies has two modes:
 //   - 'dependencies/urls' returns an array of dependency URLS.
 //   - just 'dependencies' will return them as HTML script tags.
-var { getComponentChunkUrls } = require('/lib/enonic/react4xp/dependencies');
-var { getDependenciesRoot, getSuffix } = require('/lib/enonic/react4xp/serviceRoots');
+const { getComponentChunkUrls } = require('/lib/enonic/react4xp/dependencies');
+const { getSuffix } = require('/lib/enonic/react4xp/serviceRoots');
 
 const SERVICE_NAME = 'react4xp-dependencies';
 

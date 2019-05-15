@@ -2,7 +2,6 @@
 
 const ioLib = require('/lib/xp/io');
 const cacheLib = require('/lib/cache');
-
 const { getReact4xpEntry, getReact4xpHashedChunk } = require('/lib/enonic/react4xp/clientCacheResources');
 const { getSuffix } = require('/lib/enonic/react4xp/serviceRoots');
 
