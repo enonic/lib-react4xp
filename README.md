@@ -1,6 +1,6 @@
-# lib-react4xp-runtime
+# lib-react4xp
 
-Beta: 0.3.0 
+Beta: 0.3.1 
 
 XP7 compatible. For XP6, see the [XP6_master branch](https://github.com/enonic/lib-react4xp-runtime/tree/XP6_master)
 
@@ -70,19 +70,20 @@ Assuming you have Enonic XP nicely installed, and you have an **XP parent projec
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
-	include 'com.enonic.lib:lib_react4xp_runtime:0.3.0'
+	include 'com.enonic.lib:lib-react4xp:0.3.1'
 }
 ```
 
 #### Build the lib yourself
 If you need / want to build the lib yourself instead of downloading it with Gradle, add these steps: 
 
-- Clone or otherwise download [the source code for this lib](https://github.com/enonic/lib-react4xp-runtime.git) into _its own root folder_ (not into XP_INSTALL or the parent project folder). 
+- Clone or otherwise download [the source code for this lib](https://github.com/enonic/lib-react4xp.git) into _its own root folder_ (not into XP_INSTALL or the parent project folder). 
+  - Note the version differences between branches: _master_ is XP 7 compatible, while _XP6_master_ targets XP 6.
 - From that folder, run:
 ```bash
 gradlew build install
 ```
-Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.3.0`.
+Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.3.1`.
 
 ---
 
@@ -159,9 +160,9 @@ task webpack_react4xp(type: NodeTask) {
         '--config', 'node_modules/react4xp-build-components/webpack.config.js',			// <-- This step compiles the components added in this project into runnable/renderable components. See react4xp-build-components docs.
         
         // 3 OPTIONAL STEPS:
-        //'--config', 'node_modules/react4xp-runtime-client/webpack.config.js',   		// <-- Activate this line to override the included clientside wrapper (included in lib-react4xp-runtime) - see the react4xp-runtime-client docs.
+        //'--config', 'node_modules/react4xp-runtime-client/webpack.config.js',   		// <-- Activate this line to override the included clientside wrapper (included in lib-react4xp) - see the react4xp-runtime-client docs.
         //'--config', 'node_modules/react4xp-runtime-nashornpolyfills/webpack.config.js',  	// <-- Activate this line to roll your own nashorn polyfill instead of the included one. See react4xp-runtime-nashornpolyfills docs.       
-        '--config', 'node_modules/react4xp-runtime-externals/webpack.config.js',  		// <-- This line supplies dependencies declared in the EXTERNALS config constant - see the react4xp-runtime-externals docs. If you remove this line, you can/must add react@16 and react-dom@16 on all your HTML pages yourself - e.g. from a CDN.
+        '--config', 'node_modules/react4xp-runtime-externals/webpack.config.js',  		// <-- This line supplies dependencies declared in the EXTERNALS config constant - see the react4xp-runtime-externals docs.
 
         '--env.REACT4XP_CONFIG_FILE=' + ROOT + '/' + REACT4XP_CONFIG_FILE, 			// <-- Tells all of the steps here where to find the master config file
         '--progress', '--color'  								// <-- Just pretty
@@ -390,7 +391,7 @@ export default (props) => <p>Hello {props.worldOrWhatever}!</p>;
     <div id="simple_target"></div>
     <div id="example_target"></div>
 
-	<!-- The client wrapper and the externals chunk carrying both React and ReactDOM are part of the URLs from getAllUrls. If you want to skip lib-runtime-react4xp's built-in react and react-dom chunk, remove react4xp-runtime-externals from build.gradle in your parent app (or remove them from EXTERNALS in the master config). Then you can use React and ReactDOM from CDN e.g. like this: ->        <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script><script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>         <!- More docs about EXTERNALS elsewhere in the lib-react4xp-runtime README. -->
+	<!-- The client wrapper and the externals chunk carrying both React and ReactDOM are part of the URLs from getAllUrls. If you want to skip lib-runtime-react4xp's built-in react and react-dom chunk, remove react4xp-runtime-externals from build.gradle in your parent app (or remove them from EXTERNALS in the master config). Then you can use React and ReactDOM from CDN e.g. like this: ->        <script crossorigin src="https://unpkg.com/react@16/umd/react.production.min.js"></script><script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>         <!- More docs about EXTERNALS elsewhere in the lib-react4xp README. -->
         
 	<!-- Load all the dependency scripts: -->
     <script data-th-each="url: ${urls}" data-th-src="${url}"></script>
@@ -432,7 +433,7 @@ In this example, we're fetching two react components
         	<script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
     -->
 
-    <!-- OPTION 2: ...but instead we're using the built-in Externals script from the service. This supplies React and ReactDOM pre-packaged and readily cached. More docs about EXTERNALS elsewhere in the lib-react4xp-runtime README. -->
+    <!-- OPTION 2: ...but instead we're using the built-in Externals script from the service. This supplies React and ReactDOM pre-packaged and readily cached. More docs about EXTERNALS elsewhere in the lib-react4xp README. -->
     <script src="/_/service/<app.name>/react4xp-externals"></script>
     
     <!-- The client wrapper is needed either way: -->
