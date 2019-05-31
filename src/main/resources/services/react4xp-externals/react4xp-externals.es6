@@ -1,5 +1,5 @@
 var ioLib = require('/lib/xp/io');
-var { getResourceAsString, hash } = require('/lib/enonic/react4xp/clientCacheResources');
+var { getResourceAsString } = require('/lib/enonic/react4xp/clientCacheResources');
 var { getNamesFromChunkfile } = require('/lib/enonic/react4xp/dependencies');
 
 

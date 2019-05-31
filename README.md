@@ -1,8 +1,8 @@
 # lib-react4xp
 
-Beta: 0.3.1 
+Beta: 0.3.3
 
-XP7 compatible. For XP6, see the [XP6_master branch](https://github.com/enonic/lib-react4xp-runtime/tree/XP6_master)
+XP7 compatible. For XP6, see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master)
 
 ---
 
@@ -70,7 +70,7 @@ Assuming you have Enonic XP nicely installed, and you have an **XP parent projec
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
-	include 'com.enonic.lib:lib-react4xp:0.3.1'
+	include 'com.enonic.lib:lib-react4xp:0.3.2'
 }
 ```
 
@@ -83,7 +83,7 @@ If you need / want to build the lib yourself instead of downloading it with Grad
 ```bash
 gradlew build install
 ```
-Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.3.1`.
+Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.3.3`.
 
 ---
 
@@ -245,12 +245,12 @@ In short:
 
 - A JSX source file can be **bound to an XP component**, that is, the source file is inside the folder of an XP component, under `<projectFolder>/src/main/resources/site/<component-type>/<component-name>/`. The jsxPath will then be _the XP-relative path to the JSX file_ (starts with `site/...`), without the file extension. 
 
-- If a JSX file is **independent from XP components**, the source file should be put below a special source folder in order for all the automatics to work: `<projectFolder>/src/main/react4xp/_components/` (*). The jsxPath will then be the _path-and-name of the source file_, relative to that folder (still without file extension).
+- If a JSX file is **independent from XP components**, the source file should be put below a special source folder in order for all the automatics to work: `<projectFolder>/src/main/resources/react4xp/_entries/` (*). The jsxPath will then be the _path-and-name of the source file_, relative to that folder (still without file extension).
 
 
 **So in the examples below**...
  - the XP-component-bound file `<projectFolder>/src/main/resources/site/parts/example/example.jsx` will get the jsxPath `"site/parts/example/example"`, 
- - while `<projectFolder>/src/main/react4xp/_components/SimpleGreeter.jsx` is independent and will get the jsxPath `"SimpleGreeter"`. 
+ - while `<projectFolder>/src/main/resources/react4xp/_entries/SimpleGreeter.jsx` is independent and will get the jsxPath `"SimpleGreeter"`. 
  
 **PROTIP:** When your app is built by [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components), it creates an overview file of all the available components and their jsxPaths: see `<projectFolder>/build/main/resources/react4xp/entries.json` (*). You can use this file for lookup, but don't edit or delete it - it's an active part of the runtime.
 
@@ -273,7 +273,7 @@ _TL;DR: put your code that's shared by React4xp components under `<projectFolder
 
 What code will be transpiled into Chunks? And what will become Entries? This is determined by [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components), by where you put the source files.
 
-  - **Entries** are built from source files in either `<projectFolder>/src/main/react4xp/_components` (JSX, JS or ES6 file extensions) or `<projectFolder>/src/main/resources/site/<component-type>/<component-name>/` (where `<component-type>` can be `pages` or `parts` at the moment - or `layouts`, but that's experimental for now. Here, only JSX file extensions are allowed). 
+  - **Entries** are built from source files in either `<projectFolder>/src/main/resources/react4xp/_entries` (JSX, JS or ES6 file extensions) or `<projectFolder>/src/main/resources/site/<component-type>/<component-name>/` (where `<component-type>` can be `pages` or `parts` at the moment - or `layouts`, but that's experimental for now. Here, only JSX file extensions are allowed). 
   
   - **Chunks** are built and named from any code in the folders `<projectFolder>/src/main/react4xp/<chunk-name>/` - and only code that's imported and used by at least one Entry. Use this to organize your chunks.
   
@@ -371,7 +371,7 @@ What happens when the browser runs the component and dependency scripts? One of 
 The component scripts are also downloaded and run, and adds the React components to the same `React4xp` object - e.g. as `React4xp.SimpleGreeter`: 
 
 ```jsx harmony
-// src/main/react4xp/_components/SimpleGreeter.jsx:
+// src/main/resources/react4xp/_entries/SimpleGreeter.jsx:
 
 import React from 'react';
 
@@ -711,7 +711,7 @@ A quick-ish summary of everything. Look in the docs of each of the [NPM packages
 
 [react4xp-buildconstants](https://www.npmjs.com/package/react4xp-buildconstants) builds a master config file that tells the buildtime where to look for user components, how and where to transpile them and the runtime where to look for everything - most of the magic file and folder locations mentioned here can be adjusted if you need to adapt your setup.
 
-At buildtime, [react4xp-build-components](https://www.npmjs.com/package/react4xp-buildconstants) looks for [entry](#entries-and-dependency-chunks) JSX files under `src/main/resources/site/` and under the special source folder `src/main/resources/react4xp/_components`. It will transpile _both_ sets of sources to JS files in the `build/resources/main/react4xp/` output folder. Anything that's imported by those entries is included in the transpiled files, except if the source files are put below other subfolders under `src/main/resources/react4xp/`. For example, all code in files inside the folder `src/main/resources/react4xp/myChunk/...` that is imported by other entries, will be collected in `build/resources/main/react4xp/myChunk.<some-content-hash>.js`. These chunks need to be imported by the browser along with the transpiled entry, for every entry that uses it. Along with client-side caching of these reused resources, this aims to increase performance of the page.
+At buildtime, [react4xp-build-components](https://www.npmjs.com/package/react4xp-buildconstants) looks for [entry](#entries-and-dependency-chunks) JSX files under `src/main/resources/site/` and under the special source folder `src/main/resources/react4xp/_entries`. It will transpile _both_ sets of sources to JS files in the `build/resources/main/react4xp/` output folder. Anything that's imported by those entries is included in the transpiled files, except if the source files are put below other subfolders under `src/main/resources/react4xp/`. For example, all code in files inside the folder `src/main/resources/react4xp/myChunk/...` that is imported by other entries, will be collected in `build/resources/main/react4xp/myChunk.<some-content-hash>.js`. These chunks need to be imported by the browser along with the transpiled entry, for every entry that uses it. Along with client-side caching of these reused resources, this aims to increase performance of the page.
 
 The relative location under `build/resources/main/react4xp/` is where the runtime will look for everything - that location is called the [jsxPath](#jsxpath-how-to-refer-to-a-react4xp-component). The runtime includes some tools that use the jsxPath to wrap most of the complications: the [services](#the-services) provide the browser with ways of finding these resources from the client, and caching them for effective re-use. The [library](#the-library) does the same for the XP controllers, and simplifies things even more since it can use the component itself to find co-located react components that follow the XP naming conventions - in addition to generating an HTML body with `<script>` tags that deliver the components and dependencies to the browser.
 
@@ -758,5 +758,5 @@ The JS support in Nashorn varies between different JVMs. Enonic XP 6 runs the ja
 
 ### Component-less entries
 
-If a JSX file is found under `src/main/react4xp/_components` or below, it will keep that relative path and be transpiled to an entry component. Good for component entries that shouldn't belong to a particular XP part/page. Files will be transpiled to the `/react4xp/` root folder, and their entry names will be the file path under `_components`, i.e. without "_components" or "site" (or file extension) in the name.
+If a JSX file is found under `src/main/resources/react4xp/_entries` or below, it will keep that relative path and be transpiled to an entry component. Good for component entries that shouldn't belong to a particular XP part/page. Files will be transpiled to the `/react4xp/` root folder, and their entry names will be the file path under `_entries`, i.e. without "_entries" or "site" (or file extension) in the name.
 

@@ -13,11 +13,12 @@ exports.hash = (string) => {
     return (Math.abs(hash)).toString(36);
 };
 
-exports.getResourceAsString = (resource) => utilLib.data.forceArray(
-    ioLib.readLines(
-        resource.getStream()
-    )
-).join("\n");
+exports.getResourceAsString = (resource) =>
+    utilLib.data.forceArray(
+        ioLib.readLines(
+            resource.getStream()
+        )
+    ).join("\n");
 
 
 exports.getReact4xpEntry = (resource) => {
