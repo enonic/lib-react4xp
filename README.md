@@ -237,7 +237,7 @@ There are 3 main ways to use this library with XP:
 
 
 ### jsxPath: how to refer to a React4xp component
-**The jsxPath** is React4xp's internal name for each [Entry](#jsxpath-how-to-refer-to-a-react4xp-component) component. When you have the jsxPath, you can use the component from anywhere in a lot of React4xp's methods - including a standalone HTML file.
+**The jsxPath** is React4xp's internal name for each [Entry](#entries-and-dependency-chunks) component. When you have the jsxPath, you can use the component from anywhere in a lot of React4xp's methods - including a standalone HTML file.
 
 The name is derived at build time, from the path of the transpiled react component, relative to a particular target folder in the JAR artifact of your app. But make no mistake, _a jsxPath is a name string_, not a path that can be used relatively (i.e. a jsxPath can't contain `..`, `//`, `/./` or start with `/` or `.`).
 
