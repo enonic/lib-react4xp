@@ -442,7 +442,7 @@ class React4xp {
       *      - uniqueId {boolean|string} If set, ensures that the ID is unique. If id is set (previous param), a random integer will be postfixed to it. If uniqueId is a string, this is the prefix before the random postfix. If the id param is used in addition to a uniqueId string, uniqueId takes presedence and overrides id.
       *      - props {object, optional} react props sent in to the component
       *      - body {string, optional} Existing HTML body, for example rendered from thymeleaf. If it already has a matching-ID target container, body passes through unchanged (use this option and the setId method to control where in the body the react component should be inserted). If it doesn't have a matching container, a matching <div> will be inserted at the end of the body, inside the root element. If body is missing, a pure-target-container body is generated and returned.
-      *      - pageContributions.js {object, optional} Pre-existing pageContributions.js.
+      *      - pageContributions.js {object, optional} Pre-existing pageContributions. New page contributions for rendering this component will be added to any pre-existing ones.
       *
       * @returns a response object that can be directly returned from an XP controller.
       */
