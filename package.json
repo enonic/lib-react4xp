@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/enonic/lib-react4xp-runtime.git"
+    "url": "git+https://github.com/enonic/lib-react4xp.git"
   },
   "keywords": [
     "React4xp"
@@ -19,9 +19,9 @@
   "author": "Espen Norderud",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/enonic/lib-react4xp-runtime/issues"
+    "url": "https://github.com/enonic/lib-react4xp/issues"
   },
-  "homepage": "https://github.com/enonic/lib-react4xp-runtime#readme",
+  "homepage": "https://github.com/enonic/lib-react4xp#readme",
   "dependencies": {},
   "devDependencies": {
     "babel-cli": "^6.26.0",
