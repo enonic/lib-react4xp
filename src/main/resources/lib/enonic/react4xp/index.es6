@@ -100,7 +100,7 @@ class React4xp {
 
 
 
-    /** Optional initializer: returns a React4xp component instance initialized from a single set of parameters instead of
+    /** Inner initializer: returns a React4xp component instance initialized from a single set of parameters instead of
      *  the class approach.
      *  @param params {object} MUST include jsxPath or component. All other parameters are optional. If component is included, the jsxPath is automatically inserted to point to a JSX file in the XP component folder, with the same name. This file must exist. If component AND jsxPath are included, jsxPath will override the component name.
      *      - component {object} XP component object (used to extrapolate component part, sufficient if JSX entry file is in the same folder and has the same name).
@@ -109,20 +109,12 @@ class React4xp {
      *      - id {string} sets the target container element id. If this matches an ID in an input body, the react component will be rendered there. If not, a container with this ID will be added.
      *      - uniqueId {boolean|string} If set, ensures that the ID is unique. If id is set (previous param), a random integer will be postfixed to it. If uniqueId is a string, this is the prefix before the random postfix. If the id param is used in addition to a uniqueId string, uniqueId takes presedence and overrides id.
      */
-    static buildFromParams = (params) => {
+    static _buildFromParams = (params) => {
         const {jsxPath, component, id, uniqueId, props} = params || {};
 
-        if (!component) {
-            if (!jsxPath) {
-                throw Error("Can't render React4xp for client: need 'jsxPath' or 'component' parameter");
-            }
-            if (
-                ((id || "") + "").trim() === "" &&
-                ((uniqueId || "") + "").trim() === "") {
-                throw Error("Can't render React4xp for client: without a 'component' parameter, either an 'id' or a non-falsy 'uniqueId' parameter is needed.");
-            }
-        };
-
+        if (!component && !jsxPath) {
+            throw Error("Can't render React4xp for client: need 'jsxPath' or 'component' parameter");
+        }
 
         const react4xp = new React4xp(component || jsxPath);
 
@@ -390,75 +382,87 @@ class React4xp {
 
 
 
-    ///////////////////////////////////////////////// STATIC ALL-IN-ONE RENDERERS
+    ///////////////////////////////////////////////// STATIC ALL-IN-ONE RENDERER
 
-
-
-    /** Safety renderer. More thorough fallback and failure reporting, and avoids server-side rendering - except in edit
-     *  mode, where client-side rendering is the bigger hazard.
-     *
-     *  Returns a response object that can be directly returned from an XP controller.
-     *  @param params {object} See .render for parameter details.
-     *  @returns {object} Object with body and pageContributions.js. Body will contain a target container element for the react component. PageContributions will contain scripts referred by URL for running the component client-side and the component's dependencies, as well as an inline trigger script for starting the react frontend rendering into the target container. Duplicates in pageContributions.js will be removed, to avoid running identical scripts twice.
-     */
-    static renderSafe = (request, params) => {
+    /** Main renderer. Default behavior: renders server-side and adds hydration logic for the client-side.
+      *     However, renders a static, unhydrated server-side HTML string if request is missing or in edit mode.
+      *     Or can render a container element with client-side rendering logic.
+      *     On problems/errors, logs and falls back to a placeholder output which marks the problem on the page.
+      *
+      * @param entry {string|object} Mandatory reference to the React4xp entry JSX file. Corresponds to "view" parameter in the thymeleaf renderer etc.
+      *     Can be a string or an object:
+      *     If it's a string, it's interpreted as a jsxPath.
+      *     If it's an object, it's interpreted as a component object from portal.getComponent(), and will be used to both find the JSX file and generate a unique ID (see also the params below).
+      * @param props {object} Optional object. Sends props to the JSX file. Corresponds to "model" parameter in the thymeleaf renderer etc.
+      * @param request {object} XP request object (from controller get-method etc). Mandatory for proper react rendering, but strictly speacking optional:
+      *     If omitted, the rendering will fall back to a template-like JSX rendering: outputs a static HTML string using the props,
+      *     and it will not be activated/hydrated in the client.
+      * @param params {object} Additional parameters controlling the react rendering. All of them are optional:
+      *      - clientRender {boolean} Controls server-side vs client-side rendering (as long as a request argument is given, see above).
+      *         Server-side rendering (SSR) is the default behavior if this parameter is missing or falsy: a static HTML string is rendered as output, and react hydrate() pageContributions are added.
+      *         If set to true, however, client-side rendering is forced: only a target container with an element ID is rendered in the output, but react render() pageContributions are added.
+      *      - id {string} sets the target container element ID.
+      *         (by force - if an ID was generated from a component-type entry object (see above), this manual ID will override the generated one).
+      *         If the ID matches an DOM element ID in an input body (see body below), the rendered react component will be inserted in that element. If not, a container with this ID will be added.
+      *         If there's no body parameter at all, an HTML string with a matching-ID element is generated.
+      *         If the id parameter is omitted, a generic unique ID is generated as if uniqueId below is set to true.
+      *      - uniqueId {boolean|string} If set, takes an extra step to ensure a unique ID:
+      *         If id is already set (by previous param or using a component-object entry), a random integer will be postfixed to it.
+      *         If uniqueId is a string, this is the prefix before the random postfix. If the id param is used in addition to a uniqueId string, uniqueId takes presedence and overrides id.
+      *      - body {string} HTML string, for example a static string, or previously rendered from other react4xp output, thymeleaf or other templating engines.
+      *         If it already has a matching-ID target container, body passes through unchanged (use this option and the setId method to control where in the body the react component should be inserted).
+      *         If it doesn't have a matching container, a matching <div> will be inserted at the end of the body, inside the root element.
+      *         If body is missing, a pure-target-container body is generated and returned.
+      *      - pageContributions {object} Pre-existing pageContributions.
+      *         If added, page contributions generated during this rendering will be added to (merged with) the input parameter ones.
+      *
+      * @returns a response object that can be directly returned from an XP controller, with body and pageContributions attributes
+      */
+    static render = (entry, props, request, params) => {
         let react4xp;
         try {
-            react4xp = React4xp.buildFromParams(params);
+            if (typeof entry === 'string') {
+                params.jsxPath = entry;
+            } else if (entry && typeof entry === 'object') {
+                params.component = entry;
+            }
+
+            if (props && typeof props === 'object') {
+                params.props = props;
+            }
+
+            react4xp = React4xp._buildFromParams(params);
             const {body, pageContributions} = params || {};
 
-            return (request.mode === 'edit') ?
-                {
+            if (!request || request.mode === "edit") {
+                return {
                     body: react4xp.renderSSRIntoContainer(body),
                     pageContributions
-                } :
-                {
+                };
+
+            } else if (!params.clientRender) {
+                return {
+                    body: react4xp.renderSSRIntoContainer(body),
+                    pageContributions: react4xp.renderHydrationPageContributions(pageContributions)
+                };
+
+            } else {
+                return {
                     body: react4xp.renderTargetContainer(body),
                     pageContributions: react4xp.renderClientPageContributions(pageContributions)
                 };
+            }
 
         } catch (e) {
             log.error(e);
-            log.error("Params: " + JSON.stringify(params, null, 2));
+            log.error("entry (" + typeof entry + "): " + JSON.stringify(params));
+            log.error("props (" + typeof props + "): " + JSON.stringify(props));
+            log.error("request (" + typeof request + "): " + JSON.stringify(request));
+            log.error("params (" + typeof params + "): " + JSON.stringify(params));
             const r = react4xp || {};
             return {
                 body: buildErrorContainer(r.jsxPath, r.react4xpId)
             }
-        }
-    };
-
-
-
-
-    /** All-in-one best-practice renderer. Renders server-side if it can, adds hydration logic for the client-side. Renders
-      * dynamic/client-side react in XP preview and live mode, and static/server-side in edit mode (XP content studio).
-      * On problems, falls back to renderSafe.
-      *
-      * @param request {object} XP request object.
-      * @param params {object} MUST include jsxPath or component. And if not component, either an id OR a non-falsy uniqueId parameter is needed. If component is included, the jsxPath is automatically inserted to point to a JSX file in the XP component folder, with the same name. This file must exist. If component AND jsxPath are included, jsxPath will override the component name.
-      *      - component {object} XP component object (used to extrapolate component part and target container ID). This is sufficient if the JSX entry file is in the same folder and has the same name, and the react component doesn't need to be rendered into a particular pre-existing HTML container element.
-      *      - jsxPath {string} path to react component entry, see available paths in build/main/resources/react4xp/entries.json after building the parent project with react4xp-build-components. These are NAMES, not relative paths. So jsxPath can't contain '..', '//', '/./' or start with '.' or '/'.
-      *      - id {string} sets the target container element id (overrides the extrapolated id if component was set). If this matches an ID in an input body, the react component will be rendered there. If not, a container with this ID will be added.
-      *      - uniqueId {boolean|string} If set, ensures that the ID is unique. If id is set (previous param), a random integer will be postfixed to it. If uniqueId is a string, this is the prefix before the random postfix. If the id param is used in addition to a uniqueId string, uniqueId takes presedence and overrides id.
-      *      - props {object, optional} react props sent in to the component
-      *      - body {string, optional} Existing HTML body, for example rendered from thymeleaf. If it already has a matching-ID target container, body passes through unchanged (use this option and the setId method to control where in the body the react component should be inserted). If it doesn't have a matching container, a matching <div> will be inserted at the end of the body, inside the root element. If body is missing, a pure-target-container body is generated and returned.
-      *      - pageContributions.js {object, optional} Pre-existing pageContributions. New page contributions for rendering this component will be added to any pre-existing ones.
-      *
-      * @returns a response object that can be directly returned from an XP controller.
-      */
-    static render = (request, params) => {
-        try {
-            const react4xp = React4xp.buildFromParams(params);
-            const {body, pageContributions} = params || {};
-            return {
-                body: react4xp.renderSSRIntoContainer(body),
-                pageContributions: (request.mode === "edit") ?
-                    pageContributions :
-                    react4xp.renderHydrationPageContributions(pageContributions)
-            };
-
-        } catch (e) {
-            return React4xp.renderSafe(request, params);
         }
     };
 }
