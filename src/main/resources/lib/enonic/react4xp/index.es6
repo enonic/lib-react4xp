@@ -418,7 +418,7 @@ class React4xp {
       *
       * @returns a response object that can be directly returned from an XP controller, with body and pageContributions attributes
       */
-    static render = (entry, props, request, params = {}) => {
+    static render = (entry, props = {}, request = null, params = {}) => {
         let react4xp;
         try {
             if (typeof entry === 'string') {
