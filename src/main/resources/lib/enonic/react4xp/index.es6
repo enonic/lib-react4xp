@@ -330,55 +330,32 @@ class React4xp {
 
     //--------------------------------  RENDERING page contributions for importing entry / dependency chunks  --------------
 
-    /** Generates or modifies existing enonic XP pageContributions.js. Adds client-side dependency chunks (core React4xp frontend,
+    /** Generates or modifies existing enonic XP pageContributions. Adds client-side dependency chunks (core React4xp frontend,
      * shared libs and components etc, as well as the entry component scripts.
      * Also returns/adds small scripts that trigger the component scripts. Prevents duplicate references to dependencies.
      *
-     * @param pageContributions PageContributions object that the new scripts will be added to. If no input, new ones
-     * are instantiated.
+     * @param params {object} Additional parameters controlling the react rendering. All of them are optional:
+     *      - pageContributions PageContributions object that will be added before the new pageContributions.
+     *      - clientRender If clientRender is truthy, this function will assume that the react4xp entry is not being rendered
+     *          server-side (by .renderBody), and only calls a 'render' command in the client. If omitted or falsy, server-side
+     *          rendering is assumed, and a 'hydrate' command is called on the entry instead.
      */
-    renderClientPageContributions = (pageContributions) => {
+    renderPageContributions = params => {
+        const {pageContributions, clientRender} = params || {};
+        const command = clientRender ? 'render' : 'hydrate';
+
         this.ensureAndLockBeforeRendering();
 
         return getAndMergePageContributions(this.jsxPath, pageContributions, {
             bodyEnd: [
-                // Browser-runnable script reference for the "naked" react component:
+                // Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
                 `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
 
-                // That script will expose to the browser an element or function that can be handled by React4Xp.CLIENT.render. Trigger that, along with the target container ID, and props, if any:
-                `<script defer>${LIBRARY_NAME}.CLIENT.render(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
+                // Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props:
+                `<script defer>${LIBRARY_NAME}.CLIENT.${command}(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
             ]
         });
     };
-
-
-
-
-    /** Generates or modifies existing enonic XP pageContributions.js. Adds client-side dependency chunks (core React4xp frontend,
-     * shared libs and components etc, as well as the entry component scripts.
-     * Also returns/adds small scripts that trigger the component scripts. Prevents duplicate references to dependencies.
-     *
-     * @param pageContributions PageContributions object that the new scripts will be added to. If no input, new ones
-     * are instantiated.
-     */
-    renderHydrationPageContributions = (pageContributions) => {
-        this.ensureAndLockBeforeRendering();
-
-        return getAndMergePageContributions(this.jsxPath, pageContributions, {
-            bodyEnd: [
-                // Browser-runnable script reference for the "naked" react component:
-                `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
-
-                // That script will expose to the browser an element or function that can be handled by React4Xp.CLIENT.render. Trigger that, along with the target container ID, and props, if any:
-                `<script defer>${LIBRARY_NAME}.CLIENT.hydrate(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
-            ]
-        });
-    };
-
-
-
-
-
 
 
 
