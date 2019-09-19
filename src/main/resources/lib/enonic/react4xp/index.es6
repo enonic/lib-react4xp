@@ -300,10 +300,10 @@ class React4xp {
     }
 
 
-    /** Renders a pure static HTML markup of ONLY the react component, without a surrounding HTML markup or container.
+    /** Renders a pure static HTML markup of ONLY the react4xp entry, without a surrounding HTML markup or container.
       * Can override props that have previously been added to this component.
       */
-    renderComponentString = (overrideProps) => SSRreact4xp.renderToString(this.jsxPath, JSON.stringify(overrideProps || this.props));
+    renderEntryToHtml = (overrideProps) => SSRreact4xp.renderToString(this.jsxPath, JSON.stringify(overrideProps || this.props));
 
 
     /** Server-side rendering: Renders a static HTML markup and inserts it into an ID-matching target container in an HTML body. If a
@@ -312,18 +312,17 @@ class React4xp {
      * @returns {string} adjusted or generated HTML body with rendered react component.
      */
     renderSSRIntoContainer(body) {
-        const componentString = this.renderComponentString();
+        const componentString = this.renderEntryToHtml();
         return this.renderTargetContainer(body, componentString);
     }
 
 
 
+    renderBody = params => {
+        const {body, clientRender} = params || {};
 
-
-
-
-
-
+        return clientRender ? this.renderTargetContainer(body) : this.renderSSRIntoContainer(body);
+    }
 
 
 
