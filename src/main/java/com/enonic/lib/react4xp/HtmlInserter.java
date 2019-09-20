@@ -30,6 +30,14 @@ public class HtmlInserter {
                 .setExpandEmptyElements(true);
     }
 
+    private XPathFactory xFactory = XPathFactory.instance();
+
+    private List<Element> getMatchinIdElements(Document bodyDoc, String id) {
+        String expression = "(//*[@id='" + id + "'])[1]";
+        XPathExpression<Element> expr = xFactory.compile(expression, Filters.element());
+        return expr.evaluate(bodyDoc);
+    }
+
 
     public String insertAtEndOfRoot(String body, String payload) {
         try {
@@ -64,11 +72,7 @@ public class HtmlInserter {
         try {
             Document bodyDoc = saxBuilder.build(new StringReader(body));
 
-            XPathFactory xFactory = XPathFactory.instance();
-            String expression = "//*[@id='" + id + "']";
-            XPathExpression<Element> expr = xFactory.compile(expression, Filters.element());
-
-            List<Element> links = expr.evaluate(bodyDoc);
+            List<Element> links = getMatchinIdElements(bodyDoc, id);
             if (links == null || links.size() < 1) {
                 throw new XPathException("ID '" + id + "' not found.");
             }
@@ -76,9 +80,8 @@ public class HtmlInserter {
             Document payloadDoc = saxBuilder.build(new StringReader(payload));
             Element payloadRoot = payloadDoc.getRootElement();
 
-            // Whether or not more than one element with that id was found, insert the first one.
             payloadRoot.detach();
-            links.get(0).addContent(payloadRoot);
+            links.get(0).setContent(payloadRoot);
 
             return outputter.outputString(bodyDoc);
 

@@ -322,7 +322,7 @@ class React4xp {
         const {body, clientRender} = params || {};
 
         return clientRender ? this.renderTargetContainer(body) : this.renderSSRIntoContainer(body);
-    }
+    };
 
 
 
