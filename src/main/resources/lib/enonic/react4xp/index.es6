@@ -407,25 +407,23 @@ class React4xp {
                 params.props = props;
             }
 
+            const { clientRender } = params;
+
             react4xp = React4xp._buildFromParams(params);
             const {body, pageContributions} = params || {};
 
-            if (!request || request.mode === "edit") {
+            if (!request || request.mode === "edit" || request.mode === "inline") {
                 return {
                     body: react4xp.renderSSRIntoContainer(body),
                     pageContributions
                 };
 
-            } else if (!params.clientRender) {
-                return {
-                    body: react4xp.renderSSRIntoContainer(body),
-                    pageContributions: react4xp.renderHydrationPageContributions(pageContributions)
-                };
-
             } else {
                 return {
-                    body: react4xp.renderTargetContainer(body),
-                    pageContributions: react4xp.renderClientPageContributions(pageContributions)
+                    body: clientRender ?
+                        react4xp.renderTargetContainer(body) :
+                        react4xp.renderSSRIntoContainer(body),
+                    pageContributions: react4xp.renderPageContributions({pageContributions, clientRender})
                 };
             }
 
