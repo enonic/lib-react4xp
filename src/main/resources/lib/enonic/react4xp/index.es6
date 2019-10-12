@@ -14,6 +14,7 @@ const {
 
 
 SSRreact4xp.setConfig(
+    app.name,
     `/${R4X_TARGETSUBDIR}`,
     LIBRARY_NAME,
     `/${R4X_TARGETSUBDIR}/`,
