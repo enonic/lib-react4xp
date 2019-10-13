@@ -1,6 +1,6 @@
 # lib-react4xp
 
-Beta: 0.3.3
+Beta: 0.3.6
 
 XP7 compatible. For XP6, see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master)
 
