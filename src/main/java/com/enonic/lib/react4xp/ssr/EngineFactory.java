@@ -21,11 +21,13 @@ public class EngineFactory {
             "if (typeof global === 'undefined') { var global = this; }\n" +
             "if (typeof window === 'undefined') { var window = this; }\n" +
             "if (typeof process === 'undefined') { var process = {env:{}}; }\n" +
-            "if (typeof console === 'undefined') { var console = {}; }\n" +
-            "console.debug = print;\n" +
-            "console.log = print;\n" +
-            "console.warn = print;\n" +
-            "console.error = print;";
+            "if (typeof console === 'undefined') { " +
+                "var console = {};" +
+                "console.debug = print;\n" +
+                "console.log = print;\n" +
+                "console.warn = print;\n" +
+                "console.error = print;" +
+            "}";
 
     private static ArrayList<String> CHUNKS_SOURCES = null;
     private static String ENTRIES_SOURCE = null;
@@ -61,6 +63,9 @@ public class EngineFactory {
 
             LinkedHashSet<String> transpiledDependencies = new ChunkDependencyParser().getScriptDependencyNames(CHUNKFILES_HOME + COMPONENT_STATS_FILENAME, CHUNKS_SOURCES, ENTRIES_SOURCE, true);
 
+            Her skal NASHORNPOLYFILLS_FILENAME fortsatt slå inn hvis den eksisterer.
+            Men skal kjøre uansett!
+
             try {
                 if (NASHORNPOLYFILLS_FILENAME == null && NASHORNPOLYFILLS_FILENAME.trim() == "") {
                     throw new IllegalArgumentException("NASHORNPOLYFILLS_FILENAME is empty or missing.");
@@ -74,11 +79,11 @@ public class EngineFactory {
                 LOG.warn(e.getClass().getSimpleName() + " while trying to polyfill Nashorn for React4xp (NASHORNPOLYFILLS_FILENAME = " + NASHORNPOLYFILLS_FILENAME + "): " + e.getMessage());
 
                 // Fallback: try to use the pre-built nashornPolyfills from react4xp-runtime-nashornpolyfills:
-                String file = "/lib/enonic/react4xp/fallback/react4xp-runtime-nashornpolyfills.js";
+                String file = "/lib/enonic/react4xp/default/nashornPolyfills.js";
                 String content = ResourceHandler.readResource(file);
                 scripts.put(file, content);
                 scriptList.add(file);
-                LOG.warn("Using fallback script from react4xp-runtime-nashornpolyfills");
+                LOG.warn("Fallback: using lib-react4xp's included polyfills (react4xp-runtime-nashornpolyfills)");
             }
 
             for (String scriptFile : transpiledDependencies) {
