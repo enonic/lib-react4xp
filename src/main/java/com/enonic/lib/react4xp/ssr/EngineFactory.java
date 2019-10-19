@@ -63,7 +63,7 @@ public class EngineFactory {
         }
 
         // Next, if the user has added any extra polyfills, the filename will be in NASHORNPOLYFILLS_FILENAME:
-        if (NASHORNPOLYFILLS_FILENAME != null && "".equals(NASHORNPOLYFILLS_FILENAME)) {
+        if (NASHORNPOLYFILLS_FILENAME != null && !"".equals(NASHORNPOLYFILLS_FILENAME)) {
             try {
                 String file = CHUNKFILES_HOME + NASHORNPOLYFILLS_FILENAME;
                 String content = ResourceHandler.readResource(file);
