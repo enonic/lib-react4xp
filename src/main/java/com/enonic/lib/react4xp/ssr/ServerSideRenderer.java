@@ -26,33 +26,38 @@ public class ServerSideRenderer implements ScriptBean {
 
     private static String SCRIPTS_HOME = null;
     private static String LIBRARY_NAME = null;
-    private static String CHUNKFILES_HOME = null;
-    private static String NASHORNPOLYFILLS_FILENAME = null;
-    private static String ENTRIESSOURCE = null;
-    private static String COMPONENT_STATS_FILENAME = null;
     private static String APP_NAME = null;
+
+    // TODO: Shouldn't be needed ever (aka: commenting it out shouldn't ever fail). Delete when this is confirmed.
+    // private static String CHUNKFILES_HOME = null;
+    // private static String NASHORNPOLYFILLS_FILENAME = null;
+    // private static String ENTRIESSOURCE = null;
+    // private static String COMPONENT_STATS_FILENAME = null;
 
     Set<String> componentScripts = new HashSet<>();
 
     private static final ArrayList<String> CHUNKSSOURCES = new ArrayList<>();
+    private static NashornScriptEngine ENGINE = null;
     private Supplier<ResourceService> resourceServiceSupplier;
 
     private static RunMode runMode = RunMode.get();
 
     public void setConfig(String APP_NAME, String SCRIPTS_HOME, String LIBRARY_NAME, String CHUNKFILES_HOME, String NASHORNPOLYFILLS_FILENAME, String ENTRIESSOURCE, String EXTERNALS_CHUNKS_FILENAME, String COMPONENT_STATS_FILENAME) throws IOException, ScriptException {
         ServerSideRenderer.APP_NAME = APP_NAME;
-        ServerSideRenderer.NASHORNPOLYFILLS_FILENAME = NASHORNPOLYFILLS_FILENAME;   // "nashornPolyfills.js";
-        ServerSideRenderer.ENTRIESSOURCE = ENTRIESSOURCE;                           // "entries.json";
         ServerSideRenderer.SCRIPTS_HOME = SCRIPTS_HOME;                             // "/react4xp"
         ServerSideRenderer.LIBRARY_NAME = LIBRARY_NAME;                             // "React4xp"
-        ServerSideRenderer.CHUNKFILES_HOME = CHUNKFILES_HOME;                       // "/react4xp/"
-        ServerSideRenderer.COMPONENT_STATS_FILENAME = COMPONENT_STATS_FILENAME;     // "stats.components.json"
+
+        // TODO: Shouldn't be needed ever (aka: commenting it out shouldn't ever fail). Delete when this is confirmed.
+        // ServerSideRenderer.NASHORNPOLYFILLS_FILENAME = NASHORNPOLYFILLS_FILENAME;   // "nashornPolyfills.js";
+        // ServerSideRenderer.ENTRIESSOURCE = ENTRIESSOURCE;                           // "entries.json";
+        // ServerSideRenderer.CHUNKFILES_HOME = CHUNKFILES_HOME;                       // "/react4xp/"
+        // ServerSideRenderer.COMPONENT_STATS_FILENAME = COMPONENT_STATS_FILENAME;     // "stats.components.json"
 
         // Component chunks
         ServerSideRenderer.CHUNKSSOURCES.add(EXTERNALS_CHUNKS_FILENAME);            // "chunks.externals.json"
 
         // Init the engine too
-        EngineFactory.getEngine(CHUNKFILES_HOME, NASHORNPOLYFILLS_FILENAME, ENTRIESSOURCE, COMPONENT_STATS_FILENAME, CHUNKSSOURCES);
+        ENGINE = EngineFactory.initEngine(CHUNKFILES_HOME, NASHORNPOLYFILLS_FILENAME, ENTRIESSOURCE, COMPONENT_STATS_FILENAME, CHUNKSSOURCES);
     }
 
     // Examples:
@@ -60,7 +65,8 @@ public class ServerSideRenderer implements ScriptBean {
     // props: valid stringified JSON on props object, e.g. '{"insertedMessage": "this is a prop!"}'
     public String renderToString(String component, String props) throws IOException, ScriptException {
 
-        NashornScriptEngine engine = EngineFactory.getEngine(CHUNKFILES_HOME, NASHORNPOLYFILLS_FILENAME, ENTRIESSOURCE, COMPONENT_STATS_FILENAME, CHUNKSSOURCES);
+        // TODO: Shouldn't be needed ever (aka: commenting it out shouldn't ever fail). Delete when this is confirmed.
+        // NashornScriptEngine engine = EngineFactory.initEngine(CHUNKFILES_HOME, NASHORNPOLYFILLS_FILENAME, ENTRIESSOURCE, COMPONENT_STATS_FILENAME, CHUNKSSOURCES);
 
         String script = null;
         StringBuilder scriptBuilder = new StringBuilder();
@@ -91,21 +97,21 @@ public class ServerSideRenderer implements ScriptBean {
             script = scriptBuilder.toString();
             //LOG.info("#############          componentScript:\n\n\n" + script.toString() + "\n\n\n");
 
-            ScriptObjectMirror obj = (ScriptObjectMirror)engine.eval(script);
+            ScriptObjectMirror obj = (ScriptObjectMirror)ENGINE.eval(script);
 
             return (String)obj.get("rendered");
 
         } catch (ScriptException e) {
-            LOG.error("ERROR: " + ServerSideRenderer.class.getName() + ".renderToString:\n" +
-                    "Message: " + e.getMessage() + "\n" +
-                    "Component: " + component + "\n" +
+            LOG.error("ERROR: " + ServerSideRenderer.class.getName() + ".renderToString  |  " +
+                    "Message: " + e.getMessage() + "  |  " +
+                    "Component: " + component + "  |  " +
                     "Props: " + props + "\n" +
                     "Script:\n---------------------------------\n\n" + script + "\n\n---------------------------------------", e);
 
             if (runMode == RunMode.PROD) {
                 componentScripts.remove(component);
             }
-            engine.eval("delete " + LIBRARY_NAME + "['" + component + "']");
+            ENGINE.eval("delete " + LIBRARY_NAME + "['" + component + "']");
 
             return "<div class=\"react4xp-error\" style=\"border: 1px solid #8B0000; padding: 15px; background-color: #FFB6C1\">" +
                     "<h2>" + StringEscapeUtils.escapeHtml(e.getClass().getName()) + "</h2>" +
