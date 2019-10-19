@@ -60,12 +60,15 @@ def ROOT = project.projectDir.toString() + "/"
 
 task nashornPolyfills(type: NodeTask) {
     group 'lib-react4xp'
-    description 'Build polyfill resources, allowing XP to do React server-side rendering in Nashorn'
+    description 'Build default polyfill code, allowing XP to run the (node-written) React server-side rendering in Nashorn'
 
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
             '--config', 'node_modules/react4xp-runtime-nashornpolyfills/webpack.config.js',
             '--env.NASHORNPOLYFILLS_SOURCE=node_modules/react4xp-runtime-nashornpolyfills/nashornPolyfills.es6',
+
+            // (env.BUILD_R4X + env.NASHORNPOLYFILLS_FILENAME) must match ('build/resources/main' + defaultPolyfillFileName)
+            // in com/enonic/lib/react4xp/ssr/EngineFactory.java!
             '--env.BUILD_R4X=' + ROOT + 'build/resources/main/lib/enonic/react4xp/default',
             '--env.NASHORNPOLYFILLS_FILENAME=nashornPolyfills'
     ]

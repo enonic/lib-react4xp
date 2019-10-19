@@ -1,6 +1,6 @@
 {
   "name": "lib-react4xp",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "XP serverside runtime, handles the bulk of the React4xp work: server-side rendering, and handling and serving of client-side components and dependency chunks to the client, including the React4xp front-end rendering wrapper itself.\"",
   "main": "src/main/resources/lib/enonic/react4xp/index.es6",
   "directories": {
