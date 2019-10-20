@@ -1,6 +1,6 @@
 # lib-react4xp
 
-Beta: 0.2.3 
+Beta: 0.2.7
 
 XP6 compatible. For XP7, see the [master branch](https://github.com/enonic/lib-react4xp)
 
@@ -70,7 +70,7 @@ Assuming you have Enonic XP nicely installed, and you have an **XP parent projec
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
-	include 'com.enonic.lib:lib-react4xp:0.2.3'
+	include 'com.enonic.lib:lib-react4xp:0.2.7'
 }
 ```
 
@@ -83,7 +83,7 @@ If you need / want to build the lib yourself instead of downloading it with Grad
 ```bash
 gradlew build install
 ```
-Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.2.3`.
+Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.2.7`.
 
 ---
 
@@ -162,7 +162,7 @@ task webpack_react4xp(type: NodeTask) {
         // 3 OPTIONAL STEPS:
         //'--config', 'node_modules/react4xp-runtime-client/webpack.config.js',   		// <-- Activate this line to override the included clientside wrapper (included in lib-react4xp) - see the react4xp-runtime-client docs.
         //'--config', 'node_modules/react4xp-runtime-nashornpolyfills/webpack.config.js',  	// <-- Activate this line to roll your own nashorn polyfill instead of the included one. See react4xp-runtime-nashornpolyfills docs.       
-        '--config', 'node_modules/react4xp-runtime-externals/webpack.config.js',  		// <-- This line supplies dependencies declared in the EXTERNALS config constant - see the react4xp-runtime-externals docs. If you remove this line, you can/must add react@16 and react-dom@16 on all your HTML pages yourself - e.g. from a CDN.
+        '--config', 'node_modules/react4xp-runtime-externals/webpack.config.js',  		// <-- This line supplies dependencies declared in the EXTERNALS config constant - see the react4xp-runtime-externals docs.
 
         '--env.REACT4XP_CONFIG_FILE=' + ROOT + '/' + REACT4XP_CONFIG_FILE, 			// <-- Tells all of the steps here where to find the master config file
         '--progress', '--color'  								// <-- Just pretty
@@ -237,15 +237,17 @@ There are 3 main ways to use this library with XP:
 
 
 ### jsxPath: how to refer to a React4xp component
-**The jsxPath** is React4xp's internal name for each [Entry](#jsxpath-how-to-refer-to-a-react4xp-component) component. When you have the jsxPath, you can use the component from anywhere in a lot of React4xp's methods - including a standalone HTML file.
+**The jsxPath** is React4xp's internal name for each [Entry](#entries-and-dependency-chunks) component. When you have the jsxPath, you can use the component from anywhere in a lot of React4xp's methods - including a standalone HTML file.
 
 The name is derived at build time, from the path of the transpiled react component, relative to a particular target folder in the JAR artifact of your app. But make no mistake, _a jsxPath is a name string_, not a path that can be used relatively (i.e. a jsxPath can't contain `..`, `//`, `/./` or start with `/` or `.`).
 
 In short: 
 
 - A JSX source file can be **bound to an XP component**, that is, the source file is inside the folder of an XP component, under `<projectFolder>/src/main/resources/site/<component-type>/<component-name>/`. The jsxPath will then be _the XP-relative path to the JSX file_ (starts with `site/...`), without the file extension. 
+  - Example: the XP-component-bound file in the example structure below, `<projectFolder>/src/main/resources/site/parts/example/example.jsx`, will get the jsxPath `"site/parts/example/example"`.
 
 - If a JSX file is **independent from XP components**, the source file should be put below a special source folder in order for all the automatics to work: `<projectFolder>/src/main/resources/react4xp/_entries/` (*). The jsxPath will then be the _path-and-name of the source file_, relative to that folder (still without file extension).
+  - Examples: the independent file `<projectFolder>/src/main/resources/react4xp/_entries/SimpleGreeter.jsx` is right at the root of `_entries`, and will get the jsxPath `"SimpleGreeter"`. A file in a subfolder, e.g.  `<projectFolder>/src/main/resources/react4xp/_entries/mySubfolder/SubGreeter.jsx`, will get jsxPath `mySubfolder/SubGreeter`.
 
 
 **So in the examples below**...
@@ -758,5 +760,5 @@ The JS support in Nashorn varies between different JVMs. Enonic XP 6 runs the ja
 
 ### Component-less entries
 
-If a JSX file is found under `src/main/resources/react4xp/_entries` or below, it will keep that relative path and be transpiled to an entry component. Good for component entries that shouldn't belong to a particular XP part/page. Files will be transpiled to the `/react4xp/` root folder, and their entry names will be the file path under `_components`, i.e. without "_components" or "site" (or file extension) in the name.
+If a JSX file is found under `src/main/resources/react4xp/_entries` or below, it will keep that relative path and be transpiled to an entry component. Good for component entries that shouldn't belong to a particular XP part/page. Files will be transpiled to the `/react4xp/` root folder, and their entry names will be the file path under `_entries`, i.e. without "_entries" or "site" (or file extension) in the name.
 
