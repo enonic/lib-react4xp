@@ -48,7 +48,7 @@ task babelXP(type: NodeTask) {
     description 'Compile server-side XP components from ES6'
 
     script = file('node_modules/babel-cli/bin/babel.js')
-    args = ["src/main/resources", "--out-dir", "build/resources/main"]
+    args = ["src/main/resources", "--out-dir", "build/resources/main", "--ignore", "src/main/resources/react4xp"]
 
     inputs.dir 'src/main/resources'
     outputs.dir("build/resources/main")
