@@ -9,7 +9,7 @@ export const renderPageBody = (content, params = {}) => {
     let {props = {}, jsxPath} = params;
 
     if (!content || typeof content !== 'object' || !content.page || typeof content.page !== 'object') {
-        throw Error("Can't renderPage without a content.page object, but content = " + JSON.stringify(content));
+        throw Error("lib-react4xp#templates: Can't renderPage without a content.page object, but content = " + JSON.stringify(content));
     }
 
     jsxPath = ((jsxPath || "") + "").trim();
@@ -25,15 +25,15 @@ export const renderPageBody = (content, params = {}) => {
         } else {
 
             const pageName = content.page.descriptor.split(':')[1];   // [appName]:[pageName]
-            const jsxPath = `/site/pages/${pageName}/${pageName}`;
-            const hasLocalJsx = ioLib.getResource(`${jsxPath}.jsx`).exists();
+            const jsxPath = `site/pages/${pageName}/${pageName}`;
+            const hasLocalJsx = ioLib.getResource(`/${jsxPath}.jsx`).exists();
 
             page = new React4xp( hasLocalJsx ? jsxPath : 'react4xp-templates/Page');
         }
 
     } catch (e) {
         log.error(e);
-        throw Error("Couldn't build page template from JSX. jsxPath=" + JSON.stringify(jsxPath));
+        throw Error("lib-react4xp#templates: Couldn't build page template from JSX. jsxPath=" + JSON.stringify(jsxPath));
     }
 
     page.setProps(
