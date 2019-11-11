@@ -1,4 +1,4 @@
-/** NEEDS PARENT PROJECT TO NPM-INSTALL react4xp-templates v0.1.7 OR ABOVE! **/
+/** NEEDS PARENT PROJECT TO NPM-INSTALL react4xp-templates v0.1.8 OR ABOVE! **/
 
 const React4xp = require('./index');
 const ioLib = require('/lib/xp/io');
