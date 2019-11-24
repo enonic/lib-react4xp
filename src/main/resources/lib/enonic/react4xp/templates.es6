@@ -43,7 +43,7 @@ export const renderPageBody = (content, params = {}) => {
             {content}
     );
 
-    return page.renderEntryToHtml(); // SSR always! Is it possible to use JSX that needs client-rendering in this?
+    return page.renderEntryToHtml(); // TODO: SSR always! Is it possible to use JSX that needs client-rendering in this?
 };
 
 
@@ -78,11 +78,11 @@ export const renderLayoutBody = (component, params = {}) => {
         throw Error("lib-react4xp#templates: Couldn't build layout template from JSX. jsxPath=" + JSON.stringify(jsxPath));
     }
 
-    layout.setProps(
-        (Object.keys(props).length > 0) ?
-            {...props, component} :
-            {component}
-    );
+    layout.setProps({
+        component,
+        regionClasses: true,
+        ...(props || {})
+    });
 
-    return layout.renderEntryToHtml(); // SSR always! Is it possible to use JSX that needs client-rendering in this?
+    return layout.renderEntryToHtml(); // TODO: SSR always! Is it possible to use JSX that needs client-rendering in this?
 };
