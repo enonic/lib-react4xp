@@ -9,22 +9,17 @@ export default {};
  * Render a page template from a JSX file. Intended for page templates with Regions, since those (currently) require server-side
  * rendering. This function ensures that.
  *
- * @param content (mandatory object): data object from an XP layout controller's componennt data (e.g. portal.getConponent()).
- *      Has a .regions attribute, which is an object where keys are region names and values are region data (e.g. component.regions).
+ * The argument is a mandatory params object that's entirely passed to the JSX entry (chosen by jsxPath) as props, except jsxPath
+ * itself. Its attributes are:
+ *
  * @param jsxPath (optional object): points to a JSX entry to use as rendering template. If omitted, renderPageBody
  *      first tries to look for a same-name JSX file in the same folder as the layout. If that's not found, falls back to using
- *      react4xp-templates/Layout (https://github.com/enonic/react4xp-templates/blob/master/src/_entries/react4xp-templates/Page.jsx).
- * @param regionNames (optional string or array of strings): selects to display only one, or some specific, of the available regions in the
- *      regions data. The array defines sequence, so this can also be used to display all regions in a specific order.
- *      If omitted, all regions are displayed in the order of Object.keys(component.regions).
- * @param regionClasses (optional boolean, string or object): HTML class for the region elements, added after "xp-region".
- *     If boolean, and it's true: adds a class that is the same as the name
- *     If string, all regions get that class.
- *     If object: keys are region names and values are a class name string for each region.
- * @param props (optional object): additional props passed to the JSX entry. Some of the params above are added automatically to props
- *      (content, regionClasses, regionNames).
+ *      react4xp-templates/Page (https://github.com/enonic/react4xp-templates/blob/master/src/_entries/react4xp-templates/Page.jsx).
+ * @param content (mandatory object): data object from an XP layout controller's componennt data (e.g. portal.getConponent()).
+ *      Has a .regions attribute, which is an object where keys are region names and values are region data (e.g. component.regions).
+ *      See react4xp-templates/Page.jsx for its additional props.
  */
-export const renderPageBody = ({content, jsxPath, regionNames, regionClasses, props}) => {
+export const renderPageBody = ({content, jsxPath, ...props}) => {
 
     if (!content || typeof content !== 'object' || !content.page || typeof content.page !== 'object') {
         throw Error("lib-react4xp#templates: Can't renderPageBody without a content.page object, but content = " + JSON.stringify(content));
@@ -56,8 +51,6 @@ export const renderPageBody = ({content, jsxPath, regionNames, regionClasses, pr
 
     page.setProps({
         content,
-        regionClasses,
-        regionNames,
         ...(props || {}),
     });
 
@@ -69,25 +62,23 @@ export const renderPageBody = ({content, jsxPath, regionNames, regionClasses, pr
  * Render a layout template from a JSX file. Intended for layout templates with Regions, since those (currently) require server-side
  * rendering. This function ensures that.
  *
- * @param component (mandatory object): component data (e.g. from portal.getComponent()).
- *      Has a .regions attribute, which is an object where keys are region names and values are region data (e.g. component.regions)
+ * The argument is a mandatory params object that's entirely passed to the JSX entry (chosen by jsxPath) as props, except jsxPath
+ * itself. Its attributes are:
+ *
  * @param jsxPath (optional object): points to a JSX entry to use as rendering template. If omitted, renderLayoutBody
  *      first tries to look for a same-name JSX file in the same folder as the layout. If that's not found, falls back to using
  *      react4xp-templates/Layout (https://github.com/enonic/react4xp-templates/blob/master/src/_entries/react4xp-templates/Layout.jsx).
- * @param containerTag (optional string): Controls which HTML tag is used for the element containing the layout. If omitted,
- *      defaults to 'div'.
- * @param containerClass (optional string): Adds a class to the HTML element containing the layout.
- * @param regionNames (optional string or array of strings): selects to display only one, or some specific, of the available regions in the
- *      regions data. The array defines sequence, so this can also be used to display all regions in a specific order.
- *      If omitted, all regions are displayed in the order of Object.keys(component.regions).
+ * @param component (mandatory object): component data (e.g. from portal.getComponent()).
+ *      Has a .regions attribute, which is an object where keys are region names and values are region data (e.g. component.regions)
  * @param regionClasses (optional boolean, string or object): HTML class for the region elements, added after "xp-region".
- *     If boolean, and it's true: adds a class that is the same as the name
- *     If string, all regions get that class.
- *     If object: keys are region names and values are a class name string for each region.
- * @param props (optional object): additional props passed to the JSX entry. Some of the params above are added automatically to
- *      props (component, regionClass, regionNames, containerTag, containerClass).
+ *      If boolean, and it's true: adds a class that is the same as the name
+ *      If string, all regions get that class.
+ *      If object: keys are region names and values are a class name string for each region.
+ *      Default if omitted: boolean true
+ *
+ *      See react4xp-templates/Layout.jsx for its additional props.
  */
-export const renderLayoutBody = ({component, jsxPath, containerTag, containerClass, regionNames, regionClasses, props}) => {
+export const renderLayoutBody = ({component, jsxPath, regionClasses, ...props}) => {
     if (!component || typeof component !== 'object') {
         throw Error("lib-react4xp#templates: Can't renderLayoutBody without a component object, but component = " + JSON.stringify(component));
     }
@@ -118,9 +109,6 @@ export const renderLayoutBody = ({component, jsxPath, containerTag, containerCla
     layout.setProps({
         component,
         regionClasses: regionClasses || true,
-        regionNames,
-        containerTag,
-        containerClass,
         ...(props || {})
     });
 
