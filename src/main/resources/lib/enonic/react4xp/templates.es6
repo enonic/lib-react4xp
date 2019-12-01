@@ -1,4 +1,4 @@
-/** NEEDS PARENT PROJECT TO NPM-INSTALL react4xp-templates v0.1.8 OR ABOVE! **/
+/** NEEDS PARENT PROJECT TO NPM-INSTALL react4xp-regions v0.2.0 OR ABOVE! **/
 
 const React4xp = require('./index');
 const ioLib = require('/lib/xp/io');
@@ -15,7 +15,7 @@ export default {};
  *
  * @param jsxPath (optional object): points to a JSX entry to use as rendering template. If omitted, renderLayoutBody
  *      first tries to look for a same-name JSX file in the same folder as the layout. If that's not found, falls back to using
- *      react4xp-templates/Layout (https://github.com/enonic/react4xp-templates/blob/master/src/_entries/react4xp-templates/Layout.jsx).
+ *      react4xp-regions/Layout (https://github.com/enonic/react4xp-regions/blob/master/src/_entries/react4xp-regions/Layout.jsx).
  * @param component (optional object): component data (e.g. from portal.getComponent()).
  *      Has a .regions attribute, which is an object where keys are region names and values are region data (e.g. component.regions),
  *      and a .descriptor string attribute.
@@ -31,7 +31,7 @@ export default {};
  *      If object: keys are region names and values are a class name string for each region.
  *      Default if omitted: boolean true
  *
- *      See react4xp-templates/Layout.jsx for its additional props.
+ *      See react4xp-regions/Layout.jsx for its additional props.
  */
 export const renderRegionBody = ({jsxPath, component, content, regionClasses, ...props}) => {
     if (!component || typeof component !== 'object') {
@@ -58,13 +58,13 @@ export const renderRegionBody = ({jsxPath, component, content, regionClasses, ..
             layout = new React4xp(jsxPath);
 
             // If not, look for a local jsx file (layout-name: /site/layouts/[layoutName]/[layoutName]).
-            // If that doesn't exist, fall back to the generic Layout template in react4xp-templates
+            // If that doesn't exist, fall back to the generic Layout template in react4xp-regions
         } else {
             const layoutName = component.descriptor.split(':')[1];   // FIXME [appName]:[layoutName] ????
             const jsxPath = `site/layouts/${layoutName}/${layoutName}`;
             const hasLocalJsx = ioLib.getResource(`/${jsxPath}.jsx`).exists();
 
-            layout = new React4xp( hasLocalJsx ? jsxPath : 'react4xp-templates/Layout');
+            layout = new React4xp( hasLocalJsx ? jsxPath : 'react4xp-regions/Layout');
         }
 
     } catch (e) {
