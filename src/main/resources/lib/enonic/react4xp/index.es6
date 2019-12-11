@@ -4,7 +4,8 @@ DETTE SKAL SKJE:
 .Render (eller egentlig igjennom intern new React()...... før .renderSomething):
 
 Hvis første argument er null/undefined (getComponent er null OG jsxpath er null):
-	Kanskje page? Hent (ny)component = getContent().page.
+	Kanskje page?
+	    Hent (ny)component = getContent().page.
 	Hvis (ny)component og component.descriptor: page!
 		Hvis (ny)component.regions: HAR REGIONS.
 			--> PAGE SKAL RENDRES SOM SSR (FEILSJEKK: clientRender:true), inn i en spesiallaget body : <!DOCTYPE HTML><html id="something"></html>. Sjekk ytre container
@@ -37,7 +38,7 @@ Hvis component er en streng: jsxPath.
 
 const { getAndMergePageContributions } = require('./pageContributions');
 const { getAssetRoot } = require('./serviceRoots');
-const { getContent } = require('/lib/xp/portal');
+const { getContent, getComponent } = require('/lib/xp/portal');
 
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
@@ -105,9 +106,10 @@ class React4xp {
      *     relative to the folder where the transpiled (JS) react components are found - assets/react4xp. Overview of available entry
      *     paths is built to: build/resources/main/react4xp/entries.json.
      */
-    constructor(initParam, isPage) {
+    constructor(initParam) {
         this.props = null;
-        this.isPage = isPage;
+        this.isPage = false;
+        this.hasRegions = false;
         this.react4xpIdLocked = false;
 
         if (typeof initParam === "object") {
@@ -166,36 +168,91 @@ class React4xp {
      *      - uniqueId {boolean|string} If set, ensures that the ID is unique. If id is set (previous param), a random integer will be postfixed to it. If uniqueId is a string, this is the prefix before the random postfix. If the id param is used in addition to a uniqueId string, uniqueId takes presedence and overrides id.
      */
     static _buildFromParams = (params) => {
-        const {jsxPath, id, uniqueId, props} = params || {};
-        let {component}= params || {};
-
+        const {entry, id, uniqueId, props} = params || {};
         let isPage = false;
-        if (!component) {
-            // TODO: Need a more reliable test than !component for whether is a top-level entry call from a page controller. Make a Content.getPage() call from a bean, and if it fails, this fallback should be skipped since this wasn't called from a page controller!
+        let hasRegions = false;
+        let jsxPath = null;
+        let component = null;
 
-            isPage = true;
-            // Workaround for page template rendering called from page controllers (XP bug: portal.getComponent() from page controller returns null in XP 6.x, and at least 7.0 and 7.1, maybe later versions too):
-            // Use content.page instead of component, and if there are props and not a truthy .component attribute in them, instert component as props.
-            const content = getContent();
+        /*
 
-            if (!jsxPath) {
-                if (content && content.page && content.page.descriptor) {
-                    component = content.page;
-                    log.info("Fallback component data for page: " + JSON.stringify(component, null, 2));
+Hvis entry er null/undefined (getComponent er null OG jsxpath er null):
+	Kanskje page?
+	    Hent (ny)component = getContent().page.
+	Hvis (ny)component og component.descriptor: page!
+		Hvis (ny)component.regions: HAR REGIONS.
+			--> PAGE SKAL RENDRES SOM SSR (FEILSJEKK: clientRender:true), inn i en spesiallaget body : <!DOCTYPE HTML><html id="something"></html>. Sjekk ytre container
+				Hva med pageContributions?
+					KAN SENDE UT MEN HELST IKKE.
+						I så fall strippe bort mest mulig av component-data (eller content.page) fra å sendes ut som props.
+					        Endre Region/Regions (og Page/Layout?) til å bare ta imot minste mulige mengde data for å fungere?
+					    Og kun bruke en sånn nedstrippet versjon til props og dermed pageContributions?
+					Hvis det ikke går, må pgContrib droppes.
+		Hvis ikke: --> SANNSYNLIGVIS FEIL.
+	Hvis ikke: --> FEIL.
+
+Hvis component er et objekt: OK. KOMPONENTFLYT
+	Se etter component.regions. Hvis ja:
+		--> LAYOUT. SKAL RENDRES UTEN Å LEGGE TIL YTRE CONTAINER??? Antagelig trengs en ytre container.
+			Hva med pageContributions?
+				KAN SENDE UT MEN HELST IKKE.
+				Endre Region/Regions (og Page/Layout?) til å bare ta imot minste mulige mengde data for å fungere?
+				Og kun bruke en sånn nedstrippet versjon til props og dermed pageContributions?
+				Hvis det ikke går, må pgContrib droppes.
+	Hvis ikke:
+		--> Vanlig flyt. Bruk component til å finne jsxPath osv.
+
+Hvis component er en streng: jsxPath.
+	Hent component.
+		Hvis ja, følg komponentflyt over.
+		Hvis nei, følg page-flyt.
+
+         */
+        const comp = getComponent();
+        if (typeof entry === 'string') {
+            // Use jsxPath, regular flow
+            jsxPath = entry;
+            component = comp;
+
+        } else if (!entry || (typeof entry === 'object' && !Array.isArray(entry))) {
+            if (comp) {
+                // Component. Use entry in component flow. Derive jsxPath and default ID from local part/layout folder, same name.
+                component = entry;
+
+            } else {
+                const cont = getContent();
+                if (cont && cont.page && cont.page.descriptor) {
+                    // Page. Use content.page in page flow. Derive jsxPath and default ID from local page folder, same name.
+                    isPage = true;
+                    component = cont.page;
 
                 } else {
-                    throw Error("Can't construct React4xp for client: need 'jsxPath' or 'component' parameter");
+                    // Missing content.page.descriptor as well as component and jsxPath
+                    throw Error("React4xp seems to be called from an invalid context. Looks like you tried to derive jsxPath from a non-jsxPath entry parameter, using either falsy or a component object (portal.getComponent() called from a component controller, i.e. part, layout). Both inner portal.getComponent() and portal.getContent() calls yielded invalid results: no component data and no content.page.  |  entry=" + JSON.stringify(entry) + "  |  portal.getComponent=" + JSON.stringify(comp) + "  |  portal.getContent=" + JSON.stringify(cont));
                 }
             }
-
-            if (props && !props.component) {
-                props.component = content.page;
-            }
+        } else {
+            // Missing entry
+            throw Error("React4xp got an invalid entry reference. Either use falsy, a jsxPath string, or a component object (portal.getComponent called from a component controller, i.e. part, layout). entry=" + JSON.stringify(entry));
         }
 
-        const react4xp = new React4xp(component || jsxPath, isPage);
+        if (component.regions && Object.keys(component.regions).length) {
+            hasRegions = true;
+        } else if (isPage) {
+            console.warn("React4xp appears to be asked to render a page. No regions are found.  |  entry=" + JSON.stringify(entry) + "  |  portal.getComponent=" + JSON.stringify(comp) + "  |  portal.getContent=" + JSON.stringify(cont));
+        }
+
+        /*if (props && !props.component) {
+            props.component = content.page;
+        }*/
+
+        const react4xp = new React4xp(component || jsxPath, isPage, hasRegions);
 
         if (props) {
+            if (hasRegions && props && !props.component) {
+                // TODO: Too much data in props. Consider stripping out unnecessary fields. Remember that props are exposed to client in pageContribution. Stop this?
+                props.component = component;
+            }
             react4xp.setProps(props);
         }
 
@@ -203,11 +260,20 @@ class React4xp {
             react4xp.setId(id);
         }
 
+        if (isPage) {
+            react4xp.setIsPage(isPage);
+        }
+
+        if (hasRegions) {
+            react4xp.setHasRegions(hasRegions);
+        }
+
         if (uniqueId) {
             if (typeof uniqueId === "string") {
                 react4xp.setId(uniqueId);
+            }  else {
+                react4xp.uniqueId();
             }
-            react4xp.uniqueId();
         }
 
         if (jsxPath) {
@@ -273,6 +339,11 @@ class React4xp {
 
     setIsPage(isPage) {
         this.isPage = isPage;
+        return this;
+    }
+
+    setHasRegions(hasRegions) {
+        this.hasRegions = hasRegions;
         return this;
     }
 
@@ -496,20 +567,16 @@ class React4xp {
     static render = (entry, props = {}, request = null, params = {}) => {
         let react4xp;
         try {
-            if (typeof entry === 'string') {
-                params.jsxPath = entry;
-            } else if (entry && typeof entry === 'object') {
-                params.component = entry;
-            }
-
-            if (props && typeof props === 'object') {
+            params.entry = entry;
+            if (props && typeof props === 'object' && !Array.isArray(props)) {
                 params.props = props;
+            } else {
+                throw Error("React4xp props must be falsy or a regular JS object, not this: " + JSON.stringify(props));
             }
-
-            const { clientRender } = params;
 
             react4xp = React4xp._buildFromParams(params);
-            const {body, pageContributions} = params || {};
+
+            const {body, pageContributions, clientRender} = params || {};
 
             if (!request || request.mode === "edit" || request.mode === "inline") {
                 return {
