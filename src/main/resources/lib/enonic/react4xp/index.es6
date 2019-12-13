@@ -118,8 +118,8 @@ class React4xp {
         this.component = null;
         this.props = null;
 
-        this.isPage = false;
-        this.hasRegions = false;
+        this.isPage = 0;            // boolean using 0 for false and 1 for true, for the sake of more compact client-side .render and .hydrate calls.
+        this.hasRegions = 0;        // boolean using 0 for false and 1 for true, for the sake of more compact client-side .render and .hydrate calls.
         this.react4xpIdIsLocked = false;
 
 
@@ -144,7 +144,7 @@ class React4xp {
                 if (cont && cont.page) {
                     // TODO: It the long run, it would be better with a more reliable test than !component for whether this is a top-level entry call specifically from a page controller. Make a Content.getPage() call from a bean? And if it fails, this fallback should be skipped since this wasn't called from a page controller.
                     // Page. Use content.page in page flow. Derive jsxPath and default ID from local page folder, same name.
-                    this.isPage = true;
+                    this.isPage = 1;
                     this.component = cont.page;
 
                 } else {
@@ -174,7 +174,7 @@ class React4xp {
             // TODO: Move to later in the flow. Where are regions relevant and this.component guaranteed?
             // ------------------------------------------------------------------------------------------
             if (this.component.regions && Object.keys(this.component.regions).length) {
-                this.hasRegions = true;
+                this.hasRegions = 1;
             } else if (this.isPage) {
                 console.warn("React4xp appears to be asked to render a page. No regions are found.  |  entry=" + JSON.stringify(entry) + "  |  portal.getComponent=" + JSON.stringify(getComponent()) + "  |  portal.getContent=" + JSON.stringify(getContent));
             }
@@ -282,12 +282,12 @@ class React4xp {
     }
 
     setIsPage(isPage) {
-        this.isPage = isPage;
+        this.isPage = isPage ? 1 : 0;
         return this;
     }
 
     setHasRegions(hasRegions) {
-        this.hasRegions = hasRegions;
+        this.hasRegions = hasRegions ? 1 : 0;
         return this;
     }
 
@@ -415,11 +415,11 @@ class React4xp {
 
 
     renderBody = params => {
-        if (this.isPage) {
+        // TODO: Page templates might be preferrable as standalones - that is, not need to be inserted into a container, but be able to encompass an entire DOM with <html> as the outer returned element. This is tricky: on SSR, renderEntryToHtml can be used, but how to do that on client-side react.render (and possibly worse, .hydrate)? And how to separate between them? isPage is NOT enough, since a page template might be both standalone or inserted.
+        /* if (this.isPage) {
             return this.renderEntryToHtml();
-        }
+        } */
         const {body, clientRender} = params || {};
-
         return clientRender ? this.renderTargetContainer(body) : this.renderSSRIntoContainer(body);
     };
 
@@ -440,23 +440,32 @@ class React4xp {
      */
     renderPageContributions = params => {
         const {pageContributions, clientRender} = params || {};
-        if (this.isPage) {
-            return pageContributions;
-        }
 
         const command = clientRender ? 'render' : 'hydrate';
 
         this.ensureAndLockBeforeRendering();
 
-        return getAndMergePageContributions(this.jsxPath, pageContributions, {
-            bodyEnd: [
-                // Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
-                `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
+        // TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
+        return getAndMergePageContributions(
+            this.jsxPath,
+            pageContributions,
+            {
+                bodyEnd: [
+                    // Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
+                    `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
 
-                // Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props:
-                `<script defer>${LIBRARY_NAME}.CLIENT.${command}(${LIBRARY_NAME}['${this.jsxPath}'], ${JSON.stringify(this.react4xpId)} ${this.props ? ', ' + JSON.stringify(this.props) : ''});</script>`
-            ]
-        });
+                    // Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props. Signature: <command>(entry, id, isPage, hasRegions, props?)
+                    `
+<script defer>${
+                        LIBRARY_NAME}.CLIENT.${command}(${
+                            LIBRARY_NAME}['${this.jsxPath}'],${
+                            JSON.stringify(this.react4xpId)},${
+                            this.isPage}, ${
+                            this.hasRegions}${
+                            this.props ? ',' + JSON.stringify(this.props) : ''
+                    });</script>`
+                ]
+            });
     };
 
 
