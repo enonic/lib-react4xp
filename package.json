@@ -7,7 +7,12 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "NODE_PATH=./ node_modules/mocha/bin/mocha --compilers js:babel-core/register --require babel-polyfill --require src/test/test_helper.js \"src/test/**/*@(.js)\""
+    "test": "NODE_PATH=./ node_modules/mocha/bin/mocha --compilers js:babel-core/register --require babel-polyfill --require src/test/test_helper.js \"src/test/**/*@(.js)\"",
+    "clean": "./gradlew clean --refresh-dependencies --info",
+    "local": "./gradlew publishToMavenLocal --info",
+    "reinstall": "npm run clean && npm run local",
+    "watch": "./gradlew publishToMavenLocal --info -t",
+    "dev": "npm run reinstall && npm run watch"
   },
   "repository": {
     "type": "git",
