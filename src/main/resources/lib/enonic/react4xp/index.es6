@@ -39,6 +39,8 @@ Hvis component er en streng: jsxPath.
 const { getAndMergePageContributions } = require('./pageContributions');
 const { getAssetRoot } = require('./serviceRoots');
 const { getContent, getComponent } = require('/lib/xp/portal');
+const { newCache } = require('/lib/cache');
+const contentLib = require('/lib/xp/content');
 
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
@@ -65,8 +67,40 @@ SSRreact4xp.setConfig(
 const BASE_PATHS = {
     part: "parts",
     page: "pages",
-    layout: "layouts",  // <-- experimental. Might not work.
+    layout: "layouts",
 };
+
+const templateDescriptorCache = newCache({
+    size: 100,
+    expire: 600 // 10 minutes before needing a new fetch-and-check from ES (getDescriptorFromTemplate)
+});
+
+const getDescriptorFromTemplate = (componentType, templateId) =>
+    templateDescriptorCache.get(templateId, () => {
+        if (!templateId) {
+            log.warn(`Template ID is '${JSON.stringify(templateId)}'. Not ID of a template.`);
+            return undefined;
+        }
+        if (componentType !== 'page') {
+            log.warn(`Template ID '${templateId}' not accompanied by component type 'page' (component type is ${JSON.stringify(componentType)}).`);
+            return undefined;
+        }
+
+        const content = contentLib.get({
+            key: templateId
+        });
+
+        if (!content || content.type !== "portal:page-template") {
+            log.warn(`Content not found or not a template (content.type!=="portal:page-template"). Template ID is '${JSON.stringify(templateId)}', retrieved content: ${JSON.stringify(content)}`);
+            return undefined;
+        }
+        if (!content.page || content.page.type !== "page" || !(((content.page.descriptor || '') + '').trim())) {
+            log.warn(`Template doesn't seem to have a page controller attached. Template ID is '${JSON.stringify(templateId)}', retrieved template content: ${JSON.stringify(content)}`);
+            return undefined;
+        }
+
+        return content.page.descriptor;
+    });
 
 
 
@@ -154,20 +188,20 @@ class React4xp {
             }
 
 
-            const verifyThese = {
-                descriptor: this.component.descriptor,
+            const buildingBlockData = {
+                descriptor: this.component.descriptor || getDescriptorFromTemplate(this.component.type, this.component.template),
                 type: BASE_PATHS[this.component.type],
                 path: this.component.path
             };
-            Object.keys(verifyThese).forEach( attribute => {
-                if (!verifyThese[attribute]) {
+            Object.keys(buildingBlockData).forEach( attribute => {
+                if (!buildingBlockData[attribute]) {
                     throw Error(makeErrorMessage(attribute, this.component));
                 }
             });
 
-            const compName = this.component.descriptor.split(":")[1];
-            this.jsxPath = `site/${BASE_PATHS[this.component.type]}/${compName}/${compName}`;
-            this.react4xpId = `${BASE_PATHS[this.component.type]}_${compName}_${this.component.path}`.replace(/\//g, "_");
+            const compName = buildingBlockData.descriptor.split(":")[1];
+            this.jsxPath = `site/${buildingBlockData.type}/${compName}/${compName}`;
+            this.react4xpId = `${buildingBlockData.type}_${compName}_${buildingBlockData.path}`.replace(/\//g, "_");
 
 
 
@@ -523,7 +557,7 @@ class React4xp {
             params.entry = entry;
             if (props && typeof props === 'object' && !Array.isArray(props)) {
                 params.props = props;
-            } else {
+            } else if (props) {
                 throw Error("React4xp props must be falsy or a regular JS object, not this: " + JSON.stringify(props));
             }
 
@@ -564,5 +598,9 @@ class React4xp {
             }
         }
     };
+
+    static _clearCache = () => {
+        templateDescriptorCache.clear();
+    }
 }
 module.exports = React4xp;
