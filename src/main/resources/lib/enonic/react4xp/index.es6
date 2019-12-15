@@ -567,22 +567,17 @@ class React4xp {
 
             if (!request || request.mode === "edit" || request.mode === "inline") {
                 return {
-                    body: react4xp.isPage ?
-                        react4xp.renderEntryToHtml() :
-                        react4xp.renderSSRIntoContainer(body),
+                    body: react4xp.renderSSRIntoContainer(body),
                     pageContributions
                 };
 
             } else {
                 return {
-                    body: react4xp.isPage ?
-                        react4xp.renderEntryToHtml() :
-                        clientRender ?
-                            react4xp.renderTargetContainer(body) :
-                            react4xp.renderSSRIntoContainer(body),
-                    pageContributions: react4xp.isPage ?
-                        pageContributions :
-                        react4xp.renderPageContributions({pageContributions, clientRender})
+                    body: clientRender ?
+                        react4xp.renderTargetContainer(body) :
+                        react4xp.renderSSRIntoContainer(body),
+                    pageContributions: react4xp.renderPageContributions({pageContributions, clientRender})
+
                 };
             }
 
