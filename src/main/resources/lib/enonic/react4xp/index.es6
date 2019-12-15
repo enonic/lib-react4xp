@@ -494,10 +494,10 @@ class React4xp {
                         LIBRARY_NAME}.CLIENT.${command}(${
                             LIBRARY_NAME}['${this.jsxPath}'],${
                             JSON.stringify(this.react4xpId)},${
-                            this.isPage}, ${
-                            this.hasRegions}${
-                            this.props ? ',' + JSON.stringify(this.props) : ''
-                    });</script>`
+                            this.props ? JSON.stringify(this.props) : 'null'},${
+                            this.isPage},${
+                            this.hasRegions
+});</script>`
                 ]
             });
     };
