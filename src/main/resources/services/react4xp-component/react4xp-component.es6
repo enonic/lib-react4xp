@@ -7,14 +7,14 @@ exports.get = (req) => {
     	) + "): " + JSON.stringify(req.params, null, 2)
     );
     return {
-        contentType: 'applocation/json',
+        contentType: 'application/json',
         body: JSON.stringify({
             body: `<div>${req.params.compName} (${req.params.type}): ${req.params.config}</div>`,
             pageContributions: {
-                bodyBegin: '<script>console.log("bodyBegin");</script>',
-                bodyEnd: '<script>console.log("bodyEnd");</script>',
-                headBegin: '<script>console.log("headBegin");</script>',
-                headEnd: '<script>console.log("headEnd");</script>',
+                bodyBegin: `<script>console.log("bodyBegin: ${req.params.compName} (${req.params.type}):", ${JSON.stringify(req.params.config)});</script><script>console.log("Okay then.");</script>`,
+                bodyEnd: `<script>console.log("bodyEnd");</script><div><p>Wow it working</p></div><script>console.log("Okay bodyEnd.");</script>`,
+                headBegin: '<script>console.log("headBegin");</script><style>a {color: black;}</style>',
+                headEnd: '<style>b {color: red;}</style><script>console.log("headEnd");</script>',
             }
         }),
     }
