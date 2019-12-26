@@ -38,9 +38,19 @@ repositories {
     xp.enonicRepo()
 }
 
+def BUILD_ENV = "production"
+if (project.hasProperty("dev") || project.hasProperty("development")) {
+    BUILD_ENV = "development"
+}
+
+if (BUILD_ENV == 'development') {
+    task npmInstall(type: NpmTask, overwrite: true) {
+        println "BUILD_ENV is set to '" + BUILD_ENV + "':\nOVERRIDING VANILLA npmInstall IN FAVOR OF node-safe-install (nsi)." // Because nsi retains 'npm link' symlinks!
+        args = ['run', 'install:npmdev']
+    }
+}
 npmInstall.inputs.file("package.json")
 npmInstall.outputs.dir("node_modules")
-
 
 task babelXP(type: NodeTask) {
     group 'lib-react4xp'
@@ -76,13 +86,13 @@ nashornPolyfills.dependsOn += 'babelXP'
 
 task client(type: NodeTask) {
     group 'lib-react4xp'
-    description 'Include the client rendering wrapper in the lib'
+    description 'Build default client rendering wrapper in the lib'
 
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
             '--config', 'node_modules/react4xp-runtime-client/webpack.config.js',
             '--env.BUILD_R4X=' + ROOT + 'build/resources/main/services/react4xp-client',
-            '--env.BUILD_ENV=production',
+            '--env.BUILD_ENV=' + BUILD_ENV,
             '--env.CHUNK_CONTENTHASH=[name].js',
             '--env.CLIENT_CHUNKS_FILENAME=__delete_me_im_redundant__',
 

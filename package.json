@@ -8,11 +8,12 @@
   },
   "scripts": {
     "test": "NODE_PATH=./ node_modules/mocha/bin/mocha --compilers js:babel-core/register --require babel-polyfill --require src/test/test_helper.js \"src/test/**/*@(.js)\"",
-    "clean": "./gradlew clean --refresh-dependencies --info",
-    "local": "./gradlew publishToMavenLocal --info",
+    "clean": "rimraf node_modules && ./gradlew clean --refresh-dependencies --info",
     "reinstall": "npm run clean && npm run local",
-    "watch": "./gradlew publishToMavenLocal --info -t",
-    "dev": "npm run reinstall && npm run watch"
+    "local": "./gradlew publishToMavenLocal -P development --info",
+    "local:watch": "./gradlew publishToMavenLocal -P development --info -t",
+    "dev": "npm run clean && npm run local:watch",
+    "install:npmdev": "nsi"
   },
   "repository": {
     "type": "git",
@@ -41,12 +42,14 @@
     "babel-register": "^6.26.0",
     "lodash": "^4.17.13",
     "mocha": "^5.2.0",
+    "npm-safe-install": "^1.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react4xp-build-components": "^0.6.0",
     "react4xp-buildconstants": "^0.8.0",
     "react4xp-runtime-client": "^0.3.2",
     "react4xp-runtime-nashornpolyfills": "^0.3.6",
+    "rimraf": "^3.0.0",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3"
   },
