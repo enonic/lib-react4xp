@@ -24,8 +24,8 @@
   "homepage": "https://github.com/enonic/lib-react4xp#readme",
   "dependencies": {
     "node-fetch": "^1.7.3",
-    "react4xp-runtime-client": "^0.3.2",
-    "react4xp-runtime-nashornpolyfills": "^0.3.6"
+    "react4xp-runtime-client": "^0.4.0",
+    "react4xp-runtime-nashornpolyfills": "^0.4.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.7",
@@ -33,14 +33,16 @@
     "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
     "@babel/preset-env": "^7.7.7",
+    "@babel/preset-react": "^7.7.4",
     "@babel/register": "^7.7.7",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
+    "babel-polyfill": "^6.26.0",
     "lodash": "^4.17.13",
     "mocha": "^5.2.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react4xp-build-components": "^0.5.0",
+    "react4xp-build-components": "^0.7.0",
     "react4xp-buildconstants": "^0.8.0",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3"
