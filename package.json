@@ -29,23 +29,27 @@
   },
   "homepage": "https://github.com/enonic/lib-react4xp#readme",
   "dependencies": {
-    "node-fetch": "^1.7.3"
+    "node-fetch": "^1.7.3",
+    "react4xp-runtime-client": "^0.4.0",
+    "react4xp-runtime-nashornpolyfills": "^0.4.1"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-eslint": "^7.2.3",
-    "babel-loader": "^7.1.5",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1",
-    "babel-register": "^6.26.0",
+    "@babel/cli": "^7.7.7",
+    "@babel/core": "^7.7.7",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
+    "@babel/preset-env": "^7.7.7",
+    "@babel/preset-react": "^7.7.4",
+    "@babel/register": "^7.7.7",
+    "babel-eslint": "^10.0.3",
+    "babel-loader": "^8.0.6",
+    "babel-polyfill": "^6.26.0",
     "lodash": "^4.17.13",
     "mocha": "^5.2.0",
     "npm-safe-install": "^1.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react4xp-build-components": "^0.6.0",
+    "react4xp-build-components": "^0.7.0",
     "react4xp-buildconstants": "^0.8.0",
     "react4xp-runtime-client": "^0.3.2",
     "react4xp-runtime-nashornpolyfills": "^0.3.6",
@@ -55,11 +59,11 @@
   },
   "babel": {
     "presets": [
-      "es2015",
-      "stage-0"
+      "@babel/preset-env"
     ],
     "plugins": [
-      "transform-object-rest-spread"
+      "@babel/plugin-proposal-object-rest-spread",
+      "@babel/plugin-proposal-class-properties"
     ]
   }
 }

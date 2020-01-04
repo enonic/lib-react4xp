@@ -23,7 +23,7 @@ dependencies {
     compile group: 'org.jdom', name: 'jdom', version: '2.0.2'
     compile group: 'org.json', name: 'json', version: '20180813'
     compile group: 'jaxen', name: 'jaxen', version: '1.1.6'
-    
+
     testCompile "com.enonic.xp:testing:${xpVersion}"
 }
 
@@ -56,7 +56,7 @@ task babelXP(type: NodeTask) {
     group 'lib-react4xp'
     description 'Compile server-side XP components from ES6'
 
-    script = file('node_modules/babel-cli/bin/babel.js')
+    script = file('node_modules/\\@babel/cli/bin/babel.js')
     args = ["src/main/resources", "--out-dir", "build/resources/main", "--ignore", "src/main/resources/react4xp"]
 
     inputs.dir 'src/main/resources'
