@@ -1,0 +1,60 @@
+{
+  "errors": [],
+  "warnings": [],
+  "outputPath": "/Users/munkvold/projects/gjensidige.builders/xp7-react-theme/build/resources/main/assets/react4xp",
+  "entrypoints": {
+    "site/parts/basic-text-part/basic-text-part": {
+      "chunks": ["vendors", "site/parts/basic-text-part/basic-text-part"],
+      "assets": [
+        "vendors.dfb19e5e7.js",
+        "vendors.dfb19e5e7.js.map",
+        "site/parts/basic-text-part/basic-text-part.js",
+        "site/parts/basic-text-part/basic-text-part.js.map"
+      ],
+      "children": {},
+      "childAssets": {}
+    },
+    "site/parts/basic-title/basic-title": {
+      "chunks": ["vendors", "site/parts/basic-title/basic-title"],
+      "assets": [
+        "vendors.dfb19e5e7.js",
+        "vendors.dfb19e5e7.js.map",
+        "site/parts/basic-title/basic-title.css",
+        "site/parts/basic-title/basic-title.js",
+        "site/parts/basic-title/basic-title.css.map",
+        "site/parts/basic-title/basic-title.js.map"
+      ],
+      "children": {},
+      "childAssets": {}
+    },
+    "site/parts/image-text-part/image-text-part": {
+      "chunks": ["vendors", "site/parts/image-text-part/image-text-part"],
+      "assets": [
+        "vendors.dfb19e5e7.js",
+        "vendors.dfb19e5e7.js.map",
+        "site/parts/image-text-part/image-text-part.js",
+        "site/parts/image-text-part/image-text-part.js.map"
+      ],
+      "children": {},
+      "childAssets": {}
+    },
+    "site/parts/photoheaderblock/photoheaderblock": {
+      "chunks": ["vendors", "site/parts/photoheaderblock/photoheaderblock"],
+      "assets": [
+        "vendors.dfb19e5e7.js",
+        "vendors.dfb19e5e7.js.map",
+        "site/parts/photoheaderblock/photoheaderblock.js",
+        "site/parts/photoheaderblock/photoheaderblock.js.map"
+      ],
+      "children": {},
+      "childAssets": {}
+    }
+  },
+  "logging": {
+    "webpack.buildChunkGraph.visitModules": {
+      "entries": [],
+      "filteredEntries": 2,
+      "debug": false
+    }
+  }
+}
