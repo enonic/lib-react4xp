@@ -23,7 +23,7 @@ dependencies {
     compile group: 'org.jdom', name: 'jdom', version: '2.0.2'
     compile group: 'org.json', name: 'json', version: '20180813'
     compile group: 'jaxen', name: 'jaxen', version: '1.1.6'
-    
+
     testCompile "com.enonic.xp:testing:${xpVersion}"
 }
 
@@ -47,8 +47,8 @@ task babelXP(type: NodeTask) {
     group 'lib-react4xp'
     description 'Compile server-side XP components from ES6'
 
-    script = file('node_modules/babel-cli/bin/babel.js')
-    args = ["src/main/resources", "--out-dir", "build/resources/main"]
+    script = file('node_modules/\\@babel/cli/bin/babel.js')
+    args = ["src/main/resources", "--out-dir", "build/resources/main", "--ignore", "src/main/resources/react4xp"]
 
     inputs.dir 'src/main/resources'
     outputs.dir("build/resources/main")
@@ -60,14 +60,17 @@ def ROOT = project.projectDir.toString() + "/"
 
 task nashornPolyfills(type: NodeTask) {
     group 'lib-react4xp'
-    description 'Build polyfill resopurces, allowing XP to do React server-side rendering in Nashorn'
+    description 'Build default polyfill code, allowing XP to run the (node-written) React server-side rendering in Nashorn'
 
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
             '--config', 'node_modules/react4xp-runtime-nashornpolyfills/webpack.config.js',
-            '--env.SOURCE=' + ROOT + 'node_modules/react4xp-runtime-nashornpolyfills/nashornPolyfills.es6',
-            '--env.BUILD_R4X=' + ROOT + 'build/resources/main/lib/enonic/react4xp/fallback',
-            '--env.NASHORNPOLYFILLS_FILENAME=react4xp-runtime-nashornpolyfills'
+            '--env.NASHORNPOLYFILLS_SOURCE=node_modules/react4xp-runtime-nashornpolyfills/nashornPolyfills.es6',
+
+            // (env.BUILD_R4X + env.NASHORNPOLYFILLS_FILENAME) must match ('build/resources/main' + defaultPolyfillFileName)
+            // in com/enonic/lib/react4xp/ssr/EngineFactory.java!
+            '--env.BUILD_R4X=' + ROOT + 'build/resources/main/lib/enonic/react4xp/default',
+            '--env.NASHORNPOLYFILLS_FILENAME=nashornPolyfills'
     ]
 }
 nashornPolyfills.dependsOn += 'babelXP'
