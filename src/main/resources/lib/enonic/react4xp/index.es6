@@ -219,6 +219,13 @@ class React4xp {
             // Missing entry
             throw Error("React4xp got an invalid 'entry' reference. Either use falsy, a jsxPath string, or a component object (portal.getComponent() called from a component controller, i.e. part, layout). entry=" + JSON.stringify(entry));
         }
+
+        log.info("\nthis.jsxPath (" +
+        	(Array.isArray(this.jsxPath) ?
+        		("array[" + this.jsxPath.length + "]") :
+        		(typeof this.jsxPath + (this.jsxPath && typeof this.jsxPath === 'object' ? (" with keys: " + JSON.stringify(Object.keys(this.jsxPath))) : ""))
+        	) + "): " + JSON.stringify(this.jsxPath, null, 2)
+        );
     }
 
 
@@ -237,6 +244,13 @@ class React4xp {
         const {entry, id, uniqueId, props} = params || {};
 
         const react4xp = new React4xp(entry);
+
+        log.info("\nprops (" +
+        	(Array.isArray(props) ?
+        		("array[" + props.length + "]") :
+        		(typeof props + (props && typeof props === 'object' ? (" with keys: " + JSON.stringify(Object.keys(props))) : ""))
+        	) + "): " + JSON.stringify(props, null, 2)
+        );
 
         if (props) {
             // TODO: Too much data in props. Consider stripping out unnecessary fields. Remember that props are exposed to client in pageContribution. Stop this?
@@ -566,12 +580,14 @@ class React4xp {
             const {body, pageContributions, clientRender} = params || {};
 
             if (!request || request.mode === "edit" || request.mode === "inline") {
+                log.info('\n1');
                 return {
                     body: react4xp.renderSSRIntoContainer(body),
                     pageContributions
                 };
 
             } else {
+                log.info('\n2 - clientRender: ' + clientRender);
                 return {
                     body: clientRender ?
                         react4xp.renderTargetContainer(body) :

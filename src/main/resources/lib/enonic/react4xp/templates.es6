@@ -34,6 +34,14 @@ export default {};
  *      See react4xp-regions/Layout.jsx for its additional props.
  */
 export const renderRegionBody = ({jsxPath, component, content, regionClasses, ...props}) => {
+
+    log.info("renderRehionBody jsxPath (" +
+    	(Array.isArray(jsxPath) ?
+    		("array[" + jsxPath.length + "]") :
+    		(typeof jsxPath + (jsxPath && typeof jsxPath === 'object' ? (" with keys: " + JSON.stringify(Object.keys(jsxPath))) : ""))
+    	) + "): " + JSON.stringify(jsxPath, null, 2)
+    );
+
     if (!component || typeof component !== 'object') {
         component = portal.getComponent();
     }
