@@ -220,7 +220,7 @@ class React4xp {
             throw Error("React4xp got an invalid 'entry' reference. Either use falsy, a jsxPath string, or a component object (portal.getComponent() called from a component controller, i.e. part, layout). entry=" + JSON.stringify(entry));
         }
 
-        log.info("\nthis.jsxPath (" +
+        log.info("- this.jsxPath (" +
         	(Array.isArray(this.jsxPath) ?
         		("array[" + this.jsxPath.length + "]") :
         		(typeof this.jsxPath + (this.jsxPath && typeof this.jsxPath === 'object' ? (" with keys: " + JSON.stringify(Object.keys(this.jsxPath))) : ""))
@@ -245,7 +245,7 @@ class React4xp {
 
         const react4xp = new React4xp(entry);
 
-        log.info("\nprops (" +
+        log.info("props (" +
         	(Array.isArray(props) ?
         		("array[" + props.length + "]") :
         		(typeof props + (props && typeof props === 'object' ? (" with keys: " + JSON.stringify(Object.keys(props))) : ""))
@@ -580,14 +580,14 @@ class React4xp {
             const {body, pageContributions, clientRender} = params || {};
 
             if (!request || request.mode === "edit" || request.mode === "inline") {
-                log.info('\n1');
+                log.info('---1');
                 return {
                     body: react4xp.renderSSRIntoContainer(body),
                     pageContributions
                 };
 
             } else {
-                log.info('\n2 - clientRender: ' + clientRender);
+                log.info('---2 - clientRender: ' + clientRender);
                 return {
                     body: clientRender ?
                         react4xp.renderTargetContainer(body) :
