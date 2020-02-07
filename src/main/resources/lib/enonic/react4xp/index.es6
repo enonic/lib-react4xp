@@ -1,41 +1,3 @@
-/*
-DETTE SKAL SKJE:
-
-.Render (eller egentlig igjennom intern new React()...... før .renderSomething):
-
-Hvis første argument er null/undefined (getComponent er null OG jsxpath er null):
-	Kanskje page?
-	    Hent (ny)component = getContent().page.
-	Hvis (ny)component og component.descriptor: page!
-		Hvis (ny)component.regions: HAR REGIONS.
-			--> PAGE SKAL RENDRES SOM SSR (FEILSJEKK: clientRender:true), inn i en spesiallaget body : <!DOCTYPE HTML><html id="something"></html>. Sjekk ytre container
-				Hva med pageContributions?
-					KAN SENDE UT MEN HELST IKKE.
-						I så fall strippe bort aktivering av
-					Endre Region/Regions (og Page/Layout?) til å bare ta imot minste mulige mengde data for å fungere?
-					Og kun bruke en sånn nedstrippet versjon til props og dermed pageContributions?
-					Hvis det ikke går, må pgContrib droppes.
-		Hvis ikke: --> SANNSYNLIGVIS FEIL.
-	Hvis ikke: --> FEIL.
-
-Hvis component er et objekt: OK. KOMPONENTFLYT
-	Se etter component.regions. Hvis ja:
-		--> LAYOUT. SKAL RENDRES UTEN Å LEGGE TIL YTRE CONTAINER??? Antagelig trengs en ytre container.
-			Hva med pageContributions?
-				KAN SENDE UT MEN HELST IKKE.
-				Endre Region/Regions (og Page/Layout?) til å bare ta imot minste mulige mengde data for å fungere?
-				Og kun bruke en sånn nedstrippet versjon til props og dermed pageContributions?
-				Hvis det ikke går, må pgContrib droppes.
-	Hvis ikke:
-		--> Vanlig flyt. Bruk component til å finne jsxPath osv.
-
-Hvis component er en streng: jsxPath.
-	Hent component.
-		Hvis ja, følg komponentflyt over.
-		Hvis nei, følg page-flyt.
-
- */
-
 const { getAndMergePageContributions } = require('./pageContributions');
 const { getAssetRoot } = require('./serviceRoots');
 const { getContent, getComponent } = require('/lib/xp/portal');
@@ -106,7 +68,6 @@ const getDescriptorFromTemplate = (componentType, templateId) =>
 
 const bodyHasContainer = (body, react4xpId) => {
     const react4xpPattern = new RegExp("<[^>]+\\s+id\\s*=\\s*[\"']" + react4xpId + "[\"']", 'i');
-    //log.info(JSON.stringify({react4xpId: react4xpId, react4xpPattern}, null, 2));
 
     return !!body.match(react4xpPattern);
 };
