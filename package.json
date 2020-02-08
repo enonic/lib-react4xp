@@ -30,7 +30,7 @@
   "homepage": "https://github.com/enonic/lib-react4xp#readme",
   "dependencies": {
     "node-fetch": "^1.7.3",
-    "react4xp-runtime-client": "0.4.0",
+    "react4xp-runtime-client": "0.5.0",
     "react4xp-runtime-nashornpolyfills": "0.4.2"
   },
   "devDependencies": {
@@ -49,7 +49,7 @@
     "npm-safe-install": "^1.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react4xp-build-components": "0.7.0",
+    "react4xp-build-components": "0.7.1",
     "react4xp-buildconstants": "0.8.0",
     "rimraf": "^3.0.0",
     "webpack": "^4.29.6",
