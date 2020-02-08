@@ -84,7 +84,7 @@ Assuming you have Enonic XP nicely installed, and you have an **XP parent projec
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
-	include 'com.enonic.lib:lib-react4xp:0.3.2'
+	include 'com.enonic.lib:lib-react4xp:0.3.8'
 }
 ```
 
@@ -97,7 +97,7 @@ If you need / want to build the lib yourself instead of downloading it with Grad
 ```bash
 gradlew build install
 ```
-Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.3.3`.
+Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.3.8`.
 
 ---
 
@@ -109,7 +109,7 @@ This is a runtime lib, so it doesn't provide any tools required for building/tra
 Go to the _parent XP project folder_ and use the command line to add these NPM packages as _devDependencies_:
 
 ```bash
-npm add --save react4xp-buildconstants react4xp-build-components react4xp-runtime-externals babel-cli react-dom
+npm add --save react4xp-runtime-nashornpolyfills@0.3.6 react4xp-buildconstants@0.7.9 react4xp-build-components@0.3.10 react4xp-runtime-externals@0.3.5
 ```
  
 
