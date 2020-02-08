@@ -11,7 +11,7 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
   - client-side wrapper tailored for use with the services - itself available to the browser through one of the services. 
 
 ## Version and compatibility
-Beta: **0.8.0**
+This is Alpha **0.8.0**. The currently most tested and stable version is Beta 0.3.8. 
 
 XP7 compatible. For XP6, see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master)
 
