@@ -1,11 +1,5 @@
 # lib-react4xp
 
-Beta: 0.3.6
-
-XP7 compatible. For XP6, see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master)
-
----
-
 **React for XP: handling and rendering of pre-built React components in Enonic XP**
 
 This library runs on [Enonic XP](https://enonic.com/developer-tour) server side, and provides:
@@ -14,6 +8,26 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
   - server-side rendering option in XP, through the controller functions  
   - client-side wrapper tailored for use with the services - itself available to the browser through one of the services. 
     
+## Version and compatibility
+Beta: **0.8.0**
+
+XP7 compatible. For XP6, see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master)
+
+lib-react4xp is installed as a regular XP library in a parent app/project. But it needs to run alongside the NPM packages listed in the table below. Other combinations of versions may work, YMMV, but these are the version combinations of each NPM package that each lib-react4xp package is built for so far. So these are the recommended combinations:  
+
+| lib-react4xp | react4xp-runtime-client | react4xp-runtime-nashornpolyfills | react4xp-build-components | react4xp-runtime-externals | react4xp-buildconstants | react4xp-regions |
+| ------------ | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
+| **0.2.7** | - | 0.3.6 | 0.3.8 | 0.3.5 | 0.7.6 |  - |
+| **0.2.8** | - | 0.3.6 | 0.3.10 | 0.3.5 | 0.7.9 |  - |
+| **0.3.7** | - | 0.3.6 | 0.3.8 | 0.3.5 | 0.7.6 |  - |
+| **0.3.8** | - | 0.3.6 | 0.3.10 | 0.3.5 | 0.7.9 |  - |
+| **0.3.11** | - | 0.3.6 | 0.3.11 | 0.3.5 | 0.7.10 |  - |
+| **0.5.0** | - | 0.3.6 | 0.5.0 | 0.3.5 | 0.8.0 |  - |
+| **0.7.1** | 0.4.0 | 0.4.2 | 0.7.0 | 0.4.0 | 0.8.0 |  0.2.0 |
+| **0.8.0** | 0.5.0 | 0.4.3 | 0.7.3 | 0.4.0 | 0.8.0 |  0.2.1 |
+
+This setup should get simplified before version 1.0 is released.
+
 
 ## Jump to:
   - [Install the library](#installing-the-library)
