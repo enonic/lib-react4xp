@@ -106,10 +106,10 @@ This is a runtime lib, so it doesn't provide any tools required for building/tra
 
 
 ### 1: NPM: import packages
-Go to the _parent XP project folder_ and use the command line to add these NPM packages as _devDependencies_:
+Go to the _parent XP project folder_ and use the command line to add these NPM packages:
 
 ```bash
-npm add --save react4xp-runtime-nashornpolyfills@0.3.6 react4xp-buildconstants@0.7.9 react4xp-build-components@0.3.10 react4xp-runtime-externals@0.3.5
+npm add -D react4xp-runtime-nashornpolyfills@0.3.6 react4xp-buildconstants@0.7.9 react4xp-build-components@0.3.10 react4xp-runtime-externals@0.3.5
 ```
  
 
