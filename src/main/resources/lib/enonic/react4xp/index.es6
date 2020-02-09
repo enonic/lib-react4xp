@@ -11,20 +11,24 @@ const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer')
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
 const {
-    LIBRARY_NAME, R4X_TARGETSUBDIR,
-    NASHORNPOLYFILLS_FILENAME, EXTERNALS_CHUNKS_FILENAME, COMPONENT_STATS_FILENAME, ENTRIES_FILENAME
-} = require('./react4xp_constants.json');;
-
+  LIBRARY_NAME,
+  R4X_TARGETSUBDIR,
+  NASHORNPOLYFILLS_FILENAME,
+  EXTERNALS_CHUNKS_FILENAME,
+  COMPONENT_STATS_FILENAME,
+  ENTRIES_FILENAME
+} = require("./react4xp_constants.json");
 
 SSRreact4xp.setConfig(
-    app.name,
-    `/${R4X_TARGETSUBDIR}`,
-    LIBRARY_NAME,
-    `/${R4X_TARGETSUBDIR}/`,
-    NASHORNPOLYFILLS_FILENAME ? `${NASHORNPOLYFILLS_FILENAME}.js` : null,
-    ENTRIES_FILENAME,
-    EXTERNALS_CHUNKS_FILENAME,
-    COMPONENT_STATS_FILENAME);
+  app.name,
+  `/${R4X_TARGETSUBDIR}`,
+  LIBRARY_NAME,
+  `/${R4X_TARGETSUBDIR}/`,
+  NASHORNPOLYFILLS_FILENAME ? `${NASHORNPOLYFILLS_FILENAME}.js` : null,
+  ENTRIES_FILENAME,
+  EXTERNALS_CHUNKS_FILENAME,
+  COMPONENT_STATS_FILENAME
+);
 
 const BASE_PATHS = {
     part: "parts",
@@ -222,8 +226,7 @@ class React4xp {
         return react4xp;
     };
 
-
-    //---------------------------------------------------------------
+  //---------------------------------------------------------------
 
     checkIdLock() {
         if (this.react4xpIdIsLocked) {
@@ -241,7 +244,6 @@ class React4xp {
         }
         this.react4xpIdIsLocked = true;
     }
-
 
     ensureAndLockBeforeRendering() {
         this.ensureAndLockId();
@@ -287,7 +289,7 @@ class React4xp {
     }
 
 
-    //---------------------------------------------------------------
+  //---------------------------------------------------------------
 
     /** When you want to use a particular JSX file (other than the default, a JSX file in the same folder as the XP component,
       * with the same name as the folder).
@@ -302,7 +304,7 @@ class React4xp {
     setJsxPath(jsxPath) {
         // Enforce a clean jsxPath - it's not just a file reference, but a react4xp component name!
         if (
-            (jsxPath || "").trim() === "" ||
+            (jsxPath || '').trim() === '' ||
             jsxPath.startsWith('.') ||
             jsxPath.startsWith('/') ||
             jsxPath.indexOf('..') !== -1 ||
@@ -331,10 +333,7 @@ class React4xp {
         return this;
     }
 
-
-
-
-    //--------------------------------------------------------------- Props
+  //--------------------------------------------------------------- Props
 
     /** Sets the react4xp component's top-level props.
       * @param props {object} Props to be stored in the component. Must be a string-serializeable object!
@@ -435,7 +434,6 @@ class React4xp {
      */
     renderPageContributions = params => {
         const {pageContributions, clientRender} = params || {};
-
         const command = clientRender ? 'render' : 'hydrate';
 
         this.ensureAndLockBeforeRendering();
@@ -449,7 +447,8 @@ class React4xp {
                     // Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
                     `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
 
-                    // Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props. Signature: <command>(entry, id, isPage, hasRegions, props?)
+                    // Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props.
+                    // Signature: <command>(entry, id, props?, isPage, hasRegions)
                     `
 <script defer>${
                         LIBRARY_NAME}.CLIENT.${command}(${
@@ -526,34 +525,37 @@ class React4xp {
 
             const {body, pageContributions, clientRender} = params || {};
 
-            if (!request || request.mode === "edit" || request.mode === "inline") {
-                return {
-                    body: react4xp.renderSSRIntoContainer(body),
-                    pageContributions
-                };
-
-            } else {
-                return {
-                    body: clientRender ?
-                        react4xp.renderTargetContainer(body) :
-                        react4xp.renderSSRIntoContainer(body),
-                    pageContributions: react4xp.renderPageContributions({pageContributions, clientRender})
-
-                };
-            }
-
-        } catch (e) {
-            log.error(e);
-            log.error("entry (" + typeof entry + "): " + JSON.stringify(params));
-            log.error("props (" + typeof props + "): " + JSON.stringify(props));
-            log.error("request (" + typeof request + "): " + JSON.stringify(request));
-            log.error("params (" + typeof params + "): " + JSON.stringify(params));
-            const r = react4xp || {};
-            return {
-                body: buildErrorContainer(r.jsxPath, r.react4xpId)
-            }
-        }
-    };
+      if (!request || request.mode === "edit" || request.mode === "inline") {
+        return {
+          body: react4xp.renderSSRIntoContainer(body),
+          pageContributions: react4xp.renderPageContributions({
+            pageContributions,
+            clientRender
+          })
+        };
+      } else {
+        return {
+          body: clientRender
+            ? react4xp.renderTargetContainer(body)
+            : react4xp.renderSSRIntoContainer(body),
+          pageContributions: react4xp.renderPageContributions({
+            pageContributions,
+            clientRender
+          })
+        };
+      }
+    } catch (e) {
+      log.error(e);
+      log.error("entry (" + typeof entry + "): " + JSON.stringify(params));
+      log.error("props (" + typeof props + "): " + JSON.stringify(props));
+      log.error("request (" + typeof request + "): " + JSON.stringify(request));
+      log.error("params (" + typeof params + "): " + JSON.stringify(params));
+      const r = react4xp || {};
+      return {
+        body: buildErrorContainer(r.jsxPath, r.react4xpId)
+      };
+    }
+  };
 
     static _clearCache = () => {
         templateDescriptorCache.clear();

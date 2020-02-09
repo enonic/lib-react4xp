@@ -79,7 +79,7 @@ public class ChunkDependencyParser {
                 String fileName = (String)obj;
                 if (
                         (eagerlyLoadEntries || !entries.contains(fileName)) &&
-                        !fileName.endsWith(".map")
+                        fileName.endsWith(".js")
                 ) {
                     accumulator.add(fileName);
                 }
