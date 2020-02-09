@@ -11,7 +11,7 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
   - client-side wrapper tailored for use with the services - itself available to the browser through one of the services. 
 
 ## Version and compatibility
-This is Alpha **0.8.0**. The currently most tested and stable version is Beta 0.3.8. 
+This is Alpha **0.8.1**. The currently most tested and stable version is Beta 0.3.8. 
 
 XP7 compatible. For XP6, see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master)
 
@@ -27,6 +27,8 @@ lib-react4xp is installed as a regular XP library in a parent app/project. But i
 | **0.5.0** | - | 0.3.6 | 0.5.0 | 0.3.5 | 0.8.0 |  - |
 | **0.7.1** | 0.4.0 | 0.4.2 | 0.7.0 | 0.4.0 | 0.8.0 |  0.2.0 |
 | **0.8.0** | 0.5.0 | 0.4.3 | 0.7.3 | 0.4.0 | 0.8.0 |  0.2.1 |
+| **0.8.1** | 0.5.0 | 0.4.3 | 0.7.3 | 0.4.0 | 0.8.0 | 0.2.1 |
+
 
 This setup should get simplified before version 1.0 is released.
 
@@ -85,7 +87,7 @@ Assuming you have Enonic XP nicely installed, and you have an **XP parent projec
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
-	include 'com.enonic.lib:lib-react4xp:0.8.0'
+	include 'com.enonic.lib:lib-react4xp:0.8.1'
 }
 ```
 
@@ -98,7 +100,7 @@ If you need / want to build the lib yourself instead of downloading it with Grad
 ```bash
 gradlew build install
 ```
-Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.8.0`.
+Gradle will build the library and install it into the local cache, available for other projects. Make sure that the version you downloaded/built matches your reference in `build.gradle`, e.g. `0.8.1`.
 
 ---
 
@@ -107,7 +109,7 @@ This is a runtime lib, so it doesn't provide any tools required for building/tra
 
 
 ### 1: NPM: import packages
-Go to the _parent XP project folder_ and use the command line to add these NPM packages as _devDependencies_ (this is for lib-react4xp version 0.8.0, see the table above for other version combinations):
+Go to the _parent XP project folder_ and use the command line to add these NPM packages as _devDependencies_ (this is for lib-react4xp version 0.8.1, see the table above for other version combinations):
 
 ```bash
 npm add --save-dev react4xp-runtime-client@0.5.0 react4xp-runtime-nashornpolyfills@0.4.3 react4xp-build-components@0.7.3 react4xp-runtime-externals@0.4.0 react4xp-buildconstants@0.8.0 react4xp-regions@0.2.1
