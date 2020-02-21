@@ -42,7 +42,17 @@ public class ServerSideRenderer implements ScriptBean {
 
     private static RunMode runMode = RunMode.get();
 
-    public void setConfig(String APP_NAME, String SCRIPTS_HOME, String LIBRARY_NAME, String CHUNKFILES_HOME, String NASHORNPOLYFILLS_FILENAME, String ENTRIESSOURCE, String EXTERNALS_CHUNKS_FILENAME, String COMPONENT_STATS_FILENAME) throws IOException, ScriptException {
+    public void setConfig(
+            String APP_NAME,
+            String SCRIPTS_HOME,
+            String LIBRARY_NAME,
+            String CHUNKFILES_HOME,
+            String NASHORNPOLYFILLS_FILENAME,
+            String ENTRIESSOURCE,
+            String EXTERNALS_CHUNKS_FILENAME,
+            String COMPONENT_STATS_FILENAME,
+            boolean lazyLoading
+    ) throws IOException, ScriptException {
         ServerSideRenderer.APP_NAME = APP_NAME;
         ServerSideRenderer.SCRIPTS_HOME = SCRIPTS_HOME;                             // "/react4xp"
         ServerSideRenderer.LIBRARY_NAME = LIBRARY_NAME;                             // "React4xp"
@@ -57,7 +67,14 @@ public class ServerSideRenderer implements ScriptBean {
         ServerSideRenderer.CHUNKSSOURCES.add(EXTERNALS_CHUNKS_FILENAME);            // "chunks.externals.json"
 
         // Init the engine too
-        ENGINE = EngineFactory.initEngine(CHUNKFILES_HOME, NASHORNPOLYFILLS_FILENAME, ENTRIESSOURCE, COMPONENT_STATS_FILENAME, CHUNKSSOURCES);
+        ENGINE = EngineFactory.initEngine(
+                CHUNKFILES_HOME,
+                NASHORNPOLYFILLS_FILENAME,
+                ENTRIESSOURCE,
+                COMPONENT_STATS_FILENAME,
+                ServerSideRenderer.CHUNKSSOURCES,
+                lazyLoading
+        );
     }
 
     // Examples:
