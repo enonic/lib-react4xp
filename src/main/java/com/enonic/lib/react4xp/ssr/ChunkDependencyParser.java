@@ -59,11 +59,13 @@ public class ChunkDependencyParser {
         return accumulator;
     }
 
-    private LinkedList<String> getDependencyNamesFromStatsFile(String statsFile, LinkedList<String> entries, boolean eagerlyLoadEntries) throws IOException {
+    private LinkedList<String> getDependencyNamesFromStatsFile(String statsFile, LinkedList<String> entries, boolean lazyLoading) throws IOException {
         LinkedList<String> accumulator = new LinkedList<>();
+        if (lazyLoading) {
+            return accumulator;
+        }
 
         JSONObject fileContentData = getJSON(statsFile);
-
         Object entryObj = fileContentData.get("entrypoints");
         if (entryObj == null) {
             return accumulator;
@@ -77,10 +79,7 @@ public class ChunkDependencyParser {
             JSONArray assets = (JSONArray)entryData.get("assets");
             for (Object obj : assets) {
                 String fileName = (String)obj;
-                if (
-                        (eagerlyLoadEntries || !entries.contains(fileName)) &&
-                        fileName.endsWith(".js")
-                ) {
+                if (!entries.contains(fileName) && fileName.endsWith(".js")) {
                     accumulator.add(fileName);
                 }
             }
@@ -105,7 +104,7 @@ public class ChunkDependencyParser {
         return entries;
     }
 
-    public LinkedHashSet<String> getScriptDependencyNames(String statsFile, List<String> chunkFiles, String entryFile, boolean eagerlyLoadEntries) throws IOException {
+    public LinkedHashSet<String> getScriptDependencyNames(String statsFile, List<String> chunkFiles, String entryFile, boolean lazyLoading) throws IOException {
         LinkedList<String> entries = getEntriesList(entryFile);
 
         LinkedHashSet<String> dependencyScripts = new LinkedHashSet<>();
@@ -113,7 +112,7 @@ public class ChunkDependencyParser {
             dependencyScripts.addAll(getDependencyNamesFromChunkFile(chunkFile));
         }
 
-        dependencyScripts.addAll(getDependencyNamesFromStatsFile(statsFile, entries, eagerlyLoadEntries));
+        dependencyScripts.addAll(getDependencyNamesFromStatsFile(statsFile, entries, lazyLoading));
 
         return dependencyScripts;
     }

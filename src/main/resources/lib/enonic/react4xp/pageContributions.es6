@@ -2,7 +2,7 @@ const utilLib = require("/lib/util");
 
 const cacheLib = require("/lib/cache");
 const pageContributionsCache = cacheLib.newCache({
-  size: 100,
+  size: 750,
   expire: 10800 // 30 hours
 });
 

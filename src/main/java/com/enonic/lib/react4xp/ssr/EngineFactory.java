@@ -35,21 +35,18 @@ public class EngineFactory {
 
     private static NashornScriptEngine engineInstance = null;
 
-    private static boolean lazyLoading;
     private static HashMap<String, Boolean> scriptHasBeenLoadedByName = null;
 
     private static void configEngine(
             String CHUNKFILES_HOME,
             String ENTRIES_SOURCEFILENAME,
-            ArrayList<String> CHUNK_SOURCEFILENAMES,
-            boolean lazyLoading
+            ArrayList<String> CHUNK_SOURCEFILENAMES
     ) {
         ENTRIES_SOURCE = CHUNKFILES_HOME + ENTRIES_SOURCEFILENAME;
         CHUNKS_SOURCES = new ArrayList<>();
         for (String chunkFileName : CHUNK_SOURCEFILENAMES) {
             CHUNKS_SOURCES.add(CHUNKFILES_HOME + chunkFileName);
         }
-        EngineFactory.lazyLoading = lazyLoading;
         scriptHasBeenLoadedByName = new HashMap<>();
     }
 
@@ -92,16 +89,13 @@ public class EngineFactory {
     }
 
 
-    private static void addEntriesAndChunksScripts(String CHUNKFILES_HOME, String COMPONENT_STATS_FILENAME, LinkedList<String> scriptNames, HashMap<String, String> scriptsByName) throws IOException {
-        LinkedHashSet<String> transpiledDependencies = new ChunkDependencyParser().getScriptDependencyNames(CHUNKFILES_HOME + COMPONENT_STATS_FILENAME, CHUNKS_SOURCES, ENTRIES_SOURCE, true);
+    private static void addEntriesAndChunksScripts(String CHUNKFILES_HOME, String COMPONENT_STATS_FILENAME, LinkedList<String> scriptNames, HashMap<String, String> scriptsByName, boolean lazyLoading) throws IOException {
+        LinkedHashSet<String> transpiledDependencies = new ChunkDependencyParser().getScriptDependencyNames(CHUNKFILES_HOME + COMPONENT_STATS_FILENAME, CHUNKS_SOURCES, ENTRIES_SOURCE, lazyLoading);
 
         for (String scriptFile : transpiledDependencies) {
             String file = CHUNKFILES_HOME + scriptFile;
             scriptsByName.put(file, ResourceHandler.readResource(file));
-
-            if (!lazyLoading) {
-                scriptNames.add(file);
-            }
+            scriptNames.add(file);
             scriptHasBeenLoadedByName.put(file, false);
         }
     }
@@ -194,7 +188,7 @@ public class EngineFactory {
     ) throws IOException, ScriptException {
         if (engineInstance == null) {
 
-            configEngine(CHUNKFILES_HOME, ENTRIES_SOURCEFILENAME, CHUNK_SOURCEFILENAMES, lazyLoading);
+            configEngine(CHUNKFILES_HOME, ENTRIES_SOURCEFILENAME, CHUNK_SOURCEFILENAMES);
 
             // Sequence matters, but hashmaps are not ordered! Use ordered scriptList collection 'scriptNames' for iteration!
             LinkedList<String> scriptNames = new LinkedList<>();
@@ -202,7 +196,7 @@ public class EngineFactory {
 
             prepareNashornPolyfillScripts(CHUNKFILES_HOME, NASHORNPOLYFILLS_FILENAME, scriptNames, scriptsByName);
 
-            addEntriesAndChunksScripts(CHUNKFILES_HOME, COMPONENT_STATS_FILENAME, scriptNames, scriptsByName);
+            addEntriesAndChunksScripts(CHUNKFILES_HOME, COMPONENT_STATS_FILENAME, scriptNames, scriptsByName, lazyLoading);
 
             runScripts(scriptNames, scriptsByName);
         }

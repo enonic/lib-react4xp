@@ -33,7 +33,7 @@ const normalizeEntryNames = (entryNames = []) => {
   return entryNames;
 };
 
-/** Takes entry names (array or a single string) and returns an array of (hashed) dependency file names, the complete set of chunks required for the entries to run.
+/** Takes entry names (array or a single string) and returns an array of (hashed) dependency file names, the complete set of chunks required for the set of entries to run.
  *  ASSUMES that stats.json.entrypoints is an object where the keys are entry names without file extensions, mapping to values that are objects,
  *  which in turn have an "assets" key, under which are the full file names of the entry's dependencies.
  *  If the input array is empty or null, returns ALL dependency chunk names. */
@@ -71,7 +71,7 @@ const getComponentChunkNames = entryNames => {
 
     if (missing.length > 0) {
       throw Error(
-        `Couldn't find dependencies for entries: '${missing.join(", ")}'`
+        `Couldn't find dependencies for entries: '${missing.join(', ')}'`
       );
     }
 
