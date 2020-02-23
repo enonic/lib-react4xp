@@ -1,6 +1,6 @@
 {
   "name": "lib-react4xp",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "XP serverside runtime, handles the bulk of the React4xp work: server-side rendering, and handling and serving of client-side components and dependency chunks to the client, including the React4xp front-end rendering wrapper itself.\"",
   "main": "src/main/resources/lib/enonic/react4xp/index.es6",
   "directories": {
@@ -20,7 +20,10 @@
     "url": "git+https://github.com/enonic/lib-react4xp.git"
   },
   "keywords": [
-    "React4xp"
+    "React4xp",
+    "Enonic",
+    "XP",
+    "React"
   ],
   "author": "Espen Norderud",
   "license": "Apache-2.0",
@@ -30,8 +33,7 @@
   "homepage": "https://github.com/enonic/lib-react4xp#readme",
   "dependencies": {
     "node-fetch": "^1.7.3",
-    "react4xp-runtime-client": "0.5.0",
-    "react4xp-runtime-nashornpolyfills": "0.4.3"
+    "react4xp": "0.0.5"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.7",
@@ -44,13 +46,12 @@
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "babel-polyfill": "^6.26.0",
+    "eslint": "^4.19.1",
     "lodash": "^4.17.13",
     "mocha": "^5.2.0",
     "npm-safe-install": "^1.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react4xp-build-components": "0.7.3",
-    "react4xp-buildconstants": "0.8.0",
     "rimraf": "^3.0.0",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3"

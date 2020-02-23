@@ -1,4 +1,5 @@
 const { getAndMergePageContributions } = require('./pageContributions');
+const { getComponentChunkNames } = require('./dependencies');
 const { getAssetRoot } = require('./serviceRoots');
 const { getContent, getComponent } = require('/lib/xp/portal');
 const { newCache } = require('/lib/cache');
@@ -6,6 +7,8 @@ const contentLib = require('/lib/xp/content');
 
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
+
+const SSR_LAZYLOAD_ASSETS = true; // <-- lazyLoading main switch
 
 // react4xp_constants.json is not part of lib-react4xp-runtime:
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
@@ -27,7 +30,8 @@ SSRreact4xp.setConfig(
   NASHORNPOLYFILLS_FILENAME ? `${NASHORNPOLYFILLS_FILENAME}.js` : null,
   ENTRIES_FILENAME,
   EXTERNALS_CHUNKS_FILENAME,
-  COMPONENT_STATS_FILENAME
+  COMPONENT_STATS_FILENAME,
+  SSR_LAZYLOAD_ASSETS
 );
 
 const BASE_PATHS = {
@@ -393,7 +397,16 @@ class React4xp {
     /** Renders a pure static HTML markup of ONLY the react4xp entry, without a surrounding HTML markup or container.
       * Can override props that have previously been added to this component.
       */
-    renderEntryToHtml = (overrideProps) => SSRreact4xp.renderToString(this.jsxPath, JSON.stringify(overrideProps || this.props));
+    renderEntryToHtml = (overrideProps) => SSR_LAZYLOAD_ASSETS ?
+        SSRreact4xp.renderToStringLazy(
+            this.jsxPath,
+            JSON.stringify(overrideProps || this.props),
+            JSON.stringify(getComponentChunkNames(this.jsxPath))
+        ) :
+        SSRreact4xp.renderToString(
+            this.jsxPath,
+            JSON.stringify(overrideProps || this.props)
+        );
 
 
     /** Server-side rendering: Renders a static HTML markup and inserts it into an ID-matching target container in an HTML body. If a
