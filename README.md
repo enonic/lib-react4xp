@@ -15,16 +15,17 @@ XP7 compatible. For XP6, see the [XP6_master branch](https://github.com/enonic/l
 
 This lib-react4xp is installed as a regular XP library in a parent app/project. But it needs to run alongside the NPM packages listed in the table below. Other combinations of versions may work, YMMV, but these are the version combinations of each NPM package that each lib-react4xp package is built for so far. So these are the recommended combinations:  
 
-| **lib-react4xp** | react4xp-runtime-client | react4xp-runtime-nashornpolyfills | react4xp-build-components | react4xp-runtime-externals | react4xp-buildconstants | react4xp-regions |
-| ------------ | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
+| **lib-react4xp** | react4xp | react4xp-runtime-client | react4xp-runtime-nashornpolyfills | react4xp-build-components | react4xp-runtime-externals | react4xp-buildconstants | react4xp-regions |
+| ------------ | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
 | **0.2.7** | - | 0.3.6 | 0.3.8 | 0.3.5 | 0.7.6 |  - |
-| **0.2.8** | - | 0.3.6 | 0.3.10 | 0.3.5 | 0.7.9 |  - |
-| **0.3.7** | - | 0.3.6 | 0.3.8 | 0.3.5 | 0.7.6 |  - |
-| **0.3.8** | - | 0.3.6 | 0.3.10 | 0.3.5 | 0.7.9 |  - |
-| **0.3.11** | - | 0.3.6 | 0.3.11 | 0.3.5 | 0.7.10 |  - |
-| **0.5.0** | - | 0.3.6 | 0.5.0 | 0.3.5 | 0.8.0 |  - |
-| **0.7.1** | 0.4.0 | 0.4.2 | 0.7.0 | 0.4.0 | 0.8.0 |  0.2.0 |
-| **0.8.0** | 0.5.0 | 0.4.3 | 0.7.3 | 0.4.0 | 0.8.0 |  0.2.1 |
+| **0.2.8** | - | - | 0.3.6 | 0.3.10 | 0.3.5 | 0.7.9 |  - |
+| **0.3.7** | - | - | 0.3.6 | 0.3.8 | 0.3.5 | 0.7.6 |  - |
+| **0.3.8** | - | - | 0.3.6 | 0.3.10 | 0.3.5 | 0.7.9 |  - |
+| **0.3.11** | - | - | 0.3.6 | 0.3.11 | 0.3.5 | 0.7.10 |  - |
+| **0.5.0** | - | - | 0.3.6 | 0.5.0 | 0.3.5 | 0.8.0 |  - |
+| **0.7.1** | - | 0.4.0 | 0.4.2 | 0.7.0 | 0.4.0 | 0.8.0 |  0.2.0 |
+| **0.8.0** | - | 0.5.0 | 0.4.3 | 0.7.3 | 0.4.0 | 0.8.0 |  0.2.1 |
+| **0.8.2** | 0.0.5 | - | - | - | - | - | - |
 
 This setup should get simplified before version 1.0 is released.
 
