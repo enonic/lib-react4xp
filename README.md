@@ -13,7 +13,7 @@ This is Beta **0.3.8**, the currently most tested and stable version. Alpha vers
 
 XP7 compatible. For XP6, see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master)
 
-This lib-react4xp is installed as a regular XP library in a parent app/project. But it needs to run alongside the NPM packages listed in the table below. Other combinations of versions may work, YMMV, but these are the version combinations of each NPM package that each lib-react4xp package is built for so far. So these are the recommended combinations:  
+This lib-react4xp is installed as a regular XP library in a parent app/project. But it needs to run alongside the NPM packages listed in the table below. Other combinations of versions may work, YMMV, but these are the version combinations of each NPM package that each lib-react4xp package is built for so far. Note that as of lib version 0.8.2, a single NPM package is used instead: the react4xp packages includes a stable combination of the other packages. So these are the recommended combinations:
 
 | **lib-react4xp** | react4xp | react4xp-runtime-client | react4xp-runtime-nashornpolyfills | react4xp-build-components | react4xp-runtime-externals | react4xp-buildconstants | react4xp-regions |
 | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ | ------------ |
