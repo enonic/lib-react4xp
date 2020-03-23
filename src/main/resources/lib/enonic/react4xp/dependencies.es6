@@ -3,6 +3,9 @@ const cacheLib = require("/lib/cache");
 
 import { getAssetRoot, getClientRoot } from "./serviceRoots";
 
+// Tolerate and remove file extensions ts(x), js(x), es(6) and/or trailing slash or space
+const TOLERATED_ENTRY_EXTENSIONS = /([/ ]+|\.(tsx?|jsx?|es6?)[/ ]*)$/i;
+
 // react4xp_constants.json is not part of lib-react4xp-runtime,
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
@@ -56,22 +59,41 @@ const getComponentChunkNames = entryNames => {
     const missing = [];
 
     entryNames.forEach(entry => {
-      entry = entry.trim();
-
-      const data = BUILD_STATS_ENTRYPOINTS[entry];
-      const myself = entry + ".js";
-      data.assets
-        .filter(asset => !asset.endsWith(".map") && asset !== myself)
-        .forEach(asset => {
-          if (output.indexOf(asset) === -1) {
-            output.push(asset);
+      try {
+          let data = BUILD_STATS_ENTRYPOINTS[entry];
+          if (!data) {
+              log.debug(`Cleaning entry name: '${entry}'`);
+              entry = entry.trim();
+              if (TOLERATED_ENTRY_EXTENSIONS.test(entry)) {
+                  entry = entry.replace(TOLERATED_ENTRY_EXTENSIONS, '');
+              }
+              data = BUILD_STATS_ENTRYPOINTS[entry];
+              if (!data) {
+                  throw new Error(`Requested entry '${entry}' not found in ${COMPONENT_STATS_FILENAME}`)
+              }
           }
-        });
+          if (data.assets === undefined) {
+              throw new Error(`Requested entry '${entry}' is missing assets`);
+          }
+
+          const myself = entry + ".js";
+          data.assets
+              .filter(asset => !asset.endsWith(".map") && asset !== myself)
+              .forEach(asset => {
+                  if (output.indexOf(asset) === -1) {
+                      output.push(asset);
+                  }
+              });
+
+      } catch (e) {
+          log.warning(e.message);
+          missing.push(entry);
+      }
     });
 
     if (missing.length > 0) {
       throw Error(
-        `Couldn't find dependencies for entries: '${missing.join(', ')}'`
+        `Couldn't find dependencies for ${missing.length} entries: '${missing.join(', ')}'`
       );
     }
 
@@ -127,7 +149,7 @@ const getAllUrls = entries => [
  * Throws an error if not found or if unexpected format. */
 const getNamesFromChunkfile = chunkFile => {
   const chunks = require(chunkFile);
-  //// // log.info("chunks: " + JSON.stringify(chunks, null, 2));
+  // log.info("chunks: " + JSON.stringify(chunks, null, 2));
   return Object.keys(chunks).map(chunkName => {
     let chunk = chunks[chunkName].js;
 

@@ -13,7 +13,7 @@
     "local": "./gradlew publishToMavenLocal -P development --info",
     "local:watch": "./gradlew publishToMavenLocal -P development --info -t",
     "dev": "npm run clean && npm run local:watch",
-    "install:npmdev": "nsi"
+    "install:nsi": "nsi"
   },
   "repository": {
     "type": "git",
@@ -33,7 +33,7 @@
   "homepage": "https://github.com/enonic/lib-react4xp#readme",
   "dependencies": {
     "node-fetch": "^1.7.3",
-    "react4xp": "0.0.5"
+    "react4xp": "^0.1.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.7.7",
@@ -50,8 +50,6 @@
     "lodash": "^4.17.13",
     "mocha": "^5.2.0",
     "npm-safe-install": "^1.0.0",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
     "rimraf": "^3.0.0",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3"
