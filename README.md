@@ -418,10 +418,6 @@ If you want, or already have, Babel (etc) transpilation for your XP controllers 
 Here's an example from the starter; a gradle compile task that leaves `.jsx` files alone:
 
 ```groovy
-// This task takes care of es6 under src/main/resources/site. You can replace it with build steps of your own if you want.
-// IMPORTANT: IF YOU DON'T USE THIS TASK TO COMPILE THE REGULAR XP JS (/ES6/TS etc),
-// MAKE SURE THAT YOUR OWN TASK/SCRIPT/LOGIC IGNORES .JSX FILES UNDER src/main/resources !
-// It's safer to let React4xp's tasks (above) handles those.
 task compileXP(type: NodeTask) {
     group 'React4xp'
     description 'Compile regular (non-React4xp) XP components from ES6, ignoring JSX components'
@@ -451,4 +447,5 @@ $ enonic project deploy
 
 Or, setting the environment variable `XP_HOME` (e.g. `export XP_HOME=~/.enonic/sandboxes/myProjectSandbox/home`), you can use regular gradle tasks such as `clean`, `build`, `deploy`.
 
-Happy reacting!
+
+**Happy reacting!**
