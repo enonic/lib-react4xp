@@ -448,6 +448,6 @@ $ enonic project deploy
 Or, setting the environment variable `XP_HOME` (e.g. `export XP_HOME=~/.enonic/sandboxes/myProjectSandbox/home`), you can use regular gradle tasks such as `clean`, `build`, `deploy`.
 
 
-##Happy reacting!
+## Happy reacting!
 
 [Move on to the React4xp introduction](https://developer.enonic.com/templates/react4xp)
