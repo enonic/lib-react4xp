@@ -35,19 +35,27 @@ public class EngineFactory {
 
     private static NashornScriptEngine engineInstance = null;
 
-    private static void configEngine(String CHUNKFILES_HOME, String ENTRIES_SOURCEFILENAME, ArrayList<String> CHUNK_SOURCEFILENAMES) {
+    private static HashMap<String, Boolean> scriptHasBeenLoadedByName = null;
+
+    private static void configEngine(
+            String CHUNKFILES_HOME,
+            String ENTRIES_SOURCEFILENAME,
+            ArrayList<String> CHUNK_SOURCEFILENAMES
+    ) {
         ENTRIES_SOURCE = CHUNKFILES_HOME + ENTRIES_SOURCEFILENAME;
         CHUNKS_SOURCES = new ArrayList<>();
         for (String chunkFileName : CHUNK_SOURCEFILENAMES) {
             CHUNKS_SOURCES.add(CHUNKFILES_HOME + chunkFileName);
         }
+        scriptHasBeenLoadedByName = new HashMap<>();
     }
 
 
-    private static void addNashornPolyfillScripts(String CHUNKFILES_HOME, String NASHORNPOLYFILLS_FILENAME, LinkedList<String> scriptNames, HashMap<String, String> scriptsByName) {
+    private static void prepareNashornPolyfillScripts(String CHUNKFILES_HOME, String NASHORNPOLYFILLS_FILENAME, LinkedList<String> scriptNames, HashMap<String, String> scriptsByName) {
         // Add the most basic nashorn polyfill first
         scriptsByName.put("POLYFILL_BASICS", POLYFILL_BASICS);
         scriptNames.add("POLYFILL_BASICS");
+        scriptHasBeenLoadedByName.put("POLYFILL_BASICS", false);
 
         // Next, try to add the default nashornPolyfills, pre-built from react4xp-runtime-nashornpolyfills:
         try {
@@ -58,44 +66,50 @@ public class EngineFactory {
             String content = ResourceHandler.readResource(defaultPolyfillFileName);
             scriptsByName.put(defaultPolyfillFileName, content);
             scriptNames.add(defaultPolyfillFileName);
+            scriptHasBeenLoadedByName.put(defaultPolyfillFileName, false);
+
         } catch (Exception e) {
             LOG.error(e.getClass().getSimpleName() + " while fetching the pre-built default nashorn polyfill for React4xp (build/resources/main/lib/enonic/react4xp/default/nashornPolyfills.js): " + e.getMessage());
         }
 
         // Next, if the user has added any extra polyfills, the filename will be in NASHORNPOLYFILLS_FILENAME:
-        if (NASHORNPOLYFILLS_FILENAME != null && !"".equals(NASHORNPOLYFILLS_FILENAME)) {
+        if (NASHORNPOLYFILLS_FILENAME != null && !"".equals(NASHORNPOLYFILLS_FILENAME.trim())) {
+            LOG.info("Adding additional nashorn polyfills for react4xp SSR: NASHORNPOLYFILLS_FILENAME = "+ NASHORNPOLYFILLS_FILENAME);
             try {
                 String file = CHUNKFILES_HOME + NASHORNPOLYFILLS_FILENAME;
                 String content = ResourceHandler.readResource(file);
                 scriptsByName.put(file, content);
                 scriptNames.add(file);
+                scriptHasBeenLoadedByName.put(file, false);
 
             } catch (Exception e) {
                 LOG.warn(e.getClass().getSimpleName() + " while trying to add custom nashorn polyfill for React4xp (NASHORNPOLYFILLS_FILENAME = " + NASHORNPOLYFILLS_FILENAME + "): " + e.getMessage());
             }
-        } else {
-            LOG.info("No custom nashorn polyfills (NASHORNPOLYFILLS_FILENAME = "+ NASHORNPOLYFILLS_FILENAME + " ). This is usually fine, proceeding without.");
         }
     }
 
 
-    private static void addEntriesAndChunksScripts(String CHUNKFILES_HOME, String COMPONENT_STATS_FILENAME, LinkedList<String> scriptNames, HashMap<String, String> scriptsByName) throws IOException {
-        LinkedHashSet<String> transpiledDependencies = new ChunkDependencyParser().getScriptDependencyNames(CHUNKFILES_HOME + COMPONENT_STATS_FILENAME, CHUNKS_SOURCES, ENTRIES_SOURCE, true);
+    private static void addEntriesAndChunksScripts(String CHUNKFILES_HOME, String COMPONENT_STATS_FILENAME, LinkedList<String> scriptNames, HashMap<String, String> scriptsByName, boolean lazyLoading) throws IOException {
+        LinkedHashSet<String> transpiledDependencies = new ChunkDependencyParser().getScriptDependencyNames(CHUNKFILES_HOME + COMPONENT_STATS_FILENAME, CHUNKS_SOURCES, ENTRIES_SOURCE, lazyLoading);
 
         for (String scriptFile : transpiledDependencies) {
             String file = CHUNKFILES_HOME + scriptFile;
             scriptsByName.put(file, ResourceHandler.readResource(file));
             scriptNames.add(file);
+            scriptHasBeenLoadedByName.put(file, false);
         }
     }
 
 
-    private static String buildFullScript(LinkedList<String> scriptNames, HashMap<String, String> scriptsByName) {
+    private static String mergeToRunnableScript(LinkedList<String> scriptNames, HashMap<String, String> scriptsByName) {
         StringBuilder fullScript = new StringBuilder();
         for (String scriptName : scriptNames) {
-            LOG.debug("Initializing ServerSideRenderer engine: " + scriptName);
-            String partialScript = scriptsByName.get(scriptName);
-            fullScript.append(partialScript);
+            if (!scriptHasBeenLoadedByName.get(scriptName)) {
+                LOG.info("Lazy-eval react4xp SSR asset: " + scriptName);
+                String partialScript = scriptsByName.get(scriptName);
+                fullScript.append(partialScript);
+                scriptHasBeenLoadedByName.put(scriptName, true);
+            }
         }
         return fullScript.toString();
     }
@@ -120,12 +134,16 @@ public class EngineFactory {
                 if (errorToThrow == null) {
                     errorToThrow = specificError;
                 }
+                scriptHasBeenLoadedByName.put(scriptName, false);
             }
         }
 
         if (errorToThrow == null) {
             // Fallback if unravelling failed
             LOG.error("INIT SCRIPTS FAILURE: script interaction? Full init script, line " + bloatedError.getLineNumber() + " - " + bloatedError.getClass().getName() + ": " + bloatedError.getMessage() + "\n---------------------------------\n\n" + fullScript + "\n\n---------------------------------------");
+            for (String scriptName : scriptNames) {
+                scriptHasBeenLoadedByName.put(scriptName, false);
+            }
             throw bloatedError;
 
         } else {
@@ -136,14 +154,18 @@ public class EngineFactory {
 
 
     private static void runScripts(LinkedList<String> scriptNames, HashMap<String, String> scriptsByName) throws ScriptException {
-        String fullScript = buildFullScript(scriptNames, scriptsByName);
+        if (scriptNames.size() > 0) {
+            String fullScript = mergeToRunnableScript(scriptNames, scriptsByName);
 
-        try {
-            engineInstance = (NashornScriptEngine)new ScriptEngineManager().getEngineByName("nashorn");
-            engineInstance.eval(fullScript);
+            LOG.info("Starting react4xp SSR evaluation...");
+            try {
+                engineInstance = (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
+                engineInstance.eval(fullScript);
 
-        } catch (ScriptException bloatedError) {
-            handleScriptErrors(bloatedError, scriptNames, scriptsByName, fullScript);
+            } catch (ScriptException bloatedError) {
+                handleScriptErrors(bloatedError, scriptNames, scriptsByName, fullScript);
+            }
+            LOG.info("\t...React4xp SSR evaluation is done.");
         }
     }
 
@@ -156,7 +178,14 @@ public class EngineFactory {
      * Scripts found in chunks.json depend on the previous and must be the last!
      * nashornPolyfills.js script is the basic dependency, and will be added at the very beginning
      * outside of this list. */
-    public static NashornScriptEngine initEngine(String CHUNKFILES_HOME, String NASHORNPOLYFILLS_FILENAME, String ENTRIES_SOURCEFILENAME, String COMPONENT_STATS_FILENAME, ArrayList<String> CHUNK_SOURCEFILENAMES) throws IOException, ScriptException {
+    public static NashornScriptEngine initEngine(
+            String CHUNKFILES_HOME,
+            String NASHORNPOLYFILLS_FILENAME,
+            String ENTRIES_SOURCEFILENAME,
+            String COMPONENT_STATS_FILENAME,
+            ArrayList<String> CHUNK_SOURCEFILENAMES,
+            boolean lazyLoading
+    ) throws IOException, ScriptException {
         if (engineInstance == null) {
 
             configEngine(CHUNKFILES_HOME, ENTRIES_SOURCEFILENAME, CHUNK_SOURCEFILENAMES);
@@ -165,9 +194,9 @@ public class EngineFactory {
             LinkedList<String> scriptNames = new LinkedList<>();
             HashMap<String, String> scriptsByName = new HashMap<>();
 
-            addNashornPolyfillScripts(CHUNKFILES_HOME, NASHORNPOLYFILLS_FILENAME, scriptNames, scriptsByName);
+            prepareNashornPolyfillScripts(CHUNKFILES_HOME, NASHORNPOLYFILLS_FILENAME, scriptNames, scriptsByName);
 
-            addEntriesAndChunksScripts(CHUNKFILES_HOME, COMPONENT_STATS_FILENAME, scriptNames, scriptsByName);
+            addEntriesAndChunksScripts(CHUNKFILES_HOME, COMPONENT_STATS_FILENAME, scriptNames, scriptsByName, lazyLoading);
 
             runScripts(scriptNames, scriptsByName);
         }
