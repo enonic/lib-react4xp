@@ -12,7 +12,7 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
   - client-side wrapper tailored for use with the services - itself available to the browser through one of the services. 
 
 ## Version and compatibility
-This is beta version **0.9.0-SNAPSHOT**.
+This is beta version **0.9.0**.
     
 XP7 compatible. For XP6, see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master)
 
@@ -29,7 +29,7 @@ This lib-react4xp is installed as a regular XP library in a parent app/project. 
 | **0.7.1** | - | 0.4.0 | 0.4.2 | 0.7.0 | 0.4.0 | 0.8.0 |  0.2.0 |
 | **0.8.0** | - | 0.5.0 | 0.4.3 | 0.7.3 | 0.4.0 | 0.8.0 |  0.2.1 |
 | **0.8.1** | 0.0.5 | - | - | - | - | - | - |
-| **0.9.0-SNAPSHOT** | 0.2.0 | - | - | - | - | - | - |
+| **0.9.0** | 0.2.0 | - | - | - | - | - | - |
 
 
 
@@ -73,7 +73,7 @@ Assuming you have Enonic XP 7.x nicely installed, and you have an **XP parent pr
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
-	include 'com.enonic.lib:lib-react4xp:0.9.0-SNAPSHOT'
+	include 'com.enonic.lib:lib-react4xp:0.9.0'
 }
 ```
 
@@ -85,7 +85,7 @@ If you need / want to build the lib yourself instead of downloading it with Grad
 **B.** Make the version unique in the library's `gradle.properties`, for example:
 
 ```properties
-version = 0.9.0-SNAPSHOT-SNAPSHOT
+version = 0.9.0-SNAPSHOT
 ```
 
 **C.** Build it with gradle:
@@ -101,7 +101,7 @@ Gradle will build the library and install it into the local cache, available for
 
 ```groovy
 dependencies {
-    include 'com.enonic.lib:lib-react4xp:0.9.0-SNAPSHOT-SNAPSHOT'
+    include 'com.enonic.lib:lib-react4xp:0.9.0-SNAPSHOT'
 }
 ```
 
@@ -118,7 +118,7 @@ Go to the _parent XP project folder_ and use the command line to add these NPM p
 npm add --save-dev react4xp@0.2.0
 ```
 
-Note: `react4xp@0.2.0` corresponds with lib-react4xp version 0.9.0-SNAPSHOT. For other versions of this lib, see [the table of corresponding versions](#version-and-compatibility) above.
+Note: `react4xp@0.2.0` corresponds with lib-react4xp version 0.9.0. For other versions of this lib, see [the table of corresponding versions](#version-and-compatibility) above.
 
 Other development tools might be needed, depending on your setup:
 
@@ -437,7 +437,6 @@ jar.dependsOn += 'compileXP'
 ```
 
 (Why is this needed? For simple development after everything's set up, React4xp detects and autocompiles `.jsx` files inside `src/main/resources/site`. This is to encourage a regular-XP-like structure, simply using `.jsx` files as part/page/layout _views_: just keep React entry components in the same folders, with the same names, as the corresponding XP components that use them (this structure is not _enforced_, though - using `entryDirs` and `chunkDirs` in `react4xp.properties` (see below), your react source files can basically be anywhere). However, _the react files are handled differently from other XP components and assets, both at build- and runtime!_ For that reason they must be separated, in this example by using different file extensions: `.jsx` and `.es6`, respectively)
-
 
 
 

@@ -443,7 +443,6 @@ jar.dependsOn += 'compileXP'
 
 
 
-
 ### 5: Build and run it all
 Voilà, such easy (I hope)! From the parent project, this can now be run as a regular XP app:
 ```bash
