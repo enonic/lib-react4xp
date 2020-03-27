@@ -6,7 +6,7 @@
 **React for XP: handling and rendering of pre-built React components in Enonic XP**
 
 This library runs on [Enonic XP](https://enonic.com/developer-tour) server side, and provides:
-  - services that serve pre-compiled React components and their dependency scripts to the browser, from a specific file structure. The package [react4xp-build-components](https://www.npmjs.com/package/react4xp-build-components) builds this structure from React source files. These services also provide headers for caching components and dependencies in the browser.
+  - services that serve (autodetected and) pre-compiled React components and their dependency scripts to the browser, from a specific file structure. These services also provide headers for caching components and dependencies in the browser.
   - library of XP controller functions, that make it easy to blend React into XP components, in a variety of ways
   - server-side rendering option in XP, through the controller functions  
   - client-side wrapper tailored for use with the services - itself available to the browser through one of the services. 
@@ -448,4 +448,6 @@ $ enonic project deploy
 Or, setting the environment variable `XP_HOME` (e.g. `export XP_HOME=~/.enonic/sandboxes/myProjectSandbox/home`), you can use regular gradle tasks such as `clean`, `build`, `deploy`.
 
 
-**Happy reacting!**
+##Happy reacting!
+
+[Move on to the React4xp introduction](https://developer.enonic.com/templates/react4xp)
