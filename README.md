@@ -41,9 +41,9 @@ This lib-react4xp is installed as a regular XP library in a parent app/project. 
     - [1: Add this library](#1-add-this-library)
     - [2: NPM: import packages](#2-npm-import-packages)
     - [3: Configuration: react4xp.properties](#3-configuration-react4xpproperties)
-    - [3: Gradle: basic setup](#3-gradle-basic-setup)
-    - [4: Gradle: XP component transpilation (optional)](#4-gradle-xp-component-transpilation-optional)
-    - [5: Build and run it all](#5-build-and-run-it-all)
+    - [4: Gradle: basic setup](#4-gradle-basic-setup)
+    - [5: Gradle: XP component transpilation (optional)](#5-gradle-xp-component-transpilation-optional)
+    - [6: Build and run it all](#6-build-and-run-it-all)
 
 
 ---
@@ -211,7 +211,7 @@ overwriteConstantsFile = true
 
 
 
-### 3: Gradle: basic setup
+### 4: Gradle: basic setup
 For now, you need to copy some code into the existing `build.gradle` file in your project (yes, this should obviously be simplified as a gradle plugin):  
   
 ```groovy
@@ -411,7 +411,7 @@ if (react4xp.buildExternals) {
 
 
 
-### 4: Gradle: XP component transpilation (optional)
+### 5: Gradle: XP component transpilation (optional)
 
 If you want, or already have, Babel (etc) transpilation for your XP controllers and other assets, this needs to be done separately from the build tasks above! **Make sure that your compilation step does not compile your react component source files!** 
 
@@ -439,7 +439,7 @@ jar.dependsOn += 'compileXP'
 
 
 
-### 5: Build and run it all
+### 6: Build and run it all
 Voilà, such easy (I hope)! From the parent project, this can now be run as a regular XP app:
 ```bash
 $ enonic project deploy
