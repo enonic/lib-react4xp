@@ -74,7 +74,7 @@ public class EngineFactory {
 
         // Next, if the user has added any extra polyfills, the filename will be in NASHORNPOLYFILLS_FILENAME:
         if (NASHORNPOLYFILLS_FILENAME != null && !"".equals(NASHORNPOLYFILLS_FILENAME.trim())) {
-            LOG.info("Adding additional nashorn polyfills: NASHORNPOLYFILLS_FILENAME = "+ NASHORNPOLYFILLS_FILENAME);
+            LOG.info("Adding additional nashorn polyfills for react4xp SSR: NASHORNPOLYFILLS_FILENAME = "+ NASHORNPOLYFILLS_FILENAME);
             try {
                 String file = CHUNKFILES_HOME + NASHORNPOLYFILLS_FILENAME;
                 String content = ResourceHandler.readResource(file);
@@ -105,7 +105,7 @@ public class EngineFactory {
         StringBuilder fullScript = new StringBuilder();
         for (String scriptName : scriptNames) {
             if (!scriptHasBeenLoadedByName.get(scriptName)) {
-                LOG.info("Adding to ServerSideRenderer engine: " + scriptName);
+                LOG.info("Lazy-eval react4xp SSR asset: " + scriptName);
                 String partialScript = scriptsByName.get(scriptName);
                 fullScript.append(partialScript);
                 scriptHasBeenLoadedByName.put(scriptName, true);
@@ -157,7 +157,7 @@ public class EngineFactory {
         if (scriptNames.size() > 0) {
             String fullScript = mergeToRunnableScript(scriptNames, scriptsByName);
 
-            LOG.info("Starting ServerSideRenderer evaluation...");
+            LOG.info("Starting react4xp SSR evaluation...");
             try {
                 engineInstance = (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
                 engineInstance.eval(fullScript);
@@ -165,7 +165,7 @@ public class EngineFactory {
             } catch (ScriptException bloatedError) {
                 handleScriptErrors(bloatedError, scriptNames, scriptsByName, fullScript);
             }
-            LOG.info("\t...ServerSideRenderer evaluation is done.");
+            LOG.info("\t...React4xp SSR evaluation is done.");
         }
     }
 

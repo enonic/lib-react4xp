@@ -43,6 +43,9 @@ if (project.hasProperty("dev") || project.hasProperty("development")) {
     BUILD_ENV = "development"
 }
 
+
+
+
 task babelXP(type: NodeTask) {
     group 'lib-react4xp'
     description 'Compile server-side XP components from ES6'
@@ -54,6 +57,9 @@ task babelXP(type: NodeTask) {
     outputs.dir("build/resources/main")
 }
 babelXP.dependsOn += 'processResources'
+
+
+
 
 if (BUILD_ENV == 'development') {
     task nsiInstall(type: NpmTask) {
@@ -74,9 +80,11 @@ if (BUILD_ENV == 'development') {
 }
 
 
+
+
 def ROOT = project.projectDir.toString() + File.separator
 
-task nashornPolyfills(type: NodeTask) {
+task react4xp_nashornPolyfills(type: NodeTask) {
     group 'lib-react4xp'
     description 'Build default polyfill code, allowing XP to run the (node-written) React server-side rendering in Nashorn'
 
@@ -91,9 +99,11 @@ task nashornPolyfills(type: NodeTask) {
             '--env.NASHORNPOLYFILLS_FILENAME=nashornPolyfills'
     ]
 }
-nashornPolyfills.dependsOn += 'babelXP'
+react4xp_nashornPolyfills.dependsOn += 'babelXP'
 
-task client(type: NodeTask) {
+
+
+task react4xp_client(type: NodeTask) {
     group 'lib-react4xp'
     description 'Build default client rendering wrapper in the lib'
 
@@ -116,8 +126,8 @@ task client(type: NodeTask) {
         f.delete()
     }
 }
-client.dependsOn += 'babelXP'
+react4xp_client.dependsOn += 'babelXP'
 
-jar.dependsOn += 'nashornPolyfills'
-jar.dependsOn += 'client'
+jar.dependsOn += 'react4xp_nashornPolyfills'
+jar.dependsOn += 'react4xp_client'
 jar.outputs.dir('build/libs')

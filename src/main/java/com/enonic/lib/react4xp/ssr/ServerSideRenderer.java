@@ -93,7 +93,7 @@ public class ServerSideRenderer implements ScriptBean {
 
     private void prepareScriptFromAsset(String assetName, StringBuilder scriptBuilder) throws IOException {
         if (!alreadyCachedAndRunAssetNames.contains(assetName)) {
-            LOG.info("Initializing component: " + assetName);
+            LOG.info("Initializing asset: " + assetName);
 
             String url = APP_NAME + ":" + SCRIPTS_HOME + "/" + assetName;
             ResourceKey resourceKey = ResourceKey.from(url);
