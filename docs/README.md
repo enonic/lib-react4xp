@@ -11,7 +11,20 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
   - server-side rendering option in XP, through the controller functions  
   - client-side wrapper tailored for use with the services - itself available to the browser through one of the services. 
 
-## Version and compatibility
+## Table of contents
+
+- [Versions and compatibility](#versions-and-compatibility)
+- [Setup, option 1: The React4xp starter](#setup-option-1-the-react4xp-starter)
+- [Setup, option 2: Using React4xp in an existing project](#setup-option-2-using-react4xp-in-an-existing-project)
+  - [0: Prerequisites](#0-prerequisites)
+  - [1: Add lib-react4xp](#1-add-lib-react4xp)
+  - [2: NPM: import packages](#2-npm-import-packages)
+  - [3: Configuration: react4xp.properties](#3-configuration-react4xpproperties)
+  - [4: Gradle: basic setup](#4-gradle-basic-setup)
+  - [5: Gradle: XP component transpilation (optional)](#5-gradle-xp-component-transpilation-optional)
+  - [6: Build and run it all](#6-build-and-run-it-all)
+
+## Versions and compatibility
 This is beta version **###LIB_VERSION###**.
     
 XP7 compatible. For XP6, see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master)
@@ -33,32 +46,21 @@ This lib-react4xp is installed as a regular XP library in a parent app/project. 
 
 
 
-## Table of contents
-  
-  - [The React4xp starter](#the-react4xp-starter)
-  - [Using React4xp in an existing project](#using-react4xp-in-an-existing-project)
-    - [0: Prerequisites](#0-prerequisites)
-    - [1: Add this library](#1-add-this-library)
-    - [2: NPM: import packages](#2-npm-import-packages)
-    - [3: Configuration: react4xp.properties](#3-configuration-react4xpproperties)
-    - [4: Gradle: basic setup](#4-gradle-basic-setup)
-    - [5: Gradle: XP component transpilation (optional)](#5-gradle-xp-component-transpilation-optional)
-    - [6: Build and run it all](#6-build-and-run-it-all)
 
 
----
 
-## The React4xp starter
+## Setup, option 1: The React4xp starter
 
 If you're starting with a fresh React4xp project and Enonic XP 7.x, by far the easiest way is to follow [the instructions in the React4xp tutorial](https://developer.enonic.com/templates/react4xp), and build it from there. The starter always uses the latest stable version of this library.
 
 The React4xp starter is also [available at enonic market](https://market.enonic.com/vendors/enonic/react4xp-starter) or as [open source at github](https://github.com/enonic/starter-react4xp).
 
-Or...
 
-## Using React4xp in an existing project
 
-However, if you want to skip the starter and inject React4xp in your own XP 7 project, you can. Follow these steps to get all the moving parts up and running:
+
+## Setup, option 2: Using React4xp in an existing project
+
+If you want to skip the starter and inject React4xp in your own XP 7 project, you can. Follow these steps to get all the moving parts up and running:
 
 
 
@@ -67,9 +69,11 @@ Assuming you have Enonic XP 7.x nicely installed, and you have an **XP parent pr
 
 
 
-### 1: Add this library
- 
-#### Import this lib to your parent project...
+### 1: Add lib-react4xp
+
+Two ways to add this library to a parent project: import it from an online repository, or build it from scratch:
+
+#### Import it from a repository
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
@@ -77,7 +81,7 @@ dependencies {
 }
 ```
 
-#### ...or build/fork it yourself
+#### ...or fork and build it yourself
 If you need / want to build the lib yourself instead of downloading it with Gradle, add these steps: 
 
 **A.** Clone or otherwise download [the source code for this lib](https://github.com/enonic/lib-react4xp.git) into _its own root folder_ (not into XP_INSTALL or the parent project folder).
