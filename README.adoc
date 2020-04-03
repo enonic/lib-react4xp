@@ -418,7 +418,7 @@ if (react4xp.buildExternals) {
 
 === 5: Gradle: XP component transpilation (optional)
 
-If you want, or already have, Babel (etc) transpilation for your XP controllers and other assets, this needs to be done separately from the build tasks above! **Make sure that your compilation step does not compile your react component source files!** 
+If you want, or already have, Babel (etc) transpilation for your XP controllers and other assets, this needs to be done separately from the build tasks above! **Make sure that the XP compilation step does not compile your react component source files!** 
 
 Here's an example from the starter; a gradle compile task that leaves `.jsx` files alone:
 
