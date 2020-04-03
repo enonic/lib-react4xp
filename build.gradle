@@ -206,7 +206,7 @@ task updateReadme(type: Copy) {
     }
 }
 makeAdoc.dependsOn updateReadme
-jar.dependsOn makeAdoc
+npmInstall.dependsOn makeAdoc
 
 def readmeUnstaged() {
     def command = "git diff --name-only HEAD"
