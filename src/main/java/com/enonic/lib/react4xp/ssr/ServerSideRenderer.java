@@ -131,7 +131,8 @@ public class ServerSideRenderer implements ScriptBean {
                     "Message: " + e.getMessage() + "  |  " +
                     "Component: " + component + "  |  " +
                     "Props: " + props + "\n" +
-                    "Script:\n---------------------------------\n\n" + script + "\n\n---------------------------------------", e);
+                    "Script:\n---------------------------------\n\n" + script + "\n\n---------------------------------------\n" +
+                    "\n--- TIP: --- Hard to spot the problem in the mangled code above? There might already be a more readable (and sourcemapped) error message in the browser console - look at this page / entry ( " + component + " ) in XP's preview or live mode. If not, try clientside-rendering the component to force the code to run on the client side (add a 'clientRender: true' parameter in the controller's react4xp render call).\n\n", e);
 
             if (runMode == RunMode.PROD) {
                 alreadyCachedAndRunAssetNames.remove(component);
