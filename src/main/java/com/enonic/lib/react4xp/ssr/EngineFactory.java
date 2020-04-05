@@ -130,7 +130,12 @@ public class EngineFactory {
                 tmpEngineInstance.eval(partialScript);
             } catch (ScriptException specificError) {
                 failureCount++;
-                LOG.error("INIT SCRIPT FAILURE #" + failureCount + " (" + scriptName + ":" + specificError.getLineNumber() + ") - " + specificError.getClass().getName() + ": " + specificError.getMessage() + "\n---------------------------------\n\n" + partialScript + "\n\n---------------------------------------");
+                LOG.debug("");
+                LOG.debug(scriptName + " script dump:");
+                LOG.debug("---------------------------------\n\n");
+                LOG.debug(partialScript+"\n\n");
+                LOG.debug("---------------------------------------\n");
+                LOG.error("INIT SCRIPT FAILURE #" + failureCount + " - " + specificError.getClass().getName() + ": " + specificError.getMessage() + " (" + scriptName + ":" + specificError.getLineNumber() + ". A full (compiled) script is dumped to the log at debug level)");
                 if (errorToThrow == null) {
                     errorToThrow = specificError;
                 }
@@ -140,7 +145,12 @@ public class EngineFactory {
 
         if (errorToThrow == null) {
             // Fallback if unravelling failed
-            LOG.error("INIT SCRIPTS FAILURE: script interaction? Full init script, line " + bloatedError.getLineNumber() + " - " + bloatedError.getClass().getName() + ": " + bloatedError.getMessage() + "\n---------------------------------\n\n" + fullScript + "\n\n---------------------------------------");
+            LOG.debug("");
+            LOG.debug("CONCATENATED SCRIPTS - full dump:");
+            LOG.debug("---------------------------------\n\n");
+            LOG.debug(fullScript+"\n\n");
+            LOG.debug("---------------------------------------\n");
+            LOG.error("INIT SCRIPT FAILURE: script interaction? " + bloatedError.getClass().getName() + ": " + bloatedError.getMessage() + " (line " + bloatedError.getLineNumber() + ". A full (compiled) script is dumped to the log at debug level)");
             for (String scriptName : scriptNames) {
                 scriptHasBeenLoadedByName.put(scriptName, false);
             }

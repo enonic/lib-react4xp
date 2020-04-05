@@ -108,13 +108,13 @@ public class ServerSideRenderer implements ScriptBean {
         }
     }
 
-    private String finalizeAndRender(String component, String props, StringBuilder scriptBuilder) throws ScriptException {
+    private String finalizeAndRender(String entry, String props, StringBuilder scriptBuilder) throws ScriptException {
         String script = null;
         try {
             scriptBuilder.append("var obj = { rendered: ReactDOMServer.renderToString(");
             scriptBuilder.append(LIBRARY_NAME);
             scriptBuilder.append("['");
-            scriptBuilder.append(component);
+            scriptBuilder.append(entry);
             scriptBuilder.append("'].default(");
             scriptBuilder.append(props);
             scriptBuilder.append(")) };obj;");
@@ -127,22 +127,28 @@ public class ServerSideRenderer implements ScriptBean {
             return (String)obj.get("rendered");
 
         } catch (ScriptException e) {
+
+            LOG.debug("");
+            LOG.debug(entry + " script dump:");
+            LOG.debug("---------------------------------\n\n");
+            LOG.debug(script+"\n\n");
+            LOG.debug("---------------------------------------\n");
             LOG.error("ERROR: " + ServerSideRenderer.class.getName() + ".renderToString  |  " +
                     "Message: " + e.getMessage() + "  |  " +
-                    "Component: " + component + "  |  " +
-                    "Props: " + props + "\n" +
-                    "Script:\n---------------------------------\n\n" + script + "\n\n---------------------------------------\n" +
-                    "\n--- TIP: --- Hard to spot the problem in the mangled code above? There might already be a more readable (and sourcemapped) error message in the browser console - look at this page / entry ( " + component + " ) in XP's preview or live mode. If not, try clientside-rendering the component to force the code to run on the client side (add a 'clientRender: true' parameter in the controller's react4xp render call).\n\n", e);
+                    "Entry: " + entry + "  |  " +
+                    "Props: " + props + "\n");
+            LOG.info("TIP: The previous error message tends to refer to compiled/mangled lines and code. The browser console might have more readable (and sourcemapped) information - especially if you clientside-render this page / entry instead. Add 'clientRender: true', etc - in XP's preview or live mode! A full (compiled) script is dumped to the log at debug level.\n\n", e);
 
             if (runMode == RunMode.PROD) {
-                alreadyCachedAndRunAssetNames.remove(component);
+                alreadyCachedAndRunAssetNames.remove(entry);
             }
-            ENGINE.eval("delete " + LIBRARY_NAME + "['" + component + "']");
+            ENGINE.eval("delete " + LIBRARY_NAME + "['" + entry + "']");
 
             return "<div class=\"react4xp-error\" style=\"border: 1px solid #8B0000; padding: 15px; background-color: #FFB6C1\">" +
                     "<h2>" + StringEscapeUtils.escapeHtml(e.getClass().getName()) + "</h2>" +
-                    "<p class=\"react4xp-component-name\">" + component + "</p>" +
+                    "<p class=\"react4xp-entry-name\">" + entry + "</p>" +
                     "<p class=\"react4xp-error-message\">" + StringEscapeUtils.escapeHtml(e.getMessage()) + "</p>" +
+                    "<script>console.error('" + StringEscapeUtils.escapeJavaScript(e.getMessage()).replace("'", "\"") +"\\n\\nFor more info: see the server log, and/or clientside-render this page/entry (" + entry + ") in XP preview or live mode.');</script>" +
                     "</div>";
         }
     }
