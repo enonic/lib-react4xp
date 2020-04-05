@@ -1,4 +1,4 @@
-[//]: <> (USE THIS FILE TO EDIT THE ROOT's README.md! This will be copied to root and and verions inserted before commit. Gradle task: copyReadme. Version placeholders: ###LIB_VERSION### and ###NPM_BUNDLE_VERSION###. Leave this line in place)
+[//]: <> (lib-react4xp readme: USE THIS FILE TO EDIT THE ROOT's README.md! This will be copied to root and and verions inserted before commit. Gradle task: copyReadme. Version placeholders: ###LIB_VERSION### and ###NPM_BUNDLE_VERSION###. Leave this line in place)
 
 # lib-react4xp
 

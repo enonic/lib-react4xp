@@ -136,7 +136,7 @@ jar.dependsOn += 'react4xp_nashornPolyfills'
 jar.dependsOn += 'react4xp_client'
 jar.outputs.dir('build/libs')
 
-
+//////////////////////////////////////////////////  Auto-update current version in docs and package.json:
 
 def PACKAGE_JSON = new JsonSlurper().parseText(file('package.json').text)
 def NPM_BUNDLE_VERSION = PACKAGE_JSON.dependencies.react4xp
@@ -166,10 +166,10 @@ task makeAdoc(type: Copy) {
                 .replaceAll(/\[(.*?)\]\((.*?)\)/, "link:\$2[\$1]") // Links
                 .replaceAll(/^```$/, "----") // Source code end
                 .replaceAll(/^```(.*?)$/, "[source,\$1,options=\"nowrap\"]\n----") // Source code start
-                .replaceAll(/^(\| \*?\*?lib-react4xp\*?\*?[\n \|])(.*?)\|$/, "[%header,cols=8]\n|===\n\$1\$2") // Version table header
-                .replaceAll(/^\| -.*?- \|$/, "")
-                .replaceAll(~ "^(\\| \\*?\\*?${LIB_VERSION}.*?)\$", "\$1\n|===") // Version table last line
-                .replaceAll(/^(\| .*?)\|$/, "\$1") // Version table cells
+                .replaceAll(/^(\| ?\*?\*?lib-react4xp\*?\*?[\n \|])(.*?)\|$/, "[%header,cols=8]\n|===\n\$1\$2") // Version table header
+                .replaceAll(/^\| ?-.*?- \|$/, "")
+                .replaceAll(~ "^(\\| ?\\*?\\*?${LIB_VERSION}.*?)\$", "\$1\n|===") // Version table last line
+                .replaceAll(/^(\| ?.*?)\|$/, "\$1") // Version table cells
     }
 
     doLast {
