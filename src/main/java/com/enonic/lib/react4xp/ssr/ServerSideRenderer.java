@@ -137,7 +137,7 @@ public class ServerSideRenderer implements ScriptBean {
                     "Message: " + e.getMessage() + "  |  " +
                     "Entry: " + entry + "  |  " +
                     "Props: " + props + "\n");
-            LOG.info("TIP: The previous error message tends to refer to compiled/mangled lines and code. The browser console might have more readable (and sourcemapped) information - especially if you clientside-render this page / entry instead. Add 'clientRender: true', etc - in XP's preview or live mode! A full (compiled) script is dumped to the log at debug level.\n\n", e);
+            LOG.info("SOLUTION TIPS: The previous error message tends to refer to lines in compiled/mangled code. The browser console might have more readable (and sourcemapped) information - especially if you clientside-render this page / entry instead. Add 'clientRender: true', etc - in XP's preview or live mode! A full (compiled) script is dumped to the log at debug level. Also, it sometimes helps to clear all cached behavior: stop continuous builds, clear/rebuild your project, restart the XP server, clear browser cache.\n\n", e);
 
             if (runMode == RunMode.PROD) {
                 alreadyCachedAndRunAssetNames.remove(entry);
