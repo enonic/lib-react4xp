@@ -80,6 +80,12 @@ Insert into `build.gradle` in the parent project, under `dependencies`:
 dependencies {
 	include 'com.enonic.lib:lib-react4xp:###LIB_VERSION###'
 }
+
+repositories {
+    maven {
+        url 'http://repo.enonic.com/public'
+    }
+}
 ```
 
 #### ...or fork and build it yourself
