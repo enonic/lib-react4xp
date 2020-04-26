@@ -145,7 +145,9 @@ class React4xp {
             } else {
                 const cont = getContent();
                 if (cont && cont.page) {
-                    // TODO: It the long run, it would be better with a more reliable test than !component for whether this is a top-level entry call specifically from a page controller. Make a Content.getPage() call from a bean? And if it fails, this fallback should be skipped since this wasn't called from a page controller.
+                    // TODO: In the long run, it would be better with a more reliable test than !component for whether this is a top-level entry call specifically from a page controller.
+                    //       Especially since page-view entries that are called from the controller by jsxPath instead of by component, will be unable to detect if its a page.
+                    //       Make a Content.getPage() call from a bean? And if it fails, this fallback should be skipped since this wasn't called from a page controller.
                     // Page. Use content.page in page flow. Derive jsxPath and default ID from local page folder, same name.
                     this.isPage = 1;
                     this.component = cont.page;
@@ -179,7 +181,7 @@ class React4xp {
             if (this.component.regions && Object.keys(this.component.regions).length) {
                 this.hasRegions = 1;
             } else if (this.isPage) {
-                console.warn("React4xp appears to be asked to render a page. No regions are found.  |  entry=" + JSON.stringify(entry) + "  |  portal.getComponent=" + JSON.stringify(getComponent()) + "  |  portal.getContent=" + JSON.stringify(getContent));
+                log.warning("React4xp appears to be asked to render a page. No regions are found.  |  entry=" + JSON.stringify(entry) + "  |  portal.getComponent=" + JSON.stringify(getComponent()) + "  |  portal.getContent=" + JSON.stringify(getContent));
             }
             // ------------------------------------------------------------------------------------------
 
@@ -467,10 +469,10 @@ class React4xp {
                         LIBRARY_NAME}.CLIENT.${command}(${
                             LIBRARY_NAME}['${this.jsxPath}'],${
                             JSON.stringify(this.react4xpId)},${
-                            this.props ? JSON.stringify(this.props) : 'null'},${
-                            this.isPage},${
-                            this.hasRegions
-});</script>`
+                            this.props ? JSON.stringify(this.props) : 'null'}${
+                            this.isPage || this.hasRegions ?
+                                `,${this.isPage},${this.hasRegions}` :
+                                ''});</script>`
                 ]
             });
     };
@@ -541,10 +543,12 @@ class React4xp {
       if (!request || request.mode === "edit" || request.mode === "inline") {
         return {
           body: react4xp.renderSSRIntoContainer(body),
-          pageContributions: react4xp.renderPageContributions({
-            pageContributions,
-            clientRender
-          })
+          pageContributions: request ?
+              react4xp.renderPageContributions({
+                pageContributions,
+                clientRender
+              }) :
+              undefined
         };
       } else {
         return {

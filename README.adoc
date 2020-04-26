@@ -34,7 +34,7 @@ This lib-react4xp is installed as a regular XP library in a parent app/project. 
 | **0.7.1** | - | 0.4.0 | 0.4.2 | 0.7.0 | 0.4.0 | 0.8.0 |  0.2.0 
 | **0.8.0** | - | 0.5.0 | 0.4.3 | 0.7.3 | 0.4.0 | 0.8.0 |  0.2.1 
 | **0.8.1** | 0.0.5 | - | - | - | - | - | - 
-| **1.0.0** | 0.2.0 | - | - | - | - | - | - |
+| **1.0.0** | 0.2.1 | - | - | - | - | - | - |
 |===
 
 
@@ -123,10 +123,10 @@ Go to the _parent XP project folder_ and use the command line to add these NPM p
 
 [source,bash,options="nowrap"]
 ----
-npm add --save-dev react4xp@0.2.0
+npm add --save-dev react4xp@0.2.1
 ----
 
-Note: `react4xp@0.2.0` corresponds with lib-react4xp version 1.0.0. For other versions of this lib, see link:#versions-and-compatibility[the table of corresponding versions] above.
+Note: `react4xp@0.2.1` corresponds with lib-react4xp version 1.0.0. For other versions of this lib, see link:#versions-and-compatibility[the table of corresponding versions] above.
 
 Other development tools might be needed, depending on your setup:
 
@@ -256,7 +256,7 @@ task nsiInstall(type:NodeTask) {
     doFirst {
         println "react4xp.properties#buildEnv is set to '" + react4xp.buildEnv + "':\nOVERRIDING VANILLA npmInstall IN FAVOR OF node-safe-install (nsi)." // Because nsi retains 'npm link' symlinks!
     }
-    script = file("node_modules/npm-safe-install/out/cli.js")   // npm-safe-install comes with react4xp@^0.2.0
+    script = file("node_modules/npm-safe-install/out/cli.js")   // npm-safe-install comes with react4xp@^0.2.1
     doLast {
         def marker = new File(linkMarkerName)
         new File(marker.getParent()).mkdirs()
@@ -302,7 +302,7 @@ task config_react4xp(type: NodeTask) {
     group 'React4xp'
     description 'Build the master config JSON file and its copy'
 
-    script = file('node_modules/react4xp-buildconstants/bin/cli.js')       // react4xp-buildconstants comes with react4xp@^0.2.0
+    script = file('node_modules/react4xp-buildconstants/bin/cli.js')       // react4xp-buildconstants comes with react4xp@^0.2.1
     args = [ ROOT, JsonOutput.toJson(JsonOutput.toJson(react4xp)) ]
 }
 config_react4xp.inputs.file("react4xp.properties")
@@ -351,7 +351,7 @@ task react4xp_components(type: NodeTask) {
     // react4xp-build-components compiles the components added in this project into runnable/renderable components. See react4xp-build-components docs.
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
-            '--config', 'node_modules/react4xp-build-components/webpack.config.js', // react4xp-build-components comes with react4xp@^0.2.0
+            '--config', 'node_modules/react4xp-build-components/webpack.config.js', // react4xp-build-components comes with react4xp@^0.2.1
             '--color',
             '--env.VERBOSE=' + react4xp.verbose,
             '--env.ENTRY_DIRS=' + react4xp.entryDirs,
@@ -389,7 +389,7 @@ task react4xp_externals(type: NodeTask) {
 
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
-            '--config', 'node_modules/react4xp-runtime-externals/webpack.config.js',  // react4xp-runtime-externals comes with react4xp@^0.2.0
+            '--config', 'node_modules/react4xp-runtime-externals/webpack.config.js',  // react4xp-runtime-externals comes with react4xp@^0.2.1
             '--color',
             '--env.VERBOSE=' + react4xp.verbose,
             '--env.ENTRY_DIRS=' + react4xp.entryDirs,
