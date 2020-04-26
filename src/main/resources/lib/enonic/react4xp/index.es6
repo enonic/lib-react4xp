@@ -1,8 +1,8 @@
-const { getAndMergePageContributions } = require('./pageContributions');
-const { getComponentChunkNames } = require('./dependencies');
-const { getAssetRoot } = require('./serviceRoots');
-const { getContent, getComponent } = require('/lib/xp/portal');
-const { newCache } = require('/lib/cache');
+const {getAndMergePageContributions} = require('./pageContributions');
+const {getComponentChunkNames} = require('./dependencies');
+const {getAssetRoot} = require('./serviceRoots');
+const {getContent, getComponent} = require('/lib/xp/portal');
+const {newCache} = require('/lib/cache');
 const contentLib = require('/lib/xp/content');
 
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
@@ -14,24 +14,24 @@ const SSR_LAZYLOAD_ASSETS = true; // <-- lazyLoading main switch
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
 const {
-  LIBRARY_NAME,
-  R4X_TARGETSUBDIR,
-  NASHORNPOLYFILLS_FILENAME,
-  EXTERNALS_CHUNKS_FILENAME,
-  COMPONENT_STATS_FILENAME,
-  ENTRIES_FILENAME
+    LIBRARY_NAME,
+    R4X_TARGETSUBDIR,
+    NASHORNPOLYFILLS_FILENAME,
+    EXTERNALS_CHUNKS_FILENAME,
+    COMPONENT_STATS_FILENAME,
+    ENTRIES_FILENAME
 } = require("./react4xp_constants.json");
 
 SSRreact4xp.setConfig(
-  app.name,
-  `/${R4X_TARGETSUBDIR}`,
-  LIBRARY_NAME,
-  `/${R4X_TARGETSUBDIR}/`,
-  NASHORNPOLYFILLS_FILENAME ? `${NASHORNPOLYFILLS_FILENAME}.js` : null,
-  ENTRIES_FILENAME,
-  EXTERNALS_CHUNKS_FILENAME,
-  COMPONENT_STATS_FILENAME,
-  SSR_LAZYLOAD_ASSETS
+    app.name,
+    `/${R4X_TARGETSUBDIR}`,
+    LIBRARY_NAME,
+    `/${R4X_TARGETSUBDIR}/`,
+    NASHORNPOLYFILLS_FILENAME ? `${NASHORNPOLYFILLS_FILENAME}.js` : null,
+    ENTRIES_FILENAME,
+    EXTERNALS_CHUNKS_FILENAME,
+    COMPONENT_STATS_FILENAME,
+    SSR_LAZYLOAD_ASSETS
 );
 
 const BASE_PATHS = {
@@ -73,13 +73,11 @@ const getDescriptorFromTemplate = (componentType, templateId) =>
     });
 
 
-
 const bodyHasContainer = (body, react4xpId) => {
     const react4xpPattern = new RegExp("<[^>]+\\s+id\\s*=\\s*[\"']" + react4xpId + "[\"']", 'i');
 
     return !!body.match(react4xpPattern);
 };
-
 
 
 const buildContainer = (react4xpId, content) => `<div id="${react4xpId}">${content || ''}</div>`;
@@ -99,8 +97,8 @@ const buildErrorContainer = (jsxPath, react4xpId) => '\n' +
 const makeErrorMessage = (attribute, component) => `Couldn't construct React4xp data: missing or invalid ${attribute}. ${
     this.isPage ?
         "Trying to handle a page controller template without a jsxPath string 'entry' parameter in the constructor - but that's usually okay. However, an in-construtor call to portal.getContent() returned data without a content.page." + attribute + " attribute, so no jsxPath can be derived. Content" :
-        "No jsxPath string 'entry' parameter was given to the React4xp constructor - but that's usually okay. However, component data (either from the 'entry' parameter or from an in-constructor portal.getComponent() call) is missing a component." +  attribute + " attribute, so no jsxPath can be derived. Component"
-    } data: ${JSON.stringify(component)}`;
+        "No jsxPath string 'entry' parameter was given to the React4xp constructor - but that's usually okay. However, component data (either from the 'entry' parameter or from an in-constructor portal.getComponent() call) is missing a component." + attribute + " attribute, so no jsxPath can be derived. Component"
+} data: ${JSON.stringify(component)}`;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -164,7 +162,7 @@ class React4xp {
                 type: BASE_PATHS[this.component.type],
                 path: this.component.path
             };
-            Object.keys(buildingBlockData).forEach( attribute => {
+            Object.keys(buildingBlockData).forEach(attribute => {
                 if (!buildingBlockData[attribute]) {
                     throw Error(makeErrorMessage(attribute, this.component));
                 }
@@ -173,7 +171,6 @@ class React4xp {
             const compName = buildingBlockData.descriptor.split(":")[1];
             this.jsxPath = `site/${buildingBlockData.type}/${compName}/${compName}`;
             this.react4xpId = `${buildingBlockData.type}_${compName}_${buildingBlockData.path}`.replace(/\//g, "_");
-
 
 
             // TODO: Move to later in the flow. Where are regions relevant and this.component guaranteed?
@@ -191,8 +188,6 @@ class React4xp {
             throw Error("React4xp got an invalid 'entry' reference. Either use falsy, a jsxPath string, or a component object (portal.getComponent() called from a component controller, i.e. part, layout). entry=" + JSON.stringify(entry));
         }
     }
-
-
 
 
     /** Inner initializer: returns a React4xp component instance initialized from a single set of parameters instead of
@@ -224,7 +219,7 @@ class React4xp {
         if (uniqueId) {
             if (typeof uniqueId === "string") {
                 react4xp.setId(uniqueId);
-            }  else {
+            } else {
                 react4xp.uniqueId();
             }
         }
@@ -232,7 +227,7 @@ class React4xp {
         return react4xp;
     };
 
-  //---------------------------------------------------------------
+    //---------------------------------------------------------------
 
     checkIdLock() {
         if (this.react4xpIdIsLocked) {
@@ -263,11 +258,10 @@ class React4xp {
     }
 
 
-
     /** Sets the react4xpId - the HTML ID of the target container this component will be rendered into.
-      * Deletes the ID if argument is omitted.
-      * @returns The react4xp component itself, for builder-like telescoping pattern.
-      */
+     * Deletes the ID if argument is omitted.
+     * @returns The react4xp component itself, for builder-like telescoping pattern.
+     */
     setId(react4xpId) {
         this.checkIdLock();
         this.react4xpId = react4xpId;
@@ -278,8 +272,8 @@ class React4xp {
     }
 
     /** Appends a unique target container ID postfix after the currently set reactXpId (if any).
-      * @returns The react4xp component itself, for builder-like telescoping pattern.
-      */
+     * @returns The react4xp component itself, for builder-like telescoping pattern.
+     */
     uniqueId() {
         return this.setId((this.react4xpId || "") + "_" + Math.floor(Math.random() * 99999999));
     }
@@ -295,18 +289,18 @@ class React4xp {
     }
 
 
-  //---------------------------------------------------------------
+    //---------------------------------------------------------------
 
     /** When you want to use a particular JSX file (other than the default, a JSX file in the same folder as the XP component,
-      * with the same name as the folder).
-      *
-      * @param jsxPath (string, mandatory) Name of a JSX file, will be interpreted as a full, absolute JSX path. NOTE
-      *        that these are component NAME strings, not file paths that can be relative. So avoid stuff like "..", "//", "./", etc.
-      *        After building the parent project with react4xp-build-components,
-      *        the available entry jsxPaths can be seen in build/main/resources/react4xp/entries.json.
-      *
-      * @returns The React4xp object itself, for builder-like telescoping pattern.
-      */
+     * with the same name as the folder).
+     *
+     * @param jsxPath (string, mandatory) Name of a JSX file, will be interpreted as a full, absolute JSX path. NOTE
+     *        that these are component NAME strings, not file paths that can be relative. So avoid stuff like "..", "//", "./", etc.
+     *        After building the parent project with react4xp-build-components,
+     *        the available entry jsxPaths can be seen in build/main/resources/react4xp/entries.json.
+     *
+     * @returns The React4xp object itself, for builder-like telescoping pattern.
+     */
     setJsxPath(jsxPath) {
         // Enforce a clean jsxPath - it's not just a file reference, but a react4xp component name!
         if (
@@ -320,7 +314,7 @@ class React4xp {
             jsxPath.indexOf('\\\\') !== -1 ||
             jsxPath.startsWith("\\")
         ) {
-            throw Error(`React4xp.setJsxFileName: invalid jsxPath (${JSON.stringify(jsxPath)}). This is a NAME, not a relative path, so it can't be missing/empty, or contain '..', '//', '/./' or start with '.' or '/'.${this.component ? ` Component: ${JSON.stringify(this.component)}`: ''}`);
+            throw Error(`React4xp.setJsxFileName: invalid jsxPath (${JSON.stringify(jsxPath)}). This is a NAME, not a relative path, so it can't be missing/empty, or contain '..', '//', '/./' or start with '.' or '/'.${this.component ? ` Component: ${JSON.stringify(this.component)}` : ''}`);
         }
 
         // Strip away trailing file extensions
@@ -339,12 +333,12 @@ class React4xp {
         return this;
     }
 
-  //--------------------------------------------------------------- Props
+    //--------------------------------------------------------------- Props
 
     /** Sets the react4xp component's top-level props.
-      * @param props {object} Props to be stored in the component. Must be a string-serializeable object!
-      * @returns The react4xp component itself, for builder-like telescoping pattern.
-      */
+     * @param props {object} Props to be stored in the component. Must be a string-serializeable object!
+     * @returns The react4xp component itself, for builder-like telescoping pattern.
+     */
     setProps(props) {
         if (!props || typeof props !== 'object') {
             throw Error("Top-level props must be a string-serializeable object.");
@@ -355,9 +349,6 @@ class React4xp {
         }
         return this;
     }
-
-
-
 
 
     //////////////////////////////////////////////////////  RENDERING  //////////////////////////////////////////////////
@@ -397,8 +388,8 @@ class React4xp {
 
 
     /** Renders a pure static HTML markup of ONLY the react4xp entry, without a surrounding HTML markup or container.
-      * Can override props that have previously been added to this component.
-      */
+     * Can override props that have previously been added to this component.
+     */
     renderEntryToHtml = (overrideProps) => SSR_LAZYLOAD_ASSETS ?
         SSRreact4xp.renderToStringLazy(
             this.jsxPath,
@@ -422,7 +413,6 @@ class React4xp {
     }
 
 
-
     renderBody = params => {
         // TODO: Page templates might be preferrable as standalones - that is, not need to be inserted into a container, but be able to encompass an entire DOM with <html> as the outer returned element. This is tricky: on SSR, renderEntryToHtml can be used, but how to do that on client-side react.render (and possibly worse, .hydrate)? And how to separate between them? isPage is NOT enough, since a page template might be both standalone or inserted.
         /* if (this.isPage) {
@@ -431,8 +421,6 @@ class React4xp {
         const {body, clientRender} = params || {};
         return clientRender ? this.renderTargetContainer(body) : this.renderSSRIntoContainer(body);
     };
-
-
 
 
     //--------------------------------  RENDERING page contributions for importing entry / dependency chunks  --------------
@@ -467,115 +455,113 @@ class React4xp {
                     `
 <script defer>${
                         LIBRARY_NAME}.CLIENT.${command}(${
-                            LIBRARY_NAME}['${this.jsxPath}'],${
-                            JSON.stringify(this.react4xpId)},${
-                            this.props ? JSON.stringify(this.props) : 'null'}${
-                            this.isPage || this.hasRegions ?
-                                `,${this.isPage},${this.hasRegions}` :
-                                ''});</script>`
+                        LIBRARY_NAME}['${this.jsxPath}'],${
+                        JSON.stringify(this.react4xpId)},${
+                        this.props ? JSON.stringify(this.props) : 'null'}${
+                        this.isPage || this.hasRegions ?
+                            `,${this.isPage},${this.hasRegions}` :
+                            ''});</script>`
                 ]
             });
     };
 
 
-
     ///////////////////////////////////////////////// STATIC ALL-IN-ONE RENDERER
 
     /** Main renderer. Default behavior: renders server-side and adds hydration logic for the client-side.
-      *     However, renders a static, unhydrated server-side HTML string if request is missing or in edit mode.
-      *     Or can render a container element with client-side rendering logic.
-      *     On problems/errors, logs and falls back to a placeholder output which marks the problem on the page.
-      *
-      * @param entry {string|object} Reference to the React4xp entry JSX file. Corresponds to "view" parameter
-      *     in the thymeleaf renderer etc.
-      *     Can be a string or an object:
-      *     - If it's a string, it's interpreted as a jsxPath.
-      *     - If it's an object, it's interpreted as a component object from portal.getComponent(), and will be used to both
-      *          find the JSX file (same name in same folder) and generate a unique ID (see also the params below).
-      *     Note: current versions of XP (6.x, 7.0, 7.1 and probably 7.2 too) are not able to fetch a usable component object
-      *          from a page controller. In this case, component will simply be null. There is a workaround in place
-      *          for this (detecting page controller and using content.page instead), so it's currently possible to juse pass
-      *          null/undefined as the first argument from a page controller, and it will still work. However, this seems to
-      *          be a bug in XP, so the bug might get fixed later and the workaround possibly removed To ensure future
-      *          compatibility, you're recommended to to call getComponent() in the page controller and pass that to render,
-      *          all the same.
-      * @param props {object} Optional object. Sends props to the JSX file. Corresponds to "model" parameter in the thymeleaf
-      *          renderer etc.
-      * @param request {object} XP request object (from controller get-method etc). Mandatory for proper react rendering,
-      *          but strictly speaking optional:
-      *     - If omitted, the rendering will fall back to a template-like JSX rendering: outputs a static HTML string using the props,
-      *          and it will not be activated/hydrated in the client.
-      * @param params {object} Additional parameters controlling the react rendering. All of them are optional:
-      *     - clientRender {boolean} Controls server-side vs client-side rendering (as long as a request argument is given, see above).
-      *         Server-side rendering (SSR) is the default behavior if this parameter is missing or falsy: a static HTML string is rendered as output, and react hydrate() pageContributions are added.
-      *         If set to true, however, client-side rendering is forced: only a target container with an element ID is rendered in the output, but react render() pageContributions are added.
-      *     - id {string} sets the target container element ID.
-      *         (by force - if an ID was generated from a component-type entry object (see above), this manual ID will override the generated one).
-      *         If the ID matches an DOM element ID in an input body (see body below), the rendered react component will be inserted in that element. If not, a container with this ID will be added.
-      *         If there's no body parameter at all, an HTML string with a matching-ID element is generated.
-      *         If the id parameter is omitted, a generic unique ID is generated as if uniqueId below is set to true.
-      *     - uniqueId {boolean|string} If set, takes an extra step to ensure a unique ID:
-      *         If id is already set (by previous param or using a component-object entry), a random integer will be postfixed to it.
-      *         If uniqueId is a string, this is the prefix before the random postfix. If the id param is used in addition to a uniqueId string, uniqueId takes presedence and overrides id.
-      *     - body {string} HTML string, for example a static string, or previously rendered from other react4xp output, thymeleaf or other templating engines.
-      *         If it already has a matching-ID target container, body passes through unchanged (use this option and the setId method to control where in the body the react component should be inserted).
-      *         If it doesn't have a matching container, a matching <div> will be inserted at the end of the body, inside the root element.
-      *         If body is missing, a pure-target-container body is generated and returned.
-      *     - pageContributions {object} Pre-existing pageContributions.
-      *         If added, page contributions generated during this rendering will be added to (merged with) the input parameter ones.
-      *
-      * @returns a response object that can be directly returned from an XP controller, with body and pageContributions attributes
-      */
-    static render = (entry, props = {}, request = null, params = {}) => {
+     *     However, renders a static, unhydrated server-side HTML string if request is missing or in edit mode.
+     *     Or can render a container element with client-side rendering logic.
+     *     On problems/errors, logs and falls back to a placeholder output which marks the problem on the page.
+     *
+     * @param entry {string|object} Reference to the React4xp entry JSX file. Corresponds to "view" parameter in the
+     *      thymeleaf renderer etc. Can be a string or an object: If it's a string, it's interpreted as a jsxPath. If it's an
+     *      object, it's interpreted as a component object from portal.getComponent(), and will be used to both find the JSX
+     *      file (same name in same folder) and generate a unique ID (see also the params below). Note: current versions of
+     *      XP (6.x, 7.0, 7.1 and probably 7.2 too) are not able to fetch a usable component object from a page controller.
+     *      In this case, component will simply be null. There is a workaround in place for this (detecting page controller
+     *      and using content.page instead), so it's currently possible to juse pass  null/undefined as the first argument
+     *      from a page controller, and it will still work. However, this seems to be a bug in XP, so the bug might get fixed
+     *      later and the workaround possibly removed To ensure future compatibility, you're recommended to to call
+     *      getComponent() in the page controller and pass that to render, all the same.
+     * @param props {object} Optional object. Sends props to the JSX file. Corresponds to "model" parameter in the
+     *      thymeleaf renderer etc.
+     * @param request {object} XP request object (from controller get-method etc). Mandatory for proper react rendering,
+     *          but strictly speaking optional:
+     *     - If omitted, the rendering will fall back to a template-like JSX rendering: outputs a static HTML string using the props,
+     *          and it will not be activated/hydrated in the client. If only the static output is of interest, doing this may
+     *          increase performance, since page contributions aren't rendered.
+     * @param options {object} Additional parameters controlling the react rendering. All of them are optional:
+     *     - clientRender {boolean} Controls server-side vs client-side rendering (as long as a request argument is given, see above).
+     *         Server-side rendering (SSR) is the default behavior if this parameter is missing or falsy: a static HTML string is rendered as output, and react hydrate() pageContributions are added.
+     *         If set to true, however, client-side rendering is forced: only a target container with an element ID is rendered in the output, but react render() pageContributions are added.
+     *     - id {string} sets the target container element ID.
+     *         (by force - if an ID was generated from a component-type entry object (see above), this manual ID will override the generated one).
+     *         If the ID matches an DOM element ID in an input body (see body below), the rendered react component will be inserted in that element. If not, a container with this ID will be added.
+     *         If there's no body parameter at all, an HTML string with a matching-ID element is generated.
+     *         If the id parameter is omitted, a generic unique ID is generated as if uniqueId below is set to true.
+     *     - uniqueId {boolean|string} If set, takes an extra step to ensure a unique ID:
+     *         If id is already set (by previous param or using a component-object entry), a random integer will be postfixed to it.
+     *         If uniqueId is a string, this is the prefix before the random postfix. If the id param is used in addition to a uniqueId string, uniqueId takes presedence and overrides id.
+     *     - body {string} HTML string, for example a static string, or previously rendered from other react4xp output, thymeleaf or other templating engines.
+     *         If it already has a matching-ID target container, body passes through unchanged (use this option and the setId method to control where in the body the react component should be inserted).
+     *         If it doesn't have a matching container, a matching <div> will be inserted at the end of the body, inside the root element.
+     *         If body is missing, a pure-target-container body is generated and returned.
+     *     - pageContributions {object} Pre-existing pageContributions.
+     *         If added, page contributions generated during this rendering will be added to (merged with) the input parameter ones.
+     *
+     * @returns a response object that can be directly returned from an XP controller, with body and pageContributions attributes
+     */
+    static render = (entry, props = {}, request = null, options = {}) => {
         let react4xp;
         try {
-            params.entry = entry;
+            options.entry = entry;
             if (props && typeof props === 'object' && !Array.isArray(props)) {
-                params.props = props;
+                options.props = props;
             } else if (props) {
                 throw Error("React4xp props must be falsy or a regular JS object, not this: " + JSON.stringify(props));
             }
 
-            react4xp = React4xp._buildFromParams(params);
+            react4xp = React4xp._buildFromParams(options);
 
-            const {body, pageContributions, clientRender} = params || {};
+            const {body, pageContributions, clientRender} = options || {};
 
-      if (!request || request.mode === "edit" || request.mode === "inline") {
-        return {
-          body: react4xp.renderSSRIntoContainer(body),
-          pageContributions: request ?
-              react4xp.renderPageContributions({
-                pageContributions,
-                clientRender
-              }) :
-              undefined
-        };
-      } else {
-        return {
-          body: clientRender
-            ? react4xp.renderTargetContainer(body)
-            : react4xp.renderSSRIntoContainer(body),
-          pageContributions: react4xp.renderPageContributions({
-            pageContributions,
-            clientRender
-          })
-        };
-      }
-    } catch (e) {
-      log.error(e);
-      log.error("entry (" + typeof entry + "): " + JSON.stringify(params));
-      log.error("props (" + typeof props + "): " + JSON.stringify(props));
-      log.error("request (" + typeof request + "): " + JSON.stringify(request));
-      log.error("params (" + typeof params + "): " + JSON.stringify(params));
-      const r = react4xp || {};
-      return {
-        body: buildErrorContainer(r.jsxPath, r.react4xpId)
-      };
-    }
-  };
+            if (!request || request.mode === "edit" || request.mode === "inline") {
+                return {
+                    body: react4xp.renderSSRIntoContainer(body),
+                    pageContributions: request ?
+                        react4xp.renderPageContributions({
+                            pageContributions,
+                            clientRender
+                        }) :
+                        pageContributions
+                };
+            } else {
+                return {
+                    body: clientRender
+                        ? react4xp.renderTargetContainer(body)
+                        : react4xp.renderSSRIntoContainer(body),
+                    pageContributions: react4xp.renderPageContributions({
+                        pageContributions,
+                        clientRender
+                    })
+                };
+            }
+        } catch (e) {
+            log.error(e);
+            log.error("entry (" + typeof entry + "): " + JSON.stringify(options));
+            log.error("props (" + typeof props + "): " + JSON.stringify(props));
+            log.error("request (" + typeof request + "): " + JSON.stringify(request));
+            log.error("params (" + typeof options + "): " + JSON.stringify(options));
+            const r = react4xp || {};
+            return {
+                body: buildErrorContainer(r.jsxPath, r.react4xpId)
+            };
+        }
+    };
 
     static _clearCache = () => {
         templateDescriptorCache.clear();
     }
 }
+
 module.exports = React4xp;
