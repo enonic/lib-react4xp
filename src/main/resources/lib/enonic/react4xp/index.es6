@@ -19,7 +19,8 @@ const {
     NASHORNPOLYFILLS_FILENAME,
     EXTERNALS_CHUNKS_FILENAME,
     COMPONENT_STATS_FILENAME,
-    ENTRIES_FILENAME
+    ENTRIES_FILENAME,
+    BUILD_ENV
 } = require("./react4xp_constants.json");
 
 SSRreact4xp.setConfig(
@@ -177,7 +178,7 @@ class React4xp {
             // ------------------------------------------------------------------------------------------
             if (this.component.regions && Object.keys(this.component.regions).length) {
                 this.hasRegions = 1;
-            } else if (this.isPage) {
+            } else if (this.isPage && BUILD_ENV === 'development') {
                 log.warning("React4xp appears to be asked to render a page. No regions are found.  |  entry=" + JSON.stringify(entry) + "  |  portal.getComponent=" + JSON.stringify(getComponent()) + "  |  portal.getContent=" + JSON.stringify(getContent));
             }
             // ------------------------------------------------------------------------------------------

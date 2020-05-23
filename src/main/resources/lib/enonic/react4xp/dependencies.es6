@@ -133,7 +133,7 @@ const getClientUrls = () =>
     } catch (e) {
       log.warning(e);
       log.warning(
-        `No optional clientwrapper were found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's okay, there's a fallback one at: ${getClientRoot()}`
+        `No optional clientwrapper was found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's okay, there's a fallback one at: ${getClientRoot()}`
       );
       return [getClientRoot()];
     }

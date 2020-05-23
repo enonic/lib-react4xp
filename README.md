@@ -74,7 +74,7 @@ Assuming you have Enonic XP 7.x nicely installed, and you have an **XP parent pr
 
 Two ways to add this library to a parent project: import it from an online repository, or build it from scratch:
 
-#### Import it from a repository
+#### Import it from a repository...
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
@@ -88,7 +88,7 @@ repositories {
 }
 ```
 
-#### ...or fork and build it yourself
+#### ...OR fork and build it yourself
 If you need / want to build the lib yourself instead of downloading it with Gradle, add these steps: 
 
 **A.** Clone or otherwise download [the source code for this lib](https://github.com/enonic/lib-react4xp.git) into _its own root folder_ (not into XP_INSTALL or the parent project folder).
