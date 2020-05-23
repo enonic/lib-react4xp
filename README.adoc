@@ -62,11 +62,11 @@ Assuming you have Enonic XP 7.x nicely installed, and you have an **XP parent pr
 
 
 
-=== 1: Add lib-react4xp...
+=== 1: Add lib-react4xp
 
 Two ways to add this library to a parent project: import it from an online repository, or build it from scratch:
 
-==== Import it from a repository
+==== Import it from a repository...
 Insert into `build.gradle` in the parent project, under `dependencies`:
 [source,groovy,options="nowrap"]
 ----
