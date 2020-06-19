@@ -26,7 +26,7 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
 
 <a name="versions-and-compatibility"></a>
 ## Versions and compatibility
-This is beta version **###LIB_VERSION###**.
+This is version **###LIB_VERSION###**.
     
 XP7 compatible. For XP6, see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master)
 

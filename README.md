@@ -26,7 +26,7 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
 
 <a name="versions-and-compatibility"></a>
 ## Versions and compatibility
-This is beta version **1.0.0**.
+This is version **1.0.0-RC1**.
     
 XP7 compatible. For XP6, see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master)
 
@@ -43,7 +43,7 @@ This lib-react4xp is installed as a regular XP library in a parent app/project. 
 | **0.7.1** | - | 0.4.0 | 0.4.2 | 0.7.0 | 0.4.0 | 0.8.0 |  0.2.0 |
 | **0.8.0** | - | 0.5.0 | 0.4.3 | 0.7.3 | 0.4.0 | 0.8.0 |  0.2.1 |
 | **0.8.1** | 0.0.5 | - | - | - | - | - | - |
-| **1.0.0** | 0.2.1 | - | - | - | - | - | - |
+| **1.0.0-RC1** | 1.0.0 | - | - | - | - | - | - |
 
 
 
@@ -78,7 +78,7 @@ Two ways to add this library to a parent project: import it from an online repos
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
-	include 'com.enonic.lib:lib-react4xp:1.0.0'
+	include 'com.enonic.lib:lib-react4xp:1.0.0-RC1'
 }
 
 repositories {
@@ -96,7 +96,7 @@ If you need / want to build the lib yourself instead of downloading it with Grad
 **B.** Make the version unique in the library's `gradle.properties`, for example:
 
 ```properties
-version = 1.0.0-SNAPSHOT
+version = 1.0.0-RC1-SNAPSHOT
 ```
 
 **C.** Build it with gradle:
@@ -112,7 +112,7 @@ Gradle will build the library and install it into the local cache, available for
 
 ```groovy
 dependencies {
-    include 'com.enonic.lib:lib-react4xp:1.0.0-SNAPSHOT'
+    include 'com.enonic.lib:lib-react4xp:1.0.0-RC1-SNAPSHOT'
 }
 ```
 
@@ -126,10 +126,10 @@ Other handy gradle dev tasks are `clean` and `build`.
 Go to the _parent XP project folder_ and use the command line to add these NPM packages as _devDependencies_:
 
 ```bash
-npm add --save-dev react4xp@0.2.1
+npm add --save-dev react4xp@1.0.0
 ```
 
-Note: `react4xp@0.2.1` corresponds with lib-react4xp version 1.0.0. For other versions of this lib, see [the table of corresponding versions](#versions-and-compatibility) above.
+Note: `react4xp@1.0.0` corresponds with lib-react4xp version 1.0.0-RC1. For other versions of this lib, see [the table of corresponding versions](#versions-and-compatibility) above.
 
 Other development tools might be needed, depending on your setup:
 
@@ -256,7 +256,7 @@ task nsiInstall(type:NodeTask) {
     doFirst {
         println "react4xp.properties#buildEnv is set to '" + react4xp.buildEnv + "':\nOVERRIDING VANILLA npmInstall IN FAVOR OF node-safe-install (nsi)." // Because nsi retains 'npm link' symlinks!
     }
-    script = file("node_modules/npm-safe-install/out/cli.js")   // npm-safe-install comes with react4xp@^0.2.1
+    script = file("node_modules/npm-safe-install/out/cli.js")   // npm-safe-install comes with react4xp@^1.0.0
     doLast {
         def marker = new File(linkMarkerName)
         new File(marker.getParent()).mkdirs()
@@ -302,7 +302,7 @@ task config_react4xp(type: NodeTask) {
     group 'React4xp'
     description 'Build the master config JSON file and its copy'
 
-    script = file('node_modules/react4xp-buildconstants/bin/cli.js')       // react4xp-buildconstants comes with react4xp@^0.2.1
+    script = file('node_modules/react4xp-buildconstants/bin/cli.js')       // react4xp-buildconstants comes with react4xp@^1.0.0
     args = [ ROOT, JsonOutput.toJson(JsonOutput.toJson(react4xp)) ]
 }
 config_react4xp.inputs.file("react4xp.properties")
@@ -351,7 +351,7 @@ task react4xp_components(type: NodeTask) {
     // react4xp-build-components compiles the components added in this project into runnable/renderable components. See react4xp-build-components docs.
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
-            '--config', 'node_modules/react4xp-build-components/webpack.config.js', // react4xp-build-components comes with react4xp@^0.2.1
+            '--config', 'node_modules/react4xp-build-components/webpack.config.js', // react4xp-build-components comes with react4xp@^1.0.0
             '--color',
             '--env.VERBOSE=' + react4xp.verbose,
             '--env.ENTRY_DIRS=' + react4xp.entryDirs,
@@ -389,7 +389,7 @@ task react4xp_externals(type: NodeTask) {
 
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
-            '--config', 'node_modules/react4xp-runtime-externals/webpack.config.js',  // react4xp-runtime-externals comes with react4xp@^0.2.1
+            '--config', 'node_modules/react4xp-runtime-externals/webpack.config.js',  // react4xp-runtime-externals comes with react4xp@^1.0.0
             '--color',
             '--env.VERBOSE=' + react4xp.verbose,
             '--env.ENTRY_DIRS=' + react4xp.entryDirs,

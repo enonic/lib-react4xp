@@ -205,8 +205,8 @@ task updateReadme(type: Copy) {
         pkgJsonFile.write(JsonOutput.prettyPrint(JsonOutput.toJson(PACKAGE_JSON)))
     }
 }
-makeAdoc.dependsOn updateReadme
-npmInstall.dependsOn makeAdoc
+updateReadme.dependsOn makeAdoc
+npmInstall.dependsOn updateReadme
 
 def readmeUnstaged() {
     def command = "git diff --name-only HEAD"
