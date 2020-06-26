@@ -86,7 +86,7 @@ if (BUILD_ENV == 'development') {
 
 
 
-def ROOT = project.projectDir.toString() + File.separator
+def ROOT = project.projectDir.toString()
 
 task react4xp_nashornPolyfills(type: NodeTask) {
     group 'lib-react4xp'
@@ -99,7 +99,7 @@ task react4xp_nashornPolyfills(type: NodeTask) {
 
             // (env.BUILD_R4X + env.NASHORNPOLYFILLS_FILENAME) must match ('build/resources/main' + defaultPolyfillFileName)
             // in com/enonic/lib/react4xp/ssr/EngineFactory.java!
-            '--env.BUILD_R4X="' + ROOT + 'build/resources/main/lib/enonic/react4xp/default"',
+            '--env.BUILD_R4X="' + ROOT + '/build/resources/main/lib/enonic/react4xp/default"',
             '--env.NASHORNPOLYFILLS_FILENAME=nashornPolyfills'
     ]
 }
@@ -114,19 +114,19 @@ task react4xp_client(type: NodeTask) {
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
             '--config', 'node_modules/react4xp-runtime-client/webpack.config.js',
-            '--env.BUILD_R4X="' + ROOT + 'build/resources/main/services/react4xp-client"',
+            '--env.BUILD_R4X="' + ROOT + '/build/resources/main/services/react4xp-client"',
             '--env.BUILD_ENV=' + BUILD_ENV,
             '--env.CHUNK_CONTENTHASH=[name].js',
             '--env.CLIENT_CHUNKS_FILENAME=__delete_me_im_redundant__',
             '--env.ROOT="' + ROOT + '"',
 
             // Placeholders used in services/react4xp-client/react4xp-client.es6. Keep up to date!
-            '--env.LIBRARY_NAME=__REACT4XP__RUNTIME__CLIENT__LIBRARY_NAME__PLACEHOLDER__',
-            '--env.SERVICE_ROOT_URL=__REACT4XP__RUNTIME__CLIENT__SERVICE_ROOT_URL__PLACEHOLDER__'
+            '--env.LIBRARY_NAME="__REACT4XP__RUNTIME__CLIENT__LIBRARY_NAME__PLACEHOLDER__"',
+            '--env.SERVICE_ROOT_URL="__REACT4XP__RUNTIME__CLIENT__SERVICE_ROOT_URL__PLACEHOLDER__"'
     ]
 
     doLast {
-        def f = new File(ROOT + 'build/resources/main/services/react4xp-client/__delete_me_im_redundant__')
+        def f = new File(ROOT + '/build/resources/main/services/react4xp-client/__delete_me_im_redundant__')
         f.delete()
     }
 }
@@ -138,7 +138,7 @@ jar.outputs.dir('build/libs')
 
 //////////////////////////////////////////////////  Auto-update current version in docs and package.json:
 
-def PACKAGE_JSON = new JsonSlurper().parseText(file('package.json').text)
+/*def PACKAGE_JSON = new JsonSlurper().parseText(file('package.json').text)
 def NPM_BUNDLE_VERSION = PACKAGE_JSON.dependencies.react4xp
 def LIB_VERSION = "${project.version}"
 def PREVIOUS_VERSION = "${PACKAGE_JSON.version}"
@@ -206,7 +206,7 @@ task updateReadme(type: Copy) {
     }
 }
 updateReadme.dependsOn makeAdoc
-npmInstall.dependsOn updateReadme
+npmInstall.dependsOn updateReadme */
 
 def readmeUnstaged() {
     def command = "git diff --name-only HEAD"
@@ -220,5 +220,5 @@ def readmeUnstaged() {
     def unstagedSource = stdout.split( '\n' ).findAll { it == "docs/README.md" || it == "docs\\README.md" }
     return unstagedSource.size() > 0
 }
-updateReadme.enabled = true // LIB_VERSION != PREVIOUS_VERSION || readmeUnstaged()
+//updateReadme.enabled = true // LIB_VERSION != PREVIOUS_VERSION || readmeUnstaged()
 
