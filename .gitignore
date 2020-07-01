@@ -29,6 +29,9 @@ Temporary Items
 .gradle
 build/
 
+# Enonic cli
+.enonic
+
 # Ignore Gradle GUI config
 gradle-app.setting
 

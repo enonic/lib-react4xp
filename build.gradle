@@ -18,18 +18,18 @@ dependencies {
     compile "com.enonic.xp:core-api:${xpVersion}"
 
     compile 'com.enonic.lib:lib-util:2.0.0'
-    compile 'com.enonic.lib:lib-cache:1.1.0'
+    compile 'com.enonic.lib:lib-cache:2.1.1'
 
     compile group: 'org.jdom', name: 'jdom', version: '2.0.2'
     compile group: 'org.json', name: 'json', version: '20180813'
     compile group: 'jaxen', name: 'jaxen', version: '1.1.6'
-    
+
     testCompile "com.enonic.xp:testing:${xpVersion}"
 }
 
 node {
     download = true
-    version = '10.15.3'
+    version = '9.7.0'
 }
 
 repositories {
@@ -38,67 +38,186 @@ repositories {
     xp.enonicRepo()
 }
 
-npmInstall.inputs.file("package.json")
-npmInstall.inputs.file("package-lock.json")
-npmInstall.outputs.dir("node_modules")
+def BUILD_ENV = "production"
+if (project.hasProperty("dev") || project.hasProperty("development")) {
+    BUILD_ENV = "development"
+}
+
+
 
 
 task babelXP(type: NodeTask) {
     group 'lib-react4xp'
     description 'Compile server-side XP components from ES6'
 
-    script = file('node_modules/babel-cli/bin/babel.js')
-    args = ["src/main/resources", "--out-dir", "build/resources/main"]
+    script = file('node_modules/\\@babel/cli/bin/babel.js')
+    args = ["src/main/resources", "--out-dir", "build/resources/main", "--ignore", "src/main/resources/react4xp"]
 
     inputs.dir 'src/main/resources'
     outputs.dir("build/resources/main")
 }
 babelXP.dependsOn += 'processResources'
-babelXP.dependsOn += 'npmInstall'
 
-def ROOT = project.projectDir.toString() + "/"
 
-task nashornPolyfills(type: NodeTask) {
+
+
+if (BUILD_ENV == 'development') {
+    task nsiInstall(type: NpmTask) {
+        println "BUILD_ENV is set to '" + BUILD_ENV + "':\nOVERRIDING VANILLA npmInstall IN FAVOR OF node-safe-install (nsi)." // Because nsi retains 'npm link' symlinks!
+        args = ['run', 'install:nsi']
+    }
+    npmInstall.enabled = false
+    npmInstall.dependsOn nsiInstall
+    nsiInstall.inputs.files("package.json", "package-lock.json")
+    nsiInstall.outputs.dir("node_modules")
+    nsiInstall.outputs.file file("package-lock.json")
+} else {
+    npmInstall.inputs.files("package.json", "package-lock.json")
+    // npmInstall.outputs.dir("node_modules")
+    npmInstall.outputs.file file("package-lock.json")
+
+    babelXP.dependsOn += 'npmInstall'
+}
+
+
+
+
+def ROOT = project.projectDir.toString()
+
+task react4xp_nashornPolyfills(type: NodeTask) {
     group 'lib-react4xp'
     description 'Build default polyfill code, allowing XP to run the (node-written) React server-side rendering in Nashorn'
 
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
             '--config', 'node_modules/react4xp-runtime-nashornpolyfills/webpack.config.js',
-            '--env.NASHORNPOLYFILLS_SOURCE=node_modules/react4xp-runtime-nashornpolyfills/nashornPolyfills.es6',
+            '--env.NASHORNPOLYFILLS_SOURCE=' + 'node_modules/react4xp-runtime-nashornpolyfills/nashornPolyfills.es6',
 
             // (env.BUILD_R4X + env.NASHORNPOLYFILLS_FILENAME) must match ('build/resources/main' + defaultPolyfillFileName)
             // in com/enonic/lib/react4xp/ssr/EngineFactory.java!
-            '--env.BUILD_R4X=' + ROOT + 'build/resources/main/lib/enonic/react4xp/default',
+            '--env.BUILD_R4X="' + ROOT + '/build/resources/main/lib/enonic/react4xp/default"',
             '--env.NASHORNPOLYFILLS_FILENAME=nashornPolyfills'
     ]
 }
-nashornPolyfills.dependsOn += 'babelXP'
+react4xp_nashornPolyfills.dependsOn += 'babelXP'
 
-task client(type: NodeTask) {
+
+
+task react4xp_client(type: NodeTask) {
     group 'lib-react4xp'
-    description 'Include the client rendering wrapper in the lib'
+    description 'Build default client rendering wrapper in the lib'
 
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
             '--config', 'node_modules/react4xp-runtime-client/webpack.config.js',
-            '--env.BUILD_R4X=' + ROOT + 'build/resources/main/services/react4xp-client',
-            '--env.BUILD_ENV=production',
+            '--env.BUILD_R4X="' + ROOT + '/build/resources/main/services/react4xp-client"',
+            '--env.BUILD_ENV=' + BUILD_ENV,
             '--env.CHUNK_CONTENTHASH=[name].js',
             '--env.CLIENT_CHUNKS_FILENAME=__delete_me_im_redundant__',
+            '--env.ROOT="' + ROOT + '"',
 
             // Placeholders used in services/react4xp-client/react4xp-client.es6. Keep up to date!
-            '--env.LIBRARY_NAME=__REACT4XP__RUNTIME__CLIENT__LIBRARY_NAME__PLACEHOLDER__',
-            '--env.SERVICE_ROOT_URL=__REACT4XP__RUNTIME__CLIENT__SERVICE_ROOT_URL__PLACEHOLDER__'
+            '--env.LIBRARY_NAME="__REACT4XP__RUNTIME__CLIENT__LIBRARY_NAME__PLACEHOLDER__"',
+            '--env.SERVICE_ROOT_URL="__REACT4XP__RUNTIME__CLIENT__SERVICE_ROOT_URL__PLACEHOLDER__"'
     ]
 
     doLast {
-        def f = new File(ROOT + 'build/resources/main/services/react4xp-client/__delete_me_im_redundant__')
+        def f = new File(ROOT + '/build/resources/main/services/react4xp-client/__delete_me_im_redundant__')
         f.delete()
     }
 }
-client.dependsOn += 'babelXP'
+react4xp_client.dependsOn += 'babelXP'
 
-jar.dependsOn += 'nashornPolyfills'
-jar.dependsOn += 'client'
+jar.dependsOn += 'react4xp_nashornPolyfills'
+jar.dependsOn += 'react4xp_client'
 jar.outputs.dir('build/libs')
+
+//////////////////////////////////////////////////  Auto-update current version in docs and package.json:
+
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+
+def PACKAGE_JSON = new JsonSlurper().parseText(file('package.json').text)
+def NPM_BUNDLE_VERSION = PACKAGE_JSON.dependencies.react4xp
+def LIB_VERSION = "${project.version}"
+def PREVIOUS_VERSION = "${PACKAGE_JSON.version}"
+def README_SOURCE = "README.src.md"
+
+task makeAdoc(type: Copy) {
+    from("./")
+    into("./")
+    include("README.md")
+    rename("README.md", "README.adoc")
+
+    doFirst {
+        new File('README.adoc').delete()
+    }
+
+    filter {
+        String line -> line
+                .replaceAll(/\[\/\/\]: <> \((.*?)\)/, "// \$1") // Top comment
+                .replaceAll(/^# (.*?)$/, "= \$1\n:toc: right") // Main header, adding auto ToC
+                .replaceAll(/^## (.*?)$/, "== \$1") // H2-H5
+                .replaceAll(/^### (.*?)$/, "=== \$1")
+                .replaceAll(/^#### (.*?)$/, "==== \$1")
+                .replaceAll(/^##### (.*?)$/, "===== \$1")
+                .replaceAll(/<a name="(.*?)"><\/a>/, "\n[[\$1]]") // Explicit anchor IDs
+                .replaceAll(/\[(.*?)\]\((.*?)\)/, "link:\$2[\$1]") // Links
+                .replaceAll(/^```$/, "----") // Source code end
+                .replaceAll(/^```(.*?)$/, "[source,\$1,options=\"nowrap\"]\n----") // Source code start
+                .replaceAll(/^(\| ?\*?\*?lib-react4xp\*?\*?[\n \|])(.*?)\|$/, "[%header,cols=2]\n|===\n\$1\$2") // Version table header
+                .replaceAll(/^\| ?-.*?- \|$/, "")
+                .replaceAll(~ "^(\\| ?\\*?\\*?${LIB_VERSION}.*?)\$", "\$1\n|===") // Version table last line
+                .replaceAll(/^(\| ?.*?)\|$/, "\$1") // Version table cells
+    }
+
+    doLast {
+        File fh1 = new File('README.adoc')
+        def text = fh1.getText('UTF-8')
+        text = text.replaceAll(/\n== Table of Contents\n( *- link:.*?\]\n)*\n/, "")
+        fh1.delete()
+        fh1.write text
+    }
+}
+
+task updateReadme(type: Copy) {
+    from("./docs/")
+    into("./")
+    include(README_SOURCE)
+    rename(README_SOURCE, "README.md")
+
+    doFirst {
+        new File('README.md').delete()
+    }
+
+    filter {
+        String line -> line
+                .replaceAll("USE THIS FILE TO EDIT THE ROOT's README.md! This will be copied to root and and verions inserted before commit. Gradle task: copyReadme. Version placeholders: ###LIB_VERSION### and ###NPM_BUNDLE_VERSION###. Leave this line in place", "  DO NOT EDIT! Autogenerated and auto-replaced from source docs/${README_SOURCE}, write docs there instead!  ")
+                .replaceAll("###LIB_VERSION###", LIB_VERSION)
+                .replaceAll("###NPM_BUNDLE_VERSION###", NPM_BUNDLE_VERSION)
+    }
+
+    doLast {
+        PACKAGE_JSON.version = LIB_VERSION
+        def pkgJsonFile = new File('package.json')
+        // new File('package.json').delete()
+        pkgJsonFile.write(JsonOutput.prettyPrint(JsonOutput.toJson(PACKAGE_JSON)))
+    }
+}
+updateReadme.dependsOn makeAdoc
+npmInstall.dependsOn updateReadme
+
+def readmeUnstaged() {
+    def command = "git diff --name-only HEAD"
+    // println "Process: ${command}"
+    def proc = command.execute()
+    proc.waitFor()
+    if (proc.exitValue() != 0) {
+        throw new GradleException(proc.err.text)
+    }
+    def stdout = proc.in.text
+    def unstagedSource = stdout.split( '\n' ).findAll { it == "docs/README.md" || it == "docs\\README.md" }
+    return unstagedSource.size() > 0
+}
+updateReadme.enabled = true // LIB_VERSION != PREVIOUS_VERSION || readmeUnstaged()
+
