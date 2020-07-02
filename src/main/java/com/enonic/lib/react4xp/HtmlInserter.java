@@ -20,20 +20,19 @@ import java.util.List;
 public class HtmlInserter {
     private final static Logger LOG = LoggerFactory.getLogger( HtmlInserter.class );
 
-    private static SAXBuilder saxBuilder = new SAXBuilder();
-    private static XMLOutputter outputter = new XMLOutputter();
-    static {
-        // Make the output HTML-compliant:
+    // Make the output HTML-compliant:
+    private XMLOutputter getXmlOutputter() {
+        XMLOutputter outputter = new XMLOutputter();
         outputter.getFormat()
                 .setOmitDeclaration(true)
                 .setOmitEncoding(true)
                 .setExpandEmptyElements(true);
+        return outputter;
     }
-
-    private XPathFactory xFactory = XPathFactory.instance();
 
     private List<Element> getMatchinIdElements(Document bodyDoc, String id) {
         String expression = "(//*[@id='" + id + "'])[1]";
+        XPathFactory xFactory = XPathFactory.instance();
         XPathExpression<Element> expr = xFactory.compile(expression, Filters.element());
         return expr.evaluate(bodyDoc);
     }
@@ -41,6 +40,7 @@ public class HtmlInserter {
 
     public String insertAtEndOfRoot(String body, String payload) {
         try {
+            SAXBuilder saxBuilder = new SAXBuilder();
             Document bodyDoc = saxBuilder.build(new StringReader(body));
             Element bodyRoot = bodyDoc.getRootElement();
 
@@ -50,7 +50,7 @@ public class HtmlInserter {
             payloadRoot.detach();
             bodyRoot.addContent(payloadRoot);
 
-            return outputter.outputString(bodyDoc);
+            return getXmlOutputter().outputString(bodyDoc);
 
         } catch (JDOMException | IOException e) {
             LOG.error("\n\n" +
@@ -70,6 +70,7 @@ public class HtmlInserter {
 
     public String insertInsideContainer(String body, String payload, String id) {
         try {
+            SAXBuilder saxBuilder = new SAXBuilder();
             Document bodyDoc = saxBuilder.build(new StringReader(body));
 
             List<Element> links = getMatchinIdElements(bodyDoc, id);
@@ -83,7 +84,7 @@ public class HtmlInserter {
             payloadRoot.detach();
             links.get(0).setContent(payloadRoot);
 
-            return outputter.outputString(bodyDoc);
+            return getXmlOutputter().outputString(bodyDoc);
 
         } catch (JDOMException | IOException | XPathException e) {
             LOG.error("\n\n" +

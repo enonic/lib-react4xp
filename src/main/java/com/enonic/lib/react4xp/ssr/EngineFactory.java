@@ -15,9 +15,11 @@ import java.util.LinkedList;
 public class EngineFactory {
     private final static Logger LOG = LoggerFactory.getLogger( EngineFactory.class );
 
+    private final NashornScriptEngine ENGINE = (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
+
     // Basic-level polyfills. For some reason, this must be run from here, not from nashornPolyfills.js.
     // TODO: shouldn't be a string here, but read from a JS file, preferrably in the react4xp-runtime-nashornpolyfills package.
-    private final static String POLYFILL_BASICS = "" +
+    private final String POLYFILL_BASICS = "" +
             "if (typeof exports === 'undefined') { var exports = {}; }\n" +
             "if (typeof global === 'undefined') { var global = this; }\n" +
             "if (typeof window === 'undefined') { var window = this; }\n" +
@@ -30,14 +32,12 @@ public class EngineFactory {
                 "console.error = print;" +
             "}";
 
-    private static ArrayList<String> CHUNKS_SOURCES = null;
-    private static String ENTRIES_SOURCE = null;
+    private ArrayList<String> CHUNKS_SOURCES = null;
+    private String ENTRIES_SOURCE = null;
+    private HashMap<String, Boolean> scriptHasBeenLoadedByName = null;
+    private boolean engineIsInitialized = false;
 
-    private static NashornScriptEngine engineInstance = null;
-
-    private static HashMap<String, Boolean> scriptHasBeenLoadedByName = null;
-
-    private static void configEngine(
+    private void initBasicSettings(
             String CHUNKFILES_HOME,
             String ENTRIES_SOURCEFILENAME,
             ArrayList<String> CHUNK_SOURCEFILENAMES
@@ -51,7 +51,7 @@ public class EngineFactory {
     }
 
 
-    private static void prepareNashornPolyfillScripts(String CHUNKFILES_HOME, String NASHORNPOLYFILLS_FILENAME, LinkedList<String> scriptNames, HashMap<String, String> scriptsByName) {
+    private void prepareNashornPolyfillScripts(String CHUNKFILES_HOME, String NASHORNPOLYFILLS_FILENAME, LinkedList<String> scriptNames, HashMap<String, String> scriptsByName) {
         // Add the most basic nashorn polyfill first
         scriptsByName.put("POLYFILL_BASICS", POLYFILL_BASICS);
         scriptNames.add("POLYFILL_BASICS");
@@ -89,7 +89,7 @@ public class EngineFactory {
     }
 
 
-    private static void addEntriesAndChunksScripts(String CHUNKFILES_HOME, String COMPONENT_STATS_FILENAME, LinkedList<String> scriptNames, HashMap<String, String> scriptsByName, boolean lazyLoading) throws IOException {
+    private void addEntriesAndChunksScripts(String CHUNKFILES_HOME, String COMPONENT_STATS_FILENAME, LinkedList<String> scriptNames, HashMap<String, String> scriptsByName, boolean lazyLoading) throws IOException {
         LinkedHashSet<String> transpiledDependencies = new ChunkDependencyParser().getScriptDependencyNames(CHUNKFILES_HOME + COMPONENT_STATS_FILENAME, CHUNKS_SOURCES, ENTRIES_SOURCE, lazyLoading);
 
         for (String scriptFile : transpiledDependencies) {
@@ -101,7 +101,7 @@ public class EngineFactory {
     }
 
 
-    private static String mergeToRunnableScript(LinkedList<String> scriptNames, HashMap<String, String> scriptsByName) {
+    private String mergeToRunnableScript(LinkedList<String> scriptNames, HashMap<String, String> scriptsByName) {
         StringBuilder fullScript = new StringBuilder();
         for (String scriptName : scriptNames) {
             if (!scriptHasBeenLoadedByName.get(scriptName)) {
@@ -118,7 +118,7 @@ public class EngineFactory {
     // Multiple scripts were chained together, then evaluated, but one has failed.
     // The error is probably excessive and not very precise, since ALL the scripts were evaluated together the first time - hence "bloatedError".
     // Try to unravel which one(s) failed in order to give a clearer error message:
-    private static void handleScriptErrors(ScriptException bloatedError, LinkedList<String> scriptNames, HashMap<String, String> scriptsByName, String fullScript) throws ScriptException {
+    private void handleScriptErrors(ScriptException bloatedError, LinkedList<String> scriptNames, HashMap<String, String> scriptsByName, String fullScript) throws ScriptException {
         NashornScriptEngine tmpEngineInstance = (NashornScriptEngine)new ScriptEngineManager().getEngineByName("nashorn");
         int failureCount = 0;
         ScriptException errorToThrow = null;
@@ -163,14 +163,13 @@ public class EngineFactory {
     }
 
 
-    private static void runScripts(LinkedList<String> scriptNames, HashMap<String, String> scriptsByName) throws ScriptException {
+    private void runScripts(LinkedList<String> scriptNames, HashMap<String, String> scriptsByName) throws ScriptException {
         if (scriptNames.size() > 0) {
             String fullScript = mergeToRunnableScript(scriptNames, scriptsByName);
 
             LOG.info("Starting react4xp SSR evaluation...");
             try {
-                engineInstance = (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
-                engineInstance.eval(fullScript);
+                ENGINE.eval(fullScript);
 
             } catch (ScriptException bloatedError) {
                 handleScriptErrors(bloatedError, scriptNames, scriptsByName, fullScript);
@@ -188,7 +187,7 @@ public class EngineFactory {
      * Scripts found in chunks.json depend on the previous and must be the last!
      * nashornPolyfills.js script is the basic dependency, and will be added at the very beginning
      * outside of this list. */
-    public static NashornScriptEngine initEngine(
+    public NashornScriptEngine initEngine(
             String CHUNKFILES_HOME,
             String NASHORNPOLYFILLS_FILENAME,
             String ENTRIES_SOURCEFILENAME,
@@ -196,9 +195,9 @@ public class EngineFactory {
             ArrayList<String> CHUNK_SOURCEFILENAMES,
             boolean lazyLoading
     ) throws IOException, ScriptException {
-        if (engineInstance == null) {
+        if (!engineIsInitialized) {
 
-            configEngine(CHUNKFILES_HOME, ENTRIES_SOURCEFILENAME, CHUNK_SOURCEFILENAMES);
+            initBasicSettings(CHUNKFILES_HOME, ENTRIES_SOURCEFILENAME, CHUNK_SOURCEFILENAMES);
 
             // Sequence matters, but hashmaps are not ordered! Use ordered scriptList collection 'scriptNames' for iteration!
             LinkedList<String> scriptNames = new LinkedList<>();
@@ -209,8 +208,9 @@ public class EngineFactory {
             addEntriesAndChunksScripts(CHUNKFILES_HOME, COMPONENT_STATS_FILENAME, scriptNames, scriptsByName, lazyLoading);
 
             runScripts(scriptNames, scriptsByName);
+            engineIsInitialized = true;
         }
 
-        return engineInstance;
+        return ENGINE;
     }
 }

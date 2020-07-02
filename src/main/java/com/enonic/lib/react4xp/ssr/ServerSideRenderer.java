@@ -28,23 +28,17 @@ import java.util.function.Supplier;
 public class ServerSideRenderer implements ScriptBean {
     private final static Logger LOG = LoggerFactory.getLogger( ServerSideRenderer.class );
 
-    private static String SCRIPTS_HOME = null;
-    private static String LIBRARY_NAME = null;
-    private static String APP_NAME = null;
+    // Constants. TODO: SHOULD BE final.
+    private String SCRIPTS_HOME = null;
+    private String LIBRARY_NAME = null;
+    private String APP_NAME = null;
+    private NashornScriptEngine ENGINE = null;
+    private RunMode RUN_MODE = RunMode.get();
+    private Supplier<ResourceService> RESOURCE_SERVICE_SUPPLIER;
 
-    // TODO: Shouldn't be needed ever (aka: commenting it out shouldn't ever fail). Delete when this is confirmed.
-    // private static String CHUNKFILES_HOME = null;
-    // private static String NASHORNPOLYFILLS_FILENAME = null;
-    // private static String ENTRIESSOURCE = null;
-    // private static String COMPONENT_STATS_FILENAME = null;
+    private final Set<String> ALREADY_CACHEDANDRUN_ASSETNAMES = new HashSet<>();
+    private final EngineFactory ENGINE_FACTORY = new EngineFactory();
 
-    Set<String> alreadyCachedAndRunAssetNames = new HashSet<>();
-
-    private static final ArrayList<String> CHUNKSSOURCES = new ArrayList<>();
-    private static NashornScriptEngine ENGINE = null;
-    private Supplier<ResourceService> resourceServiceSupplier;
-
-    private static RunMode runMode = RunMode.get();
 
     public void setConfig(
             String APP_NAME,
@@ -57,26 +51,21 @@ public class ServerSideRenderer implements ScriptBean {
             String COMPONENT_STATS_FILENAME,
             boolean lazyLoading
     ) throws IOException, ScriptException {
-        ServerSideRenderer.APP_NAME = APP_NAME;
-        ServerSideRenderer.SCRIPTS_HOME = SCRIPTS_HOME;                             // "/react4xp"
-        ServerSideRenderer.LIBRARY_NAME = LIBRARY_NAME;                             // "React4xp"
-
-        // TODO: Shouldn't be needed ever (aka: commenting it out shouldn't ever fail). Delete when this is confirmed.
-        // ServerSideRenderer.NASHORNPOLYFILLS_FILENAME = NASHORNPOLYFILLS_FILENAME;   // "nashornPolyfills.js";
-        // ServerSideRenderer.ENTRIESSOURCE = ENTRIESSOURCE;                           // "entries.json";
-        // ServerSideRenderer.CHUNKFILES_HOME = CHUNKFILES_HOME;                       // "/react4xp/"
-        // ServerSideRenderer.COMPONENT_STATS_FILENAME = COMPONENT_STATS_FILENAME;     // "stats.components.json"
+        this.APP_NAME = APP_NAME;
+        this.SCRIPTS_HOME = SCRIPTS_HOME;                             // "/react4xp"
+        this.LIBRARY_NAME = LIBRARY_NAME;                             // "React4xp"
 
         // Component chunks
-        ServerSideRenderer.CHUNKSSOURCES.add(EXTERNALS_CHUNKS_FILENAME);            // "chunks.externals.json"
+        ArrayList<String> chunkSources = new ArrayList<>();
+        chunkSources.add(EXTERNALS_CHUNKS_FILENAME);                                // "chunks.externals.json" = react + react-dom
 
         // Init the engine too
-        ENGINE = EngineFactory.initEngine(
+        ENGINE = ENGINE_FACTORY.initEngine(
                 CHUNKFILES_HOME,
                 NASHORNPOLYFILLS_FILENAME,
                 ENTRIESSOURCE,
                 COMPONENT_STATS_FILENAME,
-                ServerSideRenderer.CHUNKSSOURCES,
+                chunkSources,
                 lazyLoading
         );
     }
@@ -92,16 +81,16 @@ public class ServerSideRenderer implements ScriptBean {
     }
 
     private void prepareScriptFromAsset(String assetName, StringBuilder scriptBuilder) throws IOException {
-        if (!alreadyCachedAndRunAssetNames.contains(assetName)) {
+        if (!ALREADY_CACHEDANDRUN_ASSETNAMES.contains(assetName)) {
             LOG.info("Initializing asset: " + assetName);
 
             String url = APP_NAME + ":" + SCRIPTS_HOME + "/" + assetName;
             ResourceKey resourceKey = ResourceKey.from(url);
-            Resource resource = resourceServiceSupplier.get().getResource(resourceKey);
+            Resource resource = RESOURCE_SERVICE_SUPPLIER.get().getResource(resourceKey);
             String componentScript = resource.getBytes().asCharSource(Charsets.UTF_8).read();
 
-            if (runMode == RunMode.PROD) {
-                alreadyCachedAndRunAssetNames.add(assetName);
+            if (RUN_MODE == RunMode.PROD) {
+                ALREADY_CACHEDANDRUN_ASSETNAMES.add(assetName);
             }
             scriptBuilder.append(componentScript);
             scriptBuilder.append(";\n");
@@ -139,8 +128,8 @@ public class ServerSideRenderer implements ScriptBean {
                     "Props: " + props + "\n");
             LOG.info("SOLUTION TIPS: The previous error message tends to refer to lines in compiled/mangled code. The browser console might have more readable (and sourcemapped) information - especially if you clientside-render this page / entry instead. Add 'clientRender: true', etc - in XP's preview or live mode! A full (compiled) script is dumped to the log at debug level. Also, it sometimes helps to clear all cached behavior: stop continuous builds, clear/rebuild your project, restart the XP server, clear browser cache.\n\n", e);
 
-            if (runMode == RunMode.PROD) {
-                alreadyCachedAndRunAssetNames.remove(entry);
+            if (RUN_MODE == RunMode.PROD) {
+                ALREADY_CACHEDANDRUN_ASSETNAMES.remove(entry);
             }
             ENGINE.eval("delete " + LIBRARY_NAME + "['" + entry + "']");
 
@@ -202,6 +191,6 @@ public class ServerSideRenderer implements ScriptBean {
 
     @Override
     public void initialize(BeanContext context) {
-        this.resourceServiceSupplier = context.getService(ResourceService.class);
+        this.RESOURCE_SERVICE_SUPPLIER = context.getService(ResourceService.class);
     }
 }
