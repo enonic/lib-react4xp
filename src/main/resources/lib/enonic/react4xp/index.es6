@@ -245,7 +245,7 @@ class React4xp {
             this.uniqueId();
         }
         this.react4xpIdIsLocked = true;
-        if (this.react4xpId) {
+        if (this.react4xpId && this.props) {
             this.props.react4xpId = this.react4xpId;
         }
     }
