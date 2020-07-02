@@ -245,6 +245,9 @@ class React4xp {
             this.uniqueId();
         }
         this.react4xpIdIsLocked = true;
+        if (this.react4xpId) {
+            this.props.react4xpId = this.react4xpId;
+        }
     }
 
     ensureAndLockBeforeRendering() {
@@ -258,10 +261,11 @@ class React4xp {
         }
     }
 
+    //---------------------------------------------------------------
 
     /** Sets the react4xpId - the HTML ID of the target container this component will be rendered into.
      * Deletes the ID if argument is omitted.
-     * @returns The react4xp component itself, for builder-like telescoping pattern.
+     * @returns The react4xp component itself, for builder-like pattern.
      */
     setId(react4xpId) {
         this.checkIdLock();
@@ -273,7 +277,7 @@ class React4xp {
     }
 
     /** Appends a unique target container ID postfix after the currently set reactXpId (if any).
-     * @returns The react4xp component itself, for builder-like telescoping pattern.
+     * @returns The react4xp component itself, for builder-like pattern.
      */
     uniqueId() {
         return this.setId((this.react4xpId || "") + "_" + Math.floor(Math.random() * 99999999));
@@ -300,10 +304,11 @@ class React4xp {
      *        After building the parent project with react4xp-build-components,
      *        the available entry jsxPaths can be seen in build/main/resources/react4xp/entries.json.
      *
-     * @returns The React4xp object itself, for builder-like telescoping pattern.
+     * @returns The React4xp object itself, for builder-like pattern.
      */
     setJsxPath(jsxPath) {
         // Enforce a clean jsxPath - it's not just a file reference, but a react4xp component name!
+        this.checkIdLock()
         if (
             (jsxPath || '').trim() === '' ||
             jsxPath.startsWith('.') ||
@@ -318,6 +323,7 @@ class React4xp {
             throw Error(`React4xp.setJsxFileName: invalid jsxPath (${JSON.stringify(jsxPath)}). This is a NAME, not a relative path, so it can't be missing/empty, or contain '..', '//', '/./' or start with '.' or '/'.${this.component ? ` Component: ${JSON.stringify(this.component)}` : ''}`);
         }
 
+        // TODO: Get this from entryExtensions instead of hardcoded
         // Strip away trailing file extensions
         jsxPath = (jsxPath.endsWith('.jsx') || jsxPath.endsWith('.es6')) ?
             jsxPath.slice(0, -4) :
@@ -338,16 +344,13 @@ class React4xp {
 
     /** Sets the react4xp component's top-level props.
      * @param props {object} Props to be stored in the component. Must be a string-serializeable object!
-     * @returns The react4xp component itself, for builder-like telescoping pattern.
+     * @returns The react4xp component itself, for builder-like pattern.
      */
     setProps(props) {
         if (!props || typeof props !== 'object') {
             throw Error("Top-level props must be a string-serializeable object.");
         }
         this.props = props;
-        if (this.react4xpId) {
-            this.props.react4xpId = this.react4xpId;
-        }
         return this;
     }
 
@@ -403,7 +406,7 @@ class React4xp {
         );
 
 
-    /** Server-side rendering: Renders a static HTML markup and inserts it into an ID-matching target container in an HTML body. If a
+    /** Server-side rendering: Renders a static HTML markup and inserts it into an ID-matching target container in an HTML body. This is the same as renderBody({body: body}). If a
      * matching-ID container (or a body) is missing, it will be generated.
      * @param body {string} Existing HTML body, for example rendered from thymeleaf.
      * @returns {string} adjusted or generated HTML body with rendered react component.
