@@ -503,7 +503,6 @@ Here's an example from the starter; a gradle compile task that leaves `.jsx` fil
 
 ```groovy
 task compileXP(type: NodeTask) {
-    group 'React4xp'
     description 'Compile regular (non-React4xp) XP components from ES6, ignoring JSX components'
 
     script = file('node_modules/@babel/cli/bin/babel.js')
