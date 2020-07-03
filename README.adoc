@@ -164,6 +164,8 @@ chunkDirs = shared
  #       them will be compiled into react4xp entries, which most importantly get a jsxPath (relative to their entryDir, not
  #       relative to /react4xp/) and therefore are available to react4xp.
  #       overrideComponentWebpack file (see above).
+ #      
+ #   For backwards compatibility with projects that have source files in _entries, either move them to the entries folder instead, or add "_entries" below.
 entryDirs = entries
 
 
@@ -214,10 +216,14 @@ overwriteConstantsFile = true
 
 
 === 4: Gradle: basic setup
-For now, you need to copy some code into the existing `build.gradle` file in your project (yes, this should obviously be simplified as a gradle plugin):  
+For now, you need to copy a big chunk of code into your existing `build.gradle` file in your project (yes, this should obviously be simplified as a gradle plugin):  
   
 [source,groovy,options="nowrap"]
 ----
+dependencies {
+    include 'com.enonic.lib:lib-react4xp:1.0.1' // (or -SNAPSHOT, etc: your chosen/built lib version)
+}
+
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
@@ -249,6 +255,7 @@ task nsiInstall(type:NodeTask) {
         println "react4xp.properties#buildEnv is set to '" + react4xp.buildEnv + "':\nOVERRIDING VANILLA npmInstall IN FAVOR OF node-safe-install (nsi)." // Because nsi retains 'npm link' symlinks!
     }
     script = file("node_modules/npm-safe-install/out/cli.js")   // npm-safe-install comes with react4xp@^1.0.0
+
     doLast {
         def marker = new File(linkMarkerName)
         new File(marker.getParent()).mkdirs()
@@ -311,24 +318,22 @@ task config_tasks {
     // After the above script has run and created the config file, use the constructed values from the script to update the configuration of the next task(s):
     doLast {
         // Read the file content into an object
-        def configFile = new File(react4xp.masterConfigFileName)
         def REACT4XP_TASKS = [
                 "react4xp_components",
                 "react4xp_externals",
                 "react4xp_client",
                 "react4xp_nashornpolyfills"
         ]
+        def configFile = new File(react4xp.masterConfigFileName)
         CONFIG = new JsonSlurper().parseText(configFile.text)
 
         REACT4XP_TASKS.each {
-            // TODO: use react4xp.properites (entryDirs, chunkDirs) instead of assuming these inputs !!!
             tasks["${it}"].configure {
                 inputs.dir(CONFIG.SRC_SITE)
                 inputs.dir(CONFIG.SRC_R4X)
                 outputs.dir(CONFIG.BUILD_R4X)
             }
         }
-
     }
 }
 config_tasks.dependsOn += 'config_react4xp'
@@ -338,9 +343,8 @@ config_tasks.dependsOn += 'config_react4xp'
 // Compile:
 task react4xp_components(type: NodeTask) {
     group 'React4xp'
-    description 'Compile the react components into entry and chunk assets'
+    description "Compile the parent project's react components"
 
-    // react4xp-build-components compiles the components added in this project into runnable/renderable components. See react4xp-build-components docs.
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
             '--config', 'node_modules/react4xp-build-components/webpack.config.js', // react4xp-build-components comes with react4xp@^1.0.0
@@ -373,6 +377,7 @@ task react4xp_components(type: NodeTask) {
 }
 react4xp_components.dependsOn += 'config_tasks'
 jar.dependsOn += "react4xp_components"
+
 
 
 task react4xp_externals(type: NodeTask) {
@@ -409,6 +414,82 @@ task react4xp_externals(type: NodeTask) {
 react4xp_externals.dependsOn += 'config_tasks'
 if (react4xp.buildExternals) {
     jar.dependsOn += 'react4xp_externals'
+}
+
+
+
+task react4xp_client(type: NodeTask) {
+    group 'React4xp'
+    description 'Compile the react4xp runtime client'
+
+    script = file('node_modules/webpack/bin/webpack.js')
+    args = [
+            '--config', 'node_modules/react4xp-runtime-client/webpack.config.js',   // react4xp-runtime-client comes with react4xp@^1.0.0
+            '--color',
+            '--env.VERBOSE=' + react4xp.verbose,
+            '--env.ENTRY_DIRS=' + react4xp.entryDirs,
+            '--env.CHUNK_DIRS=' + react4xp.chunkDirs,
+            '--env.ROOT="' + ROOT +'"'
+    ]
+
+    // Pretty if chatty
+    if (react4xp.verbose) {
+        args += '--progress'
+    }
+
+    // Finally, and mandatorily: tells all of the webpack steps here where to find the react4xp master config file that was built during the config_react4xp task
+    args += '--env.REACT4XP_CONFIG_FILE=' + react4xp.masterConfigFileName
+
+    if (react4xp.verbose && react4xp.buildRuntimeClient) {
+        println "react4xp_client task - args:"
+        println "\t${args}\n"
+    }
+
+    inputs.file(react4xp.outputFileName)
+    inputs.file("package.json")
+    inputs.file("package-lock.json")
+}
+react4xp_client.dependsOn += 'config_tasks'
+if (react4xp.buildRuntimeClient) {
+    jar.dependsOn += 'react4xp_client'
+}
+
+
+
+task react4xp_nashornpolyfills(type: NodeTask) {
+    group 'React4xp'
+    description 'Run the imported react4xp webpack scripts that compile the components and externals (as well as client and nashorn polyfills if needed)'
+
+    script = file('node_modules/webpack/bin/webpack.js')
+    args = [
+            '--config', 'node_modules/react4xp-runtime-nashornpolyfills/webpack.config.js',    // react4xp-runtime-nashornpolyfills comes with react4xp@^1.0.0
+            '--color',
+            '--env.VERBOSE=' + react4xp.verbose,
+            '--env.ENTRY_DIRS=' + react4xp.entryDirs,
+            '--env.CHUNK_DIRS=' + react4xp.chunkDirs,
+            '--env.ROOT="' + ROOT +'"'
+    ]
+
+    // Pretty if chatty
+    if (react4xp.verbose) {
+        args += '--progress'
+    }
+
+    // Finally, and mandatorily: tells all of the webpack steps here where to find the react4xp master config file that was built during the config_react4xp task
+    args += '--env.REACT4XP_CONFIG_FILE=' + react4xp.masterConfigFileName
+
+    if (react4xp.verbose && react4xp.nashornPolyfillsSource != null) {
+        println "react4xp_nashornpolyfills task - args:"
+        println "\t${args}\n"
+    }
+
+    inputs.file(react4xp.outputFileName)
+    inputs.file("package.json")
+    inputs.file("package-lock.json")
+}
+react4xp_nashornpolyfills.dependsOn += 'config_tasks'
+if (react4xp.nashornPolyfillsSource != null) {
+    jar.dependsOn += 'react4xp_nashornpolyfills'
 }
 ----
 
