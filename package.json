@@ -36,7 +36,7 @@
         "react4xp": "1.0.0"
     },
     "devDependencies": {
-        "@babel/cli": "^7.7.7",
+        "@babel/cli": "^7.10.5",
         "@babel/core": "^7.7.7",
         "@babel/plugin-proposal-class-properties": "^7.10.4",
         "@babel/plugin-proposal-object-rest-spread": "^7.10.4",
