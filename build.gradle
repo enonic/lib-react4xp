@@ -164,6 +164,8 @@ task makeAdoc(type: Copy) {
                 .replaceAll(/^##### (.*?)$/, "===== \$1")
                 .replaceAll(/<a name="(.*?)"><\/a>/, "\n[[\$1]]") // Explicit anchor IDs
                 .replaceAll(/\[(.*?)\]\((.*?)\)/, "link:\$2[\$1]") // Links
+                .replaceAll(/^ +```\s*$/, "```\$1") // De-indent code block end inside numbered list
+                .replaceAll(/^ +```(.+)$/, "+\n```\$1") // Indented code block start inside numbered list
                 .replaceAll(/^```$/, "----") // Source code end
                 .replaceAll(/^```(.*?)$/, "[source,\$1,options=\"nowrap\"]\n----") // Source code start
                 .replaceAll(/^(\| ?\*?\*?lib-react4xp\*?\*?[\n \|])(.*?)\|$/, "[%header,cols=2]\n|===\n\$1\$2") // Version table header
