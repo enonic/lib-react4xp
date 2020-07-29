@@ -551,7 +551,7 @@ Run this first to get set up.
 
 This lib (and consuming react4xp apps) requires the corresponding link:https://www.npmjs.com/package/react4xp[react4xp NPM packages]. If you want to work with this lib with _local versions_ of those packages too, it's convenient to symlink them up under `node_modules`: 
 
-1. Download/fork/clone link:https://github.com/enonic/react4xp-npm[react4xp-npm] from github to a separate source folder.
+1. Download/fork/clone link:https://github.com/enonic/react4xp-npm[react4xp-npm] from github to a separate source folder,
 
 2. From that root react4xp-npm folder:
 +
@@ -566,7 +566,11 @@ This lib (and consuming react4xp apps) requires the corresponding link:https://w
 ----
     > sh relative/path/to/local/react4xp-npm/getlinks.sh
 ----
-4. Move on to install the lib locally, in the next step:
+4. Install the lib locally (see the next heading below),
+
+5. From the root folder of your react4xp app project too, run `getLinks` with a relative path (same way as in step 3 above),
+
+6. Build the react4xp app.
 
 
 === Install the lib
