@@ -13,19 +13,6 @@ This library runs on link:https://enonic.com/developer-tour[Enonic XP] server si
   - server-side rendering option in XP, through the controller functions  
   - client-side wrapper tailored for use with the services - itself available to the browser through one of the services. 
 
-== Table of Contents
-- link:#versions-and-compatibility[Versions and compatibility]
-- link:#setup-option-1-the-react4xp-starter[Setup, option 1: The React4xp starter]
-- link:#setup-option-2-using-react4xp-in-an-existing-project[Setup, option 2: Using React4xp in an existing project]
-  - link:#0-prerequisites[0: Prerequisites]
-  - link:#1-add-lib-react4xp[1: Add lib-react4xp]
-  - link:#2-npm-import-packages[2: NPM: import packages]
-  - link:#3-configuration-react4xpproperties[3: Configuration: react4xp.properties]
-  - link:#4-gradle-basic-setup[4: Gradle: basic setup]
-  - link:#5-gradle-xp-component-transpilation-optional[5: Gradle: XP component transpilation (optional)]
-  - link:#6-build-and-run-it-all[6: Build and run it all]
-
-
 [[versions-and-compatibility]]
 == Versions and compatibility
 This is version **1.0.2-SNAPSHOT** for XP 7.
@@ -492,4 +479,101 @@ task react4xp_nashornpolyfills(type: NodeTask) {
     args += '--env.REACT4XP_CONFIG_FILE=' + react4xp.masterConfigFileName
 
     if (react4xp.verbose && react4xp.nashornPolyfillsSource != null) {
-        println "
+        println "react4xp_nashornpolyfills task - args:"
+        println "\t${args}\n"
+    }
+
+    inputs.file(react4xp.outputFileName)
+    inputs.file("package.json")
+    inputs.file("package-lock.json")
+}
+react4xp_nashornpolyfills.dependsOn += 'config_tasks'
+if (react4xp.nashornPolyfillsSource != null) {
+    jar.dependsOn += 'react4xp_nashornpolyfills'
+}
+----
+
+
+
+=== 5: Gradle: XP component transpilation (optional)
+
+If you want, or already have, Babel (etc) transpilation for your XP controllers and other assets, this needs to be done separately from the build tasks above! **Make sure that the XP compilation step does not compile your react component source files!** 
+
+Here's an example from the starter; a gradle compile task that leaves `.jsx` files alone:
+
+[source,groovy,options="nowrap"]
+----
+task compileXP(type: NodeTask) {
+    description 'Compile regular (non-React4xp) XP components from ES6, ignoring JSX components'
+
+    script = file('node_modules/@babel/cli/bin/babel.js')
+    args = ["src/main/resources", "--out-dir", "build/resources/main", "--ignore", "**/*.jsx"]      // <-- Ignoring JSX in the XP structure
+
+    inputs.dir 'src/main/resources'
+    outputs.dir("build/resources/main")
+}
+compileXP.dependsOn += 'config_tasks'
+jar.dependsOn += 'compileXP'
+----
+
+(Why is this needed? For simple development after everything's set up, React4xp detects and autocompiles `.jsx` files inside `src/main/resources/site`. This is to encourage a regular-XP-like structure, simply using `.jsx` files as part/page/layout _views_: just keep React entry components in the same folders, with the same names, as the corresponding XP components that use them (this structure is not _enforced_, though - using `entryDirs` and `chunkDirs` in `react4xp.properties` (see below), your react source files can basically be anywhere). However, _the react files are handled differently from other XP components and assets, both at build- and runtime!_ For that reason they must be separated, in this example by using different file extensions: `.jsx` and `.es6`, respectively)
+
+
+
+
+
+
+=== 6: Build and run it all
+Voilà, such easy (I hope)! From the parent project, this can now be run as a regular XP app:
+[source,bash,options="nowrap"]
+----
+> enonic project deploy
+----
+
+Or, setting the environment variable `XP_HOME` (e.g. `export XP_HOME=~/.enonic/sandboxes/myProjectSandbox/home`), you can use regular gradle tasks such as `clean`, `build`, `deploy`.
+
+
+
+== Development
+
+Getting started with working on this library locally.
+
+=== Local build
+
+Run this first to get set up.
+
+[source,bash,options="nowrap"]
+----
+> gradlew build
+----
+
+=== NPM-linked mode
+
+This lib (and consuming react4xp apps) requires the corresponding link:https://www.npmjs.com/package/react4xp[react4xp NPM packages]. If you want to work with this lib with _local versions_ of those packages too, it's convenient to symlink them up under `node_modules`: 
+
+1. Download/fork/clone link:https://github.com/enonic/react4xp-npm[react4xp-npm] from github to a separate source folder.
+
+2. From that root react4xp-npm folder:
++
+[source,bash,options="nowrap"]
+----
+    > gradlew npmLink
+----
+ 
+3. Back in the root folder of _this lib_, run reac4xp-npm's `getLinks` script (sorry, this script has no windows version yet, but should be fairly easy to reverse-engineer): 
++
+[source,bash,options="nowrap"]
+----
+    > sh relative/path/to/local/react4xp-npm/getlinks.sh
+----
+4. Move on to install the lib locally, in the next step:
+
+
+=== Install the lib
+
+To install the built library in local maven cache, available for building react4xp app(s) locally, follow the instructions above under _"...OR fork and build it yourself"_.
+
+
+== Happy reacting!
+
+link:https://developer.enonic.com/templates/react4xp[Move on to the React4xp introduction]
