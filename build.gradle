@@ -10,12 +10,13 @@ plugins {
 }
 
 dependencies {
+    compileOnly "com.enonic.xp:core-api:${xpVersion}"
+    
     compile "com.enonic.xp:lib-io:${xpVersion}"
     compile "com.enonic.xp:lib-context:${xpVersion}"
     compile "com.enonic.xp:lib-repo:${xpVersion}"
     compile "com.enonic.xp:lib-node:${xpVersion}"
     compile "com.enonic.xp:lib-portal:${xpVersion}"
-    compile "com.enonic.xp:core-api:${xpVersion}"
 
     compile 'com.enonic.lib:lib-util:2.0.0'
     compile 'com.enonic.lib:lib-cache:2.1.1'
