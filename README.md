@@ -42,7 +42,7 @@ This library, lib-react4xp, is installed as a regular XP library in a parent app
 | **lib-react4xp** | react4xp package (in both lib and app) |
 | ------------ | ------------ |
 | 1.0.1 | 1.0.0 |
-| **1.0.2-SNAPSHOT** | 1.0.6 |
+| **1.0.2-SNAPSHOT** | 1.0.9 |
 
 For XP6-compatible version of this library (early beta), see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master).
 
@@ -129,10 +129,10 @@ Other handy gradle dev tasks are `clean` and `build`.
 Go to the _parent XP project folder_ and use the command line to add these NPM packages as _devDependencies_:
 
 ```bash
-> npm add --save-dev react4xp@1.0.6
+> npm add --save-dev react4xp@1.0.9
 ```
 
-Again, if you're using a different version of this library than 1.0.2-SNAPSHOT, the NPM package may need a different, matching version than `react4xp@1.0.6`. See [above](#versions-and-compatibility).
+Again, if you're using a different version of this library than 1.0.2-SNAPSHOT, the NPM package may need a different, matching version than `react4xp@1.0.9`. See [above](#versions-and-compatibility).
 
 Other development tools might be needed, depending on your setup:
 
