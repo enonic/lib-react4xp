@@ -164,12 +164,16 @@ task makeAdoc(type: Copy) {
                 .replaceAll(/^##### (.*?)$/, "===== \$1")
                 .replaceAll(/<a name="(.*?)"><\/a>/, "\n[[\$1]]") // Explicit anchor IDs
                 .replaceAll(/\[(.*?)\]\((.*?)\)/, "link:\$2[\$1]") // Links
+                .replaceAll(/^ +```\s*$/, "----") // Indented code block end (inside numbered list)
+                .replaceAll(/^ +```(.*?)$/, "+\n[source,\$1,options=\"nowrap\"]\n----") // Indented code block start (inside numbered list)
                 .replaceAll(/^```$/, "----") // Source code end
                 .replaceAll(/^```(.*?)$/, "[source,\$1,options=\"nowrap\"]\n----") // Source code start
                 .replaceAll(/^(\| ?\*?\*?lib-react4xp\*?\*?[\n \|])(.*?)\|$/, "[%header,cols=2]\n|===\n\$1\$2") // Version table header
                 .replaceAll(/^\| ?-.*?- \|$/, "")
                 .replaceAll(~ "^(\\| ?\\*?\\*?${LIB_VERSION}.*?)\$", "\$1\n|===") // Version table last line
                 .replaceAll(/^(\| ?.*?)\|$/, "\$1") // Version table cells
+                .replaceAll(/<br\/>/, "{zwsp} +") // Empty lines
+                .replaceAll(/<img src="(.*?)" .*? title="(.*?)" width="(.*?)">/, "image:\$1[title=\"\$2\",width=\$3]") // images
     }
 
     doLast {

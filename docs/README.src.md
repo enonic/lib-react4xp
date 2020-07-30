@@ -2,6 +2,7 @@
 
 # lib-react4xp
 
+<img src="media/react4xp.svg" alt="React4xp logo" title="React4xp logo" width="160px">
 
 **React for XP: handling and rendering of pre-built React components in Enonic XP**
 
@@ -23,6 +24,12 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
   - [4: Gradle: basic setup](#4-gradle-basic-setup)
   - [5: Gradle: XP component transpilation (optional)](#5-gradle-xp-component-transpilation-optional)
   - [6: Build and run it all](#6-build-and-run-it-all)
+- [Development](#development)
+  - [Local build](#local-build)
+  - [NPM-linked mode](#npm-linked-mode)
+  - [Install the lib](#install-the-lib)
+
+<br/>
 
 <a name="versions-and-compatibility"></a>
 ## Versions and compatibility
@@ -34,6 +41,7 @@ This library, lib-react4xp, is installed as a regular XP library in a parent app
 
 | **lib-react4xp** | react4xp package (in both lib and app) |
 | ------------ | ------------ |
+| 1.0.1 | 1.0.0 |
 | **###LIB_VERSION###** | ###NPM_BUNDLE_VERSION### |
 
 For XP6-compatible version of this library (early beta), see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master).
@@ -41,6 +49,7 @@ For XP6-compatible version of this library (early beta), see the [XP6_master bra
 
 
 
+<br/>
 
 ## Setup, option 1: The React4xp starter
 
@@ -50,6 +59,7 @@ The React4xp starter is also [available at enonic market](https://market.enonic.
 
 
 
+<br/>
 
 ## Setup, option 2: Using React4xp in an existing project
 
@@ -80,6 +90,7 @@ repositories {
 }
 ```
 
+<a name="fork-and-build"></a>
 #### ...OR fork and build it yourself
 If you need / want to build the lib yourself instead of downloading it with Gradle, add these steps: 
 
@@ -94,7 +105,7 @@ version = ###LIB_VERSION###-SNAPSHOT
 **C.** Build it with gradle:
 
 ```bash
-gradlew publishToMavenLocal
+> gradlew publishToMavenLocal
 ```
 
 Gradle will build the library and install it into the local cache, available for other projects.
@@ -118,7 +129,7 @@ Other handy gradle dev tasks are `clean` and `build`.
 Go to the _parent XP project folder_ and use the command line to add these NPM packages as _devDependencies_:
 
 ```bash
-npm add --save-dev react4xp@###NPM_BUNDLE_VERSION###
+> npm add --save-dev react4xp@###NPM_BUNDLE_VERSION###
 ```
 
 Again, if you're using a different version of this library than ###LIB_VERSION###, the NPM package may need a different, matching version than `react4xp@###NPM_BUNDLE_VERSION###`. See [above](#versions-and-compatibility).
@@ -126,7 +137,7 @@ Again, if you're using a different version of this library than ###LIB_VERSION##
 Other development tools might be needed, depending on your setup:
 
 ```bash
-npm add --save-dev @babel/cli@7 @babel/core@7 @babel/preset-env@7 @babel/preset-react@7 @babel/register@7 webpack@4 webpack-cli@3
+> npm add --save-dev @babel/cli@7 @babel/core@7 @babel/preset-env@7 @babel/preset-react@7 @babel/register@7 webpack@4 webpack-cli@3
 ```
 
 Etc.
@@ -525,11 +536,53 @@ jar.dependsOn += 'compileXP'
 ### 6: Build and run it all
 Voilà, such easy (I hope)! From the parent project, this can now be run as a regular XP app:
 ```bash
-$ enonic project deploy
+> enonic project deploy
 ```
 
 Or, setting the environment variable `XP_HOME` (e.g. `export XP_HOME=~/.enonic/sandboxes/myProjectSandbox/home`), you can use regular gradle tasks such as `clean`, `build`, `deploy`.
 
+
+<br/>
+
+## Development
+
+Getting started with working on this library locally.
+
+### Local build
+
+Run this first to get set up.
+
+```bash
+> gradlew build
+```
+
+### NPM-linked mode
+
+This lib (and consuming react4xp apps) requires the corresponding [react4xp NPM packages](https://www.npmjs.com/package/react4xp). If you want to work with this lib with _local versions_ of those packages too, it's convenient to symlink them up under `node_modules`: 
+
+1. Download/fork/clone [react4xp-npm](https://github.com/enonic/react4xp-npm) from github to a separate source folder,
+
+2. From that root react4xp-npm folder:
+    ```bash
+    > gradlew npmLink
+    ```  
+ 
+3. Back in the root folder of _this lib_, run reac4xp-npm's `getLinks` script (sorry, this script has no windows version yet, but should be fairly easy to reverse-engineer): 
+    ```bash
+    > sh relative/path/to/local/react4xp-npm/getlinks.sh
+    ``` 
+4. Install the lib locally (see the next heading below),
+
+5. From the root folder of your react4xp app project too, run `getLinks` with a relative path (same way as in step 3 above),
+
+6. Build the react4xp app.
+
+
+### Install the lib
+
+To install the built library in local maven cache, available for building react4xp app(s) locally, follow [the instructions above](#fork-and-build).
+
+<br/>
 
 ## Happy reacting!
 
