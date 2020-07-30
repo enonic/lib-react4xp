@@ -172,6 +172,8 @@ task makeAdoc(type: Copy) {
                 .replaceAll(/^\| ?-.*?- \|$/, "")
                 .replaceAll(~ "^(\\| ?\\*?\\*?${LIB_VERSION}.*?)\$", "\$1\n|===") // Version table last line
                 .replaceAll(/^(\| ?.*?)\|$/, "\$1") // Version table cells
+                .replaceAll(/<br\/>/, "{zwsp} +") // Empty lines
+                .replaceAll(/<img src="(.*?)" .*? title="(.*?)" width="(.*?)">/, "image:\$1[title=\"\$2\",width=\$3]") // images
     }
 
     doLast {
