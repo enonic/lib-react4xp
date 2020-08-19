@@ -21,7 +21,7 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
   - [1: Add lib-react4xp](#1-add-lib-react4xp)
   - [2: NPM: import packages](#2-npm-import-packages)
   - [3: Configuration: react4xp.properties](#3-configuration-react4xpproperties)
-  - [4: Gradle: basic setup](#4-gradle-basic-setup)
+  - [4: Gradle build setup](#4-gradle-build-setup)
   - [5: Gradle: XP component transpilation (optional)](#5-gradle-xp-component-transpilation-optional)
   - [6: Build and run it all](#6-build-and-run-it-all)
 - [Development](#development)
@@ -33,7 +33,7 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
 
 <a name="versions-and-compatibility"></a>
 ## Versions and compatibility
-This is version **1.0.2** for XP 7.
+This is version **1.0.3-SNAPSHOT** for XP 7.
 
 This library, lib-react4xp, is installed as a regular XP library in a parent app/project. It also needs to run alongside a suite of *NPM packages*. These are bundled (by dependency) in the [react4xp package](https://www.npmjs.com/package/react4xp), so by installing that one, you get the necessary packages. 
 
@@ -42,7 +42,7 @@ This library, lib-react4xp, is installed as a regular XP library in a parent app
 | **lib-react4xp** | react4xp package (in both lib and app) |
 | ------------ | ------------ |
 | 1.0.1 | 1.0.0 |
-| **1.0.2** | 1.0.9 |
+| **1.0.3-SNAPSHOT** | 1.0.9 |
 
 For XP6-compatible version of this library (early beta), see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master).
 
@@ -80,7 +80,7 @@ Two ways to add this library to a parent project: import it from an online repos
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
-	include 'com.enonic.lib:lib-react4xp:1.0.2'
+	include 'com.enonic.lib:lib-react4xp:1.0.3-SNAPSHOT'
 }
 
 repositories {
@@ -99,13 +99,13 @@ If you need / want to build the lib yourself instead of downloading it with Grad
 **B.** Make the version unique in the library's `gradle.properties`, for example:
 
 ```properties
-version = 1.0.2-SNAPSHOT
+version = 1.0.3-SNAPSHOT-SNAPSHOT
 ```
 
 **C.** Build it with gradle:
 
-```bash
-> gradlew publishToMavenLocal
+```commandline
+gradlew publishToMavenLocal
 ```
 
 Gradle will build the library and install it into the local cache, available for other projects.
@@ -115,7 +115,7 @@ Gradle will build the library and install it into the local cache, available for
 
 ```groovy
 dependencies {
-    include 'com.enonic.lib:lib-react4xp:1.0.2-SNAPSHOT'
+    include 'com.enonic.lib:lib-react4xp:1.0.3-SNAPSHOT-SNAPSHOT'
 }
 ```
 
@@ -128,16 +128,16 @@ Other handy gradle dev tasks are `clean` and `build`.
 ### 2: NPM: import packages
 Go to the _parent XP project folder_ and use the command line to add these NPM packages as _devDependencies_:
 
-```bash
-> npm add --save-dev react4xp@1.0.9
+```commandline
+npm add --save-dev react4xp@1.0.9
 ```
 
-Again, if you're using a different version of this library than 1.0.2, the NPM package may need a different, matching version than `react4xp@1.0.9`. See [above](#versions-and-compatibility).
+Again, if you're using a different version of this library than 1.0.3-SNAPSHOT, the NPM package may need a different, matching version than `react4xp@1.0.9`. See [above](#versions-and-compatibility).
 
 Other development tools might be needed, depending on your setup:
 
-```bash
-> npm add --save-dev @babel/cli@7 @babel/core@7 @babel/preset-env@7 @babel/preset-react@7 @babel/register@7 webpack@4 webpack-cli@3
+```commandline
+npm add --save-dev @babel/cli@7 @babel/core@7 @babel/preset-env@7 @babel/preset-react@7 @babel/register@7 webpack@4 webpack-cli@3
 ```
 
 Etc.
@@ -227,290 +227,23 @@ overwriteConstantsFile = true
 
 
 
-### 4: Gradle: basic setup
-For now, you need to copy a big chunk of code into your existing `build.gradle` file in your project (yes, this should obviously be simplified as a gradle plugin):  
-  
+### 4: Gradle build setup
+As of version 1.1.0 of [the react4xp NPM package](https://www.npmjs.com/package/react4xp), the react4xp gradle build setup is shared in `react4xp/react4xp.gradle`. 
+
+As long as that's installed and `npm i` (or similar) has been run before the gradle build, you can simply add this to your `build.gradle`: 
+
 ```groovy
-dependencies {
-    include 'com.enonic.lib:lib-react4xp:1.0.2' // (or -SNAPSHOT, etc: your chosen/built lib version)
-}
-
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-
-// Resolves the project folder root
-def ROOT = project.projectDir.toString()
-
-def react4xp = {}
-file("react4xp.properties").withReader { reader ->
-    react4xp = new Properties()
-    react4xp.load(reader)
-}
-
-if(react4xp.nashornPolyfillsSource != null) {
-    react4xp.NASHORNPOLYFILLS_SOURCE = react4xp.nashornPolyfillsSource
-}
-if(react4xp.buildEnv != null) {
-    react4xp.BUILD_ENV = react4xp.buildEnv
-}
-
-
-
-
-// These are not supplied from react4xp, but are just names used for buildtime housekeeping:
-def markerName = "node_modules/react4xp/npmInstalled.marker"
-def linkMarkerName = "node_modules/react4xp/npmLinked.marker"
-
-task nsiInstall(type:NodeTask) {
-    doFirst {
-        println "react4xp.properties#buildEnv is set to '" + react4xp.buildEnv + "':\nOVERRIDING VANILLA npmInstall IN FAVOR OF node-safe-install (nsi)." // Because nsi retains 'npm link' symlinks!
-    }
-    script = file("node_modules/npm-safe-install/out/cli.js")   // npm-safe-install comes with react4xp@^1.0.0
-
-    doLast {
-        def marker = new File(linkMarkerName)
-        new File(marker.getParent()).mkdirs()
-        marker.text = """
-Marker file, indicating that react4xp in node_module is locally linked.
-"""
-    }
-}
-nsiInstall.inputs.files('package.json', 'package-lock.json')
-nsiInstall.outputs.file('package-lock.json')
-nsiInstall.outputs.file file(linkMarkerName)
-
-if (new File(linkMarkerName).exists()) {
-    npmInstall.enabled = false
-    npmInstall.dependsOn nsiInstall
-
-} else {
-    npmInstall.enabled = true
-    npmInstall.inputs.files('package.json', 'package-lock.json')
-    npmInstall.outputs.file('package-lock.json')
-    npmInstall.outputs.file file(markerName)
-    npmInstall.doLast {
-        def marker = new File(markerName)
-        new File(marker.getParent()).mkdirs()
-        marker.text = """
-Marker file, indicating that the npmInstall gradle task has been run in this subproject - faster than traversing the entire node_modules tree for changes.
-"""
-    }
-}
-
-
-react4xp.masterConfigFileName = react4xp.masterConfigFileName != null ? react4xp.masterConfigFileName : "build/react4xp_constants.json"
-react4xp.outputFileName = ROOT + '/' + react4xp.masterConfigFileName
-
-react4xp.verbose = react4xp.verbose != null && react4xp.verbose.toBoolean()
-react4xp.buildRuntimeClient = react4xp.buildRuntimeClient != null && react4xp.buildRuntimeClient.toBoolean()
-react4xp.buildExternals = react4xp.buildExternals != null && react4xp.buildExternals.toBoolean()
-react4xp.overwriteConstantsFile = react4xp.overwriteConstantsFile != null && react4xp.overwriteConstantsFile.toBoolean()
-
-
-// Build the master config JSON file and the copy:
-task config_react4xp(type: NodeTask) {
-    group 'React4xp'
-    description 'Build the master config JSON file and its copy'
-
-    script = file('node_modules/react4xp-buildconstants/bin/cli.js')       // react4xp-buildconstants comes with react4xp@^1.0.0
-    args = [ ROOT, JsonOutput.toJson(JsonOutput.toJson(react4xp)) ]
-}
-config_react4xp.inputs.file("react4xp.properties")
-config_react4xp.outputs.file(react4xp.masterConfigFileName)
-
-config_react4xp.dependsOn += 'npmInstall'
-config_react4xp.dependsOn += 'processResources'
-
-
-// Necessary placeholder, will be filled during build
-def CONFIG = {}
-
-task config_tasks {
-    // After the above script has run and created the config file, use the constructed values from the script to update the configuration of the next task(s):
-    doLast {
-        // Read the file content into an object
-        def REACT4XP_TASKS = [
-                "react4xp_components",
-                "react4xp_externals",
-                "react4xp_client",
-                "react4xp_nashornpolyfills"
-        ]
-        def configFile = new File(react4xp.masterConfigFileName)
-        CONFIG = new JsonSlurper().parseText(configFile.text)
-
-        REACT4XP_TASKS.each {
-            tasks["${it}"].configure {
-                inputs.dir(CONFIG.SRC_SITE)
-                inputs.dir(CONFIG.SRC_R4X)
-                outputs.dir(CONFIG.BUILD_R4X)
-            }
-        }
-    }
-}
-config_tasks.dependsOn += 'config_react4xp'
-
-
-
-// Compile:
-task react4xp_components(type: NodeTask) {
-    group 'React4xp'
-    description "Compile the parent project's react components"
-
-    script = file('node_modules/webpack/bin/webpack.js')
-    args = [
-            '--config', 'node_modules/react4xp-build-components/webpack.config.js', // react4xp-build-components comes with react4xp@^1.0.0
-            '--color',
-            '--env.VERBOSE=' + react4xp.verbose,
-            '--env.ENTRY_DIRS=' + react4xp.entryDirs,
-            '--env.CHUNK_DIRS=' + react4xp.chunkDirs,
-            '--env.ROOT="' + ROOT +'"'
-    ]
-    if (react4xp.overrideComponentWebpack != null) {
-        args += '--env.OVERRIDE_COMPONENT_WEBPACK=' + react4xp.overrideComponentWebpack
-    }
-
-    // Pretty if chatty
-    if (react4xp.verbose) {
-        args += '--progress'
-    }
-
-    // Finally, and mandatorily: tells all of the webpack steps here where to find the react4xp master config file that was built during the config_react4xp task
-    args += '--env.REACT4XP_CONFIG_FILE=' + react4xp.masterConfigFileName
-
-    if (react4xp.verbose) {
-        println "react4xp_components task - args:"
-        println "\t${args}\n"
-    }
-
-    inputs.file(react4xp.outputFileName)
-    inputs.file("package.json")
-    inputs.file("package-lock.json")
-}
-react4xp_components.dependsOn += 'config_tasks'
-jar.dependsOn += "react4xp_components"
-
-
-
-task react4xp_externals(type: NodeTask) {
-    group 'React4xp'
-    description 'Compile the externals asset (react and react-dom)'
-
-    script = file('node_modules/webpack/bin/webpack.js')
-    args = [
-            '--config', 'node_modules/react4xp-runtime-externals/webpack.config.js',  // react4xp-runtime-externals comes with react4xp@^1.0.0
-            '--color',
-            '--env.VERBOSE=' + react4xp.verbose,
-            '--env.ENTRY_DIRS=' + react4xp.entryDirs,
-            '--env.CHUNK_DIRS=' + react4xp.chunkDirs,
-            '--env.ROOT="' + ROOT +'"'
-    ]
-
-    // Pretty if chatty
-    if (react4xp.verbose) {
-        args += '--progress'
-    }
-
-    // Finally, and mandatorily: tells all of the webpack steps here where to find the react4xp master config file that was built during the config_react4xp task
-    args += '--env.REACT4XP_CONFIG_FILE=' + react4xp.masterConfigFileName
-
-    if (react4xp.verbose && react4xp.buildExternals) {
-        println "react4xp_externals task - args:"
-        println "\t${args}\n"
-    }
-
-    inputs.file(react4xp.outputFileName)
-    inputs.file("package.json")
-    inputs.file("package-lock.json")
-}
-react4xp_externals.dependsOn += 'config_tasks'
-if (react4xp.buildExternals) {
-    jar.dependsOn += 'react4xp_externals'
-}
-
-
-
-task react4xp_client(type: NodeTask) {
-    group 'React4xp'
-    description 'Compile the react4xp runtime client'
-
-    script = file('node_modules/webpack/bin/webpack.js')
-    args = [
-            '--config', 'node_modules/react4xp-runtime-client/webpack.config.js',   // react4xp-runtime-client comes with react4xp@^1.0.0
-            '--color',
-            '--env.VERBOSE=' + react4xp.verbose,
-            '--env.ENTRY_DIRS=' + react4xp.entryDirs,
-            '--env.CHUNK_DIRS=' + react4xp.chunkDirs,
-            '--env.ROOT="' + ROOT +'"'
-    ]
-
-    // Pretty if chatty
-    if (react4xp.verbose) {
-        args += '--progress'
-    }
-
-    // Finally, and mandatorily: tells all of the webpack steps here where to find the react4xp master config file that was built during the config_react4xp task
-    args += '--env.REACT4XP_CONFIG_FILE=' + react4xp.masterConfigFileName
-
-    if (react4xp.verbose && react4xp.buildRuntimeClient) {
-        println "react4xp_client task - args:"
-        println "\t${args}\n"
-    }
-
-    inputs.file(react4xp.outputFileName)
-    inputs.file("package.json")
-    inputs.file("package-lock.json")
-}
-react4xp_client.dependsOn += 'config_tasks'
-if (react4xp.buildRuntimeClient) {
-    jar.dependsOn += 'react4xp_client'
-}
-
-
-
-task react4xp_nashornpolyfills(type: NodeTask) {
-    group 'React4xp'
-    description 'Run the imported react4xp webpack scripts that compile the components and externals (as well as client and nashorn polyfills if needed)'
-
-    script = file('node_modules/webpack/bin/webpack.js')
-    args = [
-            '--config', 'node_modules/react4xp-runtime-nashornpolyfills/webpack.config.js',    // react4xp-runtime-nashornpolyfills comes with react4xp@^1.0.0
-            '--color',
-            '--env.VERBOSE=' + react4xp.verbose,
-            '--env.ENTRY_DIRS=' + react4xp.entryDirs,
-            '--env.CHUNK_DIRS=' + react4xp.chunkDirs,
-            '--env.ROOT="' + ROOT +'"'
-    ]
-
-    // Pretty if chatty
-    if (react4xp.verbose) {
-        args += '--progress'
-    }
-
-    // Finally, and mandatorily: tells all of the webpack steps here where to find the react4xp master config file that was built during the config_react4xp task
-    args += '--env.REACT4XP_CONFIG_FILE=' + react4xp.masterConfigFileName
-
-    if (react4xp.verbose && react4xp.nashornPolyfillsSource != null) {
-        println "react4xp_nashornpolyfills task - args:"
-        println "\t${args}\n"
-    }
-
-    inputs.file(react4xp.outputFileName)
-    inputs.file("package.json")
-    inputs.file("package-lock.json")
-}
-react4xp_nashornpolyfills.dependsOn += 'config_tasks'
-if (react4xp.nashornPolyfillsSource != null) {
-    jar.dependsOn += 'react4xp_nashornpolyfills'
-}
+apply from: "node_modules/react4xp/react4xp.gradle"
 ```
 
+If that for some reason is not an option for you, or you want a modified version of the setup, you can [find react4xp.gradle here](https://github.com/enonic/react4xp-npm/blob/master/packages/react4xp/react4xp.gradle) and build that into your project.
 
 
 ### 5: Gradle: XP component transpilation (optional)
 
 If you want, or already have, Babel (etc) transpilation for your XP controllers and other assets, this needs to be done separately from the build tasks above! **Make sure that the XP compilation step does not compile your react component source files!** 
 
-Here's an example from the starter; a gradle compile task that leaves `.jsx` files alone:
+Here's an example from the starter; a gradle compile task that **leaves `.jsx` files alone**:
 
 ```groovy
 task compileXP(type: NodeTask) {
@@ -535,8 +268,8 @@ jar.dependsOn += 'compileXP'
 
 ### 6: Build and run it all
 Voilà, such easy (I hope)! From the parent project, this can now be run as a regular XP app:
-```bash
-> enonic project deploy
+```commandline
+enonic project deploy
 ```
 
 Or, setting the environment variable `XP_HOME` (e.g. `export XP_HOME=~/.enonic/sandboxes/myProjectSandbox/home`), you can use regular gradle tasks such as `clean`, `build`, `deploy`.
@@ -552,8 +285,8 @@ Getting started with working on this library locally.
 
 Run this first to get set up.
 
-```bash
-> gradlew build
+```commandline
+gradlew build
 ```
 
 ### NPM-linked mode
@@ -563,13 +296,13 @@ This lib (and consuming react4xp apps) requires the corresponding [react4xp NPM 
 1. Download/fork/clone [react4xp-npm](https://github.com/enonic/react4xp-npm) from github to a separate source folder,
 
 2. From that root react4xp-npm folder:
-    ```bash
-    > gradlew npmLink
+    ```commandline
+    gradlew npmLink
     ```  
  
 3. Back in the root folder of _this lib_, run reac4xp-npm's `getLinks` script (sorry, this script has no windows version yet, but should be fairly easy to reverse-engineer): 
-    ```bash
-    > sh relative/path/to/local/react4xp-npm/getlinks.sh
+    ```commandline
+    sh relative/path/to/local/react4xp-npm/getlinks.sh
     ``` 
 4. Install the lib locally (see the next heading below),
 
