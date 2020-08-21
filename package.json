@@ -33,7 +33,7 @@
     "homepage": "https://github.com/enonic/lib-react4xp#readme",
     "dependencies": {
         "node-fetch": "^1.7.3",
-        "react4xp": "1.0.9"
+        "react4xp": "1.1.0"
     },
     "devDependencies": {
         "@babel/cli": "^7.10.5",
