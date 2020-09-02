@@ -42,7 +42,7 @@ This library, lib-react4xp, is installed as a regular XP library in a parent app
 | **lib-react4xp** | react4xp package (in both lib and app) |
 | ------------ | ------------ |
 | 1.0.1 | 1.0.0 |
-| **1.0.3-SNAPSHOT** | 1.1.0 |
+| **1.0.3-SNAPSHOT** | 1.1.2 |
 
 For XP6-compatible version of this library (early beta), see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master).
 
@@ -129,10 +129,10 @@ Other handy gradle dev tasks are `clean` and `build`.
 Go to the _parent XP project folder_ and use the command line to add these NPM packages as _devDependencies_:
 
 ```commandline
-npm add --save-dev react4xp@1.1.0
+npm add --save-dev react4xp@1.1.2
 ```
 
-Again, if you're using a different version of this library than 1.0.3-SNAPSHOT, the NPM package may need a different, matching version than `react4xp@1.1.0`. See [above](#versions-and-compatibility).
+Again, if you're using a different version of this library than 1.0.3-SNAPSHOT, the NPM package may need a different, matching version than `react4xp@1.1.2`. See [above](#versions-and-compatibility).
 
 Other development tools might be needed, depending on your setup:
 
@@ -228,7 +228,7 @@ overwriteConstantsFile = true
 
 
 ### 4: Gradle build setup
-As of version 1.1.0 of [the react4xp NPM package](https://www.npmjs.com/package/react4xp), the react4xp gradle build setup is shared in `react4xp/react4xp.gradle`. 
+As of version 1.1.0 of [the react4xp NPM package](https://www.npmjs.com/package/react4xp), the react4xp gradle build setup is shared in `react4xp.gradle` in the `react4xp` package. 
 
 As long as that's installed and `npm i` (or similar) has been run before the gradle build, you can simply add this to your `build.gradle`: 
 
@@ -236,7 +236,7 @@ As long as that's installed and `npm i` (or similar) has been run before the gra
 apply from: "node_modules/react4xp/react4xp.gradle"
 ```
 
-If that for some reason is not an option for you, or you want a modified version of the setup, you can [find react4xp.gradle here](https://github.com/enonic/react4xp-npm/blob/master/packages/react4xp/react4xp.gradle) and build that into your project.
+If that for some reason is not an option for you, or you want a modified version of the setup, you can [find react4xp.gradle here](https://github.com/enonic/react4xp-npm/blob/master/packages/react4xp/src/react4xp.gradle) and build that into your project.
 
 
 ### 5: Gradle: XP component transpilation (optional)
