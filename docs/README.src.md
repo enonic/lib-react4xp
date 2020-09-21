@@ -42,6 +42,7 @@ This library, lib-react4xp, is installed as a regular XP library in a parent app
 | **lib-react4xp** | react4xp package (in both lib and app) |
 | ------------ | ------------ |
 | 1.0.1 | 1.0.0 |
+| 1.1.0 | 1.1.3 |
 | **###LIB_VERSION###** | ###NPM_BUNDLE_VERSION### |
 
 For XP6-compatible version of this library (early beta), see the [XP6_master branch](https://github.com/enonic/lib-react4xp/tree/XP6_master).
