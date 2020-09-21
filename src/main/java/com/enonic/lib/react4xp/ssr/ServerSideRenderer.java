@@ -117,15 +117,15 @@ public class ServerSideRenderer implements ScriptBean {
 
         } catch (ScriptException e) {
 
-            LOG.debug("");
-            LOG.debug(entry + " script dump:");
-            LOG.debug("---------------------------------\n\n");
-            LOG.debug(script+"\n\n");
-            LOG.debug("---------------------------------------\n");
-            LOG.error("ERROR: " + ServerSideRenderer.class.getName() + ".renderToString  |  " +
-                    "Message: " + e.getMessage() + "  |  " +
-                    "Entry: " + entry + "  |  " +
-                    "Props: " + props + "\n");
+            LOG.info("");
+            LOG.info(entry + " script dump:");
+            LOG.info("---------------------------------\n\n");
+            LOG.info(script+"\n\n");
+            LOG.info("---------------------------------------\n");
+            LOG.error("...end of entry script: " + LIBRARY_NAME + "['" + entry + "']. Dumped to log because:");
+            LOG.error("    ERROR (" + ServerSideRenderer.class.getName() + ".finalizeAndRender):");
+            LOG.error("    Message: " + e.getMessage());
+            LOG.error("    Props: " + props + "\n");
             LOG.info("SOLUTION TIPS: The previous error message tends to refer to lines in compiled/mangled code. The browser console might have more readable (and sourcemapped) information - especially if you clientside-render this page / entry instead. Add 'clientRender: true', etc - in XP's preview or live mode! A full (compiled) script is dumped to the log at debug level. Also, it sometimes helps to clear all cached behavior: stop continuous builds, clear/rebuild your project, restart the XP server, clear browser cache.\n\n", e);
 
             if (RUN_MODE == RunMode.PROD) {
