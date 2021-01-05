@@ -77,7 +77,7 @@ Assuming you have Enonic XP 7.x nicely installed, and you have an **XP parent pr
 
 Two ways to add this library to a parent project: import it from an online repository, or build it from scratch:
 
-#### Import it from a repository...
+#### 1.1: Import it from a repository...
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
@@ -92,18 +92,18 @@ repositories {
 ```
 
 <a name="fork-and-build"></a>
-#### ...OR fork and build it yourself
+#### 1.2: ...OR fork and build it yourself
 If you need / want to build the lib yourself instead of downloading it with Gradle, add these steps: 
 
-**A.** Clone or otherwise download [the source code for this lib](https://github.com/enonic/lib-react4xp.git) into _its own root folder_ (not into XP_INSTALL or the parent project folder).
+**1.2.1.** Clone or otherwise download [the source code for this lib](https://github.com/enonic/lib-react4xp.git) into _its own root folder_ (not into XP_INSTALL or the parent project folder).
 
-**B.** Make the version unique in the library's `gradle.properties`, for example:
+**1.2.2.** Make the version unique in the library's `gradle.properties`, for example:
 
 ```properties
 version = ###LIB_VERSION###-SNAPSHOT
 ```
 
-**C.** Build it with gradle:
+**1.2.3.** Build it with gradle:
 
 ```commandline
 gradlew publishToMavenLocal
@@ -112,7 +112,7 @@ gradlew publishToMavenLocal
 Gradle will build the library and install it into the local cache, available for other projects.
 
 
-**D.** Finally, go to the parent project folder root.  Make sure that the version you downloaded/built matches your local reference in `build.gradle`, under `dependencies`, e.g.:
+**1.2.4.** Finally, go to the parent project folder root.  Make sure that the version you downloaded/built matches your local reference in `build.gradle`, under `dependencies`, e.g.:
 
 ```groovy
 dependencies {
@@ -301,7 +301,7 @@ This lib (and consuming react4xp apps) requires the corresponding [react4xp NPM 
     gradlew npmLink
     ```  
  
-3. Back in the root folder of _this lib_, run reac4xp-npm's `getLinks` script (sorry, this script has no windows version yet, but should be fairly easy to reverse-engineer): 
+3. Back in the root folder of _this lib_, run react4xp-npm's `getLinks` script (sorry, this script has no windows version yet, but should be fairly easy to reverse-engineer): 
     ```commandline
     sh relative/path/to/local/react4xp-npm/getlinks.sh
     ``` 
