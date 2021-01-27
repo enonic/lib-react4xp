@@ -23,7 +23,7 @@ dependencies {
 
     compile group: 'org.jdom', name: 'jdom', version: '2.0.2'
     compile group: 'org.json', name: 'json', version: '20201115'
-    compile group: 'jaxen', name: 'jaxen', version: '1.1.6'
+    compile group: 'jaxen', name: 'jaxen', version: '1.2.0-atlassian-2'
 
     testCompile "com.enonic.xp:testing:${xpVersion}"
 }
