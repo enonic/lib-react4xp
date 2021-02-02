@@ -8,7 +8,8 @@ const contentLib = require('/lib/xp/content');
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
 
-const SSR_LAZYLOAD_ASSETS = true; // <-- lazyLoading main switch
+const SSR_LAZYLOAD_ASSETS = true;   // <-- lazyLoading main switch
+const SSR_CACHE_SIZE = 1000;        // <-- set to 0 to switch off cache size
 
 // react4xp_constants.json is not part of lib-react4xp-runtime:
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
@@ -32,7 +33,8 @@ SSRreact4xp.setConfig(
     ENTRIES_FILENAME,
     EXTERNALS_CHUNKS_FILENAME,
     COMPONENT_STATS_FILENAME,
-    SSR_LAZYLOAD_ASSETS
+    SSR_LAZYLOAD_ASSETS,
+    SSR_CACHE_SIZE
 );
 
 const BASE_PATHS = {

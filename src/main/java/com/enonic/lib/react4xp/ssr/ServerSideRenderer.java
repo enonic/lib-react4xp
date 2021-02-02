@@ -33,7 +33,7 @@ public class ServerSideRenderer implements ScriptBean {
     private String LIBRARY_NAME = null;
     private String APP_NAME = null;
     private NashornScriptEngine ENGINE = null;
-    private RunMode RUN_MODE = RunMode.get();
+    private final boolean IS_PRODMODE = (RunMode.get() == RunMode.PROD);
     private Supplier<ResourceService> RESOURCE_SERVICE_SUPPLIER;
 
     private final Set<String> ALREADY_CACHEDANDRUN_ASSETNAMES = new HashSet<>();
@@ -49,25 +49,29 @@ public class ServerSideRenderer implements ScriptBean {
             String ENTRIESSOURCE,
             String EXTERNALS_CHUNKS_FILENAME,
             String COMPONENT_STATS_FILENAME,
-            boolean lazyLoading
+            boolean lazyLoading,
+            int cacheSize
     ) throws IOException, ScriptException {
         this.APP_NAME = APP_NAME;
         this.SCRIPTS_HOME = SCRIPTS_HOME;                             // "/react4xp"
         this.LIBRARY_NAME = LIBRARY_NAME;                             // "React4xp"
 
-        // Component chunks
-        ArrayList<String> chunkSources = new ArrayList<>();
-        chunkSources.add(EXTERNALS_CHUNKS_FILENAME);                                // "chunks.externals.json" = react + react-dom
+        synchronized(ENGINE_FACTORY) {
+            // Component chunks
+            ArrayList<String> chunkSources = new ArrayList<>();
+            chunkSources.add(EXTERNALS_CHUNKS_FILENAME);                                // "chunks.externals.json" = react + react-dom
 
-        // Init the engine too
-        ENGINE = ENGINE_FACTORY.initEngine(
-                CHUNKFILES_HOME,
-                NASHORNPOLYFILLS_FILENAME,
-                ENTRIESSOURCE,
-                COMPONENT_STATS_FILENAME,
-                chunkSources,
-                lazyLoading
-        );
+            // Init the engine too
+            ENGINE = ENGINE_FACTORY.initEngine(
+                    CHUNKFILES_HOME,
+                    NASHORNPOLYFILLS_FILENAME,
+                    ENTRIESSOURCE,
+                    COMPONENT_STATS_FILENAME,
+                    chunkSources,
+                    lazyLoading,
+                    cacheSize
+            );
+        }
     }
 
     ///////////////////////////////////////////////////////////////
@@ -81,19 +85,22 @@ public class ServerSideRenderer implements ScriptBean {
     }
 
     private void prepareScriptFromAsset(String assetName, StringBuilder scriptBuilder) throws IOException {
-        if (!ALREADY_CACHEDANDRUN_ASSETNAMES.contains(assetName)) {
-            LOG.info("Initializing asset: " + assetName);
+        synchronized (ALREADY_CACHEDANDRUN_ASSETNAMES) {
+            if (!IS_PRODMODE || !ALREADY_CACHEDANDRUN_ASSETNAMES.contains(assetName)) {
 
-            String url = APP_NAME + ":" + SCRIPTS_HOME + "/" + assetName;
-            ResourceKey resourceKey = ResourceKey.from(url);
-            Resource resource = RESOURCE_SERVICE_SUPPLIER.get().getResource(resourceKey);
-            String componentScript = resource.getBytes().asCharSource(Charsets.UTF_8).read();
+                String url = APP_NAME + ":" + SCRIPTS_HOME + "/" + assetName;
+                LOG.info("Initializing asset: " + url);
 
-            if (RUN_MODE == RunMode.PROD) {
-                ALREADY_CACHEDANDRUN_ASSETNAMES.add(assetName);
+                ResourceKey resourceKey = ResourceKey.from(url);
+                Resource resource = RESOURCE_SERVICE_SUPPLIER.get().getResource(resourceKey);
+                String componentScript = resource.getBytes().asCharSource(Charsets.UTF_8).read();
+
+                if (IS_PRODMODE) {
+                    ALREADY_CACHEDANDRUN_ASSETNAMES.add(assetName);
+                }
+                scriptBuilder.append(componentScript);
+                scriptBuilder.append(";\n");
             }
-            scriptBuilder.append(componentScript);
-            scriptBuilder.append(";\n");
         }
     }
 
@@ -128,8 +135,10 @@ public class ServerSideRenderer implements ScriptBean {
             LOG.error("    Props: " + props + "\n");
             LOG.info("SOLUTION TIPS: The previous error message tends to refer to lines in compiled/mangled code. The browser console might have more readable (and sourcemapped) information - especially if you clientside-render this page / entry instead. Add 'clientRender: true', etc - in XP's preview or live mode! A full (compiled) script is dumped to the log at debug level. Also, it sometimes helps to clear all cached behavior: stop continuous builds, clear/rebuild your project, restart the XP server, clear browser cache.\n\n", e);
 
-            if (RUN_MODE == RunMode.PROD) {
-                ALREADY_CACHEDANDRUN_ASSETNAMES.remove(entry);
+            if (IS_PRODMODE) {
+                synchronized (ALREADY_CACHEDANDRUN_ASSETNAMES) {
+                    ALREADY_CACHEDANDRUN_ASSETNAMES.remove(entry);
+                }
             }
             ENGINE.eval("delete " + LIBRARY_NAME + "['" + entry + "']");
 
