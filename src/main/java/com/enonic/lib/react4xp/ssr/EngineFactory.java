@@ -1,6 +1,7 @@
 package com.enonic.lib.react4xp.ssr;
 
 import jdk.nashorn.api.scripting.NashornScriptEngine;
+import jdk.nashorn.api.scripting.NashornScriptEngineFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,7 @@ import java.util.LinkedList;
 public class EngineFactory {
     private final static Logger LOG = LoggerFactory.getLogger( EngineFactory.class );
 
-    private final NashornScriptEngine ENGINE = (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
+    private NashornScriptEngine ENGINE = null;
 
     // Basic-level polyfills. For some reason, this must be run from here, not from nashornPolyfills.js.
     // TODO: shouldn't be a string here, but read from a JS file, preferrably in the react4xp-runtime-nashornpolyfills package.
@@ -193,9 +194,17 @@ public class EngineFactory {
             String ENTRIES_SOURCEFILENAME,
             String COMPONENT_STATS_FILENAME,
             ArrayList<String> CHUNK_SOURCEFILENAMES,
-            boolean lazyLoading
+            boolean lazyLoading,
+            int cacheSize
     ) throws IOException, ScriptException {
         if (!engineIsInitialized) {
+            if (cacheSize > 0) {
+                LOG.info("Init react4xp engine (nashornCacheSize=" + cacheSize + ")");
+                ENGINE = (NashornScriptEngine) new NashornScriptEngineFactory().getScriptEngine("--persistent-code-cache", "--class-cache-size=" + cacheSize);
+            } else {
+                LOG.info("Init react4xp engine: not cached");
+                ENGINE = (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
+            }
 
             initBasicSettings(CHUNKFILES_HOME, ENTRIES_SOURCEFILENAME, CHUNK_SOURCEFILENAMES);
 
