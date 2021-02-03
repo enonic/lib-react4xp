@@ -41,6 +41,8 @@ For XP6-compatible version of this library (early beta), see the link:https://gi
 
 {zwsp} +
 
+
+[[setup-with-react4xp-starter]]
 == Setup, option 1: The React4xp starter
 
 If you're starting with a fresh React4xp project and Enonic XP 7.x, by far the easiest way is to follow link:https://developer.enonic.com/templates/react4xp[the instructions in the React4xp tutorial], and build it from there. The starter always uses the latest stable version of this library.
@@ -51,21 +53,27 @@ The React4xp starter is also link:https://market.enonic.com/vendors/enonic/react
 
 {zwsp} +
 
+
+[[setup-in-existing-project]]
 == Setup, option 2: Using React4xp in an existing project
 
 If you want to skip the starter and inject React4xp in your own XP 7 project, you can. Follow these steps to get all the moving parts up and running:
 
 
 
+[[prerequisites]]
 === 0: Prerequisites
 Assuming you have Enonic XP 7.x nicely installed, and you have an **XP parent project** app set up for it (a project where you want to use React4xp).
 
 
 
+[[add-lib-react4xp]]
 === 1: Add lib-react4xp
 
 Two ways to add this library to a parent project: import it from an online repository, or build it from scratch:
 
+
+[[import-from-lib]]
 ==== 1.1: Import it from a repository...
 Insert into `build.gradle` in the parent project, under `dependencies`:
 [source,groovy,options="nowrap"]
@@ -120,12 +128,13 @@ Other handy gradle dev tasks are `clean` and `build`.
 
 
 
-=== 2: NPM: import packages
+[[npm-install]]
+=== 2: Install NPM packages
 Go to the _parent XP project folder_ and use the command line to add these NPM packages as _devDependencies_:
 
 [source,commandline,options="nowrap"]
 ----
-npm add --save-dev react4xp@1.1.11
+npm install --save-dev react4xp@1.1.11
 ----
 
 Again, if you're using a different version of this library than 1.2.0, the NPM package may need a different, matching version than `react4xp@1.1.11`. See link:#versions-and-compatibility[above].
@@ -141,6 +150,7 @@ Etc.
 
 
 
+[[react4xp-properties]]
 === 3: Configuration: react4xp.properties
 
 A few configuration properties are needed to guide the build steps. Make a file `react4xp.properties` in the root of your project, and copy this into it. Feel free to adjust the values later, to your liking:
@@ -225,6 +235,8 @@ overwriteConstantsFile = true
 
 
 
+
+[[gradle-build]]
 === 4: Gradle build setup
 As of version 1.1.0 of link:https://www.npmjs.com/package/react4xp[the react4xp NPM package], the react4xp gradle build setup is shared in `react4xp.gradle` in the `react4xp` package. 
 
@@ -238,6 +250,8 @@ apply from: "node_modules/react4xp/react4xp.gradle"
 If that for some reason is not an option for you, or you want a modified version of the setup, you can link:https://github.com/enonic/react4xp-npm/blob/master/packages/react4xp/src/react4xp.gradle[find react4xp.gradle here] and build that into your project.
 
 
+
+[[transpile-components]]
 === 5: Gradle: XP component transpilation (optional)
 
 If you want, or already have, Babel (etc) transpilation for your XP controllers and other assets, this needs to be done separately from the build tasks above! **Make sure that the XP compilation step does not compile your react component source files!** 
@@ -266,6 +280,7 @@ jar.dependsOn += 'compileXP'
 
 
 
+[[build-and-run]]
 === 6: Build and run it all
 Voil??, such easy (I hope)! From the parent project, this can now be run as a regular XP app:
 [source,commandline,options="nowrap"]
@@ -278,10 +293,14 @@ Or, setting the environment variable `XP_HOME` (e.g. `export XP_HOME=~/.enonic/s
 
 {zwsp} +
 
+
+[[development]]
 == Development
 
 Getting started with working on this library locally.
 
+
+[[local-build]]
 === Local build
 
 Run this first to get set up.
@@ -291,6 +310,8 @@ Run this first to get set up.
 gradlew build
 ----
 
+
+[[npm-linked-mode]]
 === NPM-linked mode
 
 This lib (and consuming react4xp apps) requires the corresponding link:https://www.npmjs.com/package/react4xp[react4xp NPM packages]. If you want to work with this lib with _local versions_ of those packages too, it's convenient to symlink them up under `node_modules`: 
@@ -317,12 +338,25 @@ This lib (and consuming react4xp apps) requires the corresponding link:https://w
 6. Build the react4xp app.
 
 
+[[install-lib]]
 === Install the lib
 
 To install the built library in local maven cache, available for building react4xp app(s) locally, follow link:#fork-and-build[the instructions above].
 
+
+[[lib-usage]]
+== Usage
+
+Basic library import in XP controllers:
+
+----
+const React4xp = require('/lib/enonic/react4xp'); 
+----
+
+Beyond this, using react4xp is beste explained in the link:https://developer.enonic.com/templates/react4xp[React4xp introduction guide].
+
 {zwsp} +
 
-== Happy reacting!
+**Happy reacting!**
 
-link:https://developer.enonic.com/templates/react4xp[Move on to the React4xp introduction]
+
