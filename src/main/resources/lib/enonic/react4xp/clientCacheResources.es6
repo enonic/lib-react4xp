@@ -1,4 +1,4 @@
-var utilLib = require("/lib/util");
+const util = require('./util');
 var ioLib = require("/lib/xp/io");
 
 // Adjusted from https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
@@ -16,7 +16,7 @@ exports.hash = string => {
 };
 
 exports.getResourceAsString = resource =>
-  utilLib.data.forceArray(ioLib.readLines(resource.getStream())).join("\n");
+  util.forceArray(ioLib.readLines(resource.getStream())).join("\n");
 
 exports.getReact4xpEntry = resource => {
   //const then = new Date().getTime();

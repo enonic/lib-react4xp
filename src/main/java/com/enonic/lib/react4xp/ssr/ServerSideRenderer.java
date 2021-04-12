@@ -50,7 +50,7 @@ public class ServerSideRenderer implements ScriptBean {
             String EXTERNALS_CHUNKS_FILENAME,
             String COMPONENT_STATS_FILENAME,
             boolean lazyLoading,
-            int cacheSize
+            String[] scriptEngineSettings
     ) throws IOException, ScriptException {
         this.APP_NAME = APP_NAME;
         this.SCRIPTS_HOME = SCRIPTS_HOME;                             // "/react4xp"
@@ -69,7 +69,7 @@ public class ServerSideRenderer implements ScriptBean {
                     COMPONENT_STATS_FILENAME,
                     chunkSources,
                     lazyLoading,
-                    cacheSize
+                    scriptEngineSettings
             );
         }
     }
@@ -89,7 +89,7 @@ public class ServerSideRenderer implements ScriptBean {
             if (!IS_PRODMODE || !ALREADY_CACHEDANDRUN_ASSETNAMES.contains(assetName)) {
 
                 String url = APP_NAME + ":" + SCRIPTS_HOME + "/" + assetName;
-                LOG.info("Initializing asset: " + url);
+                LOG.info("Adding asset: " + url);
 
                 ResourceKey resourceKey = ResourceKey.from(url);
                 Resource resource = RESOURCE_SERVICE_SUPPLIER.get().getResource(resourceKey);
@@ -100,12 +100,18 @@ public class ServerSideRenderer implements ScriptBean {
                 }
                 scriptBuilder.append(componentScript);
                 scriptBuilder.append(";\n");
+                LOG.info("   Asset added: " + url);
             }
         }
     }
 
     private String finalizeAndRender(String entry, String props, StringBuilder scriptBuilder) throws ScriptException {
         String script = null;
+
+        //Timer timer = new Timer();
+        //timer.g
+        LOG.info("Rendering entry: " + entry);
+
         try {
             scriptBuilder.append("var obj = { rendered: ReactDOMServer.renderToString(");
             scriptBuilder.append(LIBRARY_NAME);
@@ -120,7 +126,9 @@ public class ServerSideRenderer implements ScriptBean {
 
             ScriptObjectMirror obj = (ScriptObjectMirror)ENGINE.eval(script);
 
-            return (String)obj.get("rendered");
+            String rendered = (String)obj.get("rendered");
+            LOG.info("   Entry rendered: " + entry);
+            return rendered;
 
         } catch (ScriptException e) {
 
