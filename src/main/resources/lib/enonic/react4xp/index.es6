@@ -180,14 +180,15 @@ const buildContainer = (react4xpId, content) => `<div id="${react4xpId}">${conte
 
 
 const buildErrorContainer = (jsxPath, react4xpId) => '\n' +
-    '<div class="react4xp-error" style="border: 1px solid #8B0000; padding: 15px; background-color: #FFB6C1">\n' +
-    "    <h2>React4xp component error</h2>\n" +
+    '<div class="react4xp-error" style="font-family:monospace; border: 1px solid #8B0000; padding: 15px; background-color: #FFB6C1">\n' +
+    "    <h2>React4xp error</h2>\n" +
     '    <div class="react4xp-component-name">' +
-    '       <p><strong>Component name / ID:</strong></p>\n' +
-    '       <p>' + jsxPath + ' / ' + react4xpId + '</p>\n' +
+    '       <p><strong>Entry:      </strong> ' + jsxPath + '</p>\n' +
+    '       <p><strong>React4xp ID:</strong> ' + react4xpId + '</p>\n' +
     '    </div>\n' +
     '    <p class="react4xp-error-message">See the log for details.</p>\n' +
     '</div>\n';
+    // TODO: console.log actual error message if one of these apply: XP dev mode, react4xp.BUILD_ENV dev mode, inside content studio.
 
 
 const makeErrorMessage = (attribute, component) => `Couldn't construct React4xp data: missing or invalid ${attribute}. ${
@@ -491,19 +492,28 @@ class React4xp {
     }
 
 
-    /** Renders a pure static HTML markup of ONLY the react4xp entry, without a surrounding HTML markup or container.
-     * Can override props that have previously been added to this component.
+    /** Renders a purely static HTML markup of ONLY the react4xp entry (without a surrounding HTML markup or container).
+     *  Can override props that have previously been added to this component.
+     *
+     *  Returns an object: { html: string, error?: string }
+     *      (The keys 'html' and 'error' are as returned from ServerSideRenderer.java - so beware if ever refactoring them!)
+     *  ...where 'html' is a rendered HTML string (successful component, or a placeholder DIV with an error message),
+     *  and 'error' is undefined if successful, or an error message string from the Nashorn engine if any error occurred.
      */
-    renderEntryToHtml = (overrideProps) => SSR_LAZYLOAD ?
-        SSRreact4xp.renderToStringLazy(
-            this.jsxPath,
-            JSON.stringify(overrideProps || this.props),
-            JSON.stringify(getComponentChunkNames(this.jsxPath))
-        ) :
-        SSRreact4xp.renderToString(
-            this.jsxPath,
-            JSON.stringify(overrideProps || this.props)
+    doRenderSSR = (overrideProps) => {
+        return __.toNativeObject(
+            SSR_LAZYLOAD ?
+                SSRreact4xp.renderLazy(
+                    this.jsxPath,
+                    JSON.stringify(overrideProps || this.props),
+                    JSON.stringify(getComponentChunkNames(this.jsxPath))
+                ) :
+                SSRreact4xp.render(
+                    this.jsxPath,
+                    JSON.stringify(overrideProps || this.props)
+                )
         );
+    };
 
 
     /** Server-side rendering: Renders a static HTML markup and inserts it into an ID-matching target container in an HTML body. This is the same as renderBody({body: body}). If a
@@ -512,18 +522,19 @@ class React4xp {
      * @returns {string} adjusted or generated HTML body with rendered react component.
      */
     renderSSRIntoContainer(body) {
-        const componentString = this.renderEntryToHtml();
-        return this.renderTargetContainer(body, componentString);
+        const { html } = this.doRenderSSR();
+        return this.renderTargetContainer(body, html);
     }
 
-
     renderBody = params => {
-        // TODO: Page templates might be preferrable as standalones - that is, not need to be inserted into a container, but be able to encompass an entire DOM with <html> as the outer returned element. This is tricky: on SSR, renderEntryToHtml can be used, but how to do that on client-side react.render (and possibly worse, .hydrate)? And how to separate between them? isPage is NOT enough, since a page template might be both standalone or inserted.
-        /* if (this.isPage) {
-            return this.renderEntryToHtml();
-        } */
+        // TODO: Page templates might be preferrable as standalones - that is, not need to be inserted into a container, but be able to encompass an entire DOM with <html> as the outer returned element. This is tricky: on SSR, doRenderSSR can be used, but how to do that on client-side react.render (and possibly worse, .hydrate)? And how to separate between them? isPage is NOT enough, since a page template might be both standalone or inserted.
+        // if (this.isPage) {
+        //    return this.doRenderSSR();
+        // }
         const {body, clientRender} = params || {};
-        return clientRender ? this.renderTargetContainer(body) : this.renderSSRIntoContainer(body);
+        return clientRender
+            ? this.renderTargetContainer(body)
+            : this.renderSSRIntoContainer(body);
     };
 
 
@@ -534,39 +545,58 @@ class React4xp {
      * Also returns/adds small scripts that trigger the component scripts. Prevents duplicate references to dependencies.
      *
      * @param params {object} Additional parameters controlling the react rendering. All of them are optional:
-     *      - pageContributions PageContributions object that will be added before the new pageContributions.
-     *      - clientRender If clientRender is truthy, this function will assume that the react4xp entry is not being rendered
+     *      - pageContributions {object} Pre-existing pageContributions object that will be added BEFORE the new pageContributions rendered here.
+     *      - clientRender {boolean-y} If clientRender is truthy, renderPageContributions will assume that the react4xp entry is not being rendered
      *          server-side (by .renderBody), and only calls a 'render' command in the client. If omitted or falsy, server-side
      *          rendering is assumed, and a 'hydrate' command is called on the entry instead.
+     *      - error {boolean/string} If true boolean, a generic error message is output to the client console error log through page contributions,
+     *          and if a string, that message is output. Also, if truthy, the render/hydrate trigger call is suppressed,
+     *          in order to keep the error placeholder element visible
+     *      - suppressJS {boolean-y} If truthy, will make sure that the render/hydrate trigger call AND all the JS sources are skipped.
+     *      TODO: Add option for more graceful failure? Render if error is true, instead of suppressing the trigger and displaying the error placeholder?
      */
     renderPageContributions = params => {
-        const {pageContributions, clientRender} = params || {};
-        const command = clientRender ? 'render' : 'hydrate';
+        const {pageContributions, clientRender, error, suppressJS} = params || {};
+        const command = clientRender
+            ? 'render'
+            : 'hydrate';
 
         this.ensureAndLockBeforeRendering();
 
         // TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
-        return getAndMergePageContributions(
-            this.jsxPath,
-            pageContributions,
-            {
-                bodyEnd: [
-                    // Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
-                    `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
+        const bodyEnd = (!suppressJS)
+            ? [
+                // Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
+                `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
 
-                    // Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props.
-                    // Signature: <command>(entry, id, props?, isPage, hasRegions)
-                    `
-<script defer>${
-                        LIBRARY_NAME}.CLIENT.${command}(${
-                        LIBRARY_NAME}['${this.jsxPath}'],${
-                        JSON.stringify(this.react4xpId)},${
-                        this.props ? JSON.stringify(this.props) : 'null'}${
-                        this.isPage || this.hasRegions ?
-                            `,${this.isPage},${this.hasRegions}` :
-                            ''});</script>`
-                ]
-            });
+                // Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props.
+                // Signature: <command>(entry, id, props?, isPage, hasRegions)
+                `
+<script>${
+                    LIBRARY_NAME}.CLIENT.${command}(${
+                    LIBRARY_NAME}['${this.jsxPath}'],${
+                    JSON.stringify(this.react4xpId)},${
+                    this.props
+                        ? JSON.stringify(this.props)
+                        : 'null'
+                }${
+                    (this.isPage || this.hasRegions)
+                        ? `,${this.isPage},${this.hasRegions}`
+                        : ''
+                });</script>`
+            ]
+            : [];
+
+        if (error && !suppressJS) {
+            const message = (typeof message === 'string')
+                ? error.replace("'", "\"")
+                : "An error occurred."
+            bodyEnd.push(
+                `<script>console.error('${message}\\n\\nFor more info, see the server log.\\nIt may also be helpful to clientside-render this page/entry (${this.jsxPath}) and display it in XP preview or live mode (since Content Studio view modes 'edit' and 'inline' will suppress client-side rendering).');</script>`
+            );
+        }
+
+        return getAndMergePageContributions(this.jsxPath, pageContributions, { bodyEnd }, suppressJS);
     };
 
 
@@ -630,28 +660,47 @@ class React4xp {
 
             const {body, pageContributions, clientRender} = options || {};
 
-            const output = (!request || request.mode === "edit" || request.mode === "inline")
-                ? {
+            let output;
 
-                    // TODO: even less than this, in CS?
+            // Content studio or request-less context: always SSR without trigger call or JS sources
+            if (!request || request.mode === "edit" || request.mode === "inline") {
+                                                                                                                        log.info("// Content studio or request-less context: always SSR without trigger call or JS sources");
+                const { html } = this.doRenderSSR();
 
-                    body: react4xp.renderSSRIntoContainer(body),
-                    pageContributions: request ?
-                        react4xp.renderPageContributions({
+                output = {
+                    body: this.renderTargetContainer(body, html),
+                    pageContributions: react4xp.renderPageContributions({
                             pageContributions,
-                            clientRender
-                        }) :
-                        pageContributions
+                            clientRender,
+                            suppressJS: true
+                        })
                 }
-                : {
-                    body: clientRender
-                        ? react4xp.renderTargetContainer(body)
-                        : react4xp.renderSSRIntoContainer(body),
+
+            // Live XP view, with SSR:
+            } else if (!clientRender) {
+                                                                                                                        log.info("// Live XP view, with SSR:");
+                const { html, error } = this.doRenderSSR();
+
+                output = {
+                    body: this.renderTargetContainer(body, html),
+                    pageContributions: react4xp.renderPageContributions({
+                        pageContributions,
+                        clientRender,
+                        error   // TODO: output the error message by page contribution instead of embedded in the DIV from JAVA-side
+                    })
+                };
+
+            // Live XP view, no SSR, all client-side rendered:
+            } else {
+                                                                                                                        log.info("// Live XP view, no SSR, all client-side rendered:");
+                output = {
+                    body: react4xp.renderTargetContainer(body),
                     pageContributions: react4xp.renderPageContributions({
                         pageContributions,
                         clientRender
                     })
                 };
+            }
 
                                                                                                                         log.info(prettify(output, "React4xp.render output"));
             return output;

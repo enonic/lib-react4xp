@@ -11,14 +11,14 @@ const { normalizeEntryNames, getAllUrls } = require("./dependencies");
  *  bodyEnd is that this allows display of server-side-rendered content or placeholders before starting to load the
  *  acrtive components. The component-render-triggering <script> tag should have a defer attribute in order to wait for
  *  these to load. */
-const appendToBodyEnd = (url, pageContributions) => {
+const appendScriptToBodyEnd = (url, pageContributions) => {
   pageContributions.bodyEnd = [
     ...(pageContributions.bodyEnd || []),
-    `<script src="${url}" ></script>\n`
+    `<script src="${url}"></script>\n`
   ];
 };
 
-const appendCss = (url, pageContributions) => {
+const appendCssToHeadEnd = (url, pageContributions) => {
   pageContributions.headEnd = [
     ...(pageContributions.headEnd || []),
     `<link href="${url}" rel="stylesheet" type="text/css" />\n`
@@ -33,15 +33,17 @@ const appendCss = (url, pageContributions) => {
  * @param entries An array (also accepts string, if only one item) of Entry names for React4xp components, for which we want to build the set
  * of dependencies.
  * @returns an object ready to be returned as a pageContributions.js from an XP component. Puts dependencies into the bodyEnd attribute. */
-const buildPageContributions = entries => {
+const buildPageContributions = (entries, suppressJS) => {
   const chunkUrls = getAllUrls(entries);
 
   const pageContributions = {};
   chunkUrls.forEach(chunkUrl => {
     if (chunkUrl.endsWith(".css")) {
-      appendCss(chunkUrl, pageContributions);
-    } else {
-      appendToBodyEnd(chunkUrl, pageContributions);
+      appendCssToHeadEnd(chunkUrl, pageContributions);
+
+    // Treat other dependencies as JS and add them in a script tag. Unless suppressJS, in which case: skip them.
+    } else if (!suppressJS || !chunkUrl.endsWith(".js")) {
+        appendScriptToBodyEnd(chunkUrl, pageContributions);
     }
   });
 
@@ -70,18 +72,20 @@ const getUniqueEntries = (arrayOfArrays, controlSet) => {
  *
  * @param incomingPgContrib incoming pageContributions.js (from other components / outside / previous this rendering)
  * @param newPgContrib pageContributions.js that this specific component will add.
+ * @param suppressJS If truthy, any JS assets are skipped
  *
  * Also part of the merge: PAGE_CONTRIBUTIONS, the common standard React4xp page contributions
  */
 const getAndMergePageContributions = (
   entryNames,
   incomingPgContrib,
-  newPgContrib
+  newPgContrib,
+  suppressJS
 ) => {
   entryNames = normalizeEntryNames(entryNames);
   const entriesPgContrib = pageContributionsCache.get(
-    entryNames.join("*"),
-    () => buildPageContributions(entryNames)
+    entryNames.join("*")+"_"+suppressJS,
+    () => buildPageContributions(entryNames, suppressJS)
   );
 
   if (!incomingPgContrib && !newPgContrib) {

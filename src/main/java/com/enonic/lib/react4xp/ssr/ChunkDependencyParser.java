@@ -59,9 +59,9 @@ public class ChunkDependencyParser {
         return accumulator;
     }
 
-    private LinkedList<String> getDependencyNamesFromStatsFile(String statsFile, LinkedList<String> entries, boolean lazyLoading) throws IOException {
+    private LinkedList<String> getDependencyNamesFromStatsFile(String statsFile, LinkedList<String> entries, boolean doLazyLoad) throws IOException {
         LinkedList<String> accumulator = new LinkedList<>();
-        if (lazyLoading) {
+        if (doLazyLoad) {
             return accumulator;
         }
 
@@ -104,7 +104,7 @@ public class ChunkDependencyParser {
         return entries;
     }
 
-    public LinkedHashSet<String> getScriptDependencyNames(String statsFile, List<String> chunkFiles, String entryFile, boolean lazyLoading) throws IOException {
+    public LinkedHashSet<String> getScriptDependencyNames(String statsFile, List<String> chunkFiles, String entryFile, boolean doLazyLoad) throws IOException {
         LinkedList<String> entries = getEntriesList(entryFile);
 
         LinkedHashSet<String> dependencyScripts = new LinkedHashSet<>();
@@ -112,7 +112,7 @@ public class ChunkDependencyParser {
             dependencyScripts.addAll(getDependencyNamesFromChunkFile(chunkFile));
         }
 
-        dependencyScripts.addAll(getDependencyNamesFromStatsFile(statsFile, entries, lazyLoading));
+        dependencyScripts.addAll(getDependencyNamesFromStatsFile(statsFile, entries, doLazyLoad));
 
         return dependencyScripts;
     }
