@@ -195,16 +195,33 @@ public class EngineFactory {
             String COMPONENT_STATS_FILENAME,
             ArrayList<String> CHUNK_SOURCEFILENAMES,
             boolean lazyLoading,
-            int cacheSize
+            String[] scriptEngineSettings
     ) throws IOException, ScriptException {
         if (!engineIsInitialized) {
-            if (cacheSize > 0) {
-                LOG.info("Init react4xp engine (nashornCacheSize=" + cacheSize + ")");
-                ENGINE = (NashornScriptEngine) new NashornScriptEngineFactory().getScriptEngine("--persistent-code-cache", "--class-cache-size=" + cacheSize);
-            } else {
+            LOG.info("scriptEngineSettings = " + scriptEngineSettings.toString());
+            if (
+                    scriptEngineSettings == null ||
+                    scriptEngineSettings.length == 0 ||
+                    (scriptEngineSettings.length == 1 && scriptEngineSettings[0] == null)
+            ) {
                 LOG.info("Init react4xp engine: not cached");
                 ENGINE = (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
+
+            } else if (scriptEngineSettings.length == 1 && ("" + Integer.parseInt(scriptEngineSettings[0])).equals(scriptEngineSettings[0].trim())) {
+                int cacheSize = Integer.parseInt(scriptEngineSettings[0]);
+                if (cacheSize > 0) {
+                    LOG.info("Init react4xp engine (nashornCacheSize=" + cacheSize + ")");
+                    ENGINE = (NashornScriptEngine) new NashornScriptEngineFactory().getScriptEngine("--persistent-code-cache", "--class-cache-size=" + cacheSize);
+                } else {
+                    LOG.info("Init react4xp engine: cache size is zero or less -> not cached");
+                    ENGINE = (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
+                }
+
+            } else {
+                LOG.info("Init react4xp engine: custom settings");
+                ENGINE = (NashornScriptEngine) new NashornScriptEngineFactory().getScriptEngine(scriptEngineSettings);
             }
+
 
             initBasicSettings(CHUNKFILES_HOME, ENTRIES_SOURCEFILENAME, CHUNK_SOURCEFILENAMES);
 

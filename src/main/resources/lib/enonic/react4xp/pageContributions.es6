@@ -1,5 +1,4 @@
-const utilLib = require("/lib/util");
-
+const util = require('./util');
 const cacheLib = require("/lib/cache");
 const pageContributionsCache = cacheLib.newCache({
   size: 750,
@@ -51,10 +50,12 @@ const buildPageContributions = entries => {
 
 // ---------------------------------------------------------------
 
+
+
 const getUniqueEntries = (arrayOfArrays, controlSet) => {
   const uniqueEntries = [];
   arrayOfArrays.forEach(arr => {
-    utilLib.data.forceArray(arr).forEach(item => {
+    util.forceArray(arr).forEach(item => {
       if (controlSet.indexOf(item) === -1) {
         uniqueEntries.push(item);
         controlSet.push(item);
