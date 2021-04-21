@@ -5,33 +5,32 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'com.enonic.defaults' version '2.0.1'
-    id 'com.enonic.xp.base' version '2.0.0'
+    id 'com.enonic.xp.base' version '3.0.0'
     id "com.moowork.node" version "1.3.1"
 }
 
 dependencies {
     compileOnly "com.enonic.xp:core-api:${xpVersion}"
-    
-    compile "com.enonic.xp:lib-io:${xpVersion}"
-    compile "com.enonic.xp:lib-context:${xpVersion}"
-    compile "com.enonic.xp:lib-repo:${xpVersion}"
-    compile "com.enonic.xp:lib-node:${xpVersion}"
-    compile "com.enonic.xp:lib-portal:${xpVersion}"
 
-    compile 'com.enonic.lib:lib-util:2.0.0'
+    compile "com.enonic.xp:lib-io:${xpVersion}"
+    compile "com.enonic.xp:lib-portal:${xpVersion}"
+//    compile "com.enonic.xp:lib-context:${xpVersion}"
+//    compile "com.enonic.xp:lib-repo:${xpVersion}"
+//    compile "com.enonic.xp:lib-node:${xpVersion}"
+
     compile 'com.enonic.lib:lib-cache:2.1.1'
 
     compile group: 'org.jdom', name: 'jdom', version: '2.0.2'
-    compile group: 'org.json', name: 'json', version: '20201115'
+    compile group: 'org.json', name: 'json', version: '20210307'
     compile group: 'jaxen', name: 'jaxen', version: '1.2.0-atlassian-2'
 
     testCompile "com.enonic.xp:testing:${xpVersion}"
 }
 
-node {
+/*node {
     download = true
-    version = '9.7.0'
-}
+    version = '12.21.0'
+}*/
 
 repositories {
     mavenLocal()

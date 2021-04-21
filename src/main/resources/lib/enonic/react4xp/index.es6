@@ -8,12 +8,11 @@ const contentLib = require('/lib/xp/content');
 const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
 
-const SSR_LAZYLOAD_ASSETS = true;   // <-- lazyLoading main switch
-const SSR_CACHE_SIZE = 1000;        // <-- set to 0 to switch off cache size
+const SSR_DEFAULT_CACHE_SIZE = 1000;
 
-// react4xp_constants.json is not part of lib-react4xp-runtime:
+// react4xp_constants.json is not part of lib-react4xp:
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
-// Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
+// Easiest: the NPM package react4xp-buildconstants creates this file and copies it here at buildtime.
 const {
     LIBRARY_NAME,
     R4X_TARGETSUBDIR,
@@ -21,8 +20,11 @@ const {
     EXTERNALS_CHUNKS_FILENAME,
     COMPONENT_STATS_FILENAME,
     ENTRIES_FILENAME,
-    BUILD_ENV
+    BUILD_ENV,
+    SSR_LAZYLOAD,                   // <-- lazyLoading main switch
+    SSR_ENGINE_SETTINGS             // <-- set to 0 to switch off cache size
 } = require("./react4xp_constants.json");
+
 
 SSRreact4xp.setConfig(
     app.name,
@@ -33,8 +35,13 @@ SSRreact4xp.setConfig(
     ENTRIES_FILENAME,
     EXTERNALS_CHUNKS_FILENAME,
     COMPONENT_STATS_FILENAME,
-    SSR_LAZYLOAD_ASSETS,
-    SSR_CACHE_SIZE
+    SSR_LAZYLOAD || true,
+    ((SSR_ENGINE_SETTINGS || SSR_DEFAULT_CACHE_SIZE) + "")
+        .replace(/^"/, '')
+        .replace(/"$/, '')
+        .split(/"?\s*(,|\s+)\s*"?/)
+        .filter(s => !!((s || '') + '').trim())
+        .map(s => s.trim())
 );
 
 const BASE_PATHS = {
@@ -396,7 +403,7 @@ class React4xp {
     /** Renders a pure static HTML markup of ONLY the react4xp entry, without a surrounding HTML markup or container.
      * Can override props that have previously been added to this component.
      */
-    renderEntryToHtml = (overrideProps) => SSR_LAZYLOAD_ASSETS ?
+    renderEntryToHtml = (overrideProps) => SSR_LAZYLOAD ?
         SSRreact4xp.renderToStringLazy(
             this.jsxPath,
             JSON.stringify(overrideProps || this.props),
