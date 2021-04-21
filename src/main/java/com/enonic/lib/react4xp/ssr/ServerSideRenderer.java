@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -28,16 +29,20 @@ import java.util.function.Supplier;
 public class ServerSideRenderer implements ScriptBean {
     private final static Logger LOG = LoggerFactory.getLogger( ServerSideRenderer.class );
 
+    private static final boolean IS_PRODMODE = (RunMode.get() == RunMode.PROD);
+    private static final Set<String> ALREADY_CACHEDANDRUN_ASSETNAMES = new HashSet<>();
+    private static final EngineFactory ENGINE_FACTORY = new EngineFactory();
+
+    private static final String KEY_HTML = "html";
+    private static final String KEY_ERROR = "error";
+
     // Constants. TODO: SHOULD BE final.
     private String SCRIPTS_HOME = null;
     private String LIBRARY_NAME = null;
     private String APP_NAME = null;
     private NashornScriptEngine ENGINE = null;
-    private final boolean IS_PRODMODE = (RunMode.get() == RunMode.PROD);
     private Supplier<ResourceService> RESOURCE_SERVICE_SUPPLIER;
 
-    private final Set<String> ALREADY_CACHEDANDRUN_ASSETNAMES = new HashSet<>();
-    private final EngineFactory ENGINE_FACTORY = new EngineFactory();
 
 
     public void setConfig(
@@ -52,41 +57,66 @@ public class ServerSideRenderer implements ScriptBean {
             boolean lazyLoading,
             String[] scriptEngineSettings
     ) throws IOException, ScriptException {
+        LOG.info("");
+        LOG.info("---- ServerSideRenderer.setConfig: " + this.hashCode());
+        LOG.info("  APP_NAME: " + APP_NAME);
+        LOG.info("  SCRIPTS_HOME: " + SCRIPTS_HOME);
+        LOG.info("  LIBRARY_NAME: " + LIBRARY_NAME);
+        LOG.info("  CHUNKFILES_HOME: " + CHUNKFILES_HOME);
+        LOG.info("  NASHORNPOLYFILLS_FILENAME: " + NASHORNPOLYFILLS_FILENAME);
+        LOG.info("  ENTRIESSOURCE: " + ENTRIESSOURCE);
+        LOG.info("  EXTERNALS_CHUNKS_FILENAME: " + EXTERNALS_CHUNKS_FILENAME);
+        LOG.info("  COMPONENT_STATS_FILENAME: " + COMPONENT_STATS_FILENAME);
+        LOG.info("  lazyLoading: " + lazyLoading);
+        LOG.info("  scriptEngineSettings: " + scriptEngineSettings);
+        LOG.info("");
+
         this.APP_NAME = APP_NAME;
         this.SCRIPTS_HOME = SCRIPTS_HOME;                             // "/react4xp"
         this.LIBRARY_NAME = LIBRARY_NAME;                             // "React4xp"
 
-        synchronized(ENGINE_FACTORY) {
-            // Component chunks
-            ArrayList<String> chunkSources = new ArrayList<>();
-            chunkSources.add(EXTERNALS_CHUNKS_FILENAME);                                // "chunks.externals.json" = react + react-dom
+        // Component chunks
+        ArrayList<String> chunkSources = new ArrayList<>();
 
-            // Init the engine too
-            ENGINE = ENGINE_FACTORY.initEngine(
-                    CHUNKFILES_HOME,
-                    NASHORNPOLYFILLS_FILENAME,
-                    ENTRIESSOURCE,
-                    COMPONENT_STATS_FILENAME,
-                    chunkSources,
-                    lazyLoading,
-                    scriptEngineSettings
-            );
-        }
+        LOG.info("Adding EXTERNALS_CHUNKS_FILENAME to chunkSources: " + EXTERNALS_CHUNKS_FILENAME);
+        chunkSources.add(EXTERNALS_CHUNKS_FILENAME);                                // "chunks.externals.json" = react + react-dom
+
+        // Init the engine too
+        ENGINE = ENGINE_FACTORY.initEngine(
+                CHUNKFILES_HOME,
+                NASHORNPOLYFILLS_FILENAME,
+                ENTRIESSOURCE,
+                COMPONENT_STATS_FILENAME,
+                chunkSources,
+                lazyLoading,
+                scriptEngineSettings
+        );
+        LOG.info("Got SSR ENGINE: " + ENGINE.hashCode());
+
+        LOG.info("---- /ServerSideRenderer.Setconfig " + this.hashCode());
+
     }
 
     ///////////////////////////////////////////////////////////////
 
 
 
-    private void prepareScriptsFromAssets(List<String> assetNamesToLoad, StringBuilder scriptBuilder) throws IOException {
+    private String prepareCodeFromAssets(List<String> assetNamesToLoad) throws IOException {
+        StringBuilder scriptBuilder = new StringBuilder();
         for (String assetName : assetNamesToLoad) {
-            prepareScriptFromAsset(assetName, scriptBuilder);
+            appendScriptFromAsset(assetName, scriptBuilder);
         }
+        return scriptBuilder.toString();
     }
 
-    private void prepareScriptFromAsset(String assetName, StringBuilder scriptBuilder) throws IOException {
+    private boolean assetIsProdCachedInNashorn(String assetName) {
+        return IS_PRODMODE && ALREADY_CACHEDANDRUN_ASSETNAMES.contains(assetName);
+    }
+
+    private void appendScriptFromAsset(String assetName, StringBuilder codeBuilder) throws IOException {
         synchronized (ALREADY_CACHEDANDRUN_ASSETNAMES) {
-            if (!IS_PRODMODE || !ALREADY_CACHEDANDRUN_ASSETNAMES.contains(assetName)) {
+            LOG.info("prepareScriptFromAsset - ALREADY_CACHEDANDRUN_ASSETNAMES.contains(" + assetName + ") ? " + ALREADY_CACHEDANDRUN_ASSETNAMES.contains(assetName));
+            if (!assetIsProdCachedInNashorn(assetName)) {
 
                 String url = APP_NAME + ":" + SCRIPTS_HOME + "/" + assetName;
                 LOG.info("Adding asset: " + url);
@@ -97,45 +127,57 @@ public class ServerSideRenderer implements ScriptBean {
 
                 if (IS_PRODMODE) {
                     ALREADY_CACHEDANDRUN_ASSETNAMES.add(assetName);
+                    LOG.info("Added " + assetName + ". Now: ALREADY_CACHEDANDRUN_ASSETNAMES: " + ALREADY_CACHEDANDRUN_ASSETNAMES);
                 }
-                scriptBuilder.append(componentScript);
-                scriptBuilder.append(";\n");
+                codeBuilder.append(componentScript);
+                codeBuilder.append(";\n");
                 LOG.info("   Asset added: " + url);
             }
         }
     }
 
-    private String finalizeAndRender(String entry, String props, StringBuilder scriptBuilder) throws ScriptException {
-        String script = null;
+    private Map<String, String> finalizeAndRender(String entry, String props, String code, LinkedList<String> assetsInvolved) throws ScriptException {
+
+        String callScript = "var obj = { " +
+                KEY_HTML + ": ReactDOMServer.renderToString(" + LIBRARY_NAME  + "['" + entry + "'].default(" + props  + ")) " +
+                "};" +
+                "obj;";
 
         //Timer timer = new Timer();
         //timer.g
-        LOG.info("Rendering entry: " + entry);
+
+        String runnable;
+        if (code != null && !"".equals(code.trim())) {
+            if (assetsInvolved != null) {
+                LOG.info("finalizeAndRender - first-time rendering assets: " + assetsInvolved);
+            } else {
+                LOG.info("finalizeAndRender - first-time rendering entry: " + entry);
+            }
+            runnable = code + callScript;
+
+        } else {
+            runnable = callScript;
+        }
+
+        LOG.info("finalizeAndRender - call: " + callScript);
+        //LOG.info("#############          componentScript:\n\n\n" + script.toString() + "\n\n\n");
 
         try {
-            scriptBuilder.append("var obj = { rendered: ReactDOMServer.renderToString(");
-            scriptBuilder.append(LIBRARY_NAME);
-            scriptBuilder.append("['");
-            scriptBuilder.append(entry);
-            scriptBuilder.append("'].default(");
-            scriptBuilder.append(props);
-            scriptBuilder.append(")) };obj;");
+            ScriptObjectMirror obj = (ScriptObjectMirror)ENGINE.eval(runnable);
 
-            script = scriptBuilder.toString();
-            //LOG.info("#############          componentScript:\n\n\n" + script.toString() + "\n\n\n");
+            String rendered = (String)obj.get(KEY_HTML);
+            LOG.info("finalizeAndRender - " + KEY_HTML + ": " + entry);
 
-            ScriptObjectMirror obj = (ScriptObjectMirror)ENGINE.eval(script);
-
-            String rendered = (String)obj.get("rendered");
-            LOG.info("   Entry rendered: " + entry);
-            return rendered;
+            return Map.of(
+                    KEY_HTML,
+                    rendered
+            );
 
         } catch (ScriptException e) {
-
             LOG.info("");
-            LOG.info(entry + " script dump:");
+            LOG.info(entry + " code dump:");
             LOG.info("---------------------------------\n\n");
-            LOG.info(script+"\n\n");
+            LOG.info(runnable+"\n\n");
             LOG.info("---------------------------------------\n");
             LOG.error("...end of entry script: " + LIBRARY_NAME + "['" + entry + "']. Dumped to log because:");
             LOG.error("    ERROR (" + ServerSideRenderer.class.getName() + ".finalizeAndRender):");
@@ -145,17 +187,30 @@ public class ServerSideRenderer implements ScriptBean {
 
             if (IS_PRODMODE) {
                 synchronized (ALREADY_CACHEDANDRUN_ASSETNAMES) {
-                    ALREADY_CACHEDANDRUN_ASSETNAMES.remove(entry);
+                    if (assetsInvolved != null) {
+                        for (String asset : assetsInvolved) {
+                            LOG.info("finalizeAndRender - removing asset from ALREADY_CACHEDANDRUN_ASSETNAMES: " + asset);
+                            ALREADY_CACHEDANDRUN_ASSETNAMES.remove(asset);
+                        }
+                    } else {
+                        LOG.info("finalizeAndRender - removing asset from ALREADY_CACHEDANDRUN_ASSETNAMES: " + entry);
+                        ALREADY_CACHEDANDRUN_ASSETNAMES.remove(entry);
+                    }
+                    LOG.info("finalizeAndRender - ALREADY_CACHEDANDRUN_ASSETNAMES now: " + ALREADY_CACHEDANDRUN_ASSETNAMES);
                 }
             }
+            LOG.info("finalizeAndRender - deleting " + LIBRARY_NAME + "['" + entry + "'] from engine");
             ENGINE.eval("delete " + LIBRARY_NAME + "['" + entry + "']");
 
-            return "<div class=\"react4xp-error\" style=\"border: 1px solid #8B0000; padding: 15px; background-color: #FFB6C1\">" +
+            return Map.of(
+                    KEY_ERROR, e.getMessage(),
+                    KEY_HTML,
+                    "<div class=\"react4xp-error\" style=\"font-family:monospace; border: 1px solid #8B0000; padding: 15px; background-color: #FFB6C1\">" +
                     "<h2>" + StringEscapeUtils.escapeHtml(e.getClass().getName()) + "</h2>" +
                     "<p class=\"react4xp-entry-name\">" + entry + "</p>" +
                     "<p class=\"react4xp-error-message\">" + StringEscapeUtils.escapeHtml(e.getMessage()) + "</p>" +
-                    "<script>console.error('" + StringEscapeUtils.escapeJavaScript(e.getMessage()).replace("'", "\"") +"\\n\\nFor more info: see the server log, and/or clientside-render this page/entry (" + entry + ") in XP preview or live mode.');</script>" +
-                    "</div>";
+                    "</div>"
+            );
         }
     }
 
@@ -171,10 +226,10 @@ public class ServerSideRenderer implements ScriptBean {
      * @throws IOException
      * @throws ScriptException
      */
-    public String renderToString(String component, String props) throws IOException, ScriptException {
-        StringBuilder scriptBuilder = new StringBuilder();
-        prepareScriptFromAsset(component + ".js", scriptBuilder);
-        return finalizeAndRender(component, props, scriptBuilder);
+    public Map<String, String> render(String component, String props) throws IOException, ScriptException {
+        StringBuilder codeBuilder = new StringBuilder();
+        appendScriptFromAsset(component + ".js", codeBuilder);
+        return finalizeAndRender(component, props, codeBuilder.toString(), null);
     }
 
     /**
@@ -186,7 +241,7 @@ public class ServerSideRenderer implements ScriptBean {
      * @throws IOException
      * @throws ScriptException
      */
-    public String renderToStringLazy(String entryName, String props, String dependencyNames) throws IOException, ScriptException {
+    public Map<String, String> renderLazy(String entryName, String props, String dependencyNames) throws IOException, ScriptException {
 
         LinkedList<String> assetNamesToLoad = new LinkedList<>();
         if (dependencyNames != null && !"".equals(dependencyNames.trim())) {
@@ -194,16 +249,18 @@ public class ServerSideRenderer implements ScriptBean {
             Iterator<Object> it = array.iterator();
             while (it.hasNext()) {
                 String assetName = (String)it.next();
-                if (assetName.endsWith(".js")) {
+                if (assetName.endsWith(".js") && !assetIsProdCachedInNashorn(assetName)) {
                     assetNamesToLoad.add(assetName);
                 }
             }
         }
-        assetNamesToLoad.add(entryName + ".js");
+        String fullEntryName = entryName + ".js";
+        if (!assetIsProdCachedInNashorn(fullEntryName)) {
+            assetNamesToLoad.add(fullEntryName);
+        }
 
-        StringBuilder scriptBuilder = new StringBuilder();
-        prepareScriptsFromAssets(assetNamesToLoad, scriptBuilder);
-        return finalizeAndRender(entryName, props, scriptBuilder);
+        String code = prepareCodeFromAssets(assetNamesToLoad);
+        return finalizeAndRender(entryName, props, code, assetNamesToLoad);
     }
 
     @Override
