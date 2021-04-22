@@ -179,16 +179,35 @@ const bodyHasContainer = (body, react4xpId) => {
 const buildContainer = (react4xpId, content) => `<div id="${react4xpId}">${content || ''}</div>`;
 
 
-const buildErrorContainer = (jsxPath, react4xpId) => '\n' +
-    '<div class="react4xp-error" style="font-family:monospace; border: 1px solid #8B0000; padding: 15px; background-color: #FFB6C1">\n' +
-    "    <h2>React4xp error</h2>\n" +
-    '    <div class="react4xp-component-name">' +
-    '       <p><strong>Entry:      </strong> ' + jsxPath + '</p>\n' +
-    '       <p><strong>React4xp ID:</strong> ' + react4xpId + '</p>\n' +
-    '    </div>\n' +
-    '    <p class="react4xp-error-message">See the log for details.</p>\n' +
-    '</div>\n';
-    // TODO: console.log actual error message if one of these apply: XP dev mode, react4xp.BUILD_ENV dev mode, inside content studio.
+const buildErrorContainer = (react4xpObj, request, message) => {
+    																													log.info(prettify(react4xpObj, "buildErrorContainer - react4xpObj"));
+    const { jsxPath, react4xpId } = react4xpObj || {};
+    if (message) log.error(message);
+    let msg = (!message || !request || request.mode === 'live')
+        ? "See the server log for details."
+        : message;
+
+    return `
+    <div class="react4xp-error" style="border:1px solid #8B0000; padding:15px; background-color:#FFB6C1">
+        <style scoped>
+            h2, p, strong { font-family:monospace; }
+            h2 { font-size:20px }
+            p,strong { font-size:13px }
+        </style>
+        <h2 class="react4xp-error-heading">React4xp error</h2>
+        <div class="react4xp-error-component">
+           <p class="react4xp-error-name"><strong>Entry:      </strong> ${jsxPath}</p>
+           <p class="react4xp-error-id"  ><strong>React4xp ID:</strong> ${react4xpId}</p>
+        </div>
+        <p class="react4xp-error-message">${msg
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;")
+        }</p>
+    </div>`;
+}
 
 
 const makeErrorMessage = (attribute, component) => `Couldn't construct React4xp data: missing or invalid ${attribute}. ${
@@ -491,16 +510,16 @@ class React4xp {
         return body;
     }
 
-
+    // TODO: Check docs! Is 'doRenderSSR' an API-breaking name and signature change? Re-insert old name!
     /** Renders a purely static HTML markup of ONLY the react4xp entry (without a surrounding HTML markup or container).
      *  Can override props that have previously been added to this component.
      *
-     *  Returns an object: { html: string, error?: string }
+     *  Returns an object: { html?: string, error?: string }
      *      (The keys 'html' and 'error' are as returned from ServerSideRenderer.java - so beware if ever refactoring them!)
-     *  ...where 'html' is a rendered HTML string (successful component, or a placeholder DIV with an error message),
-     *  and 'error' is undefined if successful, or an error message string from the Nashorn engine if any error occurred.
+     *  ...where 'html' is a rendered HTML string if successful component rendering (undefined on error),
+     *  and 'error' an error message string from the Nashorn engine if any error occurred (undefined if successful rendering).
      */
-    doRenderSSR = (overrideProps) => {
+    doRenderSSR = overrideProps => {
         return __.toNativeObject(
             SSR_LAZYLOAD ?
                 SSRreact4xp.renderLazy(
@@ -522,8 +541,10 @@ class React4xp {
      * @returns {string} adjusted or generated HTML body with rendered react component.
      */
     renderSSRIntoContainer(body) {
-        const { html } = this.doRenderSSR();
-        return this.renderTargetContainer(body, html);
+        const { html, error } = this.doRenderSSR();
+        return error
+            ? buildErrorContainer(this, null, error)
+            : this.renderTargetContainer(body, html);
     }
 
     renderBody = params => {
@@ -592,7 +613,7 @@ class React4xp {
                 ? error.replace("'", "\"")
                 : "An error occurred."
             bodyEnd.push(
-                `<script>console.error('${message}\\n\\nFor more info, see the server log.\\nIt may also be helpful to clientside-render this page/entry (${this.jsxPath}) and display it in XP preview or live mode (since Content Studio view modes 'edit' and 'inline' will suppress client-side rendering).');</script>`
+                `<script>console.error('${message}\\n\\nSee the server log for details.\\nIt may also be helpful to clientside-render this page/entry (${this.jsxPath}) and display it in XP 'live' or 'preview' mode (since Content Studio view modes 'edit' and 'inline' will suppress client-side rendering): https://developer.enonic.com/docs/react4xp/master/hello-react#client_side_rendering');</script>`
             );
         }
 
@@ -647,7 +668,7 @@ class React4xp {
      */
     static render = (entry, props = {}, request = null, options = {}) => {
                                                                                                                         log.info(prettify({entry, props, request, options}, "React4xp.render params"));
-        let react4xp;
+        let react4xp = null;
         try {
             options.entry = entry;
             if (props && typeof props === 'object' && !Array.isArray(props)) {
@@ -665,28 +686,36 @@ class React4xp {
             // Content studio or request-less context: always SSR without trigger call or JS sources
             if (!request || request.mode === "edit" || request.mode === "inline") {
                                                                                                                         log.info("// Content studio or request-less context: always SSR without trigger call or JS sources");
-                const { html } = this.doRenderSSR();
+                let { html, error } = react4xp.doRenderSSR();
+                html = !error
+                    ? html
+                    : buildErrorContainer(react4xp, request, error)
 
                 output = {
-                    body: this.renderTargetContainer(body, html),
+                    body: react4xp.renderTargetContainer(body, html),
                     pageContributions: react4xp.renderPageContributions({
                             pageContributions,
                             clientRender,
                             suppressJS: true
-                        })
+                    })  // TODO: page contributions can be problematic inside CS? Inline the renderPageContributions output into body, here?
                 }
 
             // Live XP view, with SSR:
             } else if (!clientRender) {
                                                                                                                         log.info("// Live XP view, with SSR:");
-                const { html, error } = this.doRenderSSR();
+                let { html, error } = react4xp.doRenderSSR();
+                html = !error
+                    ? html
+                    : buildErrorContainer(react4xp, request, error)
 
                 output = {
-                    body: this.renderTargetContainer(body, html),
+                    body: react4xp.renderTargetContainer(body, html),
                     pageContributions: react4xp.renderPageContributions({
                         pageContributions,
                         clientRender,
-                        error   // TODO: output the error message by page contribution instead of embedded in the DIV from JAVA-side
+                        error: (request.mode === 'preview')
+                            ? error
+                            : (!!error) // In live mode, the actual error message is suppressed in favor of a generic one.
                     })
                 };
 
@@ -711,13 +740,12 @@ class React4xp {
             log.error("props (" + typeof props + "): " + JSON.stringify(props));
             log.error("request (" + typeof request + "): " + JSON.stringify(request));
             log.error("params (" + typeof options + "): " + JSON.stringify(options));
-            const r = react4xp || {};
 
 
             																											log.info(prettify(r, "react4xp err info"));
 
             return {
-                body: buildErrorContainer(r.jsxPath, r.react4xpId)
+                body: buildErrorContainer(react4xp, request, message)
             };
         }
     };
