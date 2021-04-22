@@ -178,36 +178,54 @@ const bodyHasContainer = (body, react4xpId) => {
 
 const buildContainer = (react4xpId, content) => `<div id="${react4xpId}">${content || ''}</div>`;
 
-
-const buildErrorContainer = (react4xpObj, request, message) => {
-    																													log.info(prettify(react4xpObj, "buildErrorContainer - react4xpObj"));
-    const { jsxPath, react4xpId } = react4xpObj || {};
+const buildErrorContainer = (heading, message, request, react4xpObj) => {
+    const { jsxPath, react4xpId } = react4xpObj;
     if (message) log.error(message);
-    let msg = (!message || !request || request.mode === 'live')
-        ? "See the server log for details."
-        : message;
+
+    let msg = (
+        (!request || request.mode === 'live')
+            ? ""
+            : (message || "")
+    );
+
+    																													log.info(prettify(msg, "msg"));
+    msg = msg
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+    let protip = "";
+    if (request) {
+        protip = (request.mode === 'live')
+            ? " or display this page in Content Studio"
+            : '.<br/>' +
+            '<strong>PROTIP!</strong> Some ways to make errors in compiled entries/assets easier to pinpoint: ' +
+            '<ul><li>Rebuild your assets with react4xp development build mode, to make them more readable. Use react4xp.properties, or add this gradle CLI argument: -Pdev</li>' +
+            '<li><a href="https://developer.enonic.com/docs/react4xp/master/hello-react#client_side_rendering" target="_blank">Clientside-render</a> the entry and view it outside of content studio (live or preview mode), then inspect the browser console.</li>' +
+            '<li>If the entry renders fine in clientside mode, this is usually a sign that it (or something it imports) is trying to invoke purely-browser functionality (e.g. document- or window-functions etc), which is not available in SSR. ' +
+            'Simple workaround: in those areas, check for typeof window === undefined or similar, to only use browser-specific functionality in the browser</li></ul>';
+    }
 
     return `
     <div class="react4xp-error" style="border:1px solid #8B0000; padding:15px; background-color:#FFB6C1">
         <style scoped>
-            h2, p, strong { font-family:monospace; }
+            li,h2,p,a,strong,span { font-family:monospace; }
             h2 { font-size:20px }
-            p,strong { font-size:13px }
+            li,p,a,strong,span { font-size:13px }
+            a,span.data { color:#8B0000; }
         </style>
-        <h2 class="react4xp-error-heading">React4xp error</h2>
-        <div class="react4xp-error-component">
-           <p class="react4xp-error-name"><strong>Entry:      </strong> ${jsxPath}</p>
-           <p class="react4xp-error-id"  ><strong>React4xp ID:</strong> ${react4xpId}</p>
+        <h2 class="react4xp-error-heading">${heading}</h2>
+        <p class="react4xp-error-message">${msg}</p>
+        <div class="react4xp-error-entry">
+           <p><strong>React4xp entry:</strong><br/>
+           <span class="jsxpath">JsxPath: <span class="data">${jsxPath}</span></span><br/>
+           <span class="id" >ID: <span class="data">${react4xpId}</span></span>
         </div>
-        <p class="react4xp-error-message">${msg
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;")
-        }</p>
+        <div class="react4xp-error-protip"><p>For more details, see the server log${protip}</p></div>
     </div>`;
-}
+};
 
 
 const makeErrorMessage = (attribute, component) => `Couldn't construct React4xp data: missing or invalid ${attribute}. ${
@@ -317,7 +335,7 @@ class React4xp {
      *      - uniqueId {boolean|string} If set, ensures that the ID is unique. If id is set (previous param), a random integer will be postfixed to it. If uniqueId is a string, this is the prefix before the random postfix. If the id param is used in addition to a uniqueId string, uniqueId takes presedence and overrides id.
      */
     static _buildFromParams = (params) => {
-        log.info(prettify(react4xp, "React4xp._buildFromParams"));
+        //log.info(prettify(react4xp, "React4xp._buildFromParams"));
 
         const {entry, id, uniqueId, props} = params || {};
 
@@ -347,6 +365,7 @@ class React4xp {
 
         return react4xp;
     };
+
 
     //---------------------------------------------------------------
 
@@ -520,7 +539,7 @@ class React4xp {
      *  and 'error' an error message string from the Nashorn engine if any error occurred (undefined if successful rendering).
      */
     doRenderSSR = overrideProps => {
-        return __.toNativeObject(
+        const result = __.toNativeObject(
             SSR_LAZYLOAD ?
                 SSRreact4xp.renderLazy(
                     this.jsxPath,
@@ -532,6 +551,13 @@ class React4xp {
                     JSON.stringify(overrideProps || this.props)
                 )
         );
+
+        if (result.error && !this.react4xpId) {
+            this.react4xpId = "react4xp_error";
+            this.uniqueId();
+        }
+
+        return result;
     };
 
 
@@ -543,7 +569,7 @@ class React4xp {
     renderSSRIntoContainer(body) {
         const { html, error } = this.doRenderSSR();
         return error
-            ? buildErrorContainer(this, null, error)
+            ? this.renderTargetContainer(body, buildErrorContainer("React4xp SSR error", error, null, this))
             : this.renderTargetContainer(body, html);
     }
 
@@ -570,14 +596,14 @@ class React4xp {
      *      - clientRender {boolean-y} If clientRender is truthy, renderPageContributions will assume that the react4xp entry is not being rendered
      *          server-side (by .renderBody), and only calls a 'render' command in the client. If omitted or falsy, server-side
      *          rendering is assumed, and a 'hydrate' command is called on the entry instead.
-     *      - error {boolean/string} If true boolean, a generic error message is output to the client console error log through page contributions,
+     *      - error {boolean/string} INTERNAL USE: If true boolean, a generic error message is output to the client console error log through page contributions,
      *          and if a string, that message is output. Also, if truthy, the render/hydrate trigger call is suppressed,
      *          in order to keep the error placeholder element visible
-     *      - suppressJS {boolean-y} If truthy, will make sure that the render/hydrate trigger call AND all the JS sources are skipped.
+     *      - __suppressJS {boolean-y} INTERNAL USE: If truthy, will make sure that the render/hydrate trigger call AND all the JS sources are skipped.
      *      TODO: Add option for more graceful failure? Render if error is true, instead of suppressing the trigger and displaying the error placeholder?
      */
     renderPageContributions = params => {
-        const {pageContributions, clientRender, error, suppressJS} = params || {};
+        const {pageContributions, clientRender, __error, __suppressJS} = params || {};
         const command = clientRender
             ? 'render'
             : 'hydrate';
@@ -585,7 +611,7 @@ class React4xp {
         this.ensureAndLockBeforeRendering();
 
         // TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
-        const bodyEnd = (!suppressJS)
+        const bodyEnd = (!__suppressJS && !__error)
             ? [
                 // Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
                 `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
@@ -608,16 +634,27 @@ class React4xp {
             ]
             : [];
 
-        if (error && !suppressJS) {
-            const message = (typeof message === 'string')
-                ? error.replace("'", "\"")
-                : "An error occurred."
+        if (__error) {
+            let message = (typeof __error === 'string')
+                ? __error
+                : "React4xp error"
+            message = (message + "\\n" +
+                "Entry: jsxPath='" + this.jsxPath + "', ID='" + this.react4xpId + "'\\n\\n" +
+                "For more details, display this page in XP preview mode or Content Studio, and/or see the server log.")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "'")
             bodyEnd.push(
-                `<script>console.error('${message}\\n\\nSee the server log for details.\\nIt may also be helpful to clientside-render this page/entry (${this.jsxPath}) and display it in XP 'live' or 'preview' mode (since Content Studio view modes 'edit' and 'inline' will suppress client-side rendering): https://developer.enonic.com/docs/react4xp/master/hello-react#client_side_rendering');</script>`
+                `<script>console.error("${message}");</script>`
             );
         }
 
-        return getAndMergePageContributions(this.jsxPath, pageContributions, { bodyEnd }, suppressJS);
+
+    																													log.info(prettify(bodyEnd, "index.renderPageContributions - bodyEnd"));
+        const output = getAndMergePageContributions(this.jsxPath, pageContributions, { bodyEnd }, __suppressJS);
+
+    																													log.info(prettify(output, "index.renderPageContributions - output"));
+    	return output;
     };
 
 
@@ -681,7 +718,7 @@ class React4xp {
 
             const {body, pageContributions, clientRender} = options || {};
 
-            let output;
+            let renderedBody, renderedPageContributions;
 
             // Content studio or request-less context: always SSR without trigger call or JS sources
             if (!request || request.mode === "edit" || request.mode === "inline") {
@@ -689,16 +726,15 @@ class React4xp {
                 let { html, error } = react4xp.doRenderSSR();
                 html = !error
                     ? html
-                    : buildErrorContainer(react4xp, request, error)
+                    : buildErrorContainer("React4xp SSR error", error, request, react4xp);
 
-                output = {
-                    body: react4xp.renderTargetContainer(body, html),
-                    pageContributions: react4xp.renderPageContributions({
-                            pageContributions,
-                            clientRender,
-                            suppressJS: true
-                    })  // TODO: page contributions can be problematic inside CS? Inline the renderPageContributions output into body, here?
-                }
+                renderedBody = react4xp.renderTargetContainer(body, html);
+                renderedPageContributions = react4xp.renderPageContributions({
+                    pageContributions,
+                    clientRender: false,
+                    __suppressJS: true,
+                });  // TODO: page contributions can be problematic inside CS? Inline the renderPageContributions output into body, here?
+
 
             // Live XP view, with SSR:
             } else if (!clientRender) {
@@ -706,46 +742,55 @@ class React4xp {
                 let { html, error } = react4xp.doRenderSSR();
                 html = !error
                     ? html
-                    : buildErrorContainer(react4xp, request, error)
+                    : buildErrorContainer("React4xp SSR error", error, request, react4xp)
 
-                output = {
-                    body: react4xp.renderTargetContainer(body, html),
-                    pageContributions: react4xp.renderPageContributions({
-                        pageContributions,
-                        clientRender,
-                        error: (request.mode === 'preview')
-                            ? error
-                            : (!!error) // In live mode, the actual error message is suppressed in favor of a generic one.
-                    })
-                };
+                renderedBody = react4xp.renderTargetContainer(body, html);
+                renderedPageContributions = react4xp.renderPageContributions({
+                    pageContributions,
+                    clientRender: false,
+                    __error: (request.mode === 'preview')
+                        ? error
+                        : (!!error) // In live mode, the actual error message is suppressed in favor of a generic one, by just setting it truthy here
+                });
+
 
             // Live XP view, no SSR, all client-side rendered:
             } else {
                                                                                                                         log.info("// Live XP view, no SSR, all client-side rendered:");
-                output = {
-                    body: react4xp.renderTargetContainer(body),
-                    pageContributions: react4xp.renderPageContributions({
-                        pageContributions,
-                        clientRender
-                    })
-                };
+                renderedBody = react4xp.renderTargetContainer(body),
+                renderedPageContributions = react4xp.renderPageContributions({
+                    pageContributions,
+                    clientRender
+                });
             }
 
+            const output = {
+                body: renderedBody,
+                pageContributions: renderedPageContributions
+            }
                                                                                                                         log.info(prettify(output, "React4xp.render output"));
             return output;
 
         } catch (e) {
             log.error(e);
-            log.error("entry (" + typeof entry + "): " + JSON.stringify(options));
+            log.error("entry (" + typeof entry + "): " + JSON.stringify(entry));
             log.error("props (" + typeof props + "): " + JSON.stringify(props));
             log.error("request (" + typeof request + "): " + JSON.stringify(request));
             log.error("params (" + typeof options + "): " + JSON.stringify(options));
+            const errObj = react4xp || {
+                react4xpId: (options || {}).react4xpId,
+                jsxPath: entry
+            };
 
-
-            																											log.info(prettify(r, "react4xp err info"));
+            																											log.info(prettify(errObj, "react4xp err info"));
 
             return {
-                body: buildErrorContainer(react4xp, request, message)
+                body: buildErrorContainer(
+                    "React4xp error during rendering",
+                    e.message,
+                    request,
+                    errObj
+                )
             };
         }
     };
