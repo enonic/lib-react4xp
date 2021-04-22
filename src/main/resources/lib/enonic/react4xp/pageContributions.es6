@@ -34,7 +34,7 @@ const appendCssToHeadEnd = (url, pageContributions) => {
  * of dependencies.
  * @returns an object ready to be returned as a pageContributions.js from an XP component. Puts dependencies into the bodyEnd attribute. */
 const buildPageContributions = (entries, suppressJS) => {
-  const chunkUrls = getAllUrls(entries);
+  const chunkUrls = getAllUrls(entries, suppressJS);
 
   const pageContributions = {};
   chunkUrls.forEach(chunkUrl => {
@@ -42,7 +42,7 @@ const buildPageContributions = (entries, suppressJS) => {
       appendCssToHeadEnd(chunkUrl, pageContributions);
 
     // Treat other dependencies as JS and add them in a script tag. Unless suppressJS, in which case: skip them.
-    } else if (!suppressJS || !chunkUrl.endsWith(".js")) {
+    } else {
         appendScriptToBodyEnd(chunkUrl, pageContributions);
     }
   });

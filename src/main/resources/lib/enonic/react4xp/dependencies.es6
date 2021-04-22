@@ -139,11 +139,16 @@ const getClientUrls = () =>
     }
   });
 
-const getAllUrls = entries => [
+const getAllUrls = (entries, suppressJS) => [
   ...getExternalsUrls(),
   ...getComponentChunkUrls(entries),
-  ...getClientUrls()
-];
+  ...suppressJS
+      ? []
+      : getClientUrls()
+].filter(!suppressJS
+    ? chunkUrl => chunkUrl
+    : chunkUrl => !chunkUrl.endsWith(".js")
+);
 
 /** Open a chunkfile, read the contents and return the domain-relative urls for non-entry JS file references in the chunk file.
  * Throws an error if not found or if unexpected format. */
