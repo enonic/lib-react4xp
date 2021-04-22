@@ -9,7 +9,6 @@ import com.enonic.xp.server.RunMode;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.apache.commons.io.Charsets;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -203,17 +202,16 @@ public class ServerSideRenderer implements ScriptBean {
             ENGINE.eval("delete " + LIBRARY_NAME + "['" + entry + "']");
 
             return Map.of(
-                    KEY_ERROR, e.getMessage(),
+                    KEY_ERROR, e.getClass().getName() + ": " + e.getMessage() /*,
                     KEY_HTML,
                     "<div class=\"react4xp-error\" style=\"font-family:monospace; border: 1px solid #8B0000; padding: 15px; background-color: #FFB6C1\">" +
                     "<h2>" + StringEscapeUtils.escapeHtml(e.getClass().getName()) + "</h2>" +
                     "<p class=\"react4xp-entry-name\">" + entry + "</p>" +
                     "<p class=\"react4xp-error-message\">" + StringEscapeUtils.escapeHtml(e.getMessage()) + "</p>" +
-                    "</div>"
+                    "</div>"*/
             );
         }
     }
-
 
 
     ///////////////////////////////////////////////////////
