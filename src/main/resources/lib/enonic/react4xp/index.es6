@@ -210,7 +210,7 @@ const buildErrorContainer = (heading, message, request, react4xpObj) => {
 
     return `
     <div class="react4xp-error" style="border:1px solid #8B0000; padding:15px; background-color:#FFB6C1">
-        <style scoped>
+        <style>
             li,h2,p,a,strong,span { font-family:monospace; }
             h2 { font-size:20px }
             li,p,a,strong,span { font-size:13px }
@@ -219,9 +219,11 @@ const buildErrorContainer = (heading, message, request, react4xpObj) => {
         <h2 class="react4xp-error-heading">${heading}</h2>
         <p class="react4xp-error-message">${msg}</p>
         <div class="react4xp-error-entry">
-           <p><strong>React4xp entry:</strong><br/>
-           <span class="jsxpath">JsxPath: <span class="data">${jsxPath}</span></span><br/>
-           <span class="id" >ID: <span class="data">${react4xpId}</span></span>
+           <p>
+               <strong>React4xp entry:</strong><br/>
+               <span class="jsxpath">JsxPath: <span class="data">${jsxPath}</span></span><br/>
+               <span class="id" >ID: <span class="data">${react4xpId}</span></span>
+           </p>
         </div>
         <div class="react4xp-error-protip"><p>For more details, see the server log${protip}</p></div>
     </div>`;
