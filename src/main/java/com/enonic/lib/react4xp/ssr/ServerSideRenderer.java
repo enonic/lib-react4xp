@@ -109,7 +109,9 @@ public class ServerSideRenderer implements ScriptBean {
     }
 
     private boolean assetIsProdCachedInNashorn(String assetName) {
-        return IS_PRODMODE && ALREADY_CACHEDANDRUN_ASSETNAMES.contains(assetName);
+        boolean assetIsProdCachedInNashorn = IS_PRODMODE && ALREADY_CACHEDANDRUN_ASSETNAMES.contains(assetName);
+        LOG.info("assetIsProdCachedInNashorn('" + assetName + "')? " + assetIsProdCachedInNashorn);
+        return assetIsProdCachedInNashorn;
     }
 
     private void appendScriptFromAsset(String assetName, StringBuilder codeBuilder) throws IOException {
@@ -180,19 +182,20 @@ public class ServerSideRenderer implements ScriptBean {
             LOG.info("---------------------------------------\n");
             LOG.error("...end of entry script: " + LIBRARY_NAME + "['" + entry + "']. Dumped to log because:");
             LOG.error("    ERROR (" + ServerSideRenderer.class.getName() + ".finalizeAndRender):");
-            LOG.error("    Message: " + e.getMessage());
             LOG.error("    Props: " + props + "\n");
-            LOG.info("SOLUTION TIPS: The previous error message tends to refer to lines in compiled/mangled code. The browser console might have more readable (and sourcemapped) information - especially if you clientside-render this page / entry instead. Add 'clientRender: true', etc - in XP's preview or live mode! A full (compiled) script is dumped to the log at debug level. Also, it sometimes helps to clear all cached behavior: stop continuous builds, clear/rebuild your project, restart the XP server, clear browser cache.\n\n", e);
+            LOG.error("SOLUTION TIPS: The previous error message tends to refer to lines in compiled/mangled code. The browser console might have more readable (and sourcemapped) information - especially if you clientside-render this page / entry instead. Add 'clientRender: true', etc - in XP's preview or live mode! A full (compiled) script is dumped to the log at debug level. Also, it sometimes helps to clear all cached behavior: stop continuous builds, clear/rebuild your project, restart the XP server, clear browser cache.\n\n");
+            e.printStackTrace();
 
             if (IS_PRODMODE) {
                 synchronized (ALREADY_CACHEDANDRUN_ASSETNAMES) {
                     if (assetsInvolved != null) {
+                        LOG.info("finalizeAndRender - assetsInvolved: " + assetsInvolved);
                         for (String asset : assetsInvolved) {
                             LOG.info("finalizeAndRender - removing asset from ALREADY_CACHEDANDRUN_ASSETNAMES: " + asset);
                             ALREADY_CACHEDANDRUN_ASSETNAMES.remove(asset);
                         }
                     } else {
-                        LOG.info("finalizeAndRender - removing asset from ALREADY_CACHEDANDRUN_ASSETNAMES: " + entry);
+                        LOG.info("finalizeAndRender - removing entry asset from ALREADY_CACHEDANDRUN_ASSETNAMES: " + entry);
                         ALREADY_CACHEDANDRUN_ASSETNAMES.remove(entry);
                     }
                     LOG.info("finalizeAndRender - ALREADY_CACHEDANDRUN_ASSETNAMES now: " + ALREADY_CACHEDANDRUN_ASSETNAMES);
@@ -241,24 +244,45 @@ public class ServerSideRenderer implements ScriptBean {
      */
     public Map<String, String> renderLazy(String entryName, String props, String dependencyNames) throws IOException, ScriptException {
 
-        LinkedList<String> assetNamesToLoad = new LinkedList<>();
-        if (dependencyNames != null && !"".equals(dependencyNames.trim())) {
-            JSONArray array = new JSONArray(dependencyNames);
-            Iterator<Object> it = array.iterator();
-            while (it.hasNext()) {
-                String assetName = (String)it.next();
-                if (assetName.endsWith(".js") && !assetIsProdCachedInNashorn(assetName)) {
-                    assetNamesToLoad.add(assetName);
+        LOG.info("\n\n\n\nrenderLazy - START:");
+        LOG.info("renderLazy - entryName: " + entryName);
+        LOG.info("renderLazy - dependencyNames: " + dependencyNames);
+
+        try {
+            LinkedList<String> assetNamesToLoad = new LinkedList<>();
+            LinkedList<String> allAssetsInvolved = new LinkedList<>();
+
+            if (dependencyNames != null && !"".equals(dependencyNames.trim())) {
+                JSONArray array = new JSONArray(dependencyNames);
+                Iterator<Object> it = array.iterator();
+                while (it.hasNext()) {
+                    String assetName = (String) it.next();
+                    if (assetName.endsWith(".js")) {
+                        allAssetsInvolved.add(assetName);
+                        if (!assetIsProdCachedInNashorn(assetName)) {
+                            assetNamesToLoad.add(assetName);
+                        }
+                    }
                 }
             }
-        }
-        String fullEntryName = entryName + ".js";
-        if (!assetIsProdCachedInNashorn(fullEntryName)) {
-            assetNamesToLoad.add(fullEntryName);
-        }
+            String fullEntryName = entryName + ".js";
+            allAssetsInvolved.add(fullEntryName);
+            if (!assetIsProdCachedInNashorn(fullEntryName)) {
+                assetNamesToLoad.add(fullEntryName);
+            }
 
-        String code = prepareCodeFromAssets(assetNamesToLoad);
-        return finalizeAndRender(entryName, props, code, assetNamesToLoad);
+            String code = prepareCodeFromAssets(assetNamesToLoad);
+            Map<String, String> rendered = finalizeAndRender(entryName, props, code, allAssetsInvolved);
+                                                                                                                        LOG.info("---------------------- renderLazy - the end.\n\n\n");
+            return rendered;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+                                                                                                                        LOG.info("---------------------- renderLazy - I dieded.\n\n\n");
+            return Map.of(
+                    KEY_ERROR, e.getClass().getName() + ": " + e.getMessage()
+            );
+        }
     }
 
     @Override
