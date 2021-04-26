@@ -363,7 +363,12 @@ class React4xp {
             }
         }
 
-        log.info(prettify(react4xp, "React4xp.builtFromParams"));
+                                                                                                                                                log.info(prettify({
+                                                                                                                                                    react4xpId: react4xp.react4xpId,
+                                                                                                                                                    jsxPath: react4xp.jsxPath,
+                                                                                                                                                    component: react4xp.component,
+                                                                                                                                                    props: react4xp.props
+                                                                                                                                                }, "React4xp.builtFromParams"));
 
         return react4xp;
     };
