@@ -58,7 +58,7 @@ public class ServerSideRenderer implements ScriptBean {
             String ENTRIESSOURCE,
             String EXTERNALS_CHUNKS_FILENAME,
             String COMPONENT_STATS_FILENAME,
-            boolean lazyLoading,
+            boolean SSR_LAZYLOAD,
             String[] scriptEngineSettings
     ) throws IOException, ScriptException {
         LOG.info("");
@@ -71,7 +71,7 @@ public class ServerSideRenderer implements ScriptBean {
         LOG.info("  ENTRIESSOURCE: " + ENTRIESSOURCE);
         LOG.info("  EXTERNALS_CHUNKS_FILENAME: " + EXTERNALS_CHUNKS_FILENAME);
         LOG.info("  COMPONENT_STATS_FILENAME: " + COMPONENT_STATS_FILENAME);
-        LOG.info("  lazyLoading: " + lazyLoading);
+        LOG.info("  lazyLoading: " + SSR_LAZYLOAD);
         LOG.info("  scriptEngineSettings: " + scriptEngineSettings);
         LOG.info("");
 
@@ -80,30 +80,81 @@ public class ServerSideRenderer implements ScriptBean {
         this.LIBRARY_NAME = LIBRARY_NAME;                             // "React4xp"
 
         // Component chunks
-        ArrayList<String> chunkSources = new ArrayList<>();
+        ArrayList<String> CHUNK_SOURCEFILENAMES = new ArrayList<>();
 
         LOG.info("Adding EXTERNALS_CHUNKS_FILENAME to chunkSources: " + EXTERNALS_CHUNKS_FILENAME);
-        chunkSources.add(EXTERNALS_CHUNKS_FILENAME);                                // "chunks.externals.json" = react + react-dom
+        CHUNK_SOURCEFILENAMES.add(EXTERNALS_CHUNKS_FILENAME);                                // "chunks.externals.json" = react + react-dom
 
         // Init the engine too
         // TODO: DRY, see code farther below
+
+        LOG.info("doLazyLoad: " + SSR_LAZYLOAD);
         ENGINE = ENGINE_FACTORY.initEngine(
                 CHUNKFILES_HOME,
                 NASHORNPOLYFILLS_FILENAME,
                 ENTRIESSOURCE,
                 COMPONENT_STATS_FILENAME,
-                chunkSources,
-                lazyLoading,
+                CHUNK_SOURCEFILENAMES,
+                SSR_LAZYLOAD,
                 scriptEngineSettings
         );
         LOG.info("Got SSR ENGINE: " + ENGINE.hashCode());
 
+        /////////////////////////
+        if (!SSR_LAZYLOAD) {
+            String entriesSource = CHUNKFILES_HOME + ENTRIESSOURCE;
+            ArrayList<String> chunksSources = new ArrayList<>();
+            for (String chunkFileName : CHUNK_SOURCEFILENAMES) {
+                chunksSources.add(CHUNKFILES_HOME + chunkFileName);
+            }
+            LOG.info("init - CHUNKS_SOURCES: " + chunksSources);
+
+            String statsFile = CHUNKFILES_HOME + COMPONENT_STATS_FILENAME;
+
+            LinkedList<String> transpiledDependencies = new ChunkDependencyParser().getScriptDependencyNames(statsFile, chunksSources, entriesSource, SSR_LAZYLOAD);
+
+            for (String dep : transpiledDependencies) {
+                LOG.info("init - dep: " + dep);
+            }
+
+            loadAssets(transpiledDependencies);
+
+            /*
+            for (String scriptFile : transpiledDependencies) {
+                String file = CHUNKFILES_HOME + scriptFile;
+                scriptContentsByFilename.put(file, ResourceHandler.readResource(file));
+                scriptExecutionOrder.add(file);
+                scriptHasBeenLoadedByName.put(file, false);
+                LOG.info("addEntriesAndChunksScripts - scriptHasBeenLoadedByName: " + file + " -> false");
+            }
+             */
+        }
+        ///////////////////////////
         LOG.info("---- /ServerSideRenderer.Setconfig " + this.hashCode());
 
     }
 
     ///////////////////////////////////////////////////////////////
 
+
+    /*private void addEntriesAndChunksScripts(String CHUNKFILES_HOME, String COMPONENT_STATS_FILENAME, ArrayList<String> CHUNK_SOURCEFILENAMES, String ENTRIES_SOURCEFILENAME, LinkedList<String> scriptExecutionOrder, HashMap<String, String> scriptContentsByFilename, boolean doLazyLoad) throws IOException {
+        String ENTRIES_SOURCE = CHUNKFILES_HOME + ENTRIES_SOURCEFILENAME;
+        ArrayList<String> CHUNKS_SOURCES = new ArrayList<>();
+        for (String chunkFileName : CHUNK_SOURCEFILENAMES) {
+            CHUNKS_SOURCES.add(CHUNKFILES_HOME + chunkFileName);
+        }
+        LOG.info("initBasicSettings - CHUNKS_SOURCES: " + CHUNKS_SOURCES);
+
+        LinkedHashSet<String> transpiledDependencies = new ChunkDependencyParser().getScriptDependencyNames(CHUNKFILES_HOME + COMPONENT_STATS_FILENAME, CHUNKS_SOURCES, ENTRIES_SOURCE, doLazyLoad);
+
+        for (String scriptFile : transpiledDependencies) {
+            String file = CHUNKFILES_HOME + scriptFile;
+            scriptContentsByFilename.put(file, ResourceHandler.readResource(file));
+            scriptExecutionOrder.add(file);
+            scriptHasBeenLoadedByName.put(file, false);
+            LOG.info("addEntriesAndChunksScripts - scriptHasBeenLoadedByName: " + file + " -> false");
+        }
+    }*/
 
 
     private void ensureProdCache(List<String> assetNames) {

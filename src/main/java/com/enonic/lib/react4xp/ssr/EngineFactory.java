@@ -10,7 +10,6 @@ import javax.script.ScriptException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 public class EngineFactory {
@@ -33,8 +32,7 @@ public class EngineFactory {
                 "console.error = print;" +
             "}";
 
-    private ArrayList<String> CHUNKS_SOURCES = null;
-    private String ENTRIES_SOURCE = null;
+
     private HashMap<String, Boolean> scriptHasBeenLoadedByName = null;
     private boolean engineIsInitialized = false;
 
@@ -43,17 +41,8 @@ public class EngineFactory {
             String ENTRIES_SOURCEFILENAME,
             ArrayList<String> CHUNK_SOURCEFILENAMES
     ) {
-        ENTRIES_SOURCE = CHUNKFILES_HOME + ENTRIES_SOURCEFILENAME;
-        LOG.info("initBasicSettings - ENTRIES_SOURCE: " + ENTRIES_SOURCE);
 
-        CHUNKS_SOURCES = new ArrayList<>();
-        for (String chunkFileName : CHUNK_SOURCEFILENAMES) {
-            CHUNKS_SOURCES.add(CHUNKFILES_HOME + chunkFileName);
-        }
-        LOG.info("initBasicSettings - CHUNKS_SOURCES: " + CHUNKS_SOURCES);
 
-        scriptHasBeenLoadedByName = new HashMap<>();
-        LOG.info("initBasicSettings - scriptHasBeenLoadedByName initialized.");
     }
 
 
@@ -98,10 +87,18 @@ public class EngineFactory {
     }
 
 
-    private void addEntriesAndChunksScripts(String CHUNKFILES_HOME, String COMPONENT_STATS_FILENAME, LinkedList<String> scriptExecutionOrder, HashMap<String, String> scriptContentsByFilename, boolean doLazyLoad) throws IOException {
-        LinkedHashSet<String> transpiledDependencies = new ChunkDependencyParser().getScriptDependencyNames(CHUNKFILES_HOME + COMPONENT_STATS_FILENAME, CHUNKS_SOURCES, ENTRIES_SOURCE, doLazyLoad);
+    private void addEntriesAndChunksScripts(String CHUNKFILES_HOME, String COMPONENT_STATS_FILENAME, ArrayList<String> CHUNK_SOURCEFILENAMES, String ENTRIES_SOURCEFILENAME, LinkedList<String> scriptExecutionOrder, HashMap<String, String> scriptContentsByFilename, boolean doLazyLoad) throws IOException {
+        String ENTRIES_SOURCE = CHUNKFILES_HOME + ENTRIES_SOURCEFILENAME;
+        ArrayList<String> CHUNKS_SOURCES = new ArrayList<>();
+        for (String chunkFileName : CHUNK_SOURCEFILENAMES) {
+            CHUNKS_SOURCES.add(CHUNKFILES_HOME + chunkFileName);
+        }
+        LOG.info("addEntriesAndChunksScripts - CHUNKS_SOURCES: " + CHUNKS_SOURCES);
+
+        LinkedList<String> transpiledDependencies = new ChunkDependencyParser().getScriptDependencyNames(CHUNKFILES_HOME + COMPONENT_STATS_FILENAME, CHUNKS_SOURCES, ENTRIES_SOURCE, doLazyLoad);
 
         for (String scriptFile : transpiledDependencies) {
+            LOG.info("addEntriesAndChunksScripts - dep: " + scriptFile);
             String file = CHUNKFILES_HOME + scriptFile;
             scriptContentsByFilename.put(file, ResourceHandler.readResource(file));
             scriptExecutionOrder.add(file);
@@ -243,17 +240,26 @@ public class EngineFactory {
             String ENTRIES_SOURCEFILENAME,
             String COMPONENT_STATS_FILENAME,
             ArrayList<String> CHUNK_SOURCEFILENAMES,
-            boolean doLazyLoad,
+            boolean SSR_LAZYLOAD,
             String[] scriptEngineSettings
     ) throws IOException, ScriptException {
         if (!engineIsInitialized) {
             LOG.info("######################### EngineFactory " + this.hashCode() + " initializing new SSR engine with these scriptEngineSettings: " + scriptEngineSettings.toString());
+            LOG.info("doLazyLoad: " + SSR_LAZYLOAD);
 
             engineIsInitialized = true;
             ENGINE = buildEngine(scriptEngineSettings);
 
-            initBasicSettings(CHUNKFILES_HOME, ENTRIES_SOURCEFILENAME, CHUNK_SOURCEFILENAMES);
+            scriptHasBeenLoadedByName = new HashMap<>();
+            LOG.info("initBasicSettings - scriptHasBeenLoadedByName initialized.");
 
+            try {
+                LOG.info("Going to sleep: " + this.hashCode());
+                Thread.sleep(5000);
+                LOG.info("Waking up:      " + this.hashCode());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
             HashMap<String, String> scriptContentsByFilename = new HashMap<>();
             // Sequence matters, but hashmaps are not ordered! Use ordered scriptList collection 'scriptExecutionOrder' for iteration!
@@ -264,7 +270,7 @@ public class EngineFactory {
             LOG.info("post-prepareNashornPolyfillScripts - scriptExecutionOrder: " + scriptExecutionOrder);
             LOG.info("post-prepareNashornPolyfillScripts - scriptHasBeenLoadedByName: " + scriptHasBeenLoadedByName.toString());
 
-            addEntriesAndChunksScripts(CHUNKFILES_HOME, COMPONENT_STATS_FILENAME, scriptExecutionOrder, scriptContentsByFilename, doLazyLoad);
+            //addEntriesAndChunksScripts(CHUNKFILES_HOME, COMPONENT_STATS_FILENAME, CHUNK_SOURCEFILENAMES, ENTRIES_SOURCEFILENAME, scriptExecutionOrder, scriptContentsByFilename, SSR_LAZYLOAD);
 
             runScripts(scriptExecutionOrder, scriptContentsByFilename);
             LOG.info("######################### /EngineFactory " + this.hashCode() + " initialized SSR Engine: " + ENGINE.hashCode());
