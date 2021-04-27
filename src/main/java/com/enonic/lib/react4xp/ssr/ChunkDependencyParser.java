@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,6 +21,8 @@ public class ChunkDependencyParser {
     }
 
     private LinkedList<String> getDependencyNamesFromChunkFile(String chunkFile) throws IOException {
+        LOG.info("getDependencyNamesFromChunkFile - chunkFile: " + chunkFile);
+
         LinkedList<String> accumulator = new LinkedList<>();
 
         JSONObject fileContentData = getJSON(chunkFile);
@@ -53,6 +54,7 @@ public class ChunkDependencyParser {
                 }
             }
 
+            LOG.info("getDependencyNamesFromChunkFile + fileName: " + fileName);
             accumulator.add(fileName);
         }
 
@@ -64,6 +66,8 @@ public class ChunkDependencyParser {
         if (doLazyLoad) {
             return accumulator;
         }
+
+        LOG.info("getDependencyNamesFromStatsFile - statsFile: " + statsFile);
 
         JSONObject fileContentData = getJSON(statsFile);
         Object entryObj = fileContentData.get("entrypoints");
@@ -79,7 +83,8 @@ public class ChunkDependencyParser {
             JSONArray assets = (JSONArray)entryData.get("assets");
             for (Object obj : assets) {
                 String fileName = (String)obj;
-                if (!entries.contains(fileName) && fileName.endsWith(".js")) {
+                if (!accumulator.contains(fileName) && !entries.contains(fileName) && fileName.endsWith(".js")) {
+                    LOG.info("getDependencyNamesFromStatsFile + fileName: " + fileName);
                     accumulator.add(fileName);
                 }
             }
@@ -104,15 +109,27 @@ public class ChunkDependencyParser {
         return entries;
     }
 
-    public LinkedHashSet<String> getScriptDependencyNames(String statsFile, List<String> chunkFiles, String entryFile, boolean doLazyLoad) throws IOException {
+    public LinkedList<String> getScriptDependencyNames(String statsFile, List<String> chunkFiles, String entryFile, boolean doLazyLoad) throws IOException {
         LinkedList<String> entries = getEntriesList(entryFile);
 
-        LinkedHashSet<String> dependencyScripts = new LinkedHashSet<>();
+        LOG.info("doLazyLoad: " + doLazyLoad);
+
+        LinkedList<String> dependencyScripts = new LinkedList<>();
         for (String chunkFile : chunkFiles) {
-            dependencyScripts.addAll(getDependencyNamesFromChunkFile(chunkFile));
+            LinkedList<String> dependencyNames = getDependencyNamesFromChunkFile(chunkFile);
+            for (String dependencyName : dependencyNames) {
+                if (!dependencyScripts.contains(dependencyName)) {
+                    dependencyScripts.add(dependencyName);
+                }
+            }
         }
 
-        dependencyScripts.addAll(getDependencyNamesFromStatsFile(statsFile, entries, doLazyLoad));
+        LinkedList<String> dependencyNames = getDependencyNamesFromStatsFile(statsFile, entries, doLazyLoad);
+        for (String dependencyName : dependencyNames) {
+            if (!dependencyScripts.contains(dependencyName)) {
+                dependencyScripts.add(dependencyName);
+            }
+        }
 
         return dependencyScripts;
     }

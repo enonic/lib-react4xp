@@ -121,7 +121,7 @@ SSRreact4xp.setConfig(
     ENTRIES_FILENAME,
     EXTERNALS_CHUNKS_FILENAME,
     COMPONENT_STATS_FILENAME,
-    SSR_LAZYLOAD || true,
+    !!SSR_LAZYLOAD,
     ((SSR_ENGINE_SETTINGS || SSR_DEFAULT_CACHE_SIZE) + "")
         .replace(/^"/, '')
         .replace(/"$/, '')
