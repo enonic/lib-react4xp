@@ -45,7 +45,7 @@ This library, lib-react4xp, is installed as a regular XP library in a parent app
 | 1.0.1 | 1.0.0 |
 | 1.1.0 | 1.1.3 |
 | 1.1.1 | 1.1.4 |
-| **1.3.0-SNAPSHOT** | 1.2.0 |
+| **1.3.0-SNAPSHOT** | 1.3.1 |
 
 
 
@@ -133,10 +133,10 @@ Other handy gradle dev tasks are `clean` and `build`.
 Go to the _parent XP project folder_ and use the command line to add these NPM packages as _devDependencies_:
 
 ```commandline
-npm install --save-dev react4xp@1.2.0
+npm install --save-dev react4xp@1.3.1
 ```
 
-Again, if you're using a different version of this library than 1.3.0-SNAPSHOT, the NPM package may need a different, matching version than `react4xp@1.2.0`. See [above](#versions-and-compatibility).
+Again, if you're using a different version of this library than 1.3.0-SNAPSHOT, the NPM package may need a different, matching version than `react4xp@1.3.1`. See [above](#versions-and-compatibility).
 
 Other development tools might be needed, depending on your setup:
 
