@@ -16,26 +16,31 @@ import org.slf4j.LoggerFactory;
 import javax.script.ScriptException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
+
+
 
 
 public class ServerSideRenderer implements ScriptBean {
     private final static Logger LOG = LoggerFactory.getLogger( ServerSideRenderer.class );
 
+    private static final class CacheMarker {
+        public boolean isCached = false;
+    }
+
     private static final boolean IS_PRODMODE = (RunMode.get() == RunMode.PROD);
-    private static final Set<String> ALREADY_CACHEDANDRUN_ASSETNAMES = new HashSet<>();
+    private static final HashMap<String, CacheMarker> ASSET_CACHE_MARKERS = new HashMap<>();
     private static final EngineFactory ENGINE_FACTORY = new EngineFactory();
 
     private static final String KEY_HTML = "html";
     private static final String KEY_ERROR = "error";
 
-    // Constants. TODO: SHOULD BE final.
+    // Constants. TODO: SHOULD BE final?
     private String SCRIPTS_HOME = null;
     private String LIBRARY_NAME = null;
     private String APP_NAME = null;
@@ -81,6 +86,7 @@ public class ServerSideRenderer implements ScriptBean {
         chunkSources.add(EXTERNALS_CHUNKS_FILENAME);                                // "chunks.externals.json" = react + react-dom
 
         // Init the engine too
+        // TODO: DRY, see code farther below
         ENGINE = ENGINE_FACTORY.initEngine(
                 CHUNKFILES_HOME,
                 NASHORNPOLYFILLS_FILENAME,
@@ -100,185 +106,218 @@ public class ServerSideRenderer implements ScriptBean {
 
 
 
-    private String prepareCodeFromAssets(List<String> assetNamesToLoad) throws IOException {
-        StringBuilder scriptBuilder = new StringBuilder();
-        for (String assetName : assetNamesToLoad) {
-            appendScriptFromAsset(assetName, scriptBuilder);
+    private void ensureProdCache(List<String> assetNames) {
+        if (!IS_PRODMODE) {
+            return;
         }
-        return scriptBuilder.toString();
-    }
-
-    private boolean assetIsProdCachedInNashorn(String assetName) {
-        boolean assetIsProdCachedInNashorn = IS_PRODMODE && ALREADY_CACHEDANDRUN_ASSETNAMES.contains(assetName);
-        LOG.info("assetIsProdCachedInNashorn('" + assetName + "')? " + assetIsProdCachedInNashorn);
-        return assetIsProdCachedInNashorn;
-    }
-
-    private void appendScriptFromAsset(String assetName, StringBuilder codeBuilder) throws IOException {
-        synchronized (ALREADY_CACHEDANDRUN_ASSETNAMES) {
-            LOG.info("prepareScriptFromAsset - ALREADY_CACHEDANDRUN_ASSETNAMES.contains(" + assetName + ") ? " + ALREADY_CACHEDANDRUN_ASSETNAMES.contains(assetName));
-            if (!assetIsProdCachedInNashorn(assetName)) {
-
-                String url = APP_NAME + ":" + SCRIPTS_HOME + "/" + assetName;
-                LOG.info("Adding asset: " + url);
-
-                ResourceKey resourceKey = ResourceKey.from(url);
-                Resource resource = RESOURCE_SERVICE_SUPPLIER.get().getResource(resourceKey);
-                String componentScript = resource.getBytes().asCharSource(Charsets.UTF_8).read();
-
-                if (IS_PRODMODE) {
-                    ALREADY_CACHEDANDRUN_ASSETNAMES.add(assetName);
-                    LOG.info("Added " + assetName + ". Now: ALREADY_CACHEDANDRUN_ASSETNAMES: " + ALREADY_CACHEDANDRUN_ASSETNAMES);
+        synchronized (ASSET_CACHE_MARKERS) {
+            for (String assetName : assetNames) {
+                if (!ASSET_CACHE_MARKERS.containsKey(assetName)) {
+                    ASSET_CACHE_MARKERS.put(assetName, new CacheMarker());
                 }
-                codeBuilder.append(componentScript);
-                codeBuilder.append(";\n");
-                LOG.info("   Asset added: " + url);
             }
         }
     }
 
-    private Map<String, String> finalizeAndRender(String entry, String props, String code, LinkedList<String> assetsInvolved) throws ScriptException {
+    private void maybeLoadAsset(String assetName) {
+        LOG.info("SSR asset: " + assetName);
+        if (IS_PRODMODE) {
+            CacheMarker assetCacheMarker = ASSET_CACHE_MARKERS.get(assetName);
+            synchronized (assetCacheMarker) {
+                if (!assetCacheMarker.isCached) {
+                    loadAsset(assetName);
+                }
+            }
+        } else {
+            loadAsset(assetName);
+        }
+    }
+
+    /** Load both entry assets and JS dependency chunks into the Nashorn engine */
+    private void loadAsset(String assetName) {
+        String assetCode = null, url = null;
+        try {
+            url = APP_NAME + ":" + SCRIPTS_HOME + "/" + assetName;
+
+            // TODO: DRY
+            ResourceKey resourceKey = ResourceKey.from(url);
+            Resource resource = RESOURCE_SERVICE_SUPPLIER.get().getResource(resourceKey);
+            assetCode = resource.getBytes().asCharSource(Charsets.UTF_8).read();
+
+            ENGINE.eval(assetCode);
+
+            if (IS_PRODMODE) {
+                ASSET_CACHE_MARKERS.get(assetName).isCached = true;
+                LOG.info("Cached: " + assetName);
+            }
+
+        } catch (IOException e1) {
+            LOG.error(e1.getClass().getSimpleName() + " in " + ServerSideRenderer.class.getName() + ".loadDependency:");
+            LOG.error("assetName = '" +assetName + "'   |   asset url = '" + url + "'");
+            LOG.error(e1.getMessage());
+
+            if (IS_PRODMODE) {
+                ASSET_CACHE_MARKERS.get(assetName).isCached = false;
+                LOG.info("Removing from cache: " + assetName);
+            }
+
+        } catch (ScriptException e2) {
+            e2.printStackTrace();
+            LOG.info("");
+            LOG.error(e2.getClass().getSimpleName() + " in " + ServerSideRenderer.class.getName() + ".loadDependency:");
+            LOG.error("assetName = '" +assetName + "'   |   asset url = '" + url + "'");
+            LOG.error(e2.getMessage());
+            LOG.info("");
+            LOG.info("Code dump:");
+            LOG.info("---------------------------------\n\n");
+            LOG.info(assetCode + "\n\n");
+            LOG.info("---------------------------------------\n");
+            LOG.info("...end of code dump: " + assetName);
+            LOG.info("");
+            LOG.info("SOLUTION TIPS: The previous error message tends to refer to lines in compiled/mangled code. To increase readability, you can try react4xp clientside-rendering or building react4xp with buildEnv = development or gradle CLI argument -Pdev. Also remember to clear all cached behavior: stop continuous builds, clear/rebuild your project, restart the XP server, clear browser cache.\n\n");
+
+            if (IS_PRODMODE) {
+                ASSET_CACHE_MARKERS.get(assetName).isCached = false;
+                LOG.info("Removing from cache: " + assetName);
+            }
+        }
+    }
+
+    private Map<String, String> runSSR(String entry, String props, LinkedList<String> assetsInvolved) throws ScriptException {
 
         String callScript = "var obj = { " +
                 KEY_HTML + ": ReactDOMServer.renderToString(" + LIBRARY_NAME  + "['" + entry + "'].default(" + props  + ")) " +
                 "};" +
                 "obj;";
 
-        //Timer timer = new Timer();
-        //timer.g
-
-        String runnable;
-        if (code != null && !"".equals(code.trim())) {
-            if (assetsInvolved != null) {
-                LOG.info("finalizeAndRender - first-time rendering assets: " + assetsInvolved);
-            } else {
-                LOG.info("finalizeAndRender - first-time rendering entry: " + entry);
-            }
-            runnable = code + callScript;
-
-        } else {
-            runnable = callScript;
-        }
-
-        LOG.info("finalizeAndRender - call: " + callScript);
-        //LOG.info("#############          componentScript:\n\n\n" + script.toString() + "\n\n\n");
+        LOG.info("triggerSSR - call: " + callScript);
 
         try {
-            ScriptObjectMirror obj = (ScriptObjectMirror)ENGINE.eval(runnable);
+            ScriptObjectMirror obj = (ScriptObjectMirror)ENGINE.eval(callScript);
 
             String rendered = (String)obj.get(KEY_HTML);
             LOG.info("finalizeAndRender - " + KEY_HTML + ": " + entry);
 
-            return Map.of(
-                    KEY_HTML,
-                    rendered
-            );
+            return Map.of( KEY_HTML, rendered );
 
         } catch (ScriptException e) {
-            LOG.info("");
-            LOG.info(entry + " code dump:");
-            LOG.info("---------------------------------\n\n");
-            LOG.info(runnable+"\n\n");
-            LOG.info("---------------------------------------\n");
-            LOG.error("...end of entry script: " + LIBRARY_NAME + "['" + entry + "']. Dumped to log because:");
-            LOG.error("    ERROR (" + ServerSideRenderer.class.getName() + ".finalizeAndRender):");
-            LOG.error("    Props: " + props + "\n");
-            LOG.error("SOLUTION TIPS: The previous error message tends to refer to lines in compiled/mangled code. The browser console might have more readable (and sourcemapped) information - especially if you clientside-render this page / entry instead. Add 'clientRender: true', etc - in XP's preview or live mode! A full (compiled) script is dumped to the log at debug level. Also, it sometimes helps to clear all cached behavior: stop continuous builds, clear/rebuild your project, restart the XP server, clear browser cache.\n\n");
             e.printStackTrace();
+            LOG.info("");
+            LOG.error(e.getClass().getSimpleName() + " in " + ServerSideRenderer.class.getName() + ".triggerSSR:");
+            LOG.error("entry = '" + entry);
+            LOG.error(e.getMessage());
+            LOG.info("");
+            LOG.info("Failing trigger call:");
+            LOG.info(callScript + "\n\n");
 
-            if (IS_PRODMODE) {
-                synchronized (ALREADY_CACHEDANDRUN_ASSETNAMES) {
-                    if (assetsInvolved != null) {
-                        LOG.info("finalizeAndRender - assetsInvolved: " + assetsInvolved);
-                        for (String asset : assetsInvolved) {
-                            LOG.info("finalizeAndRender - removing asset from ALREADY_CACHEDANDRUN_ASSETNAMES: " + asset);
-                            ALREADY_CACHEDANDRUN_ASSETNAMES.remove(asset);
-                        }
-                    } else {
-                        LOG.info("finalizeAndRender - removing entry asset from ALREADY_CACHEDANDRUN_ASSETNAMES: " + entry);
-                        ALREADY_CACHEDANDRUN_ASSETNAMES.remove(entry);
+            if (IS_PRODMODE && assetsInvolved != null) {
+                LOG.info("triggerSSR - assetsInvolved: " + assetsInvolved);
+                for (String asset : assetsInvolved) {
+                    LOG.info("triggerSSR - removing asset cache: " + asset);
+                    CacheMarker cacheMarker = ASSET_CACHE_MARKERS.get(asset);
+                    synchronized (cacheMarker) {
+                        cacheMarker.isCached = false;
                     }
-                    LOG.info("finalizeAndRender - ALREADY_CACHEDANDRUN_ASSETNAMES now: " + ALREADY_CACHEDANDRUN_ASSETNAMES);
                 }
             }
-            LOG.info("finalizeAndRender - deleting " + LIBRARY_NAME + "['" + entry + "'] from engine");
+            LOG.info("triggerSSR - deleting " + LIBRARY_NAME + "['" + entry + "'] from the SSR engine");
             ENGINE.eval("delete " + LIBRARY_NAME + "['" + entry + "']");
 
-            return Map.of(
-                    KEY_ERROR, e.getClass().getName() + ": " + e.getMessage() /*,
-                    KEY_HTML,
-                    "<div class=\"react4xp-error\" style=\"font-family:monospace; border: 1px solid #8B0000; padding: 15px; background-color: #FFB6C1\">" +
-                    "<h2>" + StringEscapeUtils.escapeHtml(e.getClass().getName()) + "</h2>" +
-                    "<p class=\"react4xp-entry-name\">" + entry + "</p>" +
-                    "<p class=\"react4xp-error-message\">" + StringEscapeUtils.escapeHtml(e.getMessage()) + "</p>" +
-                    "</div>"*/
-            );
+            return Map.of( KEY_ERROR, e.getClass().getName() + ": " + e.getMessage() );
         }
     }
+
+
+
+
+    private LinkedList<String> getRunnableAssetNames(String entryName, String dependencyNames) {
+        LinkedList<String> runnableAssets = new LinkedList<>();
+
+        if (dependencyNames != null && !"".equals(dependencyNames.trim())) {
+            JSONArray array = new JSONArray(dependencyNames);
+            Iterator<Object> it = array.iterator();
+            while (it.hasNext()) {
+                String assetName = (String)it.next();
+                if (assetName.endsWith(".js")) {
+                    runnableAssets.add(assetName);
+                }
+            }
+        }
+        String fullEntryName = entryName + ".js";
+        runnableAssets.add(fullEntryName);
+
+        return runnableAssets;
+    }
+
+
+    private void loadAssets(LinkedList<String> runnableAssets) {
+        ensureProdCache(runnableAssets);
+        for (String assetName : runnableAssets) {
+            maybeLoadAsset(assetName);
+        }
+    }
+
+
 
 
     ///////////////////////////////////////////////////////
 
     /**
      * Renders an entry to an HTML string.
-     * @param component name of a transpiled JSX component, i.e. jsxPath: the filextension-less path to the compiled entry asset under assets/react4xp/, e.g: "site/parts/simple-reactive/simple-reactive"
-     * @param props valid stringified JSON on props object, e.g. '{"insertedMessage": "this is a prop!"}'
-     * @return HTML string
-     * @throws IOException
-     * @throws ScriptException
+     * @param entryName name of a transpiled JSX component, i.e. jsxPath: the filextension-less path to the compiled entry asset under assets/react4xp/, e.g: "site/parts/simple-reactive/simple-reactive"
+     * @param props valid stringified JSON object: the entry's react props, e.g. '{"insertedMessage": "this is a prop!"}'
+     * @returns {Map} Under the key 'html' (KEY_HTML), naked rendered HTML if successful. Under the key 'error' (KEY_ERROR), error message if failed.
      */
-    public Map<String, String> render(String component, String props) throws IOException, ScriptException {
-        StringBuilder codeBuilder = new StringBuilder();
-        appendScriptFromAsset(component + ".js", codeBuilder);
-        return finalizeAndRender(component, props, codeBuilder.toString(), null);
+    public Map<String, String> render(String entryName, String props) {
+
+        LOG.info("---------------------------------------\n\n\n\nrender - START:");
+        LOG.info("render - entryName: " + entryName);
+
+        try {
+            LinkedList<String> runnableAssetNames = getRunnableAssetNames(entryName, null);
+            loadAssets(runnableAssetNames);
+            Map<String, String> rendered = runSSR(entryName, props, runnableAssetNames);
+                                                                                                                        LOG.info("Rendered HTML:");
+                                                                                                                        LOG.info(rendered.get(KEY_HTML));
+                                                                                                                        LOG.info("---------------------- render - the end.\n\n\n\n");
+            return rendered;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+                                                                                                                        LOG.info("---------------------- render - I dieded.\n\n\n\n");
+            return Map.of(
+                    KEY_ERROR, e.getClass().getName() + ": " + e.getMessage()
+            );
+        }
     }
+
+
 
     /**
      * Same as renderToString, but only used when the engine has been initialized (setConfig) with lazyLoading = true
      * @param entryName name of a transpiled JSX component, i.e. jsxPath: the filextension-less path to the compiled entry asset under assets/react4xp/, e.g: "site/parts/simple-reactive/simple-reactive"
      * @param props valid stringified JSON object: the entry's react props, e.g. '{"insertedMessage": "this is a prop!"}'
      * @param dependencyNames valid stringified JSON array: a set of file names to lazy-load into the engine, needed by the entry before running it
-     * @return HTML string
-     * @throws IOException
-     * @throws ScriptException
+     * @returns {Map} Under the key 'html' (KEY_HTML), naked rendered HTML if successful. Under the key 'error' (KEY_ERROR), error message if failed.
      */
-    public Map<String, String> renderLazy(String entryName, String props, String dependencyNames) throws IOException, ScriptException {
+    public Map<String, String> renderLazy(String entryName, String props, String dependencyNames) {
 
-        LOG.info("\n\n\n\nrenderLazy - START:");
+        LOG.info("---------------------------------------\n\n\n\nrenderLazy - START:");
         LOG.info("renderLazy - entryName: " + entryName);
         LOG.info("renderLazy - dependencyNames: " + dependencyNames);
 
         try {
-            LinkedList<String> assetNamesToLoad = new LinkedList<>();
-            LinkedList<String> allAssetsInvolved = new LinkedList<>();
-
-            if (dependencyNames != null && !"".equals(dependencyNames.trim())) {
-                JSONArray array = new JSONArray(dependencyNames);
-                Iterator<Object> it = array.iterator();
-                while (it.hasNext()) {
-                    String assetName = (String) it.next();
-                    if (assetName.endsWith(".js")) {
-                        allAssetsInvolved.add(assetName);
-                        if (!assetIsProdCachedInNashorn(assetName)) {
-                            assetNamesToLoad.add(assetName);
-                        }
-                    }
-                }
-            }
-            String fullEntryName = entryName + ".js";
-            allAssetsInvolved.add(fullEntryName);
-            if (!assetIsProdCachedInNashorn(fullEntryName)) {
-                assetNamesToLoad.add(fullEntryName);
-            }
-
-            String code = prepareCodeFromAssets(assetNamesToLoad);
-            Map<String, String> rendered = finalizeAndRender(entryName, props, code, allAssetsInvolved);
-                                                                                                                        LOG.info("---------------------- renderLazy - the end.\n\n\n");
+            LinkedList<String> runnableAssetNames = getRunnableAssetNames(entryName, dependencyNames);
+            loadAssets(runnableAssetNames);
+            Map<String, String> rendered = runSSR(entryName, props, runnableAssetNames);
+                                                                                                                        LOG.info("Rendered HTML:");
+                                                                                                                        LOG.info(rendered.get(KEY_HTML));
+                                                                                                                        LOG.info("---------------------- renderLazy - the end.\n\n\n\n");
             return rendered;
 
         } catch (Exception e) {
             e.printStackTrace();
-                                                                                                                        LOG.info("---------------------- renderLazy - I dieded.\n\n\n");
+                                                                                                                        LOG.info("---------------------- renderLazy - I dieded.\n\n\n\n");
             return Map.of(
                     KEY_ERROR, e.getClass().getName() + ": " + e.getMessage()
             );
