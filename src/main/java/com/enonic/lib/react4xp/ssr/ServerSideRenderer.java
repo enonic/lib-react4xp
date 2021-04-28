@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.script.ScriptException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -45,6 +47,9 @@ public class ServerSideRenderer implements ScriptBean {
     private String APP_NAME = null;
     private NashornScriptEngine ENGINE = null;
     private Supplier<ResourceService> RESOURCE_SERVICE_SUPPLIER;
+
+    //private String processedCode = "";
+    //private int loggedLines = 0;
 
 
 
@@ -136,7 +141,6 @@ public class ServerSideRenderer implements ScriptBean {
     }
 
     private void maybeLoadAsset(String assetName) {
-        LOG.info("SSR asset: " + assetName);
         if (IS_PRODMODE) {
             CacheMarker assetCacheMarker = ASSET_CACHE_MARKERS.get(assetName);
             synchronized (assetCacheMarker) {
@@ -149,9 +153,34 @@ public class ServerSideRenderer implements ScriptBean {
         }
     }
 
+/*
+    private void dumpPrettyProcessedCode() {
+        if (!"".equals(processedCode)) {
+            String[] lines = processedCode.split("[\\n\\r]");
+            int newLines = lines.length + loggedLines;
+            StringBuilder code = new StringBuilder();
+            String formatString = "%" + ((int)(Math.floor(Math.log10(newLines))) + 1) +"d |    %s\n";
+            for (String line : lines) {
+                code.append(String.format(formatString, ++loggedLines, line));
+            }
+            String pretty = code.toString();
+
+            LOG.info("\nIncremental code dump (all code processed in the Nashorn SSR engine, and unlogged until now - so earlier code may be found above):\n" +
+                    "---------------------------------\n\n" +
+                    pretty + "\n\n" +
+                    "---------------------------------------\n");
+
+            // In case of repeated errors, empty this after logging to prevent excessive flooding in the log (the line numbers will keep counting though):
+            processedCode = "";
+        }
+    }
+    */
+
+
     /** Load both entry assets and JS dependency chunks into the Nashorn engine */
     private void loadAsset(String assetName) {
         String assetCode = null, url = null;
+
         try {
             url = APP_NAME + ":" + SCRIPTS_HOME + "/" + assetName;
 
@@ -160,42 +189,67 @@ public class ServerSideRenderer implements ScriptBean {
             Resource resource = RESOURCE_SERVICE_SUPPLIER.get().getResource(resourceKey);
             assetCode = resource.getBytes().asCharSource(Charsets.UTF_8).read();
 
+            //processedCode += assetCode + "\n";
+
             ENGINE.eval(assetCode);
 
             if (IS_PRODMODE) {
                 ASSET_CACHE_MARKERS.get(assetName).isCached = true;
-                LOG.info("Cached: " + assetName);
+                LOG.info("Loaded and cached in Nashorn engine: " + assetName);
             }
 
         } catch (IOException e1) {
-            LOG.error(e1.getClass().getSimpleName() + " in " + ServerSideRenderer.class.getName() + ".loadDependency:");
-            LOG.error("assetName = '" +assetName + "'   |   asset url = '" + url + "'");
-            LOG.error(e1.getMessage());
+            LOG.error(
+                    getLoggableStackTrace(e1, null) + "\n\n" +
+                    e1.getClass().getSimpleName()  + ": " + e1.getMessage() + "\n" +
+                    "in " + ServerSideRenderer.class.getName() + ".loadAsset\n" +
+                    "assetName = '" + assetName + "'\n" +
+                    "resource url = '" + url + "'\n" +
+                    getSolutionTips());
 
             if (IS_PRODMODE) {
+                                                                                                                        LOG.info("Removing from cache: " + assetName);
                 ASSET_CACHE_MARKERS.get(assetName).isCached = false;
-                LOG.info("Removing from cache: " + assetName);
+
             }
+            throw new RenderException(e1.getMessage());
 
         } catch (ScriptException e2) {
-            e2.printStackTrace();
-            LOG.info("");
-            LOG.error(e2.getClass().getSimpleName() + " in " + ServerSideRenderer.class.getName() + ".loadDependency:");
-            LOG.error("assetName = '" +assetName + "'   |   asset url = '" + url + "'");
-            LOG.error(e2.getMessage());
-            LOG.info("");
-            LOG.info("Code dump:");
-            LOG.info("---------------------------------\n\n");
-            LOG.info(assetCode + "\n\n");
-            LOG.info("---------------------------------------\n");
-            LOG.info("...end of code dump: " + assetName);
-            LOG.info("");
-            LOG.info("SOLUTION TIPS: The previous error message tends to refer to lines in compiled/mangled code. To increase readability, you can try react4xp clientside-rendering or building react4xp with buildEnv = development or gradle CLI argument -Pdev. Also remember to clear all cached behavior: stop continuous builds, clear/rebuild your project, restart the XP server, clear browser cache.\n\n");
+            String cleanErrorMessage = getCleanErrorMessage(e2);
+            LOG.error(
+                    getLoggableStackTrace(e2, cleanErrorMessage) + "\n\n" +
+                    e2.getClass().getSimpleName() + ": " + cleanErrorMessage + "\n" +
+                    "in " + ServerSideRenderer.class.getName() + ".loadAsset\n" +
+                    "assetName = '" +assetName + "'\n" +
+                    "resource url = '" + url + "'\n" +
+                    getSolutionTips());
 
             if (IS_PRODMODE) {
+                                                                                                                        LOG.info("Removing from cache: " + assetName);
                 ASSET_CACHE_MARKERS.get(assetName).isCached = false;
-                LOG.info("Removing from cache: " + assetName);
             }
+            throw new RenderException(cleanErrorMessage);
+        }
+    }
+
+    private String getCleanErrorMessage(Exception e) {
+        return e.getMessage().replaceAll(" in <eval> at line number \\d+ at column number \\d++", "");
+    }
+
+    private String getSolutionTips() {
+        return "\nSOLUTION TIPS: The previous error message may refer to lines in compiled/mangled code. To increase readability, you can try react4xp clientside-rendering or building react4xp with buildEnv = development or gradle CLI argument -Pdev. Remember to clear all cached behavior first (stop continuous builds, clear/rebuild your project, restart the XP server, clear browser cache). Actual line numbers in compiled JS source files tends to be referred in the stack trace above: look for '(<eval>: [lineNumber])' on the lines below '...NativeError.java...':.\n\n";
+    }
+
+    private class RenderException extends RuntimeException {
+        private final String message;
+
+        private RenderException(String message) {
+            this.message = message;
+        }
+
+        @Override
+        public String getMessage() {
+            return message;
         }
     }
 
@@ -206,40 +260,40 @@ public class ServerSideRenderer implements ScriptBean {
                 "};" +
                 "obj;";
 
-        LOG.info("triggerSSR - call: " + callScript);
+                                                                                                                        LOG.info("runSSR - call: " + callScript);
 
         try {
             ScriptObjectMirror obj = (ScriptObjectMirror)ENGINE.eval(callScript);
 
             String rendered = (String)obj.get(KEY_HTML);
-            LOG.info("finalizeAndRender - " + KEY_HTML + ": " + entry);
+                                                                                                                        LOG.info("runSSR done - " + KEY_HTML + ": " + entry);
 
             return Map.of( KEY_HTML, rendered );
 
         } catch (ScriptException e) {
-            e.printStackTrace();
-            LOG.info("");
-            LOG.error(e.getClass().getSimpleName() + " in " + ServerSideRenderer.class.getName() + ".triggerSSR:");
-            LOG.error("entry = '" + entry);
-            LOG.error(e.getMessage());
-            LOG.info("");
-            LOG.info("Failing trigger call:");
-            LOG.info(callScript + "\n\n");
+            String cleanErrorMessage = getCleanErrorMessage(e);
+            LOG.error(
+                    getLoggableStackTrace(e, cleanErrorMessage) + "\n\n" +
+                    e.getClass().getSimpleName() + ": " + cleanErrorMessage + "\n" +
+                    "in " + ServerSideRenderer.class.getName() + ".runSSR\n" +
+                    "entry = '" + entry + "'\n" +
+                    "Failing call: '" + callScript + "'\n" +
+                    getSolutionTips());
 
             if (IS_PRODMODE && assetsInvolved != null) {
-                LOG.info("triggerSSR - assetsInvolved: " + assetsInvolved);
+                                                                                                                        LOG.info("runSSR - assetsInvolved: " + assetsInvolved);
                 for (String asset : assetsInvolved) {
-                    LOG.info("triggerSSR - removing asset cache: " + asset);
+                                                                                                                            LOG.info("runSSR - removing asset cache: " + asset);
                     CacheMarker cacheMarker = ASSET_CACHE_MARKERS.get(asset);
                     synchronized (cacheMarker) {
                         cacheMarker.isCached = false;
                     }
                 }
             }
-            LOG.info("triggerSSR - deleting " + LIBRARY_NAME + "['" + entry + "'] from the SSR engine");
+                                                                                                                        LOG.info("runSSR - deleting " + LIBRARY_NAME + "['" + entry + "'] from the SSR engine");
             ENGINE.eval("delete " + LIBRARY_NAME + "['" + entry + "']");
 
-            return Map.of( KEY_ERROR, e.getClass().getName() + ": " + e.getMessage() );
+            return Map.of( KEY_ERROR, cleanErrorMessage );
         }
     }
 
@@ -274,6 +328,14 @@ public class ServerSideRenderer implements ScriptBean {
     }
 
 
+    private String getLoggableStackTrace(Exception e, String overrideMessage) {
+        String message = (overrideMessage == null)
+                ? e.getMessage()
+                : overrideMessage;
+        StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        return e.getClass().getName() + ": " + message + "\n" + sw;
+    }
 
 
     ///////////////////////////////////////////////////////
@@ -286,21 +348,29 @@ public class ServerSideRenderer implements ScriptBean {
      */
     public Map<String, String> render(String entryName, String props) {
 
-        LOG.info("---------------------------------------\n\n\n\nrender - START:");
-        LOG.info("render - entryName: " + entryName);
+                                                                                                                                LOG.info("--------------------------------------- render - START:\n" +
+                                                                                                                                        "    render - Thread ID: " + Thread.currentThread().getId() + "\n" +
+                                                                                                                                        "    render - ServerSideRenderer" + this.hashCode() + "\n" +
+                                                                                                                                        "    render - Engine" + ENGINE.hashCode() + "\n" +
+                                                                                                                                        "    render - entryName: " + entryName);
 
         try {
             LinkedList<String> runnableAssetNames = getRunnableAssetNames(entryName, null);
             loadAssets(runnableAssetNames);
             Map<String, String> rendered = runSSR(entryName, props, runnableAssetNames);
-                                                                                                                        LOG.info("Rendered HTML:");
-                                                                                                                        LOG.info(rendered.get(KEY_HTML));
-                                                                                                                        LOG.info("---------------------- render - the end.\n\n\n\n");
+                                                                                                                        LOG.info("Rendered:\n    " + KEY_HTML + ": " + rendered.get(KEY_HTML) + "\n    " + KEY_ERROR + ": " + rendered.get(KEY_ERROR));
+                                                                                                                        LOG.info("---------------------- render (" +  entryName + ") - the end.\n\n\n\n");
             return rendered;
 
+        } catch (RenderException r) {
+                                                                                                                        LOG.info("---------------------- render (" +  entryName + ") - I caught something.\n\n\n\n");
+            return Map.of(
+                    KEY_ERROR, r.getMessage()
+            );
+
         } catch (Exception e) {
-            e.printStackTrace();
-                                                                                                                        LOG.info("---------------------- render - I dieded.\n\n\n\n");
+            LOG.error(getLoggableStackTrace(e, null));
+                                                                                                                        LOG.info("---------------------- render (" +  entryName + ") - I dieded.\n\n\n\n");
             return Map.of(
                     KEY_ERROR, e.getClass().getName() + ": " + e.getMessage()
             );
@@ -318,22 +388,30 @@ public class ServerSideRenderer implements ScriptBean {
      */
     public Map<String, String> renderLazy(String entryName, String props, String dependencyNames) {
 
-        LOG.info("---------------------------------------\n\n\n\nrenderLazy - START:");
-        LOG.info("renderLazy - entryName: " + entryName);
-        LOG.info("renderLazy - dependencyNames: " + dependencyNames);
+                                                                                                                                        LOG.info("--------------------------------------- renderLazy - START:\n" +
+                                                                                                                                                "    renderLazy - Thread ID: " + Thread.currentThread().getId() + "\n" +
+                                                                                                                                                "    renderLazy - ServerSideRenderer" + this.hashCode() + "\n" +
+                                                                                                                                                "    renderLazy - Engine" + ENGINE.hashCode() + "\n" +
+                                                                                                                                                "    renderLazy - entryName: " + entryName + "\n" +
+                                                                                                                                                "    renderLazy - dependencyNames: " + dependencyNames);
 
         try {
             LinkedList<String> runnableAssetNames = getRunnableAssetNames(entryName, dependencyNames);
             loadAssets(runnableAssetNames);
             Map<String, String> rendered = runSSR(entryName, props, runnableAssetNames);
-                                                                                                                        LOG.info("Rendered HTML:");
-                                                                                                                        LOG.info(rendered.get(KEY_HTML));
-                                                                                                                        LOG.info("---------------------- renderLazy - the end.\n\n\n\n");
+                                                                                                                        LOG.info("Rendered:\n    " + KEY_HTML + ": " + rendered.get(KEY_HTML) + "\n    " + KEY_ERROR + ": " + rendered.get(KEY_ERROR));
+                                                                                                                        LOG.info("---------------------- renderLazy (" +  entryName + ")- the end.\n\n\n\n");
             return rendered;
 
+        } catch (RenderException r) {
+                                                                                                                        LOG.info("---------------------- renderLazy (" +  entryName + ") - I caught something. " + r.getMessage() + "\n\n\n\n");
+            return Map.of(
+                    KEY_ERROR, r.getMessage()
+            );
+
         } catch (Exception e) {
-            e.printStackTrace();
-                                                                                                                        LOG.info("---------------------- renderLazy - I dieded.\n\n\n\n");
+            LOG.error(getLoggableStackTrace(e, null));
+                                                                                                                        LOG.info("---------------------- renderLazy (" +  entryName + ") - I dieded.\n\n\n\n");
             return Map.of(
                     KEY_ERROR, e.getClass().getName() + ": " + e.getMessage()
             );
