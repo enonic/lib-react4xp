@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 
 /** Reads and parses file names from webpack-generated JSON files that list up contenthashed bundle chunk names. */
 public class ChunkDependencyParser {
@@ -20,12 +19,12 @@ public class ChunkDependencyParser {
         return new JSONObject(json);
     }
 
-    private LinkedList<String> getDependencyNamesFromChunkFile(String chunkFile) throws IOException {
-        LOG.info("getDependencyNamesFromChunkFile - chunkFile: " + chunkFile);
+    private LinkedList<String> getDependencyNamesFromChunkFile(String externals) throws IOException {
+        LOG.info("getDependencyNamesFromChunkFile - chunkFile: " + externals);
 
         LinkedList<String> accumulator = new LinkedList<>();
 
-        JSONObject fileContentData = getJSON(chunkFile);
+        JSONObject fileContentData = getJSON(externals);
 
         Iterator<String> keys = fileContentData.keys();
         while(keys.hasNext()) {
@@ -48,7 +47,7 @@ public class ChunkDependencyParser {
                     fileName = (String) arr.get(0);
 
                 } catch (Exception e2) {
-                    LOG.error("File: " + chunkFile);
+                    LOG.error("File: " + externals);
                     LOG.error("Chunk (" + chunk.getClass().getSimpleName() + "): " + chunk);
                     throw e2;
                 }
@@ -109,28 +108,25 @@ public class ChunkDependencyParser {
         return entries;
     }
 
-    public LinkedList<String> getScriptDependencyNames(String statsFile, List<String> chunkFiles, String entryFile, boolean doLazyLoad) throws IOException {
-        LinkedList<String> entries = getEntriesList(entryFile);
+    public LinkedList<String> getScriptDependencyNames(String chunkfilesHome, String entriesJsonFilename, String chunksExternalsJsonFilename, String statsComponentsFilename, boolean lazyLoad) throws IOException {
+        LinkedList<String> dependencies = new LinkedList<>();
 
-        LOG.info("doLazyLoad: " + doLazyLoad);
+        LinkedList<String> entries = getEntriesList(chunkfilesHome + entriesJsonFilename);
 
-        LinkedList<String> dependencyScripts = new LinkedList<>();
-        for (String chunkFile : chunkFiles) {
-            LinkedList<String> dependencyNames = getDependencyNamesFromChunkFile(chunkFile);
-            for (String dependencyName : dependencyNames) {
-                if (!dependencyScripts.contains(dependencyName)) {
-                    dependencyScripts.add(dependencyName);
-                }
+        LinkedList<String> externalsDependencies = getDependencyNamesFromChunkFile(chunkfilesHome + chunksExternalsJsonFilename);
+        for (String dependency : externalsDependencies) {
+            if (!dependencies.contains(dependency)) {
+                dependencies.add(dependency);
             }
         }
 
-        LinkedList<String> dependencyNames = getDependencyNamesFromStatsFile(statsFile, entries, doLazyLoad);
-        for (String dependencyName : dependencyNames) {
-            if (!dependencyScripts.contains(dependencyName)) {
-                dependencyScripts.add(dependencyName);
+        LinkedList<String> statsDependencies = getDependencyNamesFromStatsFile(chunkfilesHome + statsComponentsFilename, entries, lazyLoad);
+        for (String dependencyName : statsDependencies) {
+            if (!dependencies.contains(dependencyName)) {
+                dependencies.add(dependencyName);
             }
         }
 
-        return dependencyScripts;
+        return dependencies;
     }
 }

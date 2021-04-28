@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.script.ScriptException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -53,85 +52,51 @@ public class ServerSideRenderer implements ScriptBean {
             String APP_NAME,
             String SCRIPTS_HOME,
             String LIBRARY_NAME,
-            String CHUNKFILES_HOME,
-            String NASHORNPOLYFILLS_FILENAME,
-            String ENTRIESSOURCE,
-            String EXTERNALS_CHUNKS_FILENAME,
-            String COMPONENT_STATS_FILENAME,
-            boolean SSR_LAZYLOAD,
+            String chunkfilesHome,
+            String userAddedNashornpolyfillsFilename,
+            String entriesJsonFilename,
+            String chunksExternalsJsonFilename,
+            String statsComponentsFilename,
+            boolean lazyload,
             String[] scriptEngineSettings
     ) throws IOException, ScriptException {
-        LOG.info("");
-        LOG.info("---- ServerSideRenderer.setConfig: " + this.hashCode());
-        LOG.info("  APP_NAME: " + APP_NAME);
-        LOG.info("  SCRIPTS_HOME: " + SCRIPTS_HOME);
-        LOG.info("  LIBRARY_NAME: " + LIBRARY_NAME);
-        LOG.info("  CHUNKFILES_HOME: " + CHUNKFILES_HOME);
-        LOG.info("  NASHORNPOLYFILLS_FILENAME: " + NASHORNPOLYFILLS_FILENAME);
-        LOG.info("  ENTRIESSOURCE: " + ENTRIESSOURCE);
-        LOG.info("  EXTERNALS_CHUNKS_FILENAME: " + EXTERNALS_CHUNKS_FILENAME);
-        LOG.info("  COMPONENT_STATS_FILENAME: " + COMPONENT_STATS_FILENAME);
-        LOG.info("  lazyLoading: " + SSR_LAZYLOAD);
-        LOG.info("  scriptEngineSettings: " + scriptEngineSettings);
-        LOG.info("");
+                                                                                                                        LOG.info("");
+                                                                                                                        LOG.info("ServerSideRenderer" + this.hashCode() + ".setConfig with: ");
+                                                                                                                        LOG.info("  APP_NAME: " + APP_NAME);
+                                                                                                                        LOG.info("  LIBRARY_NAME: " + LIBRARY_NAME);
+                                                                                                                        LOG.info("  SCRIPTS_HOME: " + SCRIPTS_HOME);
+                                                                                                                        LOG.info("  CHUNKFILES_HOME: " + chunkfilesHome);
+                                                                                                                        LOG.info("  NASHORNPOLYFILLS_FILENAME: " + userAddedNashornpolyfillsFilename);
+                                                                                                                        LOG.info("  entriesJsonFilename: " + entriesJsonFilename);
+                                                                                                                        LOG.info("  EXTERNALS_CHUNKS_FILENAME: " + chunksExternalsJsonFilename);
+                                                                                                                        LOG.info("  COMPONENT_STATS_FILENAME: " + statsComponentsFilename);
+                                                                                                                        LOG.info("  lazyLoading: " + lazyload);
+                                                                                                                        LOG.info("  scriptEngineSettings: " + scriptEngineSettings);
+                                                                                                                        LOG.info("");
 
         this.APP_NAME = APP_NAME;
         this.SCRIPTS_HOME = SCRIPTS_HOME;                             // "/react4xp"
         this.LIBRARY_NAME = LIBRARY_NAME;                             // "React4xp"
 
-        // Component chunks
-        ArrayList<String> CHUNK_SOURCEFILENAMES = new ArrayList<>();
+        synchronized (ENGINE_FACTORY) {
+                                                                                                                        LOG.info("##################### ServerSideRenderer" + this.hashCode() + ".setconfig  / sync by EngineFactory"+ENGINE_FACTORY.hashCode());
+            EngineContainer engineContainer = ENGINE_FACTORY.initEngine(scriptEngineSettings);
+            ENGINE = engineContainer.ENGINE;
 
-        LOG.info("Adding EXTERNALS_CHUNKS_FILENAME to chunkSources: " + EXTERNALS_CHUNKS_FILENAME);
-        CHUNK_SOURCEFILENAMES.add(EXTERNALS_CHUNKS_FILENAME);                                // "chunks.externals.json" = react + react-dom
+            if (engineContainer.isFresh) {
+                LinkedList<String> dependencies = new ChunkDependencyParser().getScriptDependencyNames(chunkfilesHome, entriesJsonFilename, chunksExternalsJsonFilename, statsComponentsFilename, lazyload);
 
-        // Init the engine too
-        // TODO: DRY, see code farther below
 
-        LOG.info("doLazyLoad: " + SSR_LAZYLOAD);
-        ENGINE = ENGINE_FACTORY.initEngine(
-                CHUNKFILES_HOME,
-                NASHORNPOLYFILLS_FILENAME,
-                ENTRIESSOURCE,
-                COMPONENT_STATS_FILENAME,
-                CHUNK_SOURCEFILENAMES,
-                SSR_LAZYLOAD,
-                scriptEngineSettings
-        );
-        LOG.info("Got SSR ENGINE: " + ENGINE.hashCode());
-
-        /////////////////////////
-        if (!SSR_LAZYLOAD) {
-            String entriesSource = CHUNKFILES_HOME + ENTRIESSOURCE;
-            ArrayList<String> chunksSources = new ArrayList<>();
-            for (String chunkFileName : CHUNK_SOURCEFILENAMES) {
-                chunksSources.add(CHUNKFILES_HOME + chunkFileName);
+                if (userAddedNashornpolyfillsFilename != null && !"".equals(userAddedNashornpolyfillsFilename.trim())) {
+                    dependencies.addFirst(userAddedNashornpolyfillsFilename);
+                }
+                                                                                                                        for (String dep : dependencies) {
+                                                                                                                            LOG.info("setConfig - dependencies: " + dep);
+                                                                                                                        }
+                loadAssets(dependencies);
             }
-            LOG.info("init - CHUNKS_SOURCES: " + chunksSources);
-
-            String statsFile = CHUNKFILES_HOME + COMPONENT_STATS_FILENAME;
-
-            LinkedList<String> transpiledDependencies = new ChunkDependencyParser().getScriptDependencyNames(statsFile, chunksSources, entriesSource, SSR_LAZYLOAD);
-
-            for (String dep : transpiledDependencies) {
-                LOG.info("init - dep: " + dep);
-            }
-
-            loadAssets(transpiledDependencies);
-
-            /*
-            for (String scriptFile : transpiledDependencies) {
-                String file = CHUNKFILES_HOME + scriptFile;
-                scriptContentsByFilename.put(file, ResourceHandler.readResource(file));
-                scriptExecutionOrder.add(file);
-                scriptHasBeenLoadedByName.put(file, false);
-                LOG.info("addEntriesAndChunksScripts - scriptHasBeenLoadedByName: " + file + " -> false");
-            }
-             */
+            LOG.info("##################### /ServerSideRenderer" + this.hashCode() + ".setconfig done.");
         }
-        ///////////////////////////
-        LOG.info("---- /ServerSideRenderer.Setconfig " + this.hashCode());
-
     }
 
     ///////////////////////////////////////////////////////////////
