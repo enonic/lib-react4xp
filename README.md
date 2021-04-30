@@ -45,7 +45,7 @@ This library, lib-react4xp, is installed as a regular XP library in a parent app
 | 1.0.1 | 1.0.0 |
 | 1.1.0 | 1.1.3 |
 | 1.1.1 | 1.1.4 |
-| **1.3.0-SNAPSHOT** | 1.3.1 |
+| **1.3.0-SNAPSHOT** | 1.4.0 |
 
 
 
@@ -133,10 +133,10 @@ Other handy gradle dev tasks are `clean` and `build`.
 Go to the _parent XP project folder_ and use the command line to add these NPM packages as _devDependencies_:
 
 ```commandline
-npm install --save-dev react4xp@1.3.1
+npm install --save-dev react4xp@1.4.0
 ```
 
-Again, if you're using a different version of this library than 1.3.0-SNAPSHOT, the NPM package may need a different, matching version than `react4xp@1.3.1`. See [above](#versions-and-compatibility).
+Again, if you're using a different version of this library than 1.3.0-SNAPSHOT, the NPM package may need a different, matching version than `react4xp@1.4.0`. See [above](#versions-and-compatibility).
 
 Other development tools might be needed, depending on your setup:
 
@@ -150,84 +150,11 @@ Etc.
 <a name="react4xp-properties"></a>
 ### 3: Configuration: react4xp.properties
 
-A few configuration properties are needed to guide the build steps. Make a file `react4xp.properties` in the root of your project, and copy this into it. Feel free to adjust the values later, to your liking:
-```properties
- # ENTRIES AND CHUNKING:
- # If nothing is added below, this is the default behaviour:
- #   - Default entry source folder is /site/, that is: src/main/resources/site/ and its subfolders.
- #   - Everything under react4xp root folder (src/main/resources/react4xp/) will be considered chunks and will
- #       be bundled by webpack into a single dependency imported by webpack: react4xp.<contenthash>.js
- #   - Everything under the react4xp root folder (src/main/resources/react4xp/) will be considered non-entries:
- #       added files here can be imported by react4xp entries, but otherwise unreachable from react4xp.
- #   - Default entryExtensions (file extensions to look for when finding entries under OTHER entryDirs than /site/) are:
- #       jsx, js, tsx, ts, es6, es
+A few configuration properties are needed to guide the build steps.
 
+When you've installed the NPM package **react4xp@1.4.0** or higher, you'll find the general config file _react4xp.properties_ at _node_modules/react4xp/react4xp.properties_. It has usage instructions and explanations in it for configuring your react4xp project by changing values and commenting in/out the different settings to your liking.
 
- # chunkDirs are folder names where importable, non-entry code is kept. Comma-separated list of folder names, relative
- #       to src/main/resources/react4xp/. Each folder added here will be bundled by webpack into a separate dependency
- #       chunk with the same name as the folder, and a hash: <foldername>.<contenthash>.js. This is good for grouping
- #       sets of dependencies that belong together, or will frequently be requested from the client together in some parts
- #       of a web page but not others, etc. The react4xp root (src/main/resources/react4xp/) is the standard chunk 'react4xp',
- #       but you can add subfolders here to bundle them (and their subfolders) in separate chunks. Or you can add relative
- #       paths to the react4xp root to imported dependency code from elsewhere. Don't overlap with entryDirs or /site/.
-chunkDirs = shared
-
-
- # entryDirs are additional folder names where webpack will look for entry files. Comma-separated list of folder names,
- #       relative to src/main/resources/react4xp/. By default, react4xp instructs webpack to look for entries under
- #       src/main/resources/site/ (and in the react4xp-templates package). Added folders here will be kept out of bundled
- #       dependency chunks (take care to avoid directory overlaps with chunkDirs) and treated separately. Files in
- #       them will be compiled into react4xp entries, which most importantly get a jsxPath (relative to their entryDir, not
- #       relative to /react4xp/) and therefore are available to react4xp.
- #       overrideComponentWebpack file (see above).
- #      
- #   For backwards compatibility with projects that have source files in _entries, either move them to the entries folder instead, or add "_entries" below.
-entryDirs = entries
-
-
- # entryExtensions are filename extensions of files (comma-separated list) below the entryDirs folders that webpack should
- #       look for and turn into entries. NOTE that this doesn't apply to the default entry-folder src/main/resources/site/
- #       (or the react4xp-templates package), where ONLY .jsx (and .tsx) files can be entries. This is to avoid mixups with
- #       XP controllers etc, which can be .js or .es6. Default value if not changed is jsx,js,tsx,ts,es6,es. Also note that
- #       tsx/ts files are NOT supported out of the box. Rules for typescript compilation must be added in your own
- # entryExtensions =
-
-
-
- # A minimal webpack config is included with react4xp, to build your react components and their dependencies: See node_modules/react4xp-build-components/webpack.config.js.
- # To change this setup, or override or extend that webpack.configjs:
- # make a custom file that default-exports EITHER a finished webpack-style config object, OR a function.
- # The function should take an "env" and "config" argument:
- #   - Env is the collection of "--env." CLI arguments, and
- #   - Config is the default config from react4xp-build-components/webpack.config.js.
- # Manipulate or replace the config object AND return it.
- # Example file:
- #             module.exports = function(env, config) {
- #                 config.module.rules[0].test = /\.((tsx?)|(jsx?)|(es6))$/:
- #                 return config;
- #             };
- # Finally, refer to that file here (path/filename relative to this project's root):
- #
- # overrideComponentWebpack = webpack.config.react4xp.js
-
-
-
- # To add your own custom nashorn polyfills to the already-existing ones:
- # make the a polyfilling file and refer to it here (path/filename relative to this project's root):
- #
- # nashornPolyfillsSource = src/main/resources/extraNashornPolyfills.es6
-
-
-
-
-
- # Activates dependencies like react, react-dom, declared in the EXTERNALS config constant - see the react4xp-runtime-externals docs.
-buildExternals = true
-
- # File name for the built master config. Note that the runtime needs a copy of it in this location AND in the folder of the react4xp lib (a location predicted by the constants defined in the master config file itself). This is magically handled by the react4xp-buildconstants script package.
- # masterConfigFileName = build/react4xp_constants.json
-overwriteConstantsFile = true
-```
+**Copy it to your project folder** at the root! Now it's activated, and it will be used by _node_modules/react4xp/react4xp.gradle_ (again, depends on react4xp@1.4.0 or higher) to build your project. If you use your own build.gradle setup instead, just look there for reference.
 
 
 
