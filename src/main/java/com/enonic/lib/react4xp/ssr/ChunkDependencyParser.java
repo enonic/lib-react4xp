@@ -20,7 +20,7 @@ public class ChunkDependencyParser {
     }
 
     private LinkedList<String> getDependencyNamesFromChunkFile(String externals) throws IOException {
-        LOG.info("getDependencyNamesFromChunkFile - chunkFile: " + externals);
+                                                                                                                        LOG.info("getDependencyNamesFromChunkFile - chunkFile: " + externals);
 
         LinkedList<String> accumulator = new LinkedList<>();
 
@@ -53,7 +53,7 @@ public class ChunkDependencyParser {
                 }
             }
 
-            LOG.info("getDependencyNamesFromChunkFile + fileName: " + fileName);
+                                                                                                                        LOG.info("getDependencyNamesFromChunkFile + fileName: " + fileName);
             accumulator.add(fileName);
         }
 
@@ -66,7 +66,7 @@ public class ChunkDependencyParser {
             return accumulator;
         }
 
-        LOG.info("getDependencyNamesFromStatsFile - statsFile: " + statsFile);
+                                                                                                                        LOG.info("getDependencyNamesFromStatsFile - statsFile: " + statsFile);
 
         JSONObject fileContentData = getJSON(statsFile);
         Object entryObj = fileContentData.get("entrypoints");
@@ -83,7 +83,7 @@ public class ChunkDependencyParser {
             for (Object obj : assets) {
                 String fileName = (String)obj;
                 if (!accumulator.contains(fileName) && !entries.contains(fileName) && fileName.endsWith(".js")) {
-                    LOG.info("getDependencyNamesFromStatsFile + fileName: " + fileName);
+                                                                                                                        LOG.info("getDependencyNamesFromStatsFile + fileName: " + fileName);
                     accumulator.add(fileName);
                 }
             }

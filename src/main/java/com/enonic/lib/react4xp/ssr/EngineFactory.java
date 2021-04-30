@@ -95,12 +95,12 @@ public class EngineFactory {
      * outside of this list. */
     public synchronized EngineContainer initEngine(String[] scriptEngineSettings) throws IOException, ScriptException {
         if (!engineIsInitialized) {
-            LOG.info("React4xp SSR EngineFactory init - scriptEngineSettings: " + scriptEngineSettings.toString());
+                                                                                                                        LOG.info("React4xp SSR EngineFactory init - scriptEngineSettings: " + scriptEngineSettings.toString());
 
             engineIsInitialized = true;
             ENGINE = buildEngine(scriptEngineSettings);
 
-            LOG.info("React4xp SSR EngineFactory init - default nashorn polyfills");
+                                                                                                                        LOG.info("React4xp SSR EngineFactory init - default nashorn polyfills");
             try {
                 ENGINE.eval(POLYFILL_BASICS);
 
@@ -127,10 +127,10 @@ public class EngineFactory {
                                                                                                                             e.printStackTrace();
                                                                                                                         }*/
 
-            LOG.info("React4xp SSR EngineFactory init - done.");
+                                                                                                                        LOG.info("React4xp SSR EngineFactory init - done.");
             return new EngineContainer(ENGINE, true);
         } else {
-            LOG.info("React4xp SSR EngineFactory - got existing engine.");
+                                                                                                                        LOG.info("React4xp SSR EngineFactory - got existing engine.");
             return new EngineContainer(ENGINE, false);
         }
     }
