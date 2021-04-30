@@ -152,7 +152,7 @@ Etc.
 
 A few configuration properties are needed to guide the build steps.
 
-When you've installed the NPM package **react4xp@1.4.0** or higher, you'll find the general config file _react4xp.properties_ at _node_modules/react4xp/react4xp.properties_. It has usage instructions and explanations in it for configuring your react4xp project by changing values and commenting in/out the different settings to your liking.
+When you've installed the NPM package **react4xp@1.4.0** or higher, you'll find the general config file [react4xp.properties](https://github.com/enonic/react4xp-npm/blob/master/packages/react4xp/src/react4xp.properties) at _node_modules/react4xp/react4xp.properties_. It has usage instructions and explanations in it for configuring your react4xp project by changing values and commenting in/out the different settings to your liking.
 
 **Copy it to your project folder** at the root! Now it's activated, and it will be used by _node_modules/react4xp/react4xp.gradle_ (again, depends on react4xp@1.4.0 or higher) to build your project. If you use your own build.gradle setup instead, just look there for reference.
 
