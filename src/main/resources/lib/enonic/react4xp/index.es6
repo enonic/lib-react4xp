@@ -87,7 +87,7 @@ const SSR_DEFAULT_CACHE_SIZE = 1000;
 
 // react4xp_constants.json is not part of lib-react4xp:
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
-// Easiest: the NPM package react4xp-buildconstants creates this file and copies it here at buildtime.
+// Easiest: use <projectRoot>/react4xp.properties and the build.gradle from https://www.npmjs.com/package/react4xp
 const {
     LIBRARY_NAME,
     R4X_TARGETSUBDIR,
@@ -111,8 +111,103 @@ const {
                                                                                                                             SSR_LAZYLOAD,                   // <-- lazyLoading main switch
                                                                                                                             SSR_ENGINE_SETTINGS             // <-- set to 0 to switch off cache size
                                                                                                                         }, "./react4xp_constants.json"))
+/** Normalize engine settings to string array */
+const normalizeSSREngineSettings = (ssrEngineSettingsString) => {
 
-SSRreact4xp.setConfig(
+    // 0. --------- Internal helpers:
+
+    const COMMA_PLACEHOLDER = "##U+FE10##";
+
+    // When iterating over strings, flags whether a character is inside a quote or not:
+    const isInsideQuote = {
+        "'": false,
+        '"': false
+    };
+
+    const singleQuoteCounter = item => (item.match(/'/g) || []).length;
+    const replaceSurroundingSingleQuotes = item => (item.startsWith("'"))
+        ? item.replace(/^'/, "").replace(/'$/, "").trim()
+        : item.trim();
+    const doubleQuoteCounter = item => (item.match(/"/g) || []).length;
+    const replaceSurroundingDoubleQuotes = item => (item.startsWith('"'))
+        ? item.replace(/^"/, "").replace(/"$/, "").trim()
+        : item.trim();
+
+
+    const isQuoteSoMaybeFlagAsInside = (char, c, targetQuote, otherQuote) => {
+        if (char === targetQuote) {
+            if (isInsideQuote[targetQuote]) {
+                if (c > 0 && ssrEngineSettings[c - 1] !== "\\") {
+                    isInsideQuote[targetQuote] = false;
+                }
+            } else if (!isInsideQuote[otherQuote]) {
+                isInsideQuote[targetQuote] = true;
+            }
+            return true;
+        }
+        return false;
+    };
+
+
+    const preventUnclosedQuotes = (item) => {
+        isInsideQuote['"'] = false;
+        isInsideQuote["'"] = false;
+        for (let c = 0; c < item.length; c++) {
+            const char = item[c];
+            isQuoteSoMaybeFlagAsInside(char, c, '"', "'") ||
+            isQuoteSoMaybeFlagAsInside(char, c, "'", '"');
+        }
+        if (isInsideQuote["'"] || isInsideQuote['"']) {
+            throw Error("Malformed SSR engine setting item: " + item);
+        }
+        return item;
+    };
+
+
+    // 1. ------------ If the entire multi-setting-items-stringis surrounded by a single set of double (or single) quotes, strip that away.
+
+    let ssrEngineSettings = ((ssrEngineSettingsString || SSR_DEFAULT_CACHE_SIZE) + "").trim();
+
+    if (ssrEngineSettings.endsWith("'") && singleQuoteCounter(ssrEngineSettings) === 2) {
+        ssrEngineSettings = replaceSurroundingSingleQuotes(ssrEngineSettings);
+    }
+    if (ssrEngineSettings.endsWith('"') && doubleQuoteCounter(ssrEngineSettings) === 2) {
+        ssrEngineSettings = replaceSurroundingDoubleQuotes(ssrEngineSettings);
+    }
+
+
+
+    // 2. The settings string should be split into items on commas, but not on commas that are inside per-item quotes (that still remain after previous step).
+    //      So replace those commas with a placeholder before splitting, and re-insert them after splitting.
+    for (let c = 0; c < ssrEngineSettings.length; c++) {
+        const char = ssrEngineSettings[c];
+        if (
+            !isQuoteSoMaybeFlagAsInside(char, c, '"', "'") &&
+            !isQuoteSoMaybeFlagAsInside(char, c, "'", '"') &&
+            (char === ',' && (isInsideQuote['"'] || isInsideQuote["'"]))
+        ) {
+            ssrEngineSettings = ssrEngineSettings.substring(0, c) + COMMA_PLACEHOLDER + ssrEngineSettings.substring(c + 1);
+            c += COMMA_PLACEHOLDER.length - 1;
+        }
+    }
+    if (isInsideQuote["'"] || isInsideQuote['"']) {
+        throw Error("Malformed SSR engine settings: " + ssrEngineSettings);
+    }
+
+
+    // 3. Split the setting string into items, filter away empty items, trim away spaces or quotes that surround each item,
+    //      and if any of them still has unclosed quotes, throw an error.
+    return ssrEngineSettings
+        .split(/\s*,\s*/)
+        .map(item => ((item || '') + '').trim())
+        .filter(item => !!item)
+        .map(item => item.replace(COMMA_PLACEHOLDER, ","))
+        .map(replaceSurroundingDoubleQuotes)
+        .map(replaceSurroundingSingleQuotes)
+        .map(preventUnclosedQuotes)
+};
+
+SSRreact4xp.setup(
     app.name,
     `/${R4X_TARGETSUBDIR}`,
     LIBRARY_NAME,
@@ -121,13 +216,8 @@ SSRreact4xp.setConfig(
     ENTRIES_FILENAME,
     EXTERNALS_CHUNKS_FILENAME,
     COMPONENT_STATS_FILENAME,
-    !!SSR_LAZYLOAD,
-    ((SSR_ENGINE_SETTINGS || SSR_DEFAULT_CACHE_SIZE) + "")
-        .replace(/^"/, '')
-        .replace(/"$/, '')
-        .split(/"?\s*(,|\s+)\s*"?/)
-        .filter(s => !!((s || '') + '').trim())
-        .map(s => s.trim())
+    !!SSR_LAZYLOAD && SSR_LAZYLOAD !== 'false',
+    normalizeSSREngineSettings(SSR_ENGINE_SETTINGS)
 );
 
 const BASE_PATHS = {
@@ -363,12 +453,12 @@ class React4xp {
             }
         }
 
-                                                                                                                                                log.info(prettify({
-                                                                                                                                                    react4xpId: react4xp.react4xpId,
-                                                                                                                                                    jsxPath: react4xp.jsxPath,
-                                                                                                                                                    component: react4xp.component,
-                                                                                                                                                    props: react4xp.props
-                                                                                                                                                }, "React4xp.builtFromParams"));
+                                                                                                                        log.info(prettify({
+                                                                                                                            react4xpId: react4xp.react4xpId,
+                                                                                                                            jsxPath: react4xp.jsxPath,
+                                                                                                                            component: react4xp.component,
+                                                                                                                            props: react4xp.props
+                                                                                                                        }, "React4xp.builtFromParams"));
 
         return react4xp;
     };
@@ -546,18 +636,11 @@ class React4xp {
      *  and 'error' an error message string from the Nashorn engine if any error occurred (undefined if successful rendering).
      */
     doRenderSSR = overrideProps => {
-        const result = __.toNativeObject(
-            SSR_LAZYLOAD ?
-                SSRreact4xp.renderLazy(
-                    this.jsxPath,
-                    JSON.stringify(overrideProps || this.props),
-                    JSON.stringify(getComponentChunkNames(this.jsxPath))
-                ) :
-                SSRreact4xp.render(
-                    this.jsxPath,
-                    JSON.stringify(overrideProps || this.props)
-                )
-        );
+        const result = __.toNativeObject(SSRreact4xp.render(
+            this.jsxPath,
+            JSON.stringify(overrideProps || this.props),
+            JSON.stringify(getComponentChunkNames(this.jsxPath))
+        ));
 
         if (result.error && !this.react4xpId) {
             this.react4xpId = "react4xp_error";
