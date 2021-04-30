@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+// TODO: reuse resource service instead of this
 public class ResourceHandler {
     private final static Logger LOG = LoggerFactory.getLogger( ResourceHandler.class );
 
