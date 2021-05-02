@@ -7,8 +7,6 @@ let RESPONSE = null;
 
 exports.get = (req) => {
     if (!RESPONSE) {
-        //log.info("Init service react4xp-externals");
-
         // react4xp_constants.json is not part of lib-react4xp-runtime,
         // it's an external shared-constants file expected to exist in the build directory of this index.es6.
         // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.

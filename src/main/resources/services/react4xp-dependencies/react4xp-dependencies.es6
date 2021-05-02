@@ -29,7 +29,6 @@ exports.get = (req) => {
     const entryNames = Object.keys(params).filter( key => params[key] != null && ((params[key] || "") + "").trim() === "");
     relativePath.split("&").forEach(entryName => {
         if (entryName.trim() !== "" && entryNames.indexOf(entryName) === -1) {
-            //log.info("entryName (" + typeof entryName + "): " + JSON.stringify(entryName, null, 2));
             entryNames.push(entryName);
         }
     });

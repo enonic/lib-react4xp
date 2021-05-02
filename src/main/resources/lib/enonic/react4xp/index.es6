@@ -11,80 +11,6 @@ const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer')
 const SSR_DEFAULT_CACHE_SIZE = 1000;
 
 
-                                                                                                                                                            const prettify = (obj, label, suppressCode = false, indent = 0) => {
-                                                                                                                                                                let str = " ".repeat(indent) + (
-                                                                                                                                                                    label !== undefined
-                                                                                                                                                                        ? label + ": "
-                                                                                                                                                                        : ""
-                                                                                                                                                                );
-
-                                                                                                                                                                if (typeof obj === 'function') {
-                                                                                                                                                                    if (!suppressCode) {
-                                                                                                                                                                        return `${str}···· (function)\n${" ".repeat(indent + 4)}` +
-                                                                                                                                                                            obj.toString()
-                                                                                                                                                                                .replace(
-                                                                                                                                                                                    /\r?\n\r?/g,
-                                                                                                                                                                                    `\n${" ".repeat(indent + 4)}`
-                                                                                                                                                                                ) +
-                                                                                                                                                                            "\n" + " ".repeat(indent) + "····"
-                                                                                                                                                                            ;
-                                                                                                                                                                    } else {
-                                                                                                                                                                        return `${str}···· (function)`;
-                                                                                                                                                                    }
-
-                                                                                                                                                                } else if (Array.isArray(obj)) {
-                                                                                                                                                                    return obj.length === 0
-                                                                                                                                                                        ? `${str}[]`
-                                                                                                                                                                        : (
-                                                                                                                                                                            `${str}[\n` +
-                                                                                                                                                                            obj.map(
-                                                                                                                                                                                (item, i) =>
-                                                                                                                                                                                    prettify(item, i, suppressCode, indent + 4)
-                                                                                                                                                                            )
-                                                                                                                                                                                .join(",\n") +
-                                                                                                                                                                            `\n${" ".repeat(indent)}]`
-                                                                                                                                                                        );
-
-                                                                                                                                                                } else if (obj && typeof obj === 'object') {
-                                                                                                                                                                    try {
-                                                                                                                                                                        if (Object.keys(obj).length === 0) {
-                                                                                                                                                                            return `${str}{}`;
-                                                                                                                                                                        } else {
-                                                                                                                                                                            return `${str}{\n` +
-                                                                                                                                                                                Object.keys(obj).map(
-                                                                                                                                                                                    key => prettify(obj[key], key, suppressCode, indent + 4)
-                                                                                                                                                                                ).join(",\n") +
-                                                                                                                                                                                `\n${" ".repeat(indent)}}`
-                                                                                                                                                                        }
-                                                                                                                                                                    } catch (e) {
-                                                                                                                                                                        log.info(e);
-                                                                                                                                                                        return `${str}···· (${typeof obj})\n${" ".repeat(indent + 4)}` +
-                                                                                                                                                                            obj.toString()
-                                                                                                                                                                                .replace(
-                                                                                                                                                                                    /\r?\n\r?/g,
-                                                                                                                                                                                    `\n${" ".repeat(indent + 4)}`
-                                                                                                                                                                                ) +
-                                                                                                                                                                            "\n" + " ".repeat(indent) + `····`;
-                                                                                                                                                                    }
-                                                                                                                                                                } else if (obj === undefined || obj === null) {
-                                                                                                                                                                    return `${str}${obj}`;
-                                                                                                                                                                } else if (JSON.stringify(obj) !== undefined) {
-                                                                                                                                                                    return `${str}` + JSON.stringify(obj, null, 2).replace(
-                                                                                                                                                                        /\r?\n\r?/g,
-                                                                                                                                                                        `\n${" ".repeat(indent + 2)}`
-                                                                                                                                                                    );
-                                                                                                                                                                } else {
-                                                                                                                                                                    return `${str}···· (${typeof obj})\n${" ".repeat(indent + 4)}` +
-                                                                                                                                                                        obj.toString()
-                                                                                                                                                                            .replace(
-                                                                                                                                                                                /\r?\n\r?/g,
-                                                                                                                                                                                `\n${" ".repeat(indent + 4)}`
-                                                                                                                                                                            ) +
-                                                                                                                                                                        "\n" + " ".repeat(indent) + `····`;
-                                                                                                                                                                }
-                                                                                                                                                            };
-
-
 // react4xp_constants.json is not part of lib-react4xp:
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: use <projectRoot>/react4xp.properties and the build.gradle from https://www.npmjs.com/package/react4xp
@@ -100,17 +26,6 @@ const {
     SSR_ENGINE_SETTINGS             // <-- set to 0 to switch off cache size
 } = require("./react4xp_constants.json");
 
-                                                                                                                        log.info(prettify({
-                                                                                                                            LIBRARY_NAME,
-                                                                                                                            R4X_TARGETSUBDIR,
-                                                                                                                            NASHORNPOLYFILLS_FILENAME,
-                                                                                                                            EXTERNALS_CHUNKS_FILENAME,
-                                                                                                                            COMPONENT_STATS_FILENAME,
-                                                                                                                            ENTRIES_FILENAME,
-                                                                                                                            BUILD_ENV,
-                                                                                                                            SSR_LAZYLOAD,                   // <-- lazyLoading main switch
-                                                                                                                            SSR_ENGINE_SETTINGS             // <-- set to 0 to switch off cache size
-                                                                                                                        }, "./react4xp_constants.json"))
 /** Normalize engine settings to string array */
 const normalizeSSREngineSettings = (ssrEngineSettingsString) => {
 
@@ -278,7 +193,6 @@ const buildErrorContainer = (heading, message, request, react4xpObj) => {
             : (message || "")
     );
 
-    																													log.info(prettify(msg, "msg"));
     msg = msg
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
@@ -348,8 +262,6 @@ class React4xp {
         this.isPage = 0;            // boolean using 0 for false and 1 for true, for the sake of more compact client-side .render and .hydrate calls.
         this.hasRegions = 0;        // boolean using 0 for false and 1 for true, for the sake of more compact client-side .render and .hydrate calls.
         this.react4xpIdIsLocked = false;
-
-                                                                                                                        log.info(prettify(entry, "React4xp constructor"));
 
         if (typeof entry === 'string') {
             // Use jsxPath, regular flow
@@ -427,8 +339,6 @@ class React4xp {
      *      - uniqueId {boolean|string} If set, ensures that the ID is unique. If id is set (previous param), a random integer will be postfixed to it. If uniqueId is a string, this is the prefix before the random postfix. If the id param is used in addition to a uniqueId string, uniqueId takes presedence and overrides id.
      */
     static _buildFromParams = (params) => {
-        //log.info(prettify(react4xp, "React4xp._buildFromParams"));
-
         const {entry, id, uniqueId, props} = params || {};
 
         const react4xp = new React4xp(entry);
@@ -452,13 +362,6 @@ class React4xp {
                 react4xp.uniqueId();
             }
         }
-
-                                                                                                                        log.info(prettify({
-                                                                                                                            react4xpId: react4xp.react4xpId,
-                                                                                                                            jsxPath: react4xp.jsxPath,
-                                                                                                                            component: react4xp.component,
-                                                                                                                            props: react4xp.props
-                                                                                                                        }, "React4xp.builtFromParams"));
 
         return react4xp;
     };
@@ -739,11 +642,8 @@ class React4xp {
             );
         }
 
-
-    																													log.info(prettify(bodyEnd, "index.renderPageContributions - bodyEnd"));
         const output = getAndMergePageContributions(this.jsxPath, pageContributions, { bodyEnd }, suppressJS);
 
-    																													log.info(prettify(output, "index.renderPageContributions - output"));
     	return output;
     };
 
@@ -794,7 +694,6 @@ class React4xp {
      * @returns a response object that can be directly returned from an XP controller, with body and pageContributions attributes
      */
     static render = (entry, props = {}, request = null, options = {}) => {
-                                                                                                                        log.info(prettify({entry, props, request, options}, "React4xp.render params"));
         let react4xp = null;
         try {
             options.entry = entry;
@@ -812,7 +711,6 @@ class React4xp {
 
             // Content studio or request-less context: always SSR without trigger call or JS sources
             if (!request || request.mode === "edit" || request.mode === "inline") {
-                                                                                                                        log.info("// Content studio or request-less context: always SSR without trigger call or JS sources");
                 let { html, error } = react4xp.doRenderSSR();
                 html = !error
                     ? html
@@ -828,7 +726,6 @@ class React4xp {
 
             // Live XP view, with SSR:
             } else if (!clientRender) {
-                                                                                                                        log.info("// Live XP view, with SSR:");
                 let { html, error } = react4xp.doRenderSSR();
                 html = !error
                     ? html
@@ -846,7 +743,6 @@ class React4xp {
 
             // Live XP view, no SSR, all client-side rendered:
             } else {
-                                                                                                                        log.info("// Live XP view, no SSR, all client-side rendered:");
                 renderedBody = react4xp.renderTargetContainer(body),
                 renderedPageContributions = react4xp.renderPageContributions({
                     pageContributions,
@@ -858,7 +754,6 @@ class React4xp {
                 body: renderedBody,
                 pageContributions: renderedPageContributions
             }
-                                                                                                                        log.info(prettify(output, "React4xp.render output"));
             return output;
 
         } catch (e) {
@@ -871,8 +766,6 @@ class React4xp {
                 react4xpId: (options || {}).react4xpId,
                 jsxPath: entry
             };
-
-            																											log.info(prettify(errObj, "react4xp err info"));
 
             return {
                 body: buildErrorContainer(

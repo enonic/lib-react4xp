@@ -64,26 +64,11 @@ public class ServerSideRenderer implements ScriptBean {
             boolean lazyload,
             String[] scriptEngineSettings
     ) throws IOException, ScriptException {
-                                                                                                                        LOG.info("");
-                                                                                                                        LOG.info("ServerSideRenderer" + this.hashCode() + ".setConfig with: ");
-                                                                                                                        LOG.info("  APP_NAME: " + APP_NAME);
-                                                                                                                        LOG.info("  LIBRARY_NAME: " + LIBRARY_NAME);
-                                                                                                                        LOG.info("  SCRIPTS_HOME: " + SCRIPTS_HOME);
-                                                                                                                        LOG.info("  CHUNKFILES_HOME: " + chunkfilesHome);
-                                                                                                                        LOG.info("  NASHORNPOLYFILLS_FILENAME: " + userAddedNashornpolyfillsFilename);
-                                                                                                                        LOG.info("  entriesJsonFilename: " + entriesJsonFilename);
-                                                                                                                        LOG.info("  EXTERNALS_CHUNKS_FILENAME: " + chunksExternalsJsonFilename);
-                                                                                                                        LOG.info("  COMPONENT_STATS_FILENAME: " + statsComponentsFilename);
-                                                                                                                        LOG.info("  lazyLoading: " + lazyload);
-                                                                                                                        LOG.info("  scriptEngineSettings: " + scriptEngineSettings);
-                                                                                                                        LOG.info("");
-
         this.APP_NAME = APP_NAME;
         this.SCRIPTS_HOME = SCRIPTS_HOME;                             // "/react4xp"
         this.LIBRARY_NAME = LIBRARY_NAME;                             // "React4xp"
 
         synchronized (ENGINE_FACTORY) {
-                                                                                                                        LOG.info("##################### ServerSideRenderer" + this.hashCode() + ".setconfig  / sync by EngineFactory"+ENGINE_FACTORY.hashCode());
             EngineContainer engineContainer = ENGINE_FACTORY.initEngine(scriptEngineSettings);
             ENGINE = engineContainer.ENGINE;
 
@@ -94,12 +79,8 @@ public class ServerSideRenderer implements ScriptBean {
                 if (userAddedNashornpolyfillsFilename != null && !"".equals(userAddedNashornpolyfillsFilename.trim())) {
                     dependencies.addFirst(userAddedNashornpolyfillsFilename);
                 }
-                                                                                                                        for (String dep : dependencies) {
-                                                                                                                            LOG.info("setConfig - dependencies: " + dep);
-                                                                                                                        }
                 loadAssets(dependencies);
             }
-                                                                                                                        LOG.info("##################### /ServerSideRenderer" + this.hashCode() + ".setconfig done.");
         }
     }
 
@@ -187,7 +168,6 @@ public class ServerSideRenderer implements ScriptBean {
 
             if (IS_PRODMODE) {
                 ASSET_CACHE_MARKERS.get(assetName).isCached = true;
-                                                                                                                        LOG.info("Loaded and cached in Nashorn engine: " + assetName);
             }
 
         } catch (IOException e1) {
@@ -200,7 +180,6 @@ public class ServerSideRenderer implements ScriptBean {
                     getSolutionTips());
 
             if (IS_PRODMODE) {
-                                                                                                                        LOG.info("Removing from cache: " + assetName);
                 ASSET_CACHE_MARKERS.get(assetName).isCached = false;
 
             }
@@ -217,7 +196,6 @@ public class ServerSideRenderer implements ScriptBean {
                     getSolutionTips());
 
             if (IS_PRODMODE) {
-                                                                                                                        LOG.info("Removing from cache: " + assetName);
                 ASSET_CACHE_MARKERS.get(assetName).isCached = false;
             }
             throw new RenderException(cleanErrorMessage);
@@ -232,13 +210,11 @@ public class ServerSideRenderer implements ScriptBean {
                 "};" +
                 "obj;";
 
-                                                                                                                        LOG.info("runSSR - call: " + callScript);
 
         try {
             ScriptObjectMirror obj = (ScriptObjectMirror)ENGINE.eval(callScript);
 
             String rendered = (String)obj.get(KEY_HTML);
-                                                                                                                        LOG.info("runSSR done - " + KEY_HTML + ": " + entry);
 
             return Map.of( KEY_HTML, rendered );
 
@@ -253,16 +229,13 @@ public class ServerSideRenderer implements ScriptBean {
                     getSolutionTips());
 
             if (IS_PRODMODE && assetsInvolved != null) {
-                                                                                                                        LOG.info("runSSR - assetsInvolved: " + assetsInvolved);
                 for (String asset : assetsInvolved) {
-                                                                                                                        LOG.info("runSSR - removing asset cache: " + asset);
                     CacheMarker cacheMarker = ASSET_CACHE_MARKERS.get(asset);
                     synchronized (cacheMarker) {
                         cacheMarker.isCached = false;
                     }
                 }
             }
-                                                                                                                        LOG.info("runSSR - deleting " + LIBRARY_NAME + "['" + entry + "'] from the SSR engine");
             ENGINE.eval("delete " + LIBRARY_NAME + "['" + entry + "']");
 
             return Map.of( KEY_ERROR, cleanErrorMessage );
@@ -321,30 +294,19 @@ public class ServerSideRenderer implements ScriptBean {
      */
     public Map<String, String> render(String entryName, String props, String dependencyNames) {
 
-                                                                                                                        LOG.info("--------------------------------------- renderLazy - START:\n" +
-                                                                                                                                "    renderLazy - Thread ID: " + Thread.currentThread().getId() + "\n" +
-                                                                                                                                "    renderLazy - ServerSideRenderer" + this.hashCode() + "\n" +
-                                                                                                                                "    renderLazy - Engine" + ENGINE.hashCode() + "\n" +
-                                                                                                                                "    renderLazy - entryName: " + entryName + "\n" +
-                                                                                                                                "    renderLazy - dependencyNames: " + dependencyNames);
-
         try {
             LinkedList<String> runnableAssetNames = getRunnableAssetNames(entryName, dependencyNames);
             loadAssets(runnableAssetNames);
             Map<String, String> rendered = runSSR(entryName, props, runnableAssetNames);
-                                                                                                                        LOG.info("Rendered:\n    " + KEY_HTML + ": " + rendered.get(KEY_HTML) + "\n    " + KEY_ERROR + ": " + rendered.get(KEY_ERROR));
-                                                                                                                        LOG.info("---------------------- renderLazy (" +  entryName + ")- the end.\n\n\n\n");
             return rendered;
 
         } catch (RenderException r) {
-                                                                                                                        LOG.info("---------------------- renderLazy (" +  entryName + ") - I caught something. " + r.getMessage() + "\n\n\n\n");
             return Map.of(
                     KEY_ERROR, r.getMessage()
             );
 
         } catch (Exception e) {
             LOG.error(getLoggableStackTrace(e, null));
-                                                                                                                        LOG.info("---------------------- renderLazy (" +  entryName + ") - I dieded.\n\n\n\n");
             return Map.of(
                     KEY_ERROR, e.getClass().getName() + ": " + e.getMessage()
             );

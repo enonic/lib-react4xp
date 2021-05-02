@@ -2,7 +2,6 @@ const portal = require('/lib/xp/portal');
 
 const initServiceUrlRoot = (serviceName, label) => {
     const url = portal.serviceUrl({service: serviceName}) + '/';
-    //log.info("Init " + label + ": " + JSON.stringify(url, null, 2));
     return url;
 };
 
