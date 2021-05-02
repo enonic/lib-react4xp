@@ -45,7 +45,6 @@ const getComponentChunkNames = entryNames => {
   const entryNamesKey = entryNames.join("*");
 
   return dependenciesCache.get(entryNamesKey, () => {
-    //log.info(`Caching component chunk names for key: ${entryNamesKey}`);
 
     if (!BUILD_STATS_ENTRYPOINTS) {
       const STATS = require(`/${R4X_TARGETSUBDIR}/${COMPONENT_STATS_FILENAME}`);
@@ -154,7 +153,7 @@ const getAllUrls = (entries, suppressJS) => [
  * Throws an error if not found or if unexpected format. */
 const getNamesFromChunkfile = chunkFile => {
   const chunks = require(chunkFile);
-  // log.info("chunks: " + JSON.stringify(chunks, null, 2));
+
   return Object.keys(chunks).map(chunkName => {
     let chunk = chunks[chunkName].js;
 

@@ -7,8 +7,6 @@ let RESPONSE;
 exports.get = (req) => {
     if (RESPONSE === undefined) {
         try {
-            //log.info("Init service react4xp-client");
-
             // TODO: ADD SUPPORT FOR BUILT-AND-HASHED CHUNK, NOT JUST THE FALLBACK!
             const resource = ioLib.getResource('/services/react4xp-client/react4xpClient.js');
             if (!resource || !resource.exists()) {
