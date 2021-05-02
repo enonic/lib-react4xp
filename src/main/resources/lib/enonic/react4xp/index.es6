@@ -686,14 +686,14 @@ class React4xp {
      *      - clientRender {boolean-y} If clientRender is truthy, renderPageContributions will assume that the react4xp entry is not being rendered
      *          server-side (by .renderBody), and only calls a 'render' command in the client. If omitted or falsy, server-side
      *          rendering is assumed, and a 'hydrate' command is called on the entry instead.
+     *      - suppressJS {boolean-y} If truthy, will make sure that the render/hydrate trigger call AND all the JS sources are skipped.
      *      - error {boolean/string} INTERNAL USE: If true boolean, a generic error message is output to the client console error log through page contributions,
      *          and if a string, that message is output. Also, if truthy, the render/hydrate trigger call is suppressed,
      *          in order to keep the error placeholder element visible
-     *      - __suppressJS {boolean-y} INTERNAL USE: If truthy, will make sure that the render/hydrate trigger call AND all the JS sources are skipped.
      *      TODO: Add option for more graceful failure? Render if error is true, instead of suppressing the trigger and displaying the error placeholder?
      */
     renderPageContributions = params => {
-        const {pageContributions, clientRender, __error, __suppressJS} = params || {};
+        const {pageContributions, clientRender, suppressJS, __error} = params || {};
         const command = clientRender
             ? 'render'
             : 'hydrate';
@@ -701,7 +701,7 @@ class React4xp {
         this.ensureAndLockBeforeRendering();
 
         // TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
-        const bodyEnd = (!__suppressJS && !__error)
+        const bodyEnd = (!suppressJS && !__error)
             ? [
                 // Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
                 `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
@@ -741,7 +741,7 @@ class React4xp {
 
 
     																													log.info(prettify(bodyEnd, "index.renderPageContributions - bodyEnd"));
-        const output = getAndMergePageContributions(this.jsxPath, pageContributions, { bodyEnd }, __suppressJS);
+        const output = getAndMergePageContributions(this.jsxPath, pageContributions, { bodyEnd }, suppressJS);
 
     																													log.info(prettify(output, "index.renderPageContributions - output"));
     	return output;
@@ -822,7 +822,7 @@ class React4xp {
                 renderedPageContributions = react4xp.renderPageContributions({
                     pageContributions,
                     clientRender: false,
-                    __suppressJS: true,
+                    suppressJS: true,
                 });  // TODO: page contributions can be problematic inside CS? Inline the renderPageContributions output into body, here?
 
 
