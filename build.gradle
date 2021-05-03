@@ -24,12 +24,14 @@ dependencies {
     compile group: 'org.json', name: 'json', version: '20210307'
     compile group: 'jaxen', name: 'jaxen', version: '1.2.0-atlassian-2'
 
+    implementation 'org.apache.commons:commons-pool2:2.9.0'
+
     testCompile "com.enonic.xp:testing:${xpVersion}"
 }
 
 /*node {
     download = true
-    version = '12.21.0'
+    version = '10'
 }*/
 
 repositories {
@@ -209,7 +211,7 @@ task updateReadme(type: Copy) {
     }
 }
 updateReadme.dependsOn makeAdoc
-npmInstall.dependsOn updateReadme
+//npmInstall.dependsOn updateReadme
 
 def readmeUnstaged() {
     def command = "git diff --name-only HEAD"
