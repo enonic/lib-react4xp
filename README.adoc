@@ -18,7 +18,7 @@ This library runs on link:https://enonic.com/developer-tour[Enonic XP] server si
 
 [[versions-and-compatibility]]
 == Versions and compatibility
-This is version **1.3.0-SNAPSHOT** for XP 7.
+This is version **1.4.0** for XP 7.
 
 This library, lib-react4xp, is installed as a regular XP library in a parent app/project. It also needs to run alongside a suite of *NPM packages*. These are bundled (by dependency) in the link:https://www.npmjs.com/package/react4xp[react4xp package], so by installing that one, you get the necessary packages. 
 
@@ -31,7 +31,7 @@ This library, lib-react4xp, is installed as a regular XP library in a parent app
 | 1.0.1 | 1.0.0 
 | 1.1.0 | 1.1.3 
 | 1.1.1 | 1.1.4 
-| **1.3.0-SNAPSHOT** | 1.4.0 |
+| **1.4.0** | 1.4.0 |
 |===
 
 
@@ -77,7 +77,7 @@ Insert into `build.gradle` in the parent project, under `dependencies`:
 [source,groovy,options="nowrap"]
 ----
 dependencies {
-	include 'com.enonic.lib:lib-react4xp:1.3.0-SNAPSHOT'
+	include 'com.enonic.lib:lib-react4xp:1.4.0'
 }
 
 repositories {
@@ -98,7 +98,7 @@ If you need / want to build the lib yourself instead of downloading it with Grad
 
 [source,properties,options="nowrap"]
 ----
-version = 1.3.0-SNAPSHOT-SNAPSHOT
+version = 1.4.0-SNAPSHOT
 ----
 
 **1.2.3.** Build it with gradle:
@@ -116,7 +116,7 @@ Gradle will build the library and install it into the local cache, available for
 [source,groovy,options="nowrap"]
 ----
 dependencies {
-    include 'com.enonic.lib:lib-react4xp:1.3.0-SNAPSHOT-SNAPSHOT'
+    include 'com.enonic.lib:lib-react4xp:1.4.0-SNAPSHOT'
 }
 ----
 
@@ -135,7 +135,7 @@ Go to the _parent XP project folder_ and use the command line to add these NPM p
 npm install --save-dev react4xp@1.4.0
 ----
 
-Again, if you're using a different version of this library than 1.3.0-SNAPSHOT, the NPM package may need a different, matching version than `react4xp@1.4.0`. See link:#versions-and-compatibility[above].
+Again, if you're using a different version of this library than 1.4.0, the NPM package may need a different, matching version than `react4xp@1.4.0`. See link:#versions-and-compatibility[above].
 
 Other development tools might be needed, depending on your setup:
 
