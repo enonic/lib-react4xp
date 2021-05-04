@@ -88,7 +88,7 @@ class Engine {
 
 
 
-class ThingFactory implements PooledObjectFactory<Engine> {
+class EngineFactory implements PooledObjectFactory<Engine> {
     @Override
     public PooledObject<Engine> makeObject() throws Exception {
         return new DefaultPooledObject<>(new Engine((int)(Math.random() * 1000)));
@@ -139,16 +139,16 @@ class RenderRequestHandler extends Thread {
             System.out.println("Got a task (" + requestWithSteps + " steps). Remaining: " + requestQueue.size());
 
             if (requestWithSteps != null) {
-                Engine thing = null;
+                Engine engine = null;
                 try {
-                    thing = enginePool.borrowObject();
-                    thing.render(threadId, requestWithSteps);
-                    enginePool.returnObject(thing);
+                    engine = enginePool.borrowObject();
+                    engine.render(threadId, requestWithSteps);
+                    enginePool.returnObject(engine);
 
                 } catch (Exception e) {
                     e.printStackTrace();
-                    if (thing!=null) {
-                        thing.destroy();
+                    if (engine!=null) {
+                        engine.destroy();
                     }
                 }
 
@@ -185,7 +185,7 @@ public class PoolTest {
 
         System.out.println("Setup with " + THREADCOUNT + " threads...");
 
-        GenericObjectPool<Engine> enginePool = new GenericObjectPool(new ThingFactory(), poolConfig);
+        GenericObjectPool<Engine> enginePool = new GenericObjectPool(new EngineFactory(), poolConfig);
 
         ConcurrentLinkedQueue<Integer> requestQueue = new ConcurrentLinkedQueue<>();
         for (int i=0; i<REQUESTCOUNT; i++) {
