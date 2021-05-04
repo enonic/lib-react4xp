@@ -23,7 +23,7 @@ class Engine {
         // Engine init, simulate assets loading
         int initSize = 5 + (int)(Math.random() * 15);
         for (long c = 1; c<= initSize; c++) {
-            Thread.sleep(1000);
+            Thread.sleep(100);
             System.out.println("\tINIT " + this + ": " + c + " / " + initSize);
         }
     }
@@ -67,7 +67,7 @@ class Engine {
             System.out.println("\tThread#" + threadId + ", " + this + ": starting (" + steps + " steps)");
 
             for (int s = 1; s <= steps; s++) {
-                Thread.sleep(250);
+                Thread.sleep(25);
                 System.out.println("\tThread#" + threadId + ", " + this + ": rendering (" + s + " / " + steps + ")");
             }
 
@@ -167,7 +167,7 @@ class RenderRequestHandler extends Thread {
 
 public class PoolTest {
     private static final int THREADCOUNT = Runtime.getRuntime().availableProcessors();
-    private static final int REQUESTCOUNT = 50;
+    private static final int REQUESTCOUNT = 250;
 
     public PoolTest() {}
 
