@@ -10,21 +10,21 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 
-class Thing {
-    private long id;
+class Engine {
+    private int id;
     private boolean active = false;
     private boolean destroyed = false;
 
-    public static final long SCALE = 30000000L;
 
-    public Thing() {
-        id = (long)Math.floor(Math.random() * SCALE);
+    public Engine(int id) throws InterruptedException {
+        this.id = id;
+        System.out.println("------ We're gonna need a new engine: Init#" + id);
 
-        long tick = id / 10;
-        for (long c=0; c<id; c++) {
-            if (c%tick==0) {
-                System.out.println("\tINIT " + this + ": " + (100 * c / id) + "%");
-            }
+        // Engine init, simulate assets loading
+        int initSize = 5 + (int)(Math.random() * 15);
+        for (long c = 1; c<= initSize; c++) {
+            Thread.sleep(1000);
+            System.out.println("\tINIT " + this + ": " + c + " / " + initSize);
         }
     }
 
@@ -33,8 +33,8 @@ class Thing {
                 destroyed
                     ? "Dead#"
                     : active
-                        ? "Active#"
-                        : "Toddler#"
+                        ? "Engine#"
+                        : "Init#"
         ) + id;
     }
 
@@ -45,41 +45,41 @@ class Thing {
 
     public void passivate() {
         if (!destroyed) {
-            System.out.println("\tPassivating???  " + this);
             active = false;
+            System.out.println("\tPassivated:  " + this);
         }
     }
 
     public void activate() {
         if (!destroyed) {
-            System.out.println("\tActivating: " + this);
             active = true;
+            System.out.println("\tActivated: " + this);
         }
     }
 
     public void destroy() {
-        System.out.println("\tDestroying: " + this);
         destroyed = true;
+        System.out.println("\tDestroyed: " + this);
     }
 
-    public void run(int threadId, long target) {
+    public void render(int threadId, int steps) {
         try {
-            System.out.println("\tt" + threadId + " - starting " + this + "   --->   " + target);
+            System.out.println("\tThread#" + threadId + ", " + this + ": starting (" + steps + " steps)");
 
-            long tick = target / 10;
-            for (long c = 0; c < target; c++) {
-                if (c % tick == 0) {
-                    System.out.println("\tt" + threadId + " - running " + this + ": " + (100 * c / target) + "%");
-                }
+            for (int s = 1; s <= steps; s++) {
+                Thread.sleep(250);
+                System.out.println("\tThread#" + threadId + ", " + this + ": rendering (" + s + " / " + steps + ")");
             }
-            System.out.println("\tt" + threadId + " - done: " + this);
 
-            if (Math.random() * 10f < 1f) {
-                throw new RuntimeException("SUICIIIIDE");
+            // Test failure handling: 10% chance to finish with a random error
+            if (Math.random() < .1f) {
+                throw new RuntimeException("GOODBYE CRUEL WORLD I FAILED YOU!");
             }
+
+            System.out.println("\tThread#" + threadId + ", " + this + ": done.");
 
         } catch (Exception e) {
-            System.out.println("\tt" + threadId + " - killing " + this + " because: " + e.getMessage());
+            System.out.println("\tThread#" + threadId + ": destroying " + this + " because: " + e.getMessage());
             destroy();
         }
     }
@@ -88,58 +88,62 @@ class Thing {
 
 
 
-class ThingFactory implements PooledObjectFactory<Thing> {
+class ThingFactory implements PooledObjectFactory<Engine> {
     @Override
-    public PooledObject<Thing> makeObject() throws Exception {
-
-        System.out.println("##### We're gonna need a nother thing...");
-        return new DefaultPooledObject<>(new Thing());
+    public PooledObject<Engine> makeObject() throws Exception {
+        return new DefaultPooledObject<>(new Engine((int)(Math.random() * 1000)));
     }
 
     @Override
-    public void destroyObject(PooledObject<Thing> p) throws Exception {
+    public void destroyObject(PooledObject<Engine> p) throws Exception {
         p.getObject().destroy();
     }
 
     @Override
-    public boolean validateObject(PooledObject<Thing> p) {
+    public boolean validateObject(PooledObject<Engine> p) {
         return !p.getObject().isDestroyed();
     }
 
     @Override
-    public void activateObject(PooledObject<Thing> p) throws Exception {
+    public void activateObject(PooledObject<Engine> p) throws Exception {
         p.getObject().activate();
     }
 
     @Override
-    public void passivateObject(PooledObject<Thing> p) throws Exception {
+    public void passivateObject(PooledObject<Engine> p) throws Exception {
         p.getObject().passivate();
     }
 }
 
 
-class Worker extends Thread {
-    private ConcurrentLinkedQueue<Long> tasks;
-    private GenericObjectPool<Thing> pool;
-    private int id;
-    public Worker(int id, ConcurrentLinkedQueue<Long> tasks, GenericObjectPool<Thing> pool) {
-        this.id = id;
-        this.tasks = tasks;
-        this.pool = pool;
-        start();
+class RenderRequestHandler extends Thread {
+    private ConcurrentLinkedQueue<Integer> requestQueue;
+    private GenericObjectPool<Engine> enginePool;
+    private int threadId;
+    private long startTime;
+    public RenderRequestHandler(int threadId, ConcurrentLinkedQueue<Integer> requestQueue, GenericObjectPool<Engine> enginePool) {
+        this.threadId = threadId;
+        this.requestQueue = requestQueue;
+        this.enginePool = enginePool;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
     }
 
     @Override
     public void run() {
-        while (tasks.size() > 0) {
-            Long task = tasks.poll();
-            System.out.println(tasks.size());
-            if (task != null) {
-                Thing thing = null;
+        long elapsedTime;
+        while (requestQueue.size() > 0) {
+            Integer requestWithSteps = requestQueue.poll();
+            System.out.println("Got a task (" + requestWithSteps + " steps). Remaining: " + requestQueue.size());
+
+            if (requestWithSteps != null) {
+                Engine thing = null;
                 try {
-                    thing = pool.borrowObject();
-                    thing.run(id, task);
-                    pool.returnObject(thing);
+                    thing = enginePool.borrowObject();
+                    thing.render(threadId, requestWithSteps);
+                    enginePool.returnObject(thing);
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -147,50 +151,58 @@ class Worker extends Thread {
                         thing.destroy();
                     }
                 }
+
             } else {
-                System.out.println("\n\n\n### t" + id + " - that task was null. Looks like we're done here.");
+                elapsedTime = System.currentTimeMillis() - startTime;
+                System.out.println("########### Thread#" + threadId + ": that task was null. Looks like we're done here, tasks.size = " + requestQueue.size());
+                System.out.println("########### Thread#" + threadId + ": " + (elapsedTime/1000f) + " s.");
                 return;
             }
         }
-
-        System.out.println("\n\n\n### t" + id + " - we're done here.");
+        elapsedTime = System.currentTimeMillis() - startTime;
+        System.out.println("########### Thread#" + threadId + ": no more requests, we're done here.");
+        System.out.println("########### Thread#" + threadId + ": " + (elapsedTime/1000f) + " s.");
     }
 }
 
-/**
- * Created on 03/05/2021 as part of
- */
 public class PoolTest {
+    private static final int THREADCOUNT = Runtime.getRuntime().availableProcessors();
+    private static final int REQUESTCOUNT = 50;
+
     public PoolTest() {}
 
     public static void main(String[] arg) {
-        System.out.println("Heyo mundo");
 
-        int coreCount = Runtime.getRuntime().availableProcessors();
-
-        GenericObjectPoolConfig<Thing> poolConfig = new GenericObjectPoolConfig<>();
-        poolConfig.setLifo(false);
+        GenericObjectPoolConfig<Engine> poolConfig = new GenericObjectPoolConfig<>();
+        poolConfig.setLifo(true);
         poolConfig.setMaxWaitMillis(20000);
         poolConfig.setTestOnBorrow(false);
         poolConfig.setTestOnReturn(true);
 
-        poolConfig.setMaxIdle(coreCount * 2);
-        poolConfig.setMaxTotal(coreCount * 4);
+        poolConfig.setMaxIdle(THREADCOUNT * 2);
+        poolConfig.setMaxTotal(THREADCOUNT * 4);
         poolConfig.setMinIdle(3);
 
-        GenericObjectPool<Thing> pool = new GenericObjectPool(new ThingFactory(), poolConfig);
+        System.out.println("Setup with " + THREADCOUNT + " threads...");
 
-        System.out.println("...");
+        GenericObjectPool<Engine> enginePool = new GenericObjectPool(new ThingFactory(), poolConfig);
 
-        ConcurrentLinkedQueue<Long> tasks = new ConcurrentLinkedQueue<>();
-        for (int i=0; i<500; i++) {
-            tasks.offer((long)(Math.pow(Math.random() * Math.random() * Math.random(), 4) * Thing.SCALE));
+        ConcurrentLinkedQueue<Integer> requestQueue = new ConcurrentLinkedQueue<>();
+        for (int i=0; i<REQUESTCOUNT; i++) {
+            int requestWithSteps = 2 + (int)(Math.random() * Math.random() * Math.random() * 20 * 3f);
+            requestQueue.offer(requestWithSteps);
         }
 
-        System.out.println("----------- HEY HO LETS GO -------------");
+        RenderRequestHandler[] threads = new RenderRequestHandler[THREADCOUNT];
+        for (int id=0; id<THREADCOUNT; id++) {
+            threads[id] = new RenderRequestHandler(id, requestQueue, enginePool);
+        }
+        System.out.println("----------- HEY HO LET'S GO -------------");
 
-        for (int i=0; i<coreCount; i++) {
-            new Worker(i, tasks, pool);
+        long startTime = System.currentTimeMillis();
+        for (RenderRequestHandler thread : threads) {
+            thread.setStartTime(startTime);
+            thread.start();
         }
     }
 }
