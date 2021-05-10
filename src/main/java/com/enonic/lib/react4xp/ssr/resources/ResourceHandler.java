@@ -1,4 +1,4 @@
-package com.enonic.lib.react4xp.ssr;
+package com.enonic.lib.react4xp.ssr.resources;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public class ResourceHandler {
                 sb.append(line + "\n");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            //LOG.error(new ErrorHandler().getLoggableStackTrace(e, null));
             throw e;
 
         } finally {
@@ -40,7 +40,7 @@ public class ResourceHandler {
                 in.close();
 
             } catch (IOException e) {
-                e.printStackTrace();
+                //LOG.error(new ErrorHandler().getLoggableStackTrace(e, null));
                 throw e;
             }
         }
