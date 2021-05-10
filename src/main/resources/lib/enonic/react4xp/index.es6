@@ -123,6 +123,7 @@ const normalizeSSREngineSettings = (ssrEngineSettingsString) => {
         .map(preventUnclosedQuotes)
 };
 
+
 // Accepts numerical values (which may or may not be in strings), null or undefined, returns number > 0 or null.
 const normalizeSSRMaxThreads = (SSR_MAX_THREADS) => {
     let ssrMaxThreads;
@@ -138,13 +139,6 @@ const normalizeSSRMaxThreads = (SSR_MAX_THREADS) => {
         ? 0
         : ssrMaxThreads;
 }
-
-log.info("normalizeSSRMaxThreads(SSR_MAX_THREADS) (" +
-	(Array.isArray(normalizeSSRMaxThreads(SSR_MAX_THREADS)) ?
-		("array[" + normalizeSSRMaxThreads(SSR_MAX_THREADS).length + "]") :
-		(typeof normalizeSSRMaxThreads(SSR_MAX_THREADS) + (normalizeSSRMaxThreads(SSR_MAX_THREADS) && typeof normalizeSSRMaxThreads(SSR_MAX_THREADS) === 'object' ? (" with keys: " + JSON.stringify(Object.keys(normalizeSSRMaxThreads(SSR_MAX_THREADS)))) : ""))
-	) + "): " + JSON.stringify(normalizeSSRMaxThreads(SSR_MAX_THREADS), null, 2)
-);
 
 
 SSRreact4xp.setup(

@@ -69,11 +69,6 @@ public class ServerSideRenderer implements ScriptBean {
         this.SCRIPTS_HOME = SCRIPTS_HOME;                             // "/react4xp"
         this.LIBRARY_NAME = LIBRARY_NAME;                             // "React4xp"
 
-                                                                                                                        LOG.info(ssrMaxThreads < 1
-                                                                                                                                ? "Init SSR engine with unlimited threads"
-                                                                                                                                : "Init SSR engine with upper thread count limit: " + ssrMaxThreads
-                                                                                                                        );
-
         synchronized (ENGINE_FACTORY) {
             EngineContainer engineContainer = ENGINE_FACTORY.initEngine(scriptEngineSettings);
             ENGINE = engineContainer.ENGINE;
