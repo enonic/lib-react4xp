@@ -130,8 +130,8 @@ const getClientUrls = () =>
         name => getAssetRoot() + name
       );
     } catch (e) {
-      log.warning(e);
-      log.warning(
+      log.debug(e);
+      log.debug(
         `No optional clientwrapper was found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's okay, there's a fallback one at: ${getClientRoot()}`
       );
       return [getClientRoot()];

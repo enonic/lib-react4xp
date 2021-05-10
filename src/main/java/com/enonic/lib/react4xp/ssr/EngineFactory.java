@@ -47,16 +47,16 @@ public class EngineFactory {
                         scriptEngineSettings.length == 0 ||
                         (scriptEngineSettings.length == 1 && scriptEngineSettings[0] == null)
         ) {
-            LOG.info("# Init SSR engine: no settings (uncached)");
+            LOG.info("# Init SSR engine: no settings, uncached");
             return (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
 
         } else if (scriptEngineSettings.length == 1 && ("" + Integer.parseInt(scriptEngineSettings[0])).equals(scriptEngineSettings[0].trim())) {
             int cacheSize = Integer.parseInt(scriptEngineSettings[0]);
             if (cacheSize > 0) {
-                LOG.info("# Init SSR engine: `--persistent-code-cache`, `--class-cache-size=" + cacheSize + "`");
+                LOG.info("# Init SSR engine (cacheSize=" + cacheSize + "): `--persistent-code-cache`, `--class-cache-size=" + cacheSize + "`");
                 return (NashornScriptEngine) new NashornScriptEngineFactory().getScriptEngine("--persistent-code-cache", "--class-cache-size=" + cacheSize);
             } else {
-                LOG.info("# Init SSR engine: cacheSize<1 --> no settings (uncached)");
+                LOG.info("# Init SSR engine (cacheSize=" + cacheSize + "): no settings, uncached");
                 return (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
             }
 
@@ -113,15 +113,15 @@ public class EngineFactory {
                 reportAndRethrow(e, content, POLYFILL_REACT4XP_DEFAULT_FILE);
             }
 
-                                                                                                                        /*
-                                                                                                                        Good for testing: https://github.com/enonic/lib-react4xp/issues/191
+
+                                                                                                                        // Good for testing: https://github.com/enonic/lib-react4xp/issues/191
                                                                                                                         try {
                                                                                                                             LOG.info("Going to sleep: " + this.hashCode());
                                                                                                                             Thread.sleep(5000);
                                                                                                                             LOG.info("Waking up:      " + this.hashCode());
                                                                                                                         } catch (InterruptedException e) {
                                                                                                                             e.printStackTrace();
-                                                                                                                        }*/
+                                                                                                                        }
             return new EngineContainer(ENGINE, true);
         } else {
             return new EngineContainer(ENGINE, false);

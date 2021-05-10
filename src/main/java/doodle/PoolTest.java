@@ -167,6 +167,7 @@ class RenderRequestHandler extends Thread {
 
 public class PoolTest {
     private static final int THREADCOUNT = Runtime.getRuntime().availableProcessors();
+    private static final int POOLSIZE = Runtime.getRuntime().availableProcessors();
     private static final int REQUESTCOUNT = 250;
 
     public PoolTest() {}
@@ -179,11 +180,11 @@ public class PoolTest {
         poolConfig.setTestOnBorrow(false);
         poolConfig.setTestOnReturn(true);
 
-        poolConfig.setMaxIdle(THREADCOUNT * 2);
-        poolConfig.setMaxTotal(THREADCOUNT * 4);
-        poolConfig.setMinIdle(3);
+        poolConfig.setMaxIdle(POOLSIZE);
+        poolConfig.setMaxTotal(POOLSIZE);
+        poolConfig.setMinIdle(POOLSIZE);
 
-        System.out.println("Setup with " + THREADCOUNT + " threads...");
+        System.out.println("Setup with " + POOLSIZE + " workers in pool, " + THREADCOUNT + " threads...");
 
         GenericObjectPool<Engine> enginePool = new GenericObjectPool(new EngineFactory(), poolConfig);
 
