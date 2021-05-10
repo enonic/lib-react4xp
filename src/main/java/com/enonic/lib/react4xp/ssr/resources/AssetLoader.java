@@ -20,14 +20,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 
-/**
- * Created on 10/05/2021 as part of
- */
+
 public class AssetLoader {
     private final static Logger LOG = LoggerFactory.getLogger( AssetLoader.class );
 
-    private static final boolean IS_PRODMODE = (RunMode.get() == RunMode.PROD);
-    private static final HashMap<String, Boolean> ASSET_LOADED_MARKERS = new HashMap<>();
+    public static final boolean IS_PRODMODE = (RunMode.get() == RunMode.PROD);
+    private final HashMap<String, Boolean> ASSET_LOADED_MARKERS = new HashMap<>();
+
 
 
     private final Supplier<ResourceService> resourceServiceSupplier;
@@ -39,7 +38,7 @@ public class AssetLoader {
     }
 
     public void loadAssets(LinkedList<String> runnableAssets, NashornScriptEngine engine) {
-        ensureProdMarkers(runnableAssets);
+        ensureMarkers(runnableAssets);
         for (String assetName : runnableAssets) {
             if (shouldLoadAsset(assetName)) {
                 loadAsset(assetName, engine);
@@ -52,7 +51,7 @@ public class AssetLoader {
 
 
 
-    private void ensureProdMarkers(List<String> assetNames) {
+    private void ensureMarkers(List<String> assetNames) {
         if (!IS_PRODMODE) {
             return;
         }
@@ -76,6 +75,9 @@ public class AssetLoader {
 
     /** Load both entry assets and JS dependency chunks into the Nashorn engine */
     private void loadAsset(String assetName, NashornScriptEngine engine) {
+                                                                                                                        //if (!IS_PRODMODE) {
+                                                                                                                            LOG.info(this + " - initializing asset: " + assetName);
+                                                                                                                        //}
         String assetContent = null;
         String url = null;
 
@@ -120,4 +122,10 @@ public class AssetLoader {
         }
     }
 
+
+
+                                                                                                                        private final int ID = (int)Math.floor(Math.random() * 10000);
+                                                                                                                        public String toString() {
+                                                                                                                            return AssetLoader.class.getSimpleName() + "#" + ID;
+                                                                                                                        }
 }

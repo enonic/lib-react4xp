@@ -105,9 +105,6 @@ public class ChunkDependencyParser {
     public LinkedList<String> getScriptDependencyNames(Config config) throws IOException {
         LinkedList<String> dependencies = new LinkedList<>();
 
-        String entryFile = config.chunkfilesHome + config.entriesJsonFilename;
-        LinkedList<String> entries = getEntriesList(entryFile);
-
         String externalsChunkFile = config.chunkfilesHome + config.chunksExternalsJsonFilename;
         LinkedList<String> externalsDependencies = getDependencyNamesFromChunkFile(externalsChunkFile);
         for (String dependency : externalsDependencies) {
@@ -115,15 +112,22 @@ public class ChunkDependencyParser {
                 dependencies.add(dependency);
             }
         }
+                                                                                                                        LOG.info("dependencies from externalsChunkFile " + externalsChunkFile + ":\n\t" + String.join("\n\t", dependencies));
+
+        String entryFile = config.chunkfilesHome + config.entriesJsonFilename;
+        LinkedList<String> entries = getEntriesList(entryFile);
+                                                                                                                        LOG.info("entries from entryFile " + entryFile + ":\n\t" + String.join("\n\t", entries));
 
         String statsFile = config.chunkfilesHome + config.statsComponentsFilename;
+                                                                                                                        LOG.info("Adding statsDependencies from statsFile " + statsFile + ":");
         LinkedList<String> statsDependencies = getDependencyNamesFromStatsFile(statsFile, entries, config.lazyload);
         for (String dependencyName : statsDependencies) {
             if (!dependencies.contains(dependencyName)) {
+                                                                                                                        LOG.info("\t" + dependencyName);
                 dependencies.add(dependencyName);
             }
         }
-
+                                                                                                                        LOG.info("...and finally, all dependencies that will be loaded on init:\n\t" + String.join("\n\t", dependencies));
         return dependencies;
     }
 }

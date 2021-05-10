@@ -28,6 +28,10 @@ public class ServerSideRenderer implements ScriptBean {
     private Supplier<ResourceService> RESOURCE_SERVICE_SUPPLIER;
 
 
+    @Override
+    public void initialize(BeanContext context) {
+        this.RESOURCE_SERVICE_SUPPLIER = context.getService(ResourceService.class);
+    }
 
     ////////////////////////////////////////////////////////////////////////// INIT
 
@@ -45,32 +49,33 @@ public class ServerSideRenderer implements ScriptBean {
             String[] scriptEngineSettings
     ) {
                                                                                                                         LOG.info("##################### SSR setup: #" + Thread.currentThread().getId() + " ######################");
-
+        long then = System.currentTimeMillis();
         synchronized (ServerSideRenderer.class) {
             if (engineFactory == null) {
                 config = new Config(appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksExternalsJsonFilename, statsComponentsFilename, userAddedNashornpolyfillsFilename, lazyload);
                 engineFactory = new EngineFactory(scriptEngineSettings);
             }
         }
+        long now = System.currentTimeMillis();
 
-                                                                                                                        LOG.info("##################### SSR setup done: #" + Thread.currentThread().getId() + " ######################");
+                                                                                                                        LOG.info("##################### SSR setup done: #" + Thread.currentThread().getId() + " (" + (now-then) + " ms) ######################");
     }
 
 
 
 
+    ////////////////////////////////////////////////////////////////////////// RENDER
+
     public Map<String, String> render(String entryName, String props, String dependencyNames) throws ScriptException, IOException {
+                                                                                                                        LOG.info("### Rendering entry: " + entryName);
+        long then = System.currentTimeMillis();
         if (renderer == null || !renderer.validate()) {
             renderer = new Renderer(Thread.currentThread().getId(), engineFactory, RESOURCE_SERVICE_SUPPLIER, config);
         }
 
-        return renderer.render(entryName, props, dependencyNames);
-    }
-
-////////////////////////////////////////////////////////////////  Init
-
-    @Override
-    public void initialize(BeanContext context) {
-        this.RESOURCE_SERVICE_SUPPLIER = context.getService(ResourceService.class);
+        Map<String, String> rendered = renderer.render(entryName, props, dependencyNames);
+        long now = System.currentTimeMillis();
+                                                                                                                        LOG.info("### Entry " + entryName + " rendered (" + (now-then) + " ms)");
+        return rendered;
     }
 }
