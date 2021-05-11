@@ -111,34 +111,29 @@ public class ChunkDependencyParser {
     public LinkedList<String> getScriptDependencyNames(Config config) throws IOException {
         LinkedList<String> dependencies = new LinkedList<>();
 
-        String externalsChunkFile = config.chunkfilesHome + config.chunksExternalsJsonFilename;
+        String externalsChunkFile = config.CHUNKFILES_HOME + config.CHUNKSEXTERNALS_JSON_FILENAME;
         LinkedList<String> externalsDependencies = getDependencyNamesFromChunkFile(externalsChunkFile);
         for (String dependency : externalsDependencies) {
             if (!dependencies.contains(dependency)) {
                 dependencies.add(dependency);
             }
         }
-                                                                                                                        LOG.info(this + ": dependencies from externalsChunkFile " + externalsChunkFile + ":\n\t" + String.join("\n\t", dependencies));
 
-        String entryFile = config.chunkfilesHome + config.entriesJsonFilename;
+        String entryFile = config.CHUNKFILES_HOME + config.ENTRIES_JSON_FILENAME;
         LinkedList<String> entries = getEntriesList(entryFile);
-                                                                                                                        LOG.info(this + ": entries from entryFile " + entryFile + ":\n\t" + String.join("\n\t", entries));
 
-        String statsFile = config.chunkfilesHome + config.statsComponentsFilename;
-                                                                                                                        LOG.info(this + ": Adding statsDependencies from statsFile " + statsFile + ":");
-        LinkedList<String> statsDependencies = getDependencyNamesFromStatsFile(statsFile, entries, config.lazyload);
+        String statsFile = config.CHUNKFILES_HOME + config.STATS_COMPONENTS_FILENAME;
+        LinkedList<String> statsDependencies = getDependencyNamesFromStatsFile(statsFile, entries, config.LAZYLOAD);
         for (String dependencyName : statsDependencies) {
             if (!dependencies.contains(dependencyName)) {
-                                                                                                                        LOG.info(this + "\t" + dependencyName);
                 dependencies.add(dependencyName);
             }
         }
-                                                                                                                        LOG.info(this + ": And finally, all dependencies that will be loaded on init:\n\t" + String.join("\n\t", dependencies));
         return dependencies;
     }
 
 
-                                                                                                                        public String toString() {
-                                                                                                                            return ChunkDependencyParser.class.getSimpleName() + "#" + id;
-                                                                                                                        }
+    public String toString() {
+        return ChunkDependencyParser.class.getSimpleName() + "#" + id;
+    }
 }

@@ -37,13 +37,6 @@ public class ErrorHandler {
                 ? " '" + filename + "'"
                 : "";
 
-        /*LOG.error(e.getClass().getSimpleName() + (
-                (locationLabel != null)
-                        ? (" in " + locationLabel)
-                        : ""
-                ) + ":");
-        LOG.error(e.getMessage());*/
-
         return "\n\n" +
                 "Code dump:" + fileLabel + "\n" +
                 "---------------------------------\n\n + " +

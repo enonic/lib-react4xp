@@ -25,7 +25,7 @@ import java.util.function.Supplier;
 public class Renderer {
     private final static Logger LOG = LoggerFactory.getLogger( Renderer.class );
 
-                                                                                                                        public long id;
+    private final long id;
 
     //public static final boolean IS_PRODMODE = (RunMode.get() == RunMode.PROD);
 
@@ -36,33 +36,29 @@ public class Renderer {
 
     public static final String KEY_HTML = "html";
 
-    public Renderer(long id, EngineFactory engineFactory, Supplier< ResourceService > resourceServiceSupplier, Config config) throws ScriptException, IOException {
-                                                                                                                        this.id = id;
-                                                                                                                        LOG.info("We're gonna need a new SSR engine: Init#" + id);
+    public Renderer(EngineFactory engineFactory, Supplier< ResourceService > resourceServiceSupplier, Config config, long id) throws ScriptException, IOException {
+        this.id = id;
+
+        // if (!IS_PRODMODE) {
+        LOG.info(this + ": starting init...");
+        // }
+
         this.config = config;
 
         engine = engineFactory.buildEngine();
 
         LinkedList<String> dependencies = new ChunkDependencyParser(id).getScriptDependencyNames(config);
-        if (config.userAddedNashornpolyfillsFilename != null && !"".equals(config.userAddedNashornpolyfillsFilename.trim())) {
-            dependencies.addFirst(config.userAddedNashornpolyfillsFilename);
+        if (config.USERADDED_NASHORNPOLYFILLS_FILENAME != null && !"".equals(config.USERADDED_NASHORNPOLYFILLS_FILENAME.trim())) {
+            dependencies.addFirst(config.USERADDED_NASHORNPOLYFILLS_FILENAME);
         }
 
-        assetLoader = new AssetLoader(id, resourceServiceSupplier, config);
-                                                                                                                        //if (!IS_PRODMODE) {
-                                                                                                                            LOG.info("Init " + this + " with " + assetLoader + " and dependencies:\n\t" + String.join("\n\t", dependencies));
-                                                                                                                        //}
+        assetLoader = new AssetLoader(resourceServiceSupplier, config, id);
 
         assetLoader.loadAssets(dependencies, engine);
-                                                                                                                        // For testing: https://github.com/enonic/lib-react4xp/issues/191:
-                                                                                                                        try {
-                                                                                                                            LOG.info(this + " taking a nap...");
-                                                                                                                            Thread.sleep(5000);
-                                                                                                                            LOG.info(this + " waking up. Ready.");
-                                                                                                                        } catch (InterruptedException e) {
-                                                                                                                            e.printStackTrace();
-                                                                                                                        }
-                                                                                                                        //*/
+
+        // if (!IS_PRODMODE) {
+        LOG.info(this + ": init is done.");
+        // }
     }
 
     private LinkedList<String> getRunnableAssetNames(String entryName, String dependencyNames) {
@@ -89,7 +85,7 @@ public class Renderer {
     private Map<String, String> runSSR(String entry, String props, LinkedList<String> assetsInvolved) {
 
         String callScript = "var obj = { " +
-                KEY_HTML + ": ReactDOMServer.renderToString(" + config.LIBRARY_NAME  + "['" + entry + "'].default(" + props  + ")) " +
+                KEY_HTML + ": ReactDOMServer.renderToString(" + config.LIBRARY_NAME + "['" + entry + "'].default(" + props  + ")) " +
                 "};" +
                 "obj;";
 
@@ -158,14 +154,9 @@ public class Renderer {
 
     /////////////////////////////////////////////////////////////////////////////// Identity
 
-
-                                                                                                                        public String toString() {
-                                                                                                                            return Renderer.class.getSimpleName() + "#" + id + (
-                                                                                                                                    !valid
-                                                                                                                                            ? "(dead)"
-                                                                                                                                            : "(ok)"
-                                                                                                                            );
-                                                                                                                        }
+    public String toString() {
+        return Renderer.class.getSimpleName() + "#" + id;
+    }
 
 
 
@@ -174,15 +165,18 @@ public class Renderer {
 
 
     public boolean validate() {
-                                                                                                                        LOG.debug("Validating: " + this + ": " + valid);
         return valid;
     }
     public void destroy() {
         valid = false;
+
+        // if (!IS_PRODMODE) {
+        LOG.info(this + ": destroyed.");
+        // }
+
         engine = null;
         System.gc();
-                                                                                                                        LOG.info("Destroyed: " + this);
         // FIXME: This doesn't seem to be enough? https://stackoverflow.com/questions/32520413/scriptengine-clear-and-dispose
-        // TODO: How to completely displose of a running nashorn engine?
+        // TODO: How to completely displose of a running nashorn engine? If not, this will accumulate memory over time!
     }
 }

@@ -7,18 +7,18 @@ public class Config {
     public final String APP_NAME;
     public final String SCRIPTS_HOME;
     public final String LIBRARY_NAME;
-    public final String chunkfilesHome;
-    public final String entriesJsonFilename;
-    public final String chunksExternalsJsonFilename;
-    public final String statsComponentsFilename;
-    public final String userAddedNashornpolyfillsFilename;
-    public final boolean lazyload;
-    public final int threadCount;
+    public final String CHUNKFILES_HOME;
+    public final String ENTRIES_JSON_FILENAME;
+    public final String CHUNKSEXTERNALS_JSON_FILENAME;
+    public final String STATS_COMPONENTS_FILENAME;
+    public final String USERADDED_NASHORNPOLYFILLS_FILENAME;
+    public final boolean LAZYLOAD;
+    public final int THREAD_COUNT;
 
     public Config(
-            String APP_NAME,
-            String SCRIPTS_HOME,
-            String LIBRARY_NAME,
+            String appName,
+            String scriptsHome,
+            String libraryName,
             String chunkfilesHome,
             String entriesJsonFilename,
             String chunksExternalsJsonFilename,
@@ -26,15 +26,15 @@ public class Config {
             String userAddedNashornpolyfillsFilename,
             boolean lazyload,
             int threadCount) {
-        this.APP_NAME = APP_NAME;
-        this.SCRIPTS_HOME = SCRIPTS_HOME;                             // "/react4xp"
-        this.LIBRARY_NAME = LIBRARY_NAME;                             // "React4xp"
-        this.chunkfilesHome = chunkfilesHome;
-        this.entriesJsonFilename = entriesJsonFilename;
-        this.chunksExternalsJsonFilename = chunksExternalsJsonFilename;
-        this.statsComponentsFilename = statsComponentsFilename;
-        this.userAddedNashornpolyfillsFilename = userAddedNashornpolyfillsFilename;
-        this.lazyload = lazyload;
-        this.threadCount = threadCount;
+        this.APP_NAME = appName;
+        this.SCRIPTS_HOME = scriptsHome;                                 // Usually: "/react4xp"
+        this.LIBRARY_NAME = libraryName;                                 // "React4xp"
+        this.CHUNKFILES_HOME = chunkfilesHome;                           // "/react4xp/"
+        this.ENTRIES_JSON_FILENAME = entriesJsonFilename;
+        this.CHUNKSEXTERNALS_JSON_FILENAME = chunksExternalsJsonFilename;
+        this.STATS_COMPONENTS_FILENAME = statsComponentsFilename;
+        this.USERADDED_NASHORNPOLYFILLS_FILENAME = userAddedNashornpolyfillsFilename;
+        this.LAZYLOAD = lazyload;
+        this.THREAD_COUNT = threadCount;
     }
 }

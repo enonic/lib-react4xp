@@ -12,8 +12,6 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.script.ScriptException;
-import java.io.IOException;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -23,25 +21,22 @@ import java.util.function.Supplier;
 public class ServerSideRenderer implements ScriptBean {
     private final static Logger LOG = LoggerFactory.getLogger( ServerSideRenderer.class );
 
-
-    // Singletons: engine factory and config
-    //private static EngineFactory engineFactory = null;
-    //private static Config config = null;
-
-    // Constants. TODO: SHOULD BE final?
-    //private Renderer renderer = null;
-    private Supplier<ResourceService> resourceServiceSupplier;
-
     private static final GenericObjectPoolConfig<Renderer> poolConfig = new GenericObjectPoolConfig<>();
     private static GenericObjectPool<Renderer> rendererPool;
     private static boolean isInitialized = false;
 
     private Config config;
+    private Supplier<ResourceService> resourceServiceSupplier;
+
+    ////////////////////////////////////////////////////////////////////////// Bean init
 
     @Override
     public void initialize(BeanContext context) {
         this.resourceServiceSupplier = context.getService(ResourceService.class);
     }
+
+
+
 
     ////////////////////////////////////////////////////////////////////////// INIT
 
@@ -58,11 +53,11 @@ public class ServerSideRenderer implements ScriptBean {
             Integer ssrMaxThreads,
             String[] scriptEngineSettings
     ) {
-
+        // There can be only one poolConfig, so this will only happen once.
         synchronized (poolConfig) {
             if (!isInitialized) {
-                                                                                                                        LOG.info("##################### SSR setup: #" + Thread.currentThread().getId() + " ######################");
-                                                                                                                        long then = System.currentTimeMillis();
+                LOG.info("Initializing SSR engine(s)...");
+
                 int threadCount = (ssrMaxThreads == null || ssrMaxThreads < 1)
                         ? Runtime.getRuntime().availableProcessors()
                         : ssrMaxThreads;
@@ -82,8 +77,7 @@ public class ServerSideRenderer implements ScriptBean {
                     asyncInitRenderers(threadCount);
                 }
 
-                                                                                                                        long now = System.currentTimeMillis();
-                                                                                                                        LOG.info("##################### SSR setup is done: #" + Thread.currentThread().getId() + " (" + (now-then) + " ms) ######################");
+                LOG.info("SSR engine(s) initialized.");
                 isInitialized = true;
             }
         }
@@ -110,32 +104,23 @@ public class ServerSideRenderer implements ScriptBean {
 
     // Init a new renderer in the pool, asynchronously:
     private class AsyncPoolRendererInitializer extends Thread {
-                                                                                                                        private String rendererId = null;
 
         public void run() {
-                                                                                                                        LOG.info("oooooooo Starting renderer init (thread#" + Thread.currentThread().getId() + ")");
-                                                                                                                        long then = System.currentTimeMillis();
             Renderer renderer = null;
             try {
                 renderer = rendererPool.borrowObject();
-                rendererId = renderer.toString();
 
-                // Why sleep? When initializing multiple Renderers at once, this prevents them from only initializing one and cycling that.
+                // Why sleep? When initializing multiple Renderers at once, this prevents them from borrowing one and returning
+                // that before the next one is borrowed: if a non-destroyed Renderer is cycled like that, nothing is actually initialized.
                 Thread.sleep(3);
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-
             if (renderer != null) {
                 rendererPool.returnObject(renderer);
             }
-
-                                                                                                                        long now = System.currentTimeMillis();
-                                                                                                                        LOG.info("oooooooo " + rendererId + " init (thread#" + Thread.currentThread().getId() + ") is done (" + (now - then) + " ms)");
-
-            // TODO: SEMAPHOR THIS? So that isInitiazlized isn't set to true to allow renderers before all threads are initialized? Is that necessary?
         }
     }
 
@@ -145,36 +130,27 @@ public class ServerSideRenderer implements ScriptBean {
 
     ////////////////////////////////////////////////////////////////////////// RENDER
 
-    public Map<String, String> render(String entryName, String props, String dependencyNames) throws ScriptException, IOException {
-                                                                                                                        long then = System.currentTimeMillis();
+    public Map<String, String> render(String entryName, String props, String dependencyNames) {
         Renderer renderer = null;
         Map<String, String> result;
-        String rendererId = null;
 
         try {
             renderer = rendererPool.borrowObject();
-            rendererId = renderer.toString();
-
-                                                                                                                        LOG.info("----- " + rendererId + " is starting render: '" + entryName);
             result = renderer.render(entryName, props, dependencyNames);
 
         } catch (Exception e) {
             LOG.error(new ErrorHandler().getLoggableStackTrace(e, null));
             result = Map.of(ErrorHandler.KEY_ERROR, e.getMessage());
+        }
 
-        } finally {
-            if (renderer != null) {
-                rendererPool.returnObject(renderer);
-            }
+        if (renderer != null) {
+            rendererPool.returnObject(renderer);
         }
 
         // If an error occurred, force-init a new Renderer
-        if (result.containsKey(ErrorHandler.KEY_ERROR) && !config.lazyload) {
+        if (result == null || result.containsKey(ErrorHandler.KEY_ERROR) && !config.LAZYLOAD) {
             asyncInitRenderers(rendererPool.getNumIdle() + 1);
         }
-
-                                                                                                                        long now = System.currentTimeMillis();
-                                                                                                                        LOG.info("----- " + rendererId + " finished rendering '" + entryName + "' (" + (now-then) + " ms)");
         return result;
     }
 }

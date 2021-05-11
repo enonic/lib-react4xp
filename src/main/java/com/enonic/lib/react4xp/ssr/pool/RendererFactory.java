@@ -19,7 +19,7 @@ public class RendererFactory implements PooledObjectFactory<Renderer> {
     private final EngineFactory engineFactory;
     private final Supplier<ResourceService> resourceServiceSupplier;
 
-                                                                                                                        private AtomicLong engineId = new AtomicLong(0);
+    private final AtomicLong id = new AtomicLong(0);
 
     public RendererFactory(EngineFactory engineFactory, Supplier<ResourceService> resourceServiceSupplier, Config config) {
         this.config = config;
@@ -29,15 +29,7 @@ public class RendererFactory implements PooledObjectFactory<Renderer> {
 
     @Override
     public PooledObject<Renderer> makeObject() throws Exception {
-                                                                                                                        long then = System.currentTimeMillis();
-
-        Renderer renderer = new Renderer(engineId.incrementAndGet(), engineFactory, resourceServiceSupplier, config);
-
-
-
-                                                                                                                        long now = System.currentTimeMillis();
-                                                                                                                        LOG.info("### " + renderer + " was initialized (" + (now-then) + " ms)");
-
+        Renderer renderer = new Renderer(engineFactory, resourceServiceSupplier, config, id.incrementAndGet());
         return new DefaultPooledObject<>(renderer);
     }
 

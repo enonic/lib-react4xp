@@ -17,7 +17,7 @@ public class EngineBuilderCustom implements EngineBuilder {
     }
 
     public NashornScriptEngine buildEngine() {
-                                                                                                                        LOG.info("# Init SSR engine with custom settings: `" + String.join("`, ", scriptEngineSettings) + "`");
+        LOG.info("Init SSR engine with custom settings: `" + String.join("`, ", scriptEngineSettings) + "`");
         return (NashornScriptEngine) new NashornScriptEngineFactory().getScriptEngine(scriptEngineSettings);
     }
 }

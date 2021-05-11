@@ -28,12 +28,12 @@ public class AssetLoader {
     private final HashMap<String, Boolean> ASSET_LOADED_MARKERS = new HashMap<>();
 
 
-                                                                                                                        private final long id;
+    private final long id;
     private final Supplier<ResourceService> resourceServiceSupplier;
     private final Config config;
 
-    public AssetLoader(long id, Supplier<ResourceService> resourceServiceSupplier, Config config) {
-                                                                                                                        this.id = id;
+    public AssetLoader(Supplier<ResourceService> resourceServiceSupplier, Config config, long id) {
+        this.id = id;
         this.resourceServiceSupplier = resourceServiceSupplier;
         this.config = config;
     }
@@ -76,9 +76,11 @@ public class AssetLoader {
 
     /** Load both entry assets and JS dependency chunks into the Nashorn engine */
     private void loadAsset(String assetName, NashornScriptEngine engine) {
-                                                                                                                        //if (!IS_PRODMODE) {
-                                                                                                                            LOG.info(this + " - initializing asset: " + assetName);
-                                                                                                                        //}
+
+        //if (!IS_PRODMODE) {
+        LOG.info(this + ": loading asset '" + assetName + "'");
+        //}
+
         String assetContent = null;
         String url = null;
 
@@ -125,7 +127,7 @@ public class AssetLoader {
 
 
 
-                                                                                                                        public String toString() {
-                                                                                                                            return AssetLoader.class.getSimpleName() + "#" + id;
-                                                                                                                        }
+    public String toString() {
+        return AssetLoader.class.getSimpleName() + "#" + id;
+    }
 }

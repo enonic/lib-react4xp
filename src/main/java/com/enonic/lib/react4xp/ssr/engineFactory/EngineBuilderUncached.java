@@ -12,7 +12,7 @@ import javax.script.ScriptEngineManager;
 public class EngineBuilderUncached implements EngineBuilder {
     private final static Logger LOG = LoggerFactory.getLogger( EngineBuilderUncached.class );
     public NashornScriptEngine buildEngine() {
-                                                                                                                        LOG.info("# Init SSR engine: no settings, uncached");
+        LOG.info("Init SSR engine: no settings, uncached");
         return (NashornScriptEngine) new ScriptEngineManager().getEngineByName("nashorn");
     }
 }
