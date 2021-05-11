@@ -15,6 +15,7 @@ const {
   EXTERNALS_CHUNKS_FILENAME,
   COMPONENT_STATS_FILENAME
 } = require("./react4xp_constants.json");
+// TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use XP resource approach instead!
 
 let BUILD_STATS_ENTRYPOINTS;
 
@@ -47,7 +48,10 @@ const getComponentChunkNames = entryNames => {
   return dependenciesCache.get(entryNamesKey, () => {
 
     if (!BUILD_STATS_ENTRYPOINTS) {
+
+      // TODO: This (require) doesn't sem to handle re-reading updated files in XP dev runmode. Use ioLib.getResource instead!
       const STATS = require(`/${R4X_TARGETSUBDIR}/${COMPONENT_STATS_FILENAME}`);
+
       BUILD_STATS_ENTRYPOINTS = STATS.entrypoints;
     }
 

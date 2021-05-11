@@ -13,6 +13,7 @@ exports.get = (req) => {
         const {
             R4X_TARGETSUBDIR, EXTERNALS_CHUNKS_FILENAME
         } = require('/lib/enonic/react4xp/react4xp_constants.json');
+        // TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use XP resource approach instead!
 
         try {
             const externalsNames = getNamesFromChunkfile(`/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}`);

@@ -16,20 +16,29 @@ public class ChunkDependencyParser {
     private final static Logger LOG = LoggerFactory.getLogger( ChunkDependencyParser.class );
 
     private final long id;
+    private final ResourceReader resourceReader;
+    private final Config config;
 
-    public ChunkDependencyParser(long id) {
+    public ChunkDependencyParser(ResourceReader resourceReader, Config config, long id) {
         this.id = id;
+        this.resourceReader = resourceReader;
+        this.config = config;
     }
 
-    private JSONObject getJSON(String fileName) throws IOException {
-        String json = ResourceHandler.readResource(fileName);
+    private JSONArray getJSONArray(String fileName) throws IOException {
+        String json =  resourceReader.readResource(fileName);
+        return new JSONArray(json);
+    }
+
+    private JSONObject getJSONObject(String fileName) throws IOException {
+        String json =  resourceReader.readResource(fileName);
         return new JSONObject(json);
     }
 
     private LinkedList<String> getDependencyNamesFromChunkFile(String externalsChunkFile) throws IOException {
         LinkedList<String> accumulator = new LinkedList<>();
 
-        JSONObject fileContentData = getJSON(externalsChunkFile);
+        JSONObject fileContentData = getJSONObject(externalsChunkFile);
 
         Iterator<String> keys = fileContentData.keys();
         while(keys.hasNext()) {
@@ -69,7 +78,7 @@ public class ChunkDependencyParser {
             return accumulator;
         }
 
-        JSONObject fileContentData = getJSON(statsFile);
+        JSONObject fileContentData = getJSONObject(statsFile);
         Object entryObj = fileContentData.get("entrypoints");
         if (entryObj == null) {
             return accumulator;
@@ -98,8 +107,7 @@ public class ChunkDependencyParser {
             return entries;
         }
 
-        String json = ResourceHandler.readResource(entryFile);
-        JSONArray fileContentData = new JSONArray(json);
+        JSONArray fileContentData = getJSONArray(entryFile);
         Iterator it = fileContentData.iterator();
         while (it.hasNext()) {
             entries.add((String)it.next());

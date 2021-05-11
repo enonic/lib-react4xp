@@ -7,7 +7,7 @@ import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
 import com.enonic.lib.react4xp.ssr.errors.RenderException;
 import com.enonic.lib.react4xp.ssr.resources.AssetLoader;
 import com.enonic.lib.react4xp.ssr.resources.ChunkDependencyParser;
-import com.enonic.xp.resource.ResourceService;
+import com.enonic.lib.react4xp.ssr.resources.ResourceReader;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.json.JSONArray;
@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.function.Supplier;
 
 
 public class Renderer {
@@ -36,7 +35,7 @@ public class Renderer {
 
     public static final String KEY_HTML = "html";
 
-    public Renderer(EngineFactory engineFactory, Supplier< ResourceService > resourceServiceSupplier, Config config, long id) throws ScriptException, IOException {
+    public Renderer(EngineFactory engineFactory, ResourceReader resourceReader, Config config, long id) throws ScriptException, IOException {
         this.id = id;
 
         // if (!IS_PRODMODE) {
@@ -47,14 +46,14 @@ public class Renderer {
 
         engine = engineFactory.buildEngine();
 
-        LinkedList<String> dependencies = new ChunkDependencyParser(id).getScriptDependencyNames(config);
+        LinkedList<String> dependencies = new ChunkDependencyParser(resourceReader, config, id).getScriptDependencyNames(config);
         if (config.USERADDED_NASHORNPOLYFILLS_FILENAME != null && !"".equals(config.USERADDED_NASHORNPOLYFILLS_FILENAME.trim())) {
             dependencies.addFirst(config.USERADDED_NASHORNPOLYFILLS_FILENAME);
         }
 
-        assetLoader = new AssetLoader(resourceServiceSupplier, config, id);
+        assetLoader = new AssetLoader(resourceReader, config, id);
 
-        assetLoader.loadAssets(dependencies, engine);
+        assetLoader.loadAssetsIntoEngine(dependencies, engine);
 
         // if (!IS_PRODMODE) {
         LOG.info(this + ": init is done.");
@@ -128,7 +127,7 @@ public class Renderer {
             }
 
             LinkedList<String> runnableAssetNames = getRunnableAssetNames(entryName, dependencyNames);
-            assetLoader.loadAssets(runnableAssetNames, engine);
+            assetLoader.loadAssetsIntoEngine(runnableAssetNames, engine);
             Map<String, String> rendered = runSSR(entryName, props, runnableAssetNames);
             return rendered;
 
