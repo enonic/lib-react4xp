@@ -28,11 +28,12 @@ public class AssetLoader {
     private final HashMap<String, Boolean> ASSET_LOADED_MARKERS = new HashMap<>();
 
 
-
+                                                                                                                        private final long id;
     private final Supplier<ResourceService> resourceServiceSupplier;
     private final Config config;
 
-    public AssetLoader(Supplier<ResourceService> resourceServiceSupplier, Config config) {
+    public AssetLoader(long id, Supplier<ResourceService> resourceServiceSupplier, Config config) {
+                                                                                                                        this.id = id;
         this.resourceServiceSupplier = resourceServiceSupplier;
         this.config = config;
     }
@@ -124,8 +125,7 @@ public class AssetLoader {
 
 
 
-                                                                                                                        private final int ID = (int)Math.floor(Math.random() * 10000);
                                                                                                                         public String toString() {
-                                                                                                                            return AssetLoader.class.getSimpleName() + "#" + ID;
+                                                                                                                            return AssetLoader.class.getSimpleName() + "#" + id;
                                                                                                                         }
 }

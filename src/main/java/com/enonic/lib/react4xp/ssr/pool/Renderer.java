@@ -1,12 +1,13 @@
-package com.enonic.lib.react4xp.ssr;
+package com.enonic.lib.react4xp.ssr.pool;
 
+import com.enonic.lib.react4xp.ssr.Config;
+import com.enonic.lib.react4xp.ssr.ServerSideRenderer;
 import com.enonic.lib.react4xp.ssr.engineFactory.EngineFactory;
 import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
 import com.enonic.lib.react4xp.ssr.errors.RenderException;
 import com.enonic.lib.react4xp.ssr.resources.AssetLoader;
 import com.enonic.lib.react4xp.ssr.resources.ChunkDependencyParser;
 import com.enonic.xp.resource.ResourceService;
-import com.enonic.xp.server.RunMode;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.json.JSONArray;
@@ -20,15 +21,13 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.function.Supplier;
 
-/**
- * Created on 10/05/2021 as part of
- */
+
 public class Renderer {
     private final static Logger LOG = LoggerFactory.getLogger( Renderer.class );
 
-                                                                                                                        private long id;
+                                                                                                                        public long id;
 
-    public static final boolean IS_PRODMODE = (RunMode.get() == RunMode.PROD);
+    //public static final boolean IS_PRODMODE = (RunMode.get() == RunMode.PROD);
 
     private boolean valid = true;
     private NashornScriptEngine engine;
@@ -38,25 +37,24 @@ public class Renderer {
     public static final String KEY_HTML = "html";
 
     public Renderer(long id, EngineFactory engineFactory, Supplier< ResourceService > resourceServiceSupplier, Config config) throws ScriptException, IOException {
-        this.id = id;
-                                                                                                                        LOG.info("------ We're gonna need a new SSR engine: Init#" + id);
+                                                                                                                        this.id = id;
+                                                                                                                        LOG.info("We're gonna need a new SSR engine: Init#" + id);
         this.config = config;
 
         engine = engineFactory.buildEngine();
 
-        LinkedList<String> dependencies = new ChunkDependencyParser().getScriptDependencyNames(config);
+        LinkedList<String> dependencies = new ChunkDependencyParser(id).getScriptDependencyNames(config);
         if (config.userAddedNashornpolyfillsFilename != null && !"".equals(config.userAddedNashornpolyfillsFilename.trim())) {
             dependencies.addFirst(config.userAddedNashornpolyfillsFilename);
         }
 
-        assetLoader = new AssetLoader(resourceServiceSupplier, config);
+        assetLoader = new AssetLoader(id, resourceServiceSupplier, config);
                                                                                                                         //if (!IS_PRODMODE) {
                                                                                                                             LOG.info("Init " + this + " with " + assetLoader + " and dependencies:\n\t" + String.join("\n\t", dependencies));
                                                                                                                         //}
 
         assetLoader.loadAssets(dependencies, engine);
-                                                                                                                        // For testing: https://github.com/enonic/lib-react4xp/issues/191
-                                                                                                                        /*
+                                                                                                                        // For testing: https://github.com/enonic/lib-react4xp/issues/191:
                                                                                                                         try {
                                                                                                                             LOG.info(this + " taking a nap...");
                                                                                                                             Thread.sleep(5000);

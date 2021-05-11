@@ -13,6 +13,7 @@ public class Config {
     public final String statsComponentsFilename;
     public final String userAddedNashornpolyfillsFilename;
     public final boolean lazyload;
+    public final int threadCount;
 
     public Config(
             String APP_NAME,
@@ -23,7 +24,8 @@ public class Config {
             String chunksExternalsJsonFilename,
             String statsComponentsFilename,
             String userAddedNashornpolyfillsFilename,
-            boolean lazyload) {
+            boolean lazyload,
+            int threadCount) {
         this.APP_NAME = APP_NAME;
         this.SCRIPTS_HOME = SCRIPTS_HOME;                             // "/react4xp"
         this.LIBRARY_NAME = LIBRARY_NAME;                             // "React4xp"
@@ -33,5 +35,6 @@ public class Config {
         this.statsComponentsFilename = statsComponentsFilename;
         this.userAddedNashornpolyfillsFilename = userAddedNashornpolyfillsFilename;
         this.lazyload = lazyload;
+        this.threadCount = threadCount;
     }
 }

@@ -15,6 +15,12 @@ import java.util.LinkedList;
 public class ChunkDependencyParser {
     private final static Logger LOG = LoggerFactory.getLogger( ChunkDependencyParser.class );
 
+    private final long id;
+
+    public ChunkDependencyParser(long id) {
+        this.id = id;
+    }
+
     private JSONObject getJSON(String fileName) throws IOException {
         String json = ResourceHandler.readResource(fileName);
         return new JSONObject(json);
@@ -112,22 +118,27 @@ public class ChunkDependencyParser {
                 dependencies.add(dependency);
             }
         }
-                                                                                                                        LOG.info("dependencies from externalsChunkFile " + externalsChunkFile + ":\n\t" + String.join("\n\t", dependencies));
+                                                                                                                        LOG.info(this + ": dependencies from externalsChunkFile " + externalsChunkFile + ":\n\t" + String.join("\n\t", dependencies));
 
         String entryFile = config.chunkfilesHome + config.entriesJsonFilename;
         LinkedList<String> entries = getEntriesList(entryFile);
-                                                                                                                        LOG.info("entries from entryFile " + entryFile + ":\n\t" + String.join("\n\t", entries));
+                                                                                                                        LOG.info(this + ": entries from entryFile " + entryFile + ":\n\t" + String.join("\n\t", entries));
 
         String statsFile = config.chunkfilesHome + config.statsComponentsFilename;
-                                                                                                                        LOG.info("Adding statsDependencies from statsFile " + statsFile + ":");
+                                                                                                                        LOG.info(this + ": Adding statsDependencies from statsFile " + statsFile + ":");
         LinkedList<String> statsDependencies = getDependencyNamesFromStatsFile(statsFile, entries, config.lazyload);
         for (String dependencyName : statsDependencies) {
             if (!dependencies.contains(dependencyName)) {
-                                                                                                                        LOG.info("\t" + dependencyName);
+                                                                                                                        LOG.info(this + "\t" + dependencyName);
                 dependencies.add(dependencyName);
             }
         }
-                                                                                                                        LOG.info("...and finally, all dependencies that will be loaded on init:\n\t" + String.join("\n\t", dependencies));
+                                                                                                                        LOG.info(this + ": And finally, all dependencies that will be loaded on init:\n\t" + String.join("\n\t", dependencies));
         return dependencies;
     }
+
+
+                                                                                                                        public String toString() {
+                                                                                                                            return ChunkDependencyParser.class.getSimpleName() + "#" + id;
+                                                                                                                        }
 }
