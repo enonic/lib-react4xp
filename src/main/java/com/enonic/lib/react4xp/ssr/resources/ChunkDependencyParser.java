@@ -1,5 +1,6 @@
-package com.enonic.lib.react4xp.ssr;
+package com.enonic.lib.react4xp.ssr.resources;
 
+import com.enonic.lib.react4xp.ssr.Config;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,15 +15,28 @@ import java.util.LinkedList;
 public class ChunkDependencyParser {
     private final static Logger LOG = LoggerFactory.getLogger( ChunkDependencyParser.class );
 
-    private JSONObject getJSON(String fileName) throws IOException {
-        String json = ResourceHandler.readResource(fileName);
+    private final long id;
+    private final ResourceReader resourceReader;
+
+    public ChunkDependencyParser(ResourceReader resourceReader, long id) {
+        this.id = id;
+        this.resourceReader = resourceReader;
+    }
+
+    private JSONArray getJSONArray(String fileName) throws IOException {
+        String json =  resourceReader.readResource(fileName);
+        return new JSONArray(json);
+    }
+
+    private JSONObject getJSONObject(String fileName) throws IOException {
+        String json =  resourceReader.readResource(fileName);
         return new JSONObject(json);
     }
 
-    private LinkedList<String> getDependencyNamesFromChunkFile(String externals) throws IOException {
+    private LinkedList<String> getDependencyNamesFromChunkFile(String externalsChunkFile) throws IOException {
         LinkedList<String> accumulator = new LinkedList<>();
 
-        JSONObject fileContentData = getJSON(externals);
+        JSONObject fileContentData = getJSONObject(externalsChunkFile);
 
         Iterator<String> keys = fileContentData.keys();
         while(keys.hasNext()) {
@@ -45,7 +59,7 @@ public class ChunkDependencyParser {
                     fileName = (String) arr.get(0);
 
                 } catch (Exception e2) {
-                    LOG.error("File: " + externals);
+                    LOG.error("File: " + externalsChunkFile);
                     LOG.error("Chunk (" + chunk.getClass().getSimpleName() + "): " + chunk);
                     throw e2;
                 }
@@ -62,7 +76,7 @@ public class ChunkDependencyParser {
             return accumulator;
         }
 
-        JSONObject fileContentData = getJSON(statsFile);
+        JSONObject fileContentData = getJSONObject(statsFile);
         Object entryObj = fileContentData.get("entrypoints");
         if (entryObj == null) {
             return accumulator;
@@ -91,8 +105,7 @@ public class ChunkDependencyParser {
             return entries;
         }
 
-        String json = ResourceHandler.readResource(entryFile);
-        JSONArray fileContentData = new JSONArray(json);
+        JSONArray fileContentData = getJSONArray(entryFile);
         Iterator it = fileContentData.iterator();
         while (it.hasNext()) {
             entries.add((String)it.next());
@@ -101,25 +114,32 @@ public class ChunkDependencyParser {
         return entries;
     }
 
-    public LinkedList<String> getScriptDependencyNames(String chunkfilesHome, String entriesJsonFilename, String chunksExternalsJsonFilename, String statsComponentsFilename, boolean lazyLoad) throws IOException {
+    public LinkedList<String> getScriptDependencyNames(Config config) throws IOException {
         LinkedList<String> dependencies = new LinkedList<>();
 
-        LinkedList<String> entries = getEntriesList(chunkfilesHome + entriesJsonFilename);
-
-        LinkedList<String> externalsDependencies = getDependencyNamesFromChunkFile(chunkfilesHome + chunksExternalsJsonFilename);
+        String externalsChunkFile = config.CHUNKFILES_HOME + config.CHUNKSEXTERNALS_JSON_FILENAME;
+        LinkedList<String> externalsDependencies = getDependencyNamesFromChunkFile(externalsChunkFile);
         for (String dependency : externalsDependencies) {
             if (!dependencies.contains(dependency)) {
                 dependencies.add(dependency);
             }
         }
 
-        LinkedList<String> statsDependencies = getDependencyNamesFromStatsFile(chunkfilesHome + statsComponentsFilename, entries, lazyLoad);
+        String entryFile = config.CHUNKFILES_HOME + config.ENTRIES_JSON_FILENAME;
+        LinkedList<String> entries = getEntriesList(entryFile);
+
+        String statsFile = config.CHUNKFILES_HOME + config.STATS_COMPONENTS_FILENAME;
+        LinkedList<String> statsDependencies = getDependencyNamesFromStatsFile(statsFile, entries, config.LAZYLOAD);
         for (String dependencyName : statsDependencies) {
             if (!dependencies.contains(dependencyName)) {
                 dependencies.add(dependencyName);
             }
         }
-
         return dependencies;
+    }
+
+
+    public String toString() {
+        return ChunkDependencyParser.class.getSimpleName() + "#" + id;
     }
 }
