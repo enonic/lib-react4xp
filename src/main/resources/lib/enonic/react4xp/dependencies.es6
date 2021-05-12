@@ -21,7 +21,7 @@ const {
   EXTERNALS_CHUNKS_FILENAME,
   COMPONENT_STATS_FILENAME
 } = require("./react4xp_constants.json");
-// TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use XP resource approach instead!
+// TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use readResourceAsJson instead!
 
 let BUILD_STATS_ENTRYPOINTS;
 
@@ -55,7 +55,7 @@ const normalizeEntryNames = (entryNames = []) => {
 
 
 const readResourceAsJson = fileName => {
-                                                                                                                        log.info("Reading resource: " + JSON.stringify(fileName, null, 2));
+                                                                                                                        log.debug("Reading resource: " + JSON.stringify(fileName, null, 2));
     const resource = ioLib.getResource(fileName);
     if (!resource || !resource.exists()) {
         throw Error("Empty or not found: " + fileName);
@@ -92,12 +92,6 @@ const readComponentChunkNames = entryNames => {
 
     // Just verify that it exists and has a content:
     let STATS = readResourceAsJson(FULL_COMPONENT_STATS_FILENAME);
-                                                                                                                        log.info("STATS (" +
-                                                                                                                            (Array.isArray(STATS) ?
-                                                                                                                                ("array[" + STATS.length + "]") :
-                                                                                                                                (typeof STATS + (STATS && typeof STATS === 'object' ? (" with keys: " + JSON.stringify(Object.keys(STATS))) : ""))
-                                                                                                                            ) + "): " + JSON.stringify(STATS, null, 2)
-                                                                                                                        );
 
     BUILD_STATS_ENTRYPOINTS = STATS.entrypoints;
 
@@ -107,13 +101,6 @@ const readComponentChunkNames = entryNames => {
     }
     const output = [];
     const missing = [];
-
-                                                                                                                        log.info("entryNames raw (" +
-                                                                                                                            (Array.isArray(entryNames) ?
-                                                                                                                                ("array[" + entryNames.length + "]") :
-                                                                                                                                (typeof entryNames + (entryNames && typeof entryNames === 'object' ? (" with keys: " + JSON.stringify(Object.keys(entryNames))) : ""))
-                                                                                                                            ) + "): " + JSON.stringify(entryNames, null, 2)
-                                                                                                                        );
 
     entryNames.forEach(entry => {
         try {
@@ -161,13 +148,6 @@ const readComponentChunkNames = entryNames => {
 const readComponentChunkNamesCached = entryNames => {
   entryNames = normalizeEntryNames(entryNames);
   const entryNamesKey = entryNames.join("*");
-
-                                                                                                                          log.info("entryNames pre cache (" +
-                                                                                                                            (Array.isArray(entryNames) ?
-                                                                                                                                ("array[" + entryNames.length + "]") :
-                                                                                                                                (typeof entryNames + (entryNames && typeof entryNames === 'object' ? (" with keys: " + JSON.stringify(Object.keys(entryNames))) : ""))
-                                                                                                                            ) + "): " + JSON.stringify(entryNames, null, 2)
-                                                                                                                          );
 
   return dependenciesCache.get(entryNamesKey, () => readComponentChunkNames(entryNames));
 };

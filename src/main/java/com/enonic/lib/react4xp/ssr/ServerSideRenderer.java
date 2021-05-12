@@ -57,11 +57,11 @@ public class ServerSideRenderer implements ScriptBean {
         // There can be only one poolConfig, so this will only happen once.
         synchronized (poolConfig) {
             if (!isInitialized) {
-                LOG.info("Initializing SSR engine(s)...");
-
                 int threadCount = (ssrMaxThreads == null || ssrMaxThreads < 1)
                         ? Runtime.getRuntime().availableProcessors()
                         : ssrMaxThreads;
+
+                LOG.info("Setting up SSR with " + threadCount + " engine" + (threadCount == 1 ? "" : "s") + "...");
 
                 config = new Config(appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksExternalsJsonFilename, statsComponentsFilename, userAddedNashornpolyfillsFilename, lazyload, threadCount);
 
@@ -80,7 +80,6 @@ public class ServerSideRenderer implements ScriptBean {
                     asyncInitRenderers(threadCount);
                 }
 
-                LOG.info("SSR engine(s) initialized.");
                 isInitialized = true;
             }
         }

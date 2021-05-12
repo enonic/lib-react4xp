@@ -31,7 +31,7 @@ public class ResourceReader {
 
     public String readResource(String resourcePath) throws IOException {
         // if (!IS_PRODMODE) {
-        LOG.info(this + ": reading resource '" + resourcePath + "'");
+        LOG.debug(this + ": reading resource '" + resourcePath + "'");
         // }
 
         String url = null;
@@ -40,7 +40,6 @@ public class ResourceReader {
             ResourceKey resourceKey = ResourceKey.from(url);
             Resource resource = resourceServiceSupplier.get().getResource(resourceKey);
             String content = resource.getBytes().asCharSource(Charsets.UTF_8).read();
-                                                                                                                        LOG.info("Content of " + resourcePath + ":\n\n" + content + "\n\n");
             return content;
 
         } catch (IOException e) {

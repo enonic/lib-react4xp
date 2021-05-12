@@ -17,12 +17,10 @@ public class ChunkDependencyParser {
 
     private final long id;
     private final ResourceReader resourceReader;
-    private final Config config;
 
-    public ChunkDependencyParser(ResourceReader resourceReader, Config config, long id) {
+    public ChunkDependencyParser(ResourceReader resourceReader, long id) {
         this.id = id;
         this.resourceReader = resourceReader;
-        this.config = config;
     }
 
     private JSONArray getJSONArray(String fileName) throws IOException {

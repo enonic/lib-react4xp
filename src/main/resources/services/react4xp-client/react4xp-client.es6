@@ -22,7 +22,7 @@ exports.get = (req) => {
             // it's an external shared-constants file expected to exist in the react4xp lib build directory.
             // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
             const { LIBRARY_NAME } = require('/lib/enonic/react4xp/react4xp_constants.json');
-            // TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use XP resource approach instead!
+            // TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use dependencies.readResourceAsJson instead!
 
             // Placeholders defined in build.gradle. Keep up to date!
             RESPONSE.body = RESPONSE.body
