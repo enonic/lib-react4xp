@@ -34,7 +34,7 @@ This library runs on [Enonic XP](https://enonic.com/developer-tour) server side,
 
 <a name="versions-and-compatibility"></a>
 ## Versions and compatibility
-This is version **1.5.0-SNAPSHOT** for XP 7.
+This is version **1.5.0** for XP 7.
 
 This library, lib-react4xp, is installed as a regular XP library in a parent app/project. It also needs to run alongside a suite of *NPM packages*. These are bundled (by dependency) in the [react4xp package](https://www.npmjs.com/package/react4xp), so by installing that one, you get the necessary packages. 
 
@@ -45,7 +45,8 @@ This library, lib-react4xp, is installed as a regular XP library in a parent app
 | 1.0.1 | 1.0.0 |
 | 1.1.0 | 1.1.3 |
 | 1.1.1 | 1.1.4 |
-| **1.5.0-SNAPSHOT** | 1.5.4 |
+| 1.4.0 | 1.4.0 |
+| **1.5.0** | 1.5.4 |
 
 
 
@@ -84,7 +85,7 @@ Two ways to add this library to a parent project: import it from an online repos
 Insert into `build.gradle` in the parent project, under `dependencies`:
 ```groovy
 dependencies {
-	include 'com.enonic.lib:lib-react4xp:1.5.0-SNAPSHOT'
+	include 'com.enonic.lib:lib-react4xp:1.5.0'
 }
 
 repositories {
@@ -103,7 +104,7 @@ If you need / want to build the lib yourself instead of downloading it with Grad
 **1.2.2.** Make the version unique in the library's `gradle.properties`, for example:
 
 ```properties
-version = 1.5.0-SNAPSHOT-SNAPSHOT
+version = 1.5.0-SNAPSHOT
 ```
 
 **1.2.3.** Build it with gradle:
@@ -119,7 +120,7 @@ Gradle will build the library and install it into the local cache, available for
 
 ```groovy
 dependencies {
-    include 'com.enonic.lib:lib-react4xp:1.5.0-SNAPSHOT-SNAPSHOT'
+    include 'com.enonic.lib:lib-react4xp:1.5.0-SNAPSHOT'
 }
 ```
 
@@ -136,7 +137,7 @@ Go to the _parent XP project folder_ and use the command line to add these NPM p
 npm install --save-dev react4xp@1.5.4
 ```
 
-Again, if you're using a different version of this library than 1.5.0-SNAPSHOT, the NPM package may need a different, matching version than `react4xp@1.5.4`. See [above](#versions-and-compatibility).
+Again, if you're using a different version of this library than 1.5.0, the NPM package may need a different, matching version than `react4xp@1.5.4`. See [above](#versions-and-compatibility).
 
 Other development tools might be needed, depending on your setup:
 
