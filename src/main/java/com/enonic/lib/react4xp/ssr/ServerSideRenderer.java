@@ -116,10 +116,11 @@ public class ServerSideRenderer implements ScriptBean {
 
             } catch (Exception e) {
                 e.printStackTrace();
-            }
 
-            if (renderer != null) {
-                rendererPool.returnObject(renderer);
+            } finally {
+                if (renderer != null) {
+                    rendererPool.returnObject(renderer);
+                }
             }
         }
     }
@@ -132,25 +133,32 @@ public class ServerSideRenderer implements ScriptBean {
 
     public Map<String, String> render(String entryName, String props, String dependencyNames) {
         Renderer renderer = null;
-        Map<String, String> result;
+        Map<String, String> result = null;
 
         try {
             renderer = rendererPool.borrowObject();
             result = renderer.render(entryName, props, dependencyNames);
 
-        } catch (Exception e) {
-            LOG.error(new ErrorHandler().getLoggableStackTrace(e, null));
-            result = Map.of(ErrorHandler.KEY_ERROR, e.getMessage());
+        } catch (Exception e1) {
+            LOG.error(new ErrorHandler().getLoggableStackTrace(e1, null));
+            result = Map.of(ErrorHandler.KEY_ERROR, e1.getMessage());
+
+        } finally {
+            if (renderer != null) {
+                rendererPool.returnObject(renderer);
+            }
+
+            try {
+                // If an error occurred, force-init a new Renderer
+                if (result == null || result.containsKey(ErrorHandler.KEY_ERROR) && !config.LAZYLOAD) {
+                    asyncInitRenderers(rendererPool.getNumIdle() + 1);
+                }
+            } catch (Exception e2) {
+                LOG.error("Error when trying to reinitialize Renderer(s) in rendererPool after earlier error:");
+                LOG.error(new ErrorHandler().getLoggableStackTrace(e2, null));
+            }
         }
 
-        if (renderer != null) {
-            rendererPool.returnObject(renderer);
-        }
-
-        // If an error occurred, force-init a new Renderer
-        if (result == null || result.containsKey(ErrorHandler.KEY_ERROR) && !config.LAZYLOAD) {
-            asyncInitRenderers(rendererPool.getNumIdle() + 1);
-        }
         return result;
     }
 }
