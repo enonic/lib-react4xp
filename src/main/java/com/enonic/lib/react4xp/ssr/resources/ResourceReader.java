@@ -34,16 +34,14 @@ public class ResourceReader {
         LOG.info(this + ": reading resource '" + resourcePath + "'");
         // }
 
-        LOG.info("config: " + config);
-        LOG.info("resourceServiceSupplier: " + resourceServiceSupplier);
-
-
+        String url = null;
         try {
-            String url = config.APP_NAME + ":" + resourcePath;
-            LOG.info("url: " + url);
+            url = config.APP_NAME + ":" + resourcePath;
             ResourceKey resourceKey = ResourceKey.from(url);
             Resource resource = resourceServiceSupplier.get().getResource(resourceKey);
-            return resource.getBytes().asCharSource(Charsets.UTF_8).read();
+            String content = resource.getBytes().asCharSource(Charsets.UTF_8).read();
+                                                                                                                        LOG.info("Content of " + resourcePath + ":\n\n" + content + "\n\n");
+            return content;
 
         } catch (IOException e) {
             ErrorHandler errorHandler = new ErrorHandler();
@@ -51,7 +49,7 @@ public class ResourceReader {
                     errorHandler.getLoggableStackTrace(e, null) + "\n\n" +
                             e.getClass().getSimpleName() + ": " + e.getMessage() + "\n" +
                             "in " + ServerSideRenderer.class.getName() + ".loadAsset\n" +
-                            "resource url = '" + config.APP_NAME + ":" + resourcePath + "'\n" +
+                            "resource url = '" + url + "'\n" +
                             errorHandler.getSolutionTips());
 
             throw e;
