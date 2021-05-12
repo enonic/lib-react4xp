@@ -1,7 +1,8 @@
 package com.enonic.lib.react4xp.ssr.engineFactory;
 
+import com.enonic.lib.react4xp.ssr.ServerSideRenderer;
 import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
-import com.enonic.lib.react4xp.ssr.resources.ResourceHandler;
+import com.enonic.lib.react4xp.ssr.resources.ResourceReader;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +14,44 @@ public class EngineFactory {
     private final static Logger LOG = LoggerFactory.getLogger( EngineFactory.class );
 
     private final EngineBuilder engineBuilder;
+    private final ResourceReader resourceReader;
+
+    // ['build/resources/main' + defaultPolyfillFileName] MUST match [env.BUILD_R4X + env.NASHORNPOLYFILLS_FILENAME]
+    // in the nashornPolyfills task in build.gradle!
+    private final static String POLYFILL_REACT4XP_DEFAULT_FILE = "/lib/enonic/react4xp/default/nashornPolyfills.js";
+
+    // Basic-level polyfills. For some reason, these must be run hardcoded from here, not from nashornPolyfills.js.
+    // TODO: shouldn't be a string here, but read from a JS file. From react4xp-runtime-nashornpolyfills package? Or make it available in the jar (/lib)?
+    private final static String POLYFILL_BASICS = "" +
+            "if (typeof exports === 'undefined') { var exports = {}; }\n" +
+            "if (typeof global === 'undefined') { var global = this; }\n" +
+            "if (typeof window === 'undefined') { var window = this; }\n" +
+            "if (typeof process === 'undefined') { var process = {env:{}}; }\n" +
+            "if (typeof console === 'undefined') { " +
+            "var console = {};" +
+            "console.debug = print;\n" +
+            "console.log = print;\n" +
+            "console.warn = print;\n" +
+            "console.error = print;" +
+            "}";
 
 
-    public EngineFactory(String[] scriptEngineSettings) {
+
+
+
+
+
+
+
+
+
+
+
+    /////////////////////////////////////////////////////////// INIT
+
+    public EngineFactory(String[] scriptEngineSettings, ResourceReader resourceReader) {
         engineBuilder = getEngineBuilder(scriptEngineSettings);
+        this.resourceReader = resourceReader;
     }
 
 
@@ -45,6 +80,9 @@ public class EngineFactory {
 
 
 
+
+    ////////////////////////////////////////////////////////////////////////////////////// ENTRY
+
     /** MAIN ENTRY.
      * CHUNK_SOURCEFILES is a list of files (filename only, expected to be found in CHUNKFILES_HOME alongside the entries file)
      * that each describe one or several bundle/chunk asset file names, used to generate
@@ -53,23 +91,7 @@ public class EngineFactory {
      * Scripts found in chunks.json depend on the previous and must be the last!
      * nashornPolyfills.js script is the basic dependency, and will be added at the very beginning
      * outside of this list. */
-    public synchronized NashornScriptEngine buildEngine() throws IOException, ScriptException {
-
-        // Basic-level polyfills. For some reason, this must be run from here, not from nashornPolyfills.js.
-        // TODO: shouldn't be a string here, but read from a JS file, preferrably in the react4xp-runtime-nashornpolyfills package.
-        String POLYFILL_BASICS = "" +
-                "if (typeof exports === 'undefined') { var exports = {}; }\n" +
-                "if (typeof global === 'undefined') { var global = this; }\n" +
-                "if (typeof window === 'undefined') { var window = this; }\n" +
-                "if (typeof process === 'undefined') { var process = {env:{}}; }\n" +
-                "if (typeof console === 'undefined') { " +
-                "var console = {};" +
-                "console.debug = print;\n" +
-                "console.log = print;\n" +
-                "console.warn = print;\n" +
-                "console.error = print;" +
-                "}";
-
+    public NashornScriptEngine buildEngine() throws IOException, ScriptException {
         NashornScriptEngine engine = engineBuilder.buildEngine();
 
         try {
@@ -82,22 +104,23 @@ public class EngineFactory {
             throw e;
         }
 
-        // ['build/resources/main' + defaultPolyfillFileName] MUST match [env.BUILD_R4X + env.NASHORNPOLYFILLS_FILENAME]
-        // in the nashornPolyfills task in build.gradle!
-        String POLYFILL_REACT4XP_DEFAULT_FILE = "/lib/enonic/react4xp/default/nashornPolyfills.js";
-
-        String content = null;
+        String assetContent = null;
         try {
-            content = ResourceHandler.readResource(POLYFILL_REACT4XP_DEFAULT_FILE);
-            engine.eval(content);
+            assetContent =  resourceReader.readResource(POLYFILL_REACT4XP_DEFAULT_FILE);
+            engine.eval(assetContent);
 
-        } catch (ScriptException e) {
+        } catch (ScriptException e1) {
             ErrorHandler errorHandler = new ErrorHandler();
-            // LOG.error(errorHandler.getLoggableStackTrace(e, e.getClass().getSimpleName() + " in " + EngineFactory.class.getName() + ".initEngine"));
-            LOG.info(errorHandler.getCodeDump(e, content, POLYFILL_REACT4XP_DEFAULT_FILE));
-            throw e;
-        }
+            LOG.error(
+                    errorHandler.getLoggableStackTrace(e1, null) + "\n\n" +
+                            e1.getClass().getSimpleName()  + ": " + e1.getMessage() + "\n" +
+                            "in " + ServerSideRenderer.class.getName() + ".loadAsset\n" +
+                            "assetName = '" + POLYFILL_REACT4XP_DEFAULT_FILE + "'\n" +
+                            errorHandler.getSolutionTips());
+            LOG.info(errorHandler.getCodeDump(e1, assetContent, POLYFILL_REACT4XP_DEFAULT_FILE));
 
+            throw e1;
+        }
 
         return engine;
     }

@@ -4,12 +4,8 @@ import com.enonic.lib.react4xp.ssr.Config;
 import com.enonic.lib.react4xp.ssr.ServerSideRenderer;
 import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
 import com.enonic.lib.react4xp.ssr.errors.RenderException;
-import com.enonic.xp.resource.Resource;
-import com.enonic.xp.resource.ResourceKey;
-import com.enonic.xp.resource.ResourceService;
 import com.enonic.xp.server.RunMode;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
-import org.apache.commons.io.Charsets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +14,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Supplier;
 
 
 public class AssetLoader {
@@ -29,25 +24,23 @@ public class AssetLoader {
 
 
     private final long id;
-    private final Supplier<ResourceService> resourceServiceSupplier;
+    private final ResourceReader resourceReader;
     private final Config config;
 
-    public AssetLoader(Supplier<ResourceService> resourceServiceSupplier, Config config, long id) {
+    public AssetLoader(ResourceReader resourceReader, Config config, long id) {
         this.id = id;
-        this.resourceServiceSupplier = resourceServiceSupplier;
+        this.resourceReader = resourceReader;
         this.config = config;
     }
 
-    public void loadAssets(LinkedList<String> runnableAssets, NashornScriptEngine engine) {
+    public void loadAssetsIntoEngine(LinkedList<String> runnableAssets, NashornScriptEngine engine) {
         ensureMarkers(runnableAssets);
         for (String assetName : runnableAssets) {
             if (shouldLoadAsset(assetName)) {
-                loadAsset(assetName, engine);
+                loadAssetIntoEngine(assetName, engine);
             }
         }
     }
-
-
 
 
 
@@ -75,39 +68,19 @@ public class AssetLoader {
 
 
     /** Load both entry assets and JS dependency chunks into the Nashorn engine */
-    private void loadAsset(String assetName, NashornScriptEngine engine) {
+    private void loadAssetIntoEngine(String assetName, NashornScriptEngine engine) {
 
         //if (!IS_PRODMODE) {
         LOG.info(this + ": loading asset '" + assetName + "'");
         //}
 
-        String assetContent = null;
-        String url = null;
-
         try {
-            url = config.APP_NAME + ":" + config.SCRIPTS_HOME + "/" + assetName;
-
-            // TODO: DRY
-            ResourceKey resourceKey = ResourceKey.from(url);
-            Resource resource = resourceServiceSupplier.get().getResource(resourceKey);
-            assetContent = resource.getBytes().asCharSource(Charsets.UTF_8).read();
-
-            //processedCode += assetCode + "\n";
-
-            engine.eval(assetContent);
+            String content = resourceReader.readResource(config.SCRIPTS_HOME + "/" + assetName);
+            engine.eval(content);
 
             markAssetLoaded(assetName);
 
         } catch (IOException e1) {
-            ErrorHandler errorHandler = new ErrorHandler();
-            LOG.error(
-                    errorHandler.getLoggableStackTrace(e1, null) + "\n\n" +
-                            e1.getClass().getSimpleName()  + ": " + e1.getMessage() + "\n" +
-                            "in " + ServerSideRenderer.class.getName() + ".loadAsset\n" +
-                            "assetName = '" + assetName + "'\n" +
-                            "resource url = '" + url + "'\n" +
-                            errorHandler.getSolutionTips());
-
             throw new RenderException(e1);
 
         } catch (ScriptException e2) {
@@ -118,7 +91,6 @@ public class AssetLoader {
                             e2.getClass().getSimpleName() + ": " + cleanErrorMessage + "\n" +
                             "in " + ServerSideRenderer.class.getName() + ".loadAsset\n" +
                             "assetName = '" +assetName + "'\n" +
-                            "resource url = '" + url + "'\n" +
                             errorHandler.getSolutionTips());
 
             throw new RenderException(e2, cleanErrorMessage);

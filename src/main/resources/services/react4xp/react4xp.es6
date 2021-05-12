@@ -15,6 +15,7 @@ const {
   R4X_TARGETSUBDIR,
   ENTRIES_FILENAME
 } = require("/lib/enonic/react4xp/react4xp_constants.json");
+// TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use dependencies.readResourceAsJson instead!
 
 const REACT4XP_ROOT = `/${R4X_TARGETSUBDIR}/`;
 

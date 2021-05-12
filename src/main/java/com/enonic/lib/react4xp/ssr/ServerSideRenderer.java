@@ -4,6 +4,7 @@ import com.enonic.lib.react4xp.ssr.engineFactory.EngineFactory;
 import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
 import com.enonic.lib.react4xp.ssr.pool.Renderer;
 import com.enonic.lib.react4xp.ssr.pool.RendererFactory;
+import com.enonic.lib.react4xp.ssr.resources.ResourceReader;
 import com.enonic.xp.resource.ResourceService;
 import com.enonic.xp.script.bean.BeanContext;
 import com.enonic.xp.script.bean.ScriptBean;
@@ -56,15 +57,17 @@ public class ServerSideRenderer implements ScriptBean {
         // There can be only one poolConfig, so this will only happen once.
         synchronized (poolConfig) {
             if (!isInitialized) {
-                LOG.info("Initializing SSR engine(s)...");
-
                 int threadCount = (ssrMaxThreads == null || ssrMaxThreads < 1)
                         ? Runtime.getRuntime().availableProcessors()
                         : ssrMaxThreads;
 
+                LOG.info("Setting up SSR with " + threadCount + " engine" + (threadCount == 1 ? "" : "s") + "...");
+
                 config = new Config(appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksExternalsJsonFilename, statsComponentsFilename, userAddedNashornpolyfillsFilename, lazyload, threadCount);
-                EngineFactory engineFactory = new EngineFactory(scriptEngineSettings);
-                RendererFactory rendererFactory = new RendererFactory(engineFactory, resourceServiceSupplier, config);
+
+                ResourceReader resourceReader = new ResourceReader(resourceServiceSupplier, config, 0);
+                EngineFactory engineFactory = new EngineFactory(scriptEngineSettings, resourceReader);
+                RendererFactory rendererFactory = new RendererFactory(engineFactory, resourceReader, config);
 
 
 
@@ -77,7 +80,6 @@ public class ServerSideRenderer implements ScriptBean {
                     asyncInitRenderers(threadCount);
                 }
 
-                LOG.info("SSR engine(s) initialized.");
                 isInitialized = true;
             }
         }
@@ -149,7 +151,7 @@ public class ServerSideRenderer implements ScriptBean {
             }
 
             try {
-                // If an error occurred, force-init a new Renderer
+                // If an error occurred, force-init a new Renderer by borrowing one Renderer in excess of the available ones - enforcing one re-init.
                 if (result == null || result.containsKey(ErrorHandler.KEY_ERROR) && !config.LAZYLOAD) {
                     asyncInitRenderers(rendererPool.getNumIdle() + 1);
                 }
