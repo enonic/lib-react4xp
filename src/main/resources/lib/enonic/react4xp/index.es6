@@ -1,160 +1,19 @@
-const {getAndMergePageContributions} = require('./pageContributions');
-const {getComponentChunkNames} = require('./dependencies');
-const {getAssetRoot} = require('./serviceRoots');
 const {getContent, getComponent} = require('/lib/xp/portal');
 const {newCache} = require('/lib/cache');
 const contentLib = require('/lib/xp/content');
 
-const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
-const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
+const {getAndMergePageContributions} = require('./pageContributions');
+const {getComponentChunkNames} = require('./dependencies');
+const {getAssetRoot} = require('./serviceRoots');
+const htmlHandler = require('./htmlHandling');
 
-const SSR_DEFAULT_CACHE_SIZE = 1000;
-
+const ssrEngine = require('./ssrEngine').get();
 
 // react4xp_constants.json is not part of lib-react4xp:
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: use <projectRoot>/react4xp.properties and the build.gradle from https://www.npmjs.com/package/react4xp
-const {
-    LIBRARY_NAME,
-    R4X_TARGETSUBDIR,
-    NASHORNPOLYFILLS_FILENAME,
-    EXTERNALS_CHUNKS_FILENAME,
-    COMPONENT_STATS_FILENAME,
-    ENTRIES_FILENAME,
-    BUILD_ENV,
-    SSR_LAZYLOAD,                   // <-- lazyLoading main switch: true/false
-    SSR_MAX_THREADS,                // <-- set to 0/undefined/null for unlimited, otherwise a number for an upper concurrency limit (to save memory)
-    SSR_ENGINE_SETTINGS,            // <-- set to 0 to switch off nashorn cache, otherwise cache size (number) or full settings (comma-separated string referring to https://github.com/openjdk/nashorn/blob/main/src/org.openjdk.nashorn/share/classes/org/openjdk/nashorn/internal/runtime/resources/Options.properties )
-} = require("./react4xp_constants.json");
-// TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use dependencies.readResourceAsJson instead!
-
-/** Normalize engine settings to string array */
-const normalizeSSREngineSettings = (ssrEngineSettingsString) => {
-
-    // 0. --------- Internal helpers:
-
-    const COMMA_PLACEHOLDER = "##U+FE10##";
-
-    // When iterating over strings, flags whether a character is inside a quote or not:
-    const isInsideQuote = {
-        "'": false,
-        '"': false
-    };
-
-    const singleQuoteCounter = item => (item.match(/'/g) || []).length;
-    const replaceSurroundingSingleQuotes = item => (item.startsWith("'"))
-        ? item.replace(/^'/, "").replace(/'$/, "").trim()
-        : item.trim();
-    const doubleQuoteCounter = item => (item.match(/"/g) || []).length;
-    const replaceSurroundingDoubleQuotes = item => (item.startsWith('"'))
-        ? item.replace(/^"/, "").replace(/"$/, "").trim()
-        : item.trim();
-
-
-    const isQuoteSoMaybeFlagAsInside = (char, c, targetQuote, otherQuote) => {
-        if (char === targetQuote) {
-            if (isInsideQuote[targetQuote]) {
-                if (c > 0 && ssrEngineSettings[c - 1] !== "\\") {
-                    isInsideQuote[targetQuote] = false;
-                }
-            } else if (!isInsideQuote[otherQuote]) {
-                isInsideQuote[targetQuote] = true;
-            }
-            return true;
-        }
-        return false;
-    };
-
-
-    const preventUnclosedQuotes = (item) => {
-        isInsideQuote['"'] = false;
-        isInsideQuote["'"] = false;
-        for (let c = 0; c < item.length; c++) {
-            const char = item[c];
-            isQuoteSoMaybeFlagAsInside(char, c, '"', "'") ||
-            isQuoteSoMaybeFlagAsInside(char, c, "'", '"');
-        }
-        if (isInsideQuote["'"] || isInsideQuote['"']) {
-            throw Error("Malformed SSR engine setting item: " + item);
-        }
-        return item;
-    };
-
-
-    // 1. ------------ If the entire multi-setting-items-stringis surrounded by a single set of double (or single) quotes, strip that away.
-
-    let ssrEngineSettings = ((ssrEngineSettingsString || SSR_DEFAULT_CACHE_SIZE) + "").trim();
-
-    if (ssrEngineSettings.endsWith("'") && singleQuoteCounter(ssrEngineSettings) === 2) {
-        ssrEngineSettings = replaceSurroundingSingleQuotes(ssrEngineSettings);
-    }
-    if (ssrEngineSettings.endsWith('"') && doubleQuoteCounter(ssrEngineSettings) === 2) {
-        ssrEngineSettings = replaceSurroundingDoubleQuotes(ssrEngineSettings);
-    }
-
-
-
-    // 2. The settings string should be split into items on commas, but not on commas that are inside per-item quotes (that still remain after previous step).
-    //      So replace those commas with a placeholder before splitting, and re-insert them after splitting.
-    for (let c = 0; c < ssrEngineSettings.length; c++) {
-        const char = ssrEngineSettings[c];
-        if (
-            !isQuoteSoMaybeFlagAsInside(char, c, '"', "'") &&
-            !isQuoteSoMaybeFlagAsInside(char, c, "'", '"') &&
-            (char === ',' && (isInsideQuote['"'] || isInsideQuote["'"]))
-        ) {
-            ssrEngineSettings = ssrEngineSettings.substring(0, c) + COMMA_PLACEHOLDER + ssrEngineSettings.substring(c + 1);
-            c += COMMA_PLACEHOLDER.length - 1;
-        }
-    }
-    if (isInsideQuote["'"] || isInsideQuote['"']) {
-        throw Error("Malformed SSR engine settings: " + ssrEngineSettings);
-    }
-
-
-    // 3. Split the setting string into items, filter away empty items, trim away spaces or quotes that surround each item,
-    //      and if any of them still has unclosed quotes, throw an error.
-    return ssrEngineSettings
-        .split(/\s*,\s*/)
-        .map(item => ((item || '') + '').trim())
-        .filter(item => !!item)
-        .map(item => item.replace(COMMA_PLACEHOLDER, ","))
-        .map(replaceSurroundingDoubleQuotes)
-        .map(replaceSurroundingSingleQuotes)
-        .map(preventUnclosedQuotes)
-};
-
-
-// Accepts numerical values (which may or may not be in strings), null or undefined, returns number > 0 or null.
-const normalizeSSRMaxThreads = (SSR_MAX_THREADS) => {
-    let ssrMaxThreads;
-    try {
-        ssrMaxThreads = (typeof SSR_MAX_THREADS === 'number' || typeof SSR_MAX_THREADS === 'string')
-            ? parseInt(SSR_MAX_THREADS, 10)
-            : 0;
-    } catch (e) {
-        log.error("Looks like the value of ssrMaxThreads from react4xp.properties (or SSR_MAX_THREADS from react4xp_constants.json) is illegal: " + JSON.stringify(SSR_MAX_THREADS))
-    }
-
-    return (!ssrMaxThreads || isNaN(ssrMaxThreads) || ssrMaxThreads < 1)
-        ? 0
-        : ssrMaxThreads;
-}
-
-
-SSRreact4xp.setup(
-    app.name,
-    `/${R4X_TARGETSUBDIR}`,
-    LIBRARY_NAME,
-    `/${R4X_TARGETSUBDIR}/`,
-    NASHORNPOLYFILLS_FILENAME ? `${NASHORNPOLYFILLS_FILENAME}.js` : null,
-    ENTRIES_FILENAME,
-    EXTERNALS_CHUNKS_FILENAME,
-    COMPONENT_STATS_FILENAME,
-    !!SSR_LAZYLOAD && SSR_LAZYLOAD !== 'false',
-    normalizeSSRMaxThreads(SSR_MAX_THREADS),
-    normalizeSSREngineSettings(SSR_ENGINE_SETTINGS)
-);
+const { LIBRARY_NAME } = require("./react4xp_constants.json");
+// TODO: The above (require) doesn't seem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use dependencies.readResourceAsJson instead!
 
 const BASE_PATHS = {
     part: "parts",
@@ -166,6 +25,8 @@ const templateDescriptorCache = newCache({
     size: 100,
     expire: 600 // 10 minutes before needing a new fetch-and-check from ES (getDescriptorFromTemplate)
 });
+
+
 
 const getDescriptorFromTemplate = (componentType, templateId) =>
     templateDescriptorCache.get(templateId, () => {
@@ -195,71 +56,12 @@ const getDescriptorFromTemplate = (componentType, templateId) =>
     });
 
 
-const bodyHasContainer = (body, react4xpId) => {
+const bodyHasMatchingIdContainer = (body, react4xpId) => {
     const react4xpPattern = new RegExp("<[^>]+\\s+id\\s*=\\s*[\"']" + react4xpId + "[\"']", 'i');
 
     return !!body.match(react4xpPattern);
 };
 
-
-const buildContainer = (react4xpId, content) => `<div id="${react4xpId}">${content || ''}</div>`;
-
-const buildErrorContainer = (heading, message, request, react4xpObj) => {
-    const { jsxPath, react4xpId } = react4xpObj;
-    if (message) log.error(message);
-
-    let msg = (
-        (!request || request.mode === 'live')
-            ? ""
-            : (message || "")
-    );
-
-    msg = msg
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-    let protip = "";
-    if (request) {
-        protip = (request.mode === 'live')
-            ? " or display this page in Content Studio"
-            : '.<br/>' +
-            '<strong>PROTIP!</strong> Some ways to make errors in compiled entries/assets easier to pinpoint: ' +
-            '<ul><li>Rebuild your assets with react4xp development build mode, to make them more readable. Use react4xp.properties, or add this gradle CLI argument: -Pdev</li>' +
-            '<li><a href="https://developer.enonic.com/docs/react4xp/master/hello-react#client_side_rendering" target="_blank">Clientside-render</a> the entry and view it outside of content studio (live or preview mode), then inspect the browser console.</li>' +
-            '<li>If the entry renders fine in clientside mode, this is usually a sign that it (or something it imports) is trying to invoke purely-browser functionality (e.g. document- or window-functions etc), which is not available in SSR. ' +
-            'Simple workaround: in those areas, check for typeof window === undefined or similar, to only use browser-specific functionality in the browser</li></ul>';
-    }
-
-    return `
-    <div class="react4xp-error" style="border:1px solid #8B0000; padding:15px; background-color:#FFB6C1">
-        <style>
-            li,h2,p,a,strong,span { font-family:monospace; }
-            h2 { font-size:20px }
-            li,p,a,strong,span { font-size:13px }
-            a,span.data { color:#8B0000; }
-        </style>
-        <h2 class="react4xp-error-heading">${heading}</h2>
-        <p class="react4xp-error-message">${msg}</p>
-        <div class="react4xp-error-entry">
-           <p>
-               <strong>React4xp entry:</strong><br/>
-               <span class="jsxpath">JsxPath: <span class="data">${jsxPath}</span></span><br/>
-               <span class="id" >ID: <span class="data">${react4xpId}</span></span>
-           </p>
-        </div>
-        <div class="react4xp-error-protip"><p>For more details, see the server log${protip}</p></div>
-    </div>`;
-};
-
-
-const makeErrorMessage = (attribute, component) => `Couldn't construct React4xp data: missing or invalid ${attribute}. ${
-    this.isPage ?
-        "Trying to handle a page controller template without a jsxPath string 'entry' parameter in the constructor - but that's usually okay. However, an in-construtor call to portal.getContent() returned data without a content.page." + attribute + " attribute, so no jsxPath can be derived. Content" :
-        "No jsxPath string 'entry' parameter was given to the React4xp constructor - but that's usually okay. However, component data (either from the 'entry' parameter or from an in-constructor portal.getComponent() call) is missing a component." + attribute + " attribute, so no jsxPath can be derived. Component"
-} data: ${JSON.stringify(component)}`;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -291,7 +93,7 @@ class React4xp {
             //this.component = getComponent();
 
             if (this.jsxPath === "") {
-                throw Error(`Can't initialize Reac4xp component with initParm = ${JSON.stringify(entry)}. XP component object or jsxPath string only, please.`);
+                throw Error(`Can't initialize React4xp component with initParam = ${JSON.stringify(entry)}. XP component object or jsxPath string only, please.`);
             }
 
         } else if (!entry || (typeof entry === 'object' && !Array.isArray(entry))) {
@@ -324,7 +126,7 @@ class React4xp {
             };
             Object.keys(buildingBlockData).forEach(attribute => {
                 if (!buildingBlockData[attribute]) {
-                    throw Error(makeErrorMessage(attribute, this.component));
+                    throw Error(htmlHandler.makeErrorMessage(attribute, this.component));
                 }
             });
 
@@ -440,7 +242,8 @@ class React4xp {
      * @returns The react4xp component itself, for builder-like pattern.
      */
     uniqueId() {
-        return this.setId((this.react4xpId || "") + "_" + Math.floor(Math.random() * 99999999));
+        // Magic numbers: enforces a random 8-character base-64 string, in the range "10000000" - "zzzzzzzz" (78364164096 - 2821109907455)
+        return this.setId((this.react4xpId || "") + ":" + (78364164096 + Math.floor(Math.random() * 2742745743360)).toString(36));
     }
 
     setIsPage(isPage) {
@@ -529,22 +332,37 @@ class React4xp {
      * @param content {string} HTML content that, if included, is inserted into the container with the matching Id.
      * @returns {string} adjusted or generated HTML body with rendered react component.
      */
-    renderTargetContainer(body, content) {
+    renderTargetContainer(body, content, appendErrorContainer = false) {
         this.ensureAndLockId();
 
+        // True if no (or empty) body is supplied:
+        const noBody = ((body || '') + "").replace(/(^\s+)|(\s+$)/g, "") === "";
+        // True if a body is supplied but it contains no matching-ID element:
+        const noMatch = !noBody && !bodyHasMatchingIdContainer(body, this.react4xpId);
+
+        const output = (!noBody && !noMatch)
+            ? undefined
+            : appendErrorContainer
+                ? `<div id="${this.react4xpId}__error__" style="border:1px solid #8B0000; padding:15px; background-color:#FFB6C1">${
+                    content}${
+                    htmlHandler.buildContainer(this.react4xpId)
+                }</div>`
+                : htmlHandler.buildContainer(this.react4xpId, content);
+
+
         // If no (or empty) body is supplied: generate a minimal container body with only a target container element.
-        if (((body || '') + "").replace(/(^\s+)|(\s+$)/g, "") === "") {
-            return buildContainer(this.react4xpId, content);
+        if (noBody) {
+            return output;
         }
 
         // If there is a body but it's missing a target container element:
         // Make a container and insert it right before the closing tag.
-        if (!bodyHasContainer(body, this.react4xpId)) {
-            return HTMLinserter.insertAtEndOfRoot(body, buildContainer(this.react4xpId, content));
+        if (noMatch) {
+            return htmlHandler.insertAtEndOfRoot(body, output);
         }
 
         if (content) {
-            return HTMLinserter.insertInsideContainer(body, content, this.react4xpId);
+            return htmlHandler.insertInsideContainer(body, content, this.react4xpId, appendErrorContainer);
         }
 
         return body;
@@ -560,7 +378,7 @@ class React4xp {
      *  and 'error' an error message string from the Nashorn engine if any error occurred (undefined if successful rendering).
      */
     doRenderSSR = overrideProps => {
-        const result = __.toNativeObject(SSRreact4xp.render(
+        const result = __.toNativeObject(ssrEngine.render(
             this.jsxPath,
             JSON.stringify(overrideProps || this.props),
             JSON.stringify(getComponentChunkNames(this.jsxPath))
@@ -580,11 +398,20 @@ class React4xp {
      * @param body {string} Existing HTML body, for example rendered from thymeleaf.
      * @returns {string} adjusted or generated HTML body with rendered react component.
      */
-    renderSSRIntoContainer(body) {
+    renderSSRIntoContainer(body, request, react4xpObj) {
         const { html, error } = this.doRenderSSR();
         return error
-            ? this.renderTargetContainer(body, buildErrorContainer("React4xp SSR error", error, null, this))
-            : this.renderTargetContainer(body, html);
+            ? this.renderTargetContainer(
+                body,
+                htmlHandler.buildErrorContainer(
+                    "React4xp SSR error",
+                    error, request || null,
+                    react4xpObj || this
+                ),
+                true)
+            : this.renderTargetContainer(
+                body,
+                html);
     }
 
     renderBody = params => {
@@ -730,29 +557,34 @@ class React4xp {
 
             let renderedBody, renderedPageContributions;
 
-            // Content studio or request-less context: always SSR without trigger call or JS sources
+            // Context 1: Content studio or request-less context: always SSR without trigger call or JS sources
             if (!request || request.mode === "edit" || request.mode === "inline") {
-                let { html, error } = react4xp.doRenderSSR();
-                html = !error
-                    ? html
-                    : buildErrorContainer("React4xp SSR error", error, request, react4xp);
 
-                renderedBody = react4xp.renderTargetContainer(body, html);
+                /*
+                // TODO: Almost identical with renderSSRIntoContainer. Reuse?
+                let { html, error } = react4xp.doRenderSSR();
+                renderedBody = error
+                    ? react4xp.renderTargetContainer(body, htmlHandler.buildErrorContainer("React4xp SSR error", error, request, react4xp), true)
+                    : react4xp.renderTargetContainer(body, html);
+                //*/
+                renderedBody = react4xp.renderSSRIntoContainer(body, request, react4xp);
+
+                // TODO: page contributions can be problematic inside CS? Inline the renderPageContributions output into body, here?
                 renderedPageContributions = react4xp.renderPageContributions({
                     pageContributions,
                     clientRender: false,
                     suppressJS: true,
-                });  // TODO: page contributions can be problematic inside CS? Inline the renderPageContributions output into body, here?
+                });
 
-
-            // Live XP view, with SSR:
+            // Context 2: Live XP view, with SSR:
             } else if (!clientRender) {
-                let { html, error } = react4xp.doRenderSSR();
-                html = !error
-                    ? html
-                    : buildErrorContainer("React4xp SSR error", error, request, react4xp)
 
-                renderedBody = react4xp.renderTargetContainer(body, html);
+                // Identical to renderSSRIntoContainer, but needs the error data too
+                let { html, error } = react4xp.doRenderSSR();
+                renderedBody = error
+                    ? react4xp.renderTargetContainer(body, htmlHandler.buildErrorContainer("React4xp SSR error", error, request, react4xp), true)
+                    : react4xp.renderTargetContainer(body, html);
+
                 renderedPageContributions = react4xp.renderPageContributions({
                     pageContributions,
                     clientRender: false,
@@ -762,7 +594,7 @@ class React4xp {
                 });
 
 
-            // Live XP view, no SSR, all client-side rendered:
+            // Context 3: Live XP view, no SSR, all client-side rendered:
             } else {
                 renderedBody = react4xp.renderTargetContainer(body),
                 renderedPageContributions = react4xp.renderPageContributions({
@@ -789,7 +621,7 @@ class React4xp {
             };
 
             return {
-                body: buildErrorContainer(
+                body: htmlHandler.buildErrorContainer(
                     "React4xp error during rendering",
                     e.message,
                     request,
