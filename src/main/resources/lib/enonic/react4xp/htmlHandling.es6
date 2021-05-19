@@ -28,7 +28,7 @@ module.exports = {
                 '<strong>PROTIP!</strong> Some ways to make errors in compiled entries/assets easier to pinpoint: ' +
                 '<ul><li>Rebuild your assets with react4xp development build mode, to make them more readable. Use react4xp.properties, or add this gradle CLI argument: -Pdev</li>' +
                 '<li><a href="https://developer.enonic.com/docs/react4xp/master/hello-react#client_side_rendering" target="_blank">Clientside-render</a> the entry and view it outside of content studio (live or preview mode), then inspect the browser console.</li>' +
-                '<li>If the entry renders fine in clientside mode, this is usually a sign that it (or something it imports) is trying to invoke purely-browser functionality (e.g. document- or window-functions etc), which is not available in SSR. ' +
+                '<li>If the entry renders fine in clientside render mode and/or works when hydrating (basically: is visible below here), this is usually a sign that the entry (or something it imports) is trying to invoke purely-browser functionality (e.g. document- or window-functions etc), which is not available in SSR. ' +
                 'Simple workaround: in those areas, check for typeof window === undefined or similar, to only use browser-specific functionality in the browser</li></ul>';
         }
 
