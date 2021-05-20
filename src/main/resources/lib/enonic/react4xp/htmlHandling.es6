@@ -18,7 +18,7 @@ module.exports = {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
 
-        let protip = "";
+        let protip = ".</p>";
         if (request) {
             protip = (request.mode === 'live')
                 ? " or display this page in Content Studio.</p>"
