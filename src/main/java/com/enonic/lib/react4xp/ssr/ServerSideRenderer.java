@@ -61,7 +61,7 @@ public class ServerSideRenderer implements ScriptBean {
                         ? Runtime.getRuntime().availableProcessors()
                         : ssrMaxThreads;
 
-                LOG.info("Setting up SSR with " + threadCount + " engine" + (threadCount == 1 ? "" : "s") + "...");
+                LOG.info("Setting up " + (lazyload ? "lazy-loading " : "") + "SSR with " + threadCount + " engine" + (threadCount == 1 ? "" : "s") + "...");
 
                 config = new Config(appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksExternalsJsonFilename, statsComponentsFilename, userAddedNashornpolyfillsFilename, lazyload, threadCount);
 
@@ -89,7 +89,7 @@ public class ServerSideRenderer implements ScriptBean {
 
     private void setPoolConfig(Integer threadCount) {
         poolConfig.setLifo(true);
-        poolConfig.setMaxWaitMillis(20000);
+        poolConfig.setMaxWaitMillis(200000);
         poolConfig.setTestOnBorrow(false);
         poolConfig.setTestOnReturn(true);
         poolConfig.setMaxIdle(threadCount);
