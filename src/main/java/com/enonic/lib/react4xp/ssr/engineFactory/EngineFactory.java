@@ -1,6 +1,5 @@
 package com.enonic.lib.react4xp.ssr.engineFactory;
 
-import com.enonic.lib.react4xp.ssr.ServerSideRenderer;
 import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
 import com.enonic.lib.react4xp.ssr.resources.ResourceReader;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
@@ -91,30 +90,48 @@ public class EngineFactory {
      * Scripts found in chunks.json depend on the previous and must be the last!
      * nashornPolyfills.js script is the basic dependency, and will be added at the very beginning
      * outside of this list. */
-    public NashornScriptEngine buildEngine() throws IOException, ScriptException {
+    public NashornScriptEngine buildEngine(long id) throws IOException, ScriptException {
         NashornScriptEngine engine = engineBuilder.buildEngine();
 
+        // if (!IS_PRODMODE) {
+        LOG.info("#" + id + ": loading polyfill basics");
+        // }
+
         try {
+
             engine.eval(POLYFILL_BASICS);
+
+            // if (!IS_PRODMODE) {
+            LOG.info("#" + id + ": successfully loaded polyfill basics");
+            // }
 
         } catch (ScriptException e) {
             ErrorHandler errorHandler = new ErrorHandler();
             // LOG.error(errorHandler.getLoggableStackTrace(e, e.getClass().getSimpleName() + " in " + EngineFactory.class.getName() + ".initEngine"));
+            LOG.error(EngineFactory.class.getName() + "#" + id + ".buildEngine:");
             LOG.info(errorHandler.getCodeDump(e, POLYFILL_BASICS, null));
             throw e;
         }
 
         String assetContent = null;
         try {
+            // if (!IS_PRODMODE) {
+            LOG.info("#" + id + ": loading asset '" + POLYFILL_REACT4XP_DEFAULT_FILE + "'");
+            // }
+
             assetContent =  resourceReader.readResource(POLYFILL_REACT4XP_DEFAULT_FILE);
             engine.eval(assetContent);
+
+            // if (!IS_PRODMODE) {
+            LOG.info("#" + id + ": successfully loaded '" + POLYFILL_REACT4XP_DEFAULT_FILE + "'");
+            // }
 
         } catch (ScriptException e1) {
             ErrorHandler errorHandler = new ErrorHandler();
             LOG.error(
                     errorHandler.getLoggableStackTrace(e1, null) + "\n\n" +
                             e1.getClass().getSimpleName()  + ": " + e1.getMessage() + "\n" +
-                            "in " + ServerSideRenderer.class.getName() + ".loadAsset\n" +
+                            "in " + EngineFactory.class.getName() + "#" + id + ".buildEngine\n" +
                             "assetName = '" + POLYFILL_REACT4XP_DEFAULT_FILE + "'\n" +
                             errorHandler.getSolutionTips());
             LOG.info(errorHandler.getCodeDump(e1, assetContent, POLYFILL_REACT4XP_DEFAULT_FILE));

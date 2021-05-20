@@ -70,13 +70,17 @@ public class AssetLoader {
     /** Load both entry assets and JS dependency chunks into the Nashorn engine */
     private void loadAssetIntoEngine(String assetName, NashornScriptEngine engine) {
 
-        //if (!IS_PRODMODE) {
+        // if (!IS_PRODMODE) {
         LOG.info(this + ": loading asset '" + assetName + "'");
-        //}
+        // }
 
         try {
             String content = resourceReader.readResource(config.SCRIPTS_HOME + "/" + assetName);
             engine.eval(content);
+
+            // if (!IS_PRODMODE) {
+            LOG.info(this + ": successfully loaded '" + assetName + "'");
+            // }
 
             markAssetLoaded(assetName);
 

@@ -5,15 +5,47 @@ const contentLib = require('/lib/xp/content');
 const {getAndMergePageContributions} = require('./pageContributions');
 const {getComponentChunkNames} = require('./dependencies');
 const {getAssetRoot} = require('./serviceRoots');
-const htmlHandler = require('./htmlHandling');
 
-const ssrEngine = require('./ssrEngine').get();
+const htmlHandler = require('./htmlHandling');
+const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
+
+const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
+
+const { normalizeSSREngineSettings, normalizeSSRMaxThreads } = require('./normalizing');
+
+const SSR_DEFAULT_CACHE_SIZE = 1000;
 
 // react4xp_constants.json is not part of lib-react4xp:
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: use <projectRoot>/react4xp.properties and the build.gradle from https://www.npmjs.com/package/react4xp
-const { LIBRARY_NAME } = require("./react4xp_constants.json");
+const {
+    LIBRARY_NAME,
+    R4X_TARGETSUBDIR,
+    NASHORNPOLYFILLS_FILENAME,
+    EXTERNALS_CHUNKS_FILENAME,
+    COMPONENT_STATS_FILENAME,
+    ENTRIES_FILENAME,
+    SSR_LAZYLOAD,                   // <-- lazyLoading main switch: true/false
+    SSR_MAX_THREADS,                // <-- set to 0/undefined/null for unlimited, otherwise a number for an upper concurrency limit (to save memory)
+    SSR_ENGINE_SETTINGS,            // <-- set to 0 to switch off nashorn cache, otherwise cache size (number) or full settings (comma-separated string referring to https://github.com/openjdk/nashorn/blob/main/src/org.openjdk.nashorn/share/classes/org/openjdk/nashorn/internal/runtime/resources/Options.properties )
+} = require("./react4xp_constants.json");
 // TODO: The above (require) doesn't seem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use dependencies.readResourceAsJson instead!
+
+
+SSRreact4xp.setup(
+    app.name,
+    `/${R4X_TARGETSUBDIR}`,
+    LIBRARY_NAME,
+    `/${R4X_TARGETSUBDIR}/`,
+    NASHORNPOLYFILLS_FILENAME ? `${NASHORNPOLYFILLS_FILENAME}.js` : null,
+    ENTRIES_FILENAME,
+    EXTERNALS_CHUNKS_FILENAME,
+    COMPONENT_STATS_FILENAME,
+    !!SSR_LAZYLOAD && SSR_LAZYLOAD !== 'false',
+    normalizeSSRMaxThreads(SSR_MAX_THREADS),
+    normalizeSSREngineSettings(SSR_ENGINE_SETTINGS, SSR_DEFAULT_CACHE_SIZE)
+);
+
 
 const BASE_PATHS = {
     part: "parts",
@@ -358,11 +390,11 @@ class React4xp {
         // If there is a body but it's missing a target container element:
         // Make a container and insert it right before the closing tag.
         if (noMatch) {
-            return htmlHandler.insertAtEndOfRoot(body, output);
+            return HTMLinserter.insertAtEndOfRoot(body, output);
         }
 
         if (content) {
-            return htmlHandler.insertInsideContainer(body, content, this.react4xpId, appendErrorContainer);
+            return HTMLinserter.insertInsideContainer(body, content, this.react4xpId, appendErrorContainer);
         }
 
         return body;
@@ -378,7 +410,7 @@ class React4xp {
      *  and 'error' an error message string from the Nashorn engine if any error occurred (undefined if successful rendering).
      */
     doRenderSSR = overrideProps => {
-        const result = __.toNativeObject(ssrEngine.render(
+        const result = __.toNativeObject(SSRreact4xp.render(
             this.jsxPath,
             JSON.stringify(overrideProps || this.props),
             JSON.stringify(getComponentChunkNames(this.jsxPath))
@@ -405,8 +437,9 @@ class React4xp {
                 body,
                 htmlHandler.buildErrorContainer(
                     "React4xp SSR error",
-                    error, request || null,
-                    react4xpObj || this
+                    error,
+                    request,
+                    react4xpObj
                 ),
                 true)
             : this.renderTargetContainer(
@@ -452,7 +485,7 @@ class React4xp {
         this.ensureAndLockBeforeRendering();
 
         // TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
-        const bodyEnd = (!suppressJS && !__error)
+        const bodyEnd = (!suppressJS)
             ? [
                 // Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
                 `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
@@ -478,7 +511,7 @@ class React4xp {
         if (__error) {
             let message = (typeof __error === 'string')
                 ? __error
-                : "React4xp error"
+                : ""
             message = (message + "\\n" +
                 "Entry: jsxPath='" + this.jsxPath + "', ID='" + this.react4xpId + "'\\n\\n" +
                 "For more details, display this page in XP preview mode or Content Studio, and/or see the server log.")
@@ -486,7 +519,7 @@ class React4xp {
                 .replace(/>/g, "&gt;")
                 .replace(/"/g, "'")
             bodyEnd.push(
-                `<script>console.error("${message}");</script>`
+                `<script>console.error("React4xp SSR error. ${message}");</script>`
             );
         }
 

@@ -44,7 +44,7 @@ public class Renderer {
 
         this.config = config;
 
-        engine = engineFactory.buildEngine();
+        engine = engineFactory.buildEngine(id);
 
         LinkedList<String> dependencies = new ChunkDependencyParser(resourceReader, id).getScriptDependencyNames(config);
         if (config.USERADDED_NASHORNPOLYFILLS_FILENAME != null && !"".equals(config.USERADDED_NASHORNPOLYFILLS_FILENAME.trim())) {

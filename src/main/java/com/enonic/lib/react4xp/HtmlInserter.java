@@ -88,11 +88,7 @@ public class HtmlInserter {
                                                                                                                         LOG.info("APPENDING ERROR CONTAINER");
                 Element existingTarget = target.clone();
 
-                Document emptyDoc = saxBuilder.build(new StringReader(""));
-                Element emptyRoot = emptyDoc.getRootElement();
-                emptyRoot.detach();
-
-                target.setContent(emptyRoot);
+                target.setText(null);
                 target.setAttribute("id", id + "__error__");
                 target.setAttribute("style", "border:1px solid #8B0000; padding:15px; background-color:#FFB6C1");
                 target.addContent(payloadRoot);
@@ -107,11 +103,11 @@ public class HtmlInserter {
         } catch (JDOMException | IOException | XPathException e) {
             LOG.error("\n\n" +
                     "ERROR: [ " + e.getClass().getName() + " ] ...when trying to " + (appendErrorContainer ? "append error message" : "insert") + " HTML" +
-                    (payload.length() < 1000 ?
+                    (payload.length() < 10000 ?
                             "...\n\n" + payload + "\n\n..." :
                             " ") +
                     "at element with ID '" + id + "' into body" +
-                    (body.length() < 1000 ?
+                    (body.length() < 10000 ?
                             ":\n\n" + body + "\n\n" :
                             "") +
                     "\nReturning the submitted body unchanged.", e);
