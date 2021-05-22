@@ -13,7 +13,7 @@ const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer')
 
 const { normalizeSSREngineSettings, normalizeSSRMaxThreads } = require('./normalizing');
 
-const SSR_DEFAULT_CACHE_SIZE = 1000;
+const SSR_DEFAULT_CACHE_SIZE = 0;
 
 // react4xp_constants.json is not part of lib-react4xp:
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
