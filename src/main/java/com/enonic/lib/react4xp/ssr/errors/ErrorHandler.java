@@ -3,7 +3,6 @@ package com.enonic.lib.react4xp.ssr.errors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.script.ScriptException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -14,6 +13,7 @@ public class ErrorHandler {
     private final static Logger LOG = LoggerFactory.getLogger( ErrorHandler.class );
 
     public static final String KEY_ERROR = "error";
+    public static final String KEY_STACKTRACE = "stack";
 
     public String getCleanErrorMessage(Exception e) {
         return e.getMessage().replaceAll(" in <eval> at line number \\d+ at column number \\d++", "");
@@ -29,10 +29,10 @@ public class ErrorHandler {
     }
 
     public String getSolutionTips() {
-        return "\nSOLUTION TIPS: The previous error message may refer to lines in compiled/mangled code. To increase readability, you can try react4xp clientside-rendering or building react4xp with buildEnv = development or gradle CLI argument -Pdev. Remember to clear all cached behavior first (stop continuous builds, clear/rebuild your project, restart the XP server, clear browser cache). Actual line numbers in compiled JS source files tends to be referred in the stack trace above: look for '(<eval>: [lineNumber])' on the lines below '...NativeError.java...':.\n\n";
+        return "\nSOLUTION TIPS: The previous error message may refer to lines in compiled/mangled code. To increase readability, you can try react4xp clientside-rendering or building react4xp with buildEnv = development or gradle CLI argument -Pdev. Remember to clear all cached behavior first (stop continuous builds, clear/rebuild your project, restart the XP server, clear browser cache).\n\n";
     }
 
-    public String getCodeDump(ScriptException e, String code, String filename) throws ScriptException {
+    public String getCodeDump(String code, String filename) {
         String fileLabel = (filename != null)
                 ? " '" + filename + "'"
                 : "";

@@ -4,12 +4,12 @@ import com.enonic.lib.react4xp.ssr.Config;
 import com.enonic.lib.react4xp.ssr.ServerSideRenderer;
 import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
 import com.enonic.lib.react4xp.ssr.errors.RenderException;
+import com.enonic.lib.react4xp.ssr.pool.Renderer;
 import com.enonic.xp.server.RunMode;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.script.ScriptException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -76,7 +76,7 @@ public class AssetLoader {
 
         try {
             String content = resourceReader.readResource(config.SCRIPTS_HOME + "/" + assetName);
-            engine.eval(content);
+            Renderer.evalAndGetByKey(engine, content, null);
 
             // if (!IS_PRODMODE) {
             LOG.info(this + ": successfully loaded '" + assetName + "'");
@@ -87,17 +87,17 @@ public class AssetLoader {
         } catch (IOException e1) {
             throw new RenderException(e1);
 
-        } catch (ScriptException e2) {
+        } catch (RenderException e2) {
             ErrorHandler errorHandler = new ErrorHandler();
-            String cleanErrorMessage = errorHandler.getCleanErrorMessage(e2);
             LOG.error(
-                    errorHandler.getLoggableStackTrace(e2, cleanErrorMessage) + "\n\n" +
-                            e2.getClass().getSimpleName() + ": " + cleanErrorMessage + "\n" +
+                    (e2.getStacktraceString() == null ? "" : e2.getStacktraceString() + "\n") +
+                            errorHandler.getLoggableStackTrace(e2, e2.getMessage()) + "\n\n" +
+                            e2.getClass().getSimpleName() + ": " + e2.getMessage() + "\n" +
                             "in " + ServerSideRenderer.class.getName() + ".loadAsset\n" +
                             "assetName = '" +assetName + "'\n" +
                             errorHandler.getSolutionTips());
 
-            throw new RenderException(e2, cleanErrorMessage);
+            throw e2;
         }
     }
 
