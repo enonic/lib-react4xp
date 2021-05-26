@@ -1,9 +1,11 @@
 module.exports = {
     buildContainer: (react4xpId, content) => `<div id="${react4xpId}">${content || ''}</div>`,
 
-    buildErrorContainer: (heading, message, request, react4xpObj) => {
-        const {jsxPath, react4xpId} = react4xpObj || {jsxPath: "N/A", react4xpId: "N/A"};
-        if (message) log.error(message);
+    buildErrorContainer: (heading, message, request, react4xpObj, hasOuterBorder) => {
+        const {jsxPath, react4xpId} = react4xpObj || {};
+        /*if (message) {
+            log.error(message);
+        }*/
 
         let msg = (
             (!request || request.mode === 'live')
@@ -18,20 +20,19 @@ module.exports = {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;");
 
-        let protip = ".</p>";
+        let protip = "For more details, see the server log.";
         if (request) {
             protip = (request.mode === 'live')
-                ? " or display this page in Content Studio.</p>"
-                : '.</p>' +
-                '<p><strong>PROTIP!</strong> Some ways to make errors in compiled entries/assets easier to pinpoint:</p>' +
-                '<ul><li>Rebuild your assets with react4xp development build mode, to make them more readable. Use react4xp.properties, or add this gradle CLI argument: -Pdev</li>' +
-                '<li><a href="https://developer.enonic.com/docs/react4xp/master/hello-react#client_side_rendering" target="_blank">Clientside-render</a> the entry and view it outside of content studio (live or preview mode), then inspect the browser console.</li>' +
-                '<li>If the entry renders fine in clientside render mode and/or works when hydrating (basically: is visible below here), this is usually a sign that the entry (or something it imports) is trying to invoke purely-browser functionality (e.g. document- or window-functions etc), which is not available in SSR. ' +
-                'Simple workaround: in those areas, check for typeof navigator === undefined or similar, to only use browser-specific functionality in the browser</li></ul>';
+                ? "For more details, see the server log or preview this page in Content Studio."
+                : 'For more details, see the server log.\\n\\nPROTIPS: Some ways to make errors in compiled entries/assets easier to pinpoint:\\n' +
+                    '- Rebuild your assets with react4xp development build mode, to make them more readable. Use react4xp.properties, or add this gradle CLI argument: -Pdev\\n' +
+                    '- Clientside-render the entry (https://developer.enonic.com/docs/react4xp/master/hello-react#client_side_rendering) and view it outside of content studio (live or preview mode), then inspect the browser console.\\n' +
+                    '- If the entry renders fine in clientside render mode and/or is visualized when hydrating despite a failing SSR, this is usually a sign that the entry (or something it imports) is trying to invoke purely-browser functionality (e.g. document- or window-functions etc), which is not available in SSR. ' +
+                    'Simple workaround: in those areas, check for typeof navigator === undefined or similar, to only use browser-specific functionality in the browser.';
         }
 
         return `
-        <div class="react4xp-error" style="background-color:#FFB6C1; margin-bottom:15px">
+        <div class="react4xp-error" style="${hasOuterBorder ? '' : "1px solid #8B0000; padding:15px; "}background-color:#FFB6C1; margin-bottom:15px">
             <style>
                 li,h2,p,a,strong,span { font-family:monospace; }
                 h2 { font-size:17px }
@@ -39,14 +40,23 @@ module.exports = {
                 a,span.data { color:#8B0000; }
             </style>
             <h2 class="react4xp-error-heading">${heading}</h2>
-            <p class="react4xp-error-message">${msg}</p>
-            <div class="react4xp-error-entry">
-               <p><strong>React4xp entry:</strong></p>
-               <p class="jsxpath">JsxPath: <span class="data">${jsxPath}</span></p>
-               <p class="id" >ID: <span class="data">${react4xpId}</span></p>
-            </div>
-            <div class="react4xp-error-protip"><p>For more details, see the server log${protip}</div>
-        </div>`;
+            ${msg 
+                ? `<p class="react4xp-error-message">${msg}</p>` 
+                : ''
+            }
+            ${react4xpObj
+                ? '<div class="react4xp-error-entry"><p><strong>React4xp entry:</strong></p>' + 
+                        `<p className="jsxpath">JsxPath: <span className="data">${jsxPath}</span></p>` +
+                        `<p className="id" >ID: <span className="data">${react4xpId}</span></p></div>`
+                : ''
+            }
+        </div>
+        <script>console.error("${heading}${msg ? `:\\n${msg}` : ''}${
+            react4xpObj
+                ? '\\n\\nJsxPath: ' + jsxPath + "\\nID: " + react4xpId
+                : ''
+        }\\n\\n${protip}");</script>
+`;
     },
 
     makeErrorMessage: (attribute, component) => `Couldn't construct React4xp data: missing or invalid ${attribute}. ${

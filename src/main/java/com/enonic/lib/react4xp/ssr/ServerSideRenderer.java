@@ -83,7 +83,6 @@ public class ServerSideRenderer implements ScriptBean {
                 isInitialized = true;
             }
         }
-
     }
 
 

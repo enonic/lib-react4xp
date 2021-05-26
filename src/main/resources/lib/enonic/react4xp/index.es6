@@ -410,11 +410,16 @@ class React4xp {
      *  and 'error' an error message string from the Nashorn engine if any error occurred (undefined if successful rendering).
      */
     doRenderSSR = overrideProps => {
-        const result = __.toNativeObject(SSRreact4xp.render(
-            this.jsxPath,
-            JSON.stringify(overrideProps || this.props),
-            JSON.stringify(getComponentChunkNames(this.jsxPath))
-        ));
+        let result = {};
+        try {
+            result = __.toNativeObject(SSRreact4xp.render(
+                this.jsxPath,
+                JSON.stringify(overrideProps || this.props),
+                JSON.stringify(getComponentChunkNames(this.jsxPath))
+            ));
+        } catch (e) {
+            result.error = e.message;
+        }
 
         if (result.error && !this.react4xpId) {
             this.react4xpId = "react4xp_error";
@@ -439,7 +444,8 @@ class React4xp {
                     "React4xp SSR error",
                     error,
                     request,
-                    react4xpObj
+                    react4xpObj,
+                    false
                 ),
                 true)
             : this.renderTargetContainer(
@@ -448,14 +454,17 @@ class React4xp {
     }
 
     renderBody = params => {
-        // TODO: Page templates might be preferrable as standalones - that is, not need to be inserted into a container, but be able to encompass an entire DOM with <html> as the outer returned element. This is tricky: on SSR, doRenderSSR can be used, but how to do that on client-side react.render (and possibly worse, .hydrate)? And how to separate between them? isPage is NOT enough, since a page template might be both standalone or inserted.
-        // if (this.isPage) {
-        //    return this.doRenderSSR();
-        // }
-        const {body, clientRender} = params || {};
-        return clientRender
-            ? this.renderTargetContainer(body)
-            : this.renderSSRIntoContainer(body);
+        // The rendered body depends on the rendered context:
+        // SSR is default behavior, but can be overriden by clientRender = true - UNLESS a supplied request object (if any) signals an XP view mode of 'inline' or 'edit'.
+        const {body, clientRender, request} = params || {};
+        const viewMode = (request || {}).mode;
+        return (
+            !clientRender
+            ||
+            (viewMode === 'edit' && viewMode === 'inline')
+        )
+            ? this.renderSSRIntoContainer(body, request, this)
+            : this.renderTargetContainer(body);
     };
 
 
@@ -477,54 +486,65 @@ class React4xp {
      *      TODO: Add option for more graceful failure? Render if error is true, instead of suppressing the trigger and displaying the error placeholder?
      */
     renderPageContributions = params => {
-        const {pageContributions, clientRender, suppressJS, __error} = params || {};
-        const command = clientRender
-            ? 'render'
-            : 'hydrate';
+        const {pageContributions, clientRender, request} = params || {};
 
-        this.ensureAndLockBeforeRendering();
+        let output = null;
+        try {
 
-        // TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
-        const bodyEnd = (!suppressJS)
-            ? [
-                // Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
-                `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
+            // Context 1: Content studio or request-less context: always SSR without trigger call or JS sources.
+            const suppressJS = (!request || request.mode === "edit" || request.mode === "inline");
 
-                // Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props.
-                // Signature: <command>(entry, id, props?, isPage, hasRegions)
-                `
+            const command = clientRender
+                ? 'render'
+                : 'hydrate';
+
+            this.ensureAndLockBeforeRendering();
+
+            // TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
+            const bodyEnd = (!suppressJS)
+                ? [
+                    // Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
+                    `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
+
+                    // Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props.
+                    // Signature: <command>(entry, id, props?, isPage, hasRegions)
+                    `
 <script>${
-                    LIBRARY_NAME}.CLIENT.${command}(${
-                    LIBRARY_NAME}['${this.jsxPath}'],${
-                    JSON.stringify(this.react4xpId)},${
-                    this.props
-                        ? JSON.stringify(this.props)
-                        : 'null'
-                }${
-                    (this.isPage || this.hasRegions)
-                        ? `,${this.isPage},${this.hasRegions}`
-                        : ''
-                });</script>`
-            ]
-            : [];
+                        LIBRARY_NAME}.CLIENT.${command}(${
+                        LIBRARY_NAME}['${this.jsxPath}'],${
+                        JSON.stringify(this.react4xpId)},${
+                        this.props
+                            ? JSON.stringify(this.props)
+                            : 'null'
+                    }${
+                        (this.isPage || this.hasRegions)
+                            ? `,${this.isPage},${this.hasRegions}`
+                            : ''
+                    });</script>`
+                ]
+                : [];
 
-        if (__error) {
-            let message = (typeof __error === 'string')
-                ? __error
-                : ""
-            message = (message + "\\n" +
-                "Entry: jsxPath='" + this.jsxPath + "', ID='" + this.react4xpId + "'\\n\\n" +
-                "For more details, display this page in XP preview mode or Content Studio, and/or see the server log.")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "'")
-            bodyEnd.push(
-                `<script>console.error("React4xp SSR error. ${message}");</script>`
-            );
+            output = getAndMergePageContributions(this.jsxPath, pageContributions, {bodyEnd}, suppressJS);
+
+        } catch (e) {
+            log.error(e);
+            const { pageContributions } = params || {};
+            const {headBegin, headEnd, bodyBegin, bodyEnd } = pageContributions || {};
+            output = {
+                headBegin,
+                headEnd,
+                bodyEnd,
+                bodyBegin: [
+                    ...(bodyBegin || []),
+                    htmlHandler.buildErrorContainer(
+                        "React4xp renderPageContributions error",
+                        e.message,
+                        request,
+                        this
+                    )
+                ],
+            };
         }
-
-        const output = getAndMergePageContributions(this.jsxPath, pageContributions, { bodyEnd }, suppressJS);
-
     	return output;
     };
 
@@ -588,59 +608,19 @@ class React4xp {
 
             const {body, pageContributions, clientRender} = options || {};
 
-            let renderedBody, renderedPageContributions;
-
-            // Context 1: Content studio or request-less context: always SSR without trigger call or JS sources
-            if (!request || request.mode === "edit" || request.mode === "inline") {
-
-                /*
-                // TODO: Almost identical with renderSSRIntoContainer. Reuse?
-                let { html, error } = react4xp.doRenderSSR();
-                renderedBody = error
-                    ? react4xp.renderTargetContainer(body, htmlHandler.buildErrorContainer("React4xp SSR error", error, request, react4xp), true)
-                    : react4xp.renderTargetContainer(body, html);
-                //*/
-                renderedBody = react4xp.renderSSRIntoContainer(body, request, react4xp);
-
-                // TODO: page contributions can be problematic inside CS? Inline the renderPageContributions output into body, here?
-                renderedPageContributions = react4xp.renderPageContributions({
+            return {
+                ...options,
+                body: react4xp.renderBody({
+                    body,
+                    clientRender,
+                    request
+                }),
+                pageContributions: react4xp.renderPageContributions({
                     pageContributions,
-                    clientRender: false,
-                    suppressJS: true,
-                });
-
-            // Context 2: Live XP view, with SSR:
-            } else if (!clientRender) {
-
-                // Identical to renderSSRIntoContainer, but needs the error data too
-                let { html, error } = react4xp.doRenderSSR();
-                renderedBody = error
-                    ? react4xp.renderTargetContainer(body, htmlHandler.buildErrorContainer("React4xp SSR error", error, request, react4xp), true)
-                    : react4xp.renderTargetContainer(body, html);
-
-                renderedPageContributions = react4xp.renderPageContributions({
-                    pageContributions,
-                    clientRender: false,
-                    __error: (request.mode === 'preview')
-                        ? error
-                        : (!!error) // In live mode, the actual error message is suppressed in favor of a generic one, by just setting it truthy here
-                });
-
-
-            // Context 3: Live XP view, no SSR, all client-side rendered:
-            } else {
-                renderedBody = react4xp.renderTargetContainer(body),
-                renderedPageContributions = react4xp.renderPageContributions({
-                    pageContributions,
-                    clientRender
-                });
+                    clientRender,
+                    request
+                })
             }
-
-            const output = {
-                body: renderedBody,
-                pageContributions: renderedPageContributions
-            }
-            return output;
 
         } catch (e) {
             log.error(e);
