@@ -85,7 +85,6 @@ public class HtmlInserter {
             payloadRoot.detach();
 
             if (appendErrorContainer) {
-                                                                                                                        LOG.info("APPENDING ERROR CONTAINER");
                 Element existingTarget = target.clone();
 
                 target.setText(null);

@@ -151,7 +151,7 @@ public class ServerSideRenderer implements ScriptBean {
 
             try {
                 // If an error occurred, force-init a new Renderer by borrowing one Renderer in excess of the available ones - enforcing one re-init.
-                if (result == null || result.containsKey(ErrorHandler.KEY_ERROR) && !config.LAZYLOAD) {
+                if (result == null || result.containsKey(ErrorHandler.KEY_ERROR)) { // && !config.LAZYLOAD) {
                     asyncInitRenderers(rendererPool.getNumIdle() + 1);
                 }
             } catch (Exception e2) {

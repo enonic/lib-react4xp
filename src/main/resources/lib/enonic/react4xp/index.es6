@@ -461,7 +461,7 @@ class React4xp {
         return (
             !clientRender
             ||
-            (viewMode === 'edit' && viewMode === 'inline')
+            viewMode === 'edit' || viewMode === 'inline'
         )
             ? this.renderSSRIntoContainer(body, request, this)
             : this.renderTargetContainer(body);

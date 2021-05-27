@@ -45,17 +45,18 @@ module.exports = {
                 : ''
             }
             ${react4xpObj
-                ? '<div class="react4xp-error-entry"><p><strong>React4xp entry:</strong></p>' + 
-                        `<p className="jsxpath">JsxPath: <span className="data">${jsxPath}</span></p>` +
-                        `<p className="id" >ID: <span className="data">${react4xpId}</span></p></div>`
+                ? '<p class="react4xp-error-entry">' + 
+                        `<span class="jsxpath">Entry jsxPath: <span class="data">${jsxPath}</span></span><br/>` +
+                        `<span class="id" >ID: <span class="data">${react4xpId}</span></span>` +
+                  '</p>'
                 : ''
             }
+            <script>console.error("${heading}${msg ? `:\\n${msg}` : ''}${
+                react4xpObj
+                    ? '\\n\\nJsxPath: ' + jsxPath + "\\nID: " + react4xpId
+                    : ''
+            }\\n\\n${protip}");</script>
         </div>
-        <script>console.error("${heading}${msg ? `:\\n${msg}` : ''}${
-            react4xpObj
-                ? '\\n\\nJsxPath: ' + jsxPath + "\\nID: " + react4xpId
-                : ''
-        }\\n\\n${protip}");</script>
 `;
     },
 
