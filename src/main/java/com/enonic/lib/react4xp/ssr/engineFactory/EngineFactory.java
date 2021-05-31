@@ -102,7 +102,7 @@ public class EngineFactory {
             Renderer.evalAndGetByKey(engine, POLYFILL_BASICS, null);
 
             // if (!IS_PRODMODE) {
-            LOG.info("#" + id + ": successfully loaded polyfill basics");
+            LOG.info("#" + id + ": ...polyfill basics ok.");
             // }
 
         } catch (RenderException e) {
@@ -123,7 +123,7 @@ public class EngineFactory {
             Renderer.evalAndGetByKey(engine, assetContent, null);
 
             // if (!IS_PRODMODE) {
-            LOG.info("#" + id + ": successfully loaded '" + POLYFILL_REACT4XP_DEFAULT_FILE + "'");
+            LOG.info("#" + id + ": ...'" + POLYFILL_REACT4XP_DEFAULT_FILE + "' ok.");
             // }
 
         } catch (RenderException e1) {

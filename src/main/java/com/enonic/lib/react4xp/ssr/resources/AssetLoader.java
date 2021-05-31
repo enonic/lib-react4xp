@@ -79,7 +79,7 @@ public class AssetLoader {
             Renderer.evalAndGetByKey(engine, content, null);
 
             // if (!IS_PRODMODE) {
-            LOG.info(this + ": successfully loaded '" + assetName + "'");
+            LOG.info(this + ": ...'" + assetName + "' ok.");
             // }
 
             markAssetLoaded(assetName);
