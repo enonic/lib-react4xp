@@ -122,6 +122,10 @@ Gradle will build the library and install it into the local cache, available for
 ```groovy
 dependencies {
     include 'com.enonic.lib:lib-react4xp:###LIB_VERSION###-SNAPSHOT'
+    
+    // Depending on your setup, it's likely you also need this,
+    // to enable the JSON handling in react4xp.gradle:
+    compile group: 'org.json', name: 'json', version: '20210307'
 }
 ```
 
