@@ -20,6 +20,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
+import static com.enonic.lib.react4xp.ssr.errors.ErrorHandler.KEY_ERROR;
+import static com.enonic.lib.react4xp.ssr.errors.ErrorHandler.KEY_STACKTRACE;
+
 
 public class Renderer {
     private final static Logger LOG = LoggerFactory.getLogger( Renderer.class );
@@ -39,25 +42,31 @@ public class Renderer {
         this.id = id;
 
         // if (!IS_PRODMODE) {
-        LOG.info(this + ": starting init...");
+        LOG.info(this + ": starting init" + (config.LAZYLOAD ? " (lazyloading)" : "") + "...");
         // }
 
         this.config = config;
 
-        engine = engineFactory.buildEngine();
+        try {
+            engine = engineFactory.buildEngine(id);
 
-        LinkedList<String> dependencies = new ChunkDependencyParser(resourceReader, id).getScriptDependencyNames(config);
-        if (config.USERADDED_NASHORNPOLYFILLS_FILENAME != null && !"".equals(config.USERADDED_NASHORNPOLYFILLS_FILENAME.trim())) {
-            dependencies.addFirst(config.USERADDED_NASHORNPOLYFILLS_FILENAME);
+            LinkedList<String> dependencies = new ChunkDependencyParser(resourceReader, id).getScriptDependencyNames(config);
+            if (config.USERADDED_NASHORNPOLYFILLS_FILENAME != null && !"".equals(config.USERADDED_NASHORNPOLYFILLS_FILENAME.trim())) {
+                dependencies.addFirst(config.USERADDED_NASHORNPOLYFILLS_FILENAME);
+            }
+
+            assetLoader = new AssetLoader(resourceReader, config, id);
+
+            assetLoader.loadAssetsIntoEngine(dependencies, engine);
+
+            // if (!IS_PRODMODE) {
+            LOG.info(this + ": init is done.");
+            // }
+
+        } catch (Exception e) {
+            destroy();
+            throw new RenderException(e, "Couldn't init " + this);
         }
-
-        assetLoader = new AssetLoader(resourceReader, config, id);
-
-        assetLoader.loadAssetsIntoEngine(dependencies, engine);
-
-        // if (!IS_PRODMODE) {
-        LOG.info(this + ": init is done.");
-        // }
     }
 
     private LinkedList<String> getRunnableAssetNames(String entryName, String dependencyNames) {
@@ -81,35 +90,75 @@ public class Renderer {
 
     ///////////////////////////////////////////////////////////////////////////////
 
-    private Map<String, String> runSSR(String entry, String props, LinkedList<String> assetsInvolved) {
+    public static String evalAndGetByKey(NashornScriptEngine engine, String runnableCode, String key) throws RenderException {
+        StringBuilder scriptBuilder = new StringBuilder(
+                "var __react4xp__internal__nashorn__obj__ = {};" +
+                "try {\n"
+        );
+            if (key != null) {
+                scriptBuilder.append("__react4xp__internal__nashorn__obj__." + key + "=");
+            }
+            scriptBuilder.append(runnableCode);
+        scriptBuilder.append("\n}catch (__react4xp__internal__nashorn_error__){");
+            scriptBuilder.append("__react4xp__internal__nashorn__obj__.");
+            scriptBuilder.append(KEY_STACKTRACE);
+            scriptBuilder.append("=''+__react4xp__internal__nashorn_error__.stack;");
+            scriptBuilder.append("__react4xp__internal__nashorn__obj__.");
+            scriptBuilder.append(KEY_ERROR);
+            scriptBuilder.append("=__react4xp__internal__nashorn_error__.message;");
+        scriptBuilder.append("}");
+        scriptBuilder.append("__react4xp__internal__nashorn__obj__;");
 
-        String callScript = "var obj = { " +
-                KEY_HTML + ": ReactDOMServer.renderToString(" + config.LIBRARY_NAME + "['" + entry + "'].default(" + props  + ")) " +
-                "};" +
-                "obj;";
+        String callScript = scriptBuilder.toString();
 
+        ScriptObjectMirror __react4xp__internal__nashorn__obj__;
 
         try {
-            ScriptObjectMirror obj = (ScriptObjectMirror)engine.eval(callScript);
+            __react4xp__internal__nashorn__obj__ = (ScriptObjectMirror) engine.eval(callScript);
 
-            String rendered = (String)obj.get(KEY_HTML);
+            String errorMessage = (String) __react4xp__internal__nashorn__obj__.get(KEY_ERROR);
+
+            if (errorMessage != null && !"".equals(errorMessage.trim())) {
+                String errorStack = (String) __react4xp__internal__nashorn__obj__.get(KEY_STACKTRACE);
+                // LOG.warn(errorStack);
+                // LOG.warn("The above is a nashorn-internal stack trace for the following error:");
+                throw new RenderException(errorMessage, errorStack);
+            }
+
+            return (key != null)
+                    ? (String) __react4xp__internal__nashorn__obj__.get(key)
+                    : null;
+
+        } catch (ScriptException s) {
+            throw new RenderException(s);
+        }
+    }
+
+
+    private Map<String, String> runSSR(String entry, String props, LinkedList<String> assetsInvolved) {
+
+        String call = "ReactDOMServer.renderToString(" + config.LIBRARY_NAME + "['" + entry + "'].default(" + props  + "));";
+
+        try {
+            String rendered = evalAndGetByKey(engine, call, KEY_HTML);
 
             return Map.of( KEY_HTML, rendered );
 
-        } catch (ScriptException e) {
+        } catch (RenderException e) {
             ErrorHandler errorHandler = new ErrorHandler();
             String cleanErrorMessage = errorHandler.getCleanErrorMessage(e);
             LOG.error(
-                    errorHandler.getLoggableStackTrace(e, cleanErrorMessage) + "\n\n" +
+                    (e.getStacktraceString() == null ? "" : e.getStacktraceString() + "\n") +
+                            errorHandler.getLoggableStackTrace(e, cleanErrorMessage) + "\n\n" +
                             e.getClass().getSimpleName() + ": " + cleanErrorMessage + "\n" +
                             "in " + ServerSideRenderer.class.getName() + ".runSSR\n" +
                             "Entry: '" + entry + "'\n" +
                             "Assets involved:\n\t" + String.join("\n\t", assetsInvolved) + "\n" +
-                            "Failing call: '" + callScript + "'\n" +
+                            "Failing call: '" + call + "'\n" +
                             errorHandler.getSolutionTips());
 
             destroy();
-            return Map.of( errorHandler.KEY_ERROR, cleanErrorMessage );
+            return Map.of( KEY_ERROR, cleanErrorMessage );
         }
     }
 
@@ -136,7 +185,7 @@ public class Renderer {
             LOG.error(errorHandler.getLoggableStackTrace(r, null));
             destroy();
             return Map.of(
-                    errorHandler.KEY_ERROR, r.getMessage()
+                    KEY_ERROR, r.getMessage()
             );
 
         } catch (Exception e) {
@@ -144,7 +193,7 @@ public class Renderer {
             LOG.error(errorHandler.getLoggableStackTrace(e, null));
             destroy();
             return Map.of(
-                    errorHandler.KEY_ERROR, e.getClass().getName() + ": " + e.getMessage()
+                    KEY_ERROR, e.getClass().getName() + ": " + e.getMessage()
             );
         }
     }

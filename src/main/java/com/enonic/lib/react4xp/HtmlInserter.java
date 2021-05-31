@@ -68,7 +68,7 @@ public class HtmlInserter {
     }
 
 
-    public String insertInsideContainer(String body, String payload, String id) {
+    public String insertInsideContainer(String body, String payload, String id, boolean appendErrorContainer) {
         try {
             SAXBuilder saxBuilder = new SAXBuilder();
             Document bodyDoc = saxBuilder.build(new StringReader(body));
@@ -78,22 +78,35 @@ public class HtmlInserter {
                 throw new XPathException("ID '" + id + "' not found.");
             }
 
+            Element target = links.get(0);
+
             Document payloadDoc = saxBuilder.build(new StringReader(payload));
             Element payloadRoot = payloadDoc.getRootElement();
-
             payloadRoot.detach();
-            links.get(0).setContent(payloadRoot);
+
+            if (appendErrorContainer) {
+                Element existingTarget = target.clone();
+
+                target.setText(null);
+                target.setAttribute("id", id + "__error__");
+                target.setAttribute("style", "border:1px solid #8B0000; padding:15px; background-color:#FFB6C1");
+                target.addContent(payloadRoot);
+                target.addContent(existingTarget);
+
+            } else {
+                target.setContent(payloadRoot);
+            }
 
             return getXmlOutputter().outputString(bodyDoc);
 
         } catch (JDOMException | IOException | XPathException e) {
             LOG.error("\n\n" +
-                    "ERROR: [ " + e.getClass().getName() + " ] ...when trying to insert HTML" +
-                    (payload.length() < 1000 ?
+                    "ERROR: [ " + e.getClass().getName() + " ] ...when trying to " + (appendErrorContainer ? "append error message" : "insert") + " HTML" +
+                    (payload.length() < 10000 ?
                             "...\n\n" + payload + "\n\n..." :
                             " ") +
                     "at element with ID '" + id + "' into body" +
-                    (body.length() < 1000 ?
+                    (body.length() < 10000 ?
                             ":\n\n" + body + "\n\n" :
                             "") +
                     "\nReturning the submitted body unchanged.", e);

@@ -1,13 +1,13 @@
 package com.enonic.lib.react4xp.ssr.engineFactory;
 
-import com.enonic.lib.react4xp.ssr.ServerSideRenderer;
 import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
+import com.enonic.lib.react4xp.ssr.errors.RenderException;
+import com.enonic.lib.react4xp.ssr.pool.Renderer;
 import com.enonic.lib.react4xp.ssr.resources.ResourceReader;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.script.ScriptException;
 import java.io.IOException;
 
 public class EngineFactory {
@@ -91,33 +91,51 @@ public class EngineFactory {
      * Scripts found in chunks.json depend on the previous and must be the last!
      * nashornPolyfills.js script is the basic dependency, and will be added at the very beginning
      * outside of this list. */
-    public NashornScriptEngine buildEngine() throws IOException, ScriptException {
+    public NashornScriptEngine buildEngine(long id) throws IOException, RenderException {
         NashornScriptEngine engine = engineBuilder.buildEngine();
 
-        try {
-            engine.eval(POLYFILL_BASICS);
+        // if (!IS_PRODMODE) {
+        LOG.info("#" + id + ": loading polyfill basics");
+        // }
 
-        } catch (ScriptException e) {
+        try {
+            Renderer.evalAndGetByKey(engine, POLYFILL_BASICS, null);
+
+            // if (!IS_PRODMODE) {
+            LOG.info("#" + id + ": successfully loaded polyfill basics");
+            // }
+
+        } catch (RenderException e) {
             ErrorHandler errorHandler = new ErrorHandler();
             // LOG.error(errorHandler.getLoggableStackTrace(e, e.getClass().getSimpleName() + " in " + EngineFactory.class.getName() + ".initEngine"));
-            LOG.info(errorHandler.getCodeDump(e, POLYFILL_BASICS, null));
+            LOG.error(EngineFactory.class.getName() + "#" + id + ".buildEngine:");
+            LOG.info(errorHandler.getCodeDump(POLYFILL_BASICS, null));
             throw e;
         }
 
         String assetContent = null;
         try {
-            assetContent =  resourceReader.readResource(POLYFILL_REACT4XP_DEFAULT_FILE);
-            engine.eval(assetContent);
+            // if (!IS_PRODMODE) {
+            LOG.info("#" + id + ": loading asset '" + POLYFILL_REACT4XP_DEFAULT_FILE + "'");
+            // }
 
-        } catch (ScriptException e1) {
+            assetContent =  resourceReader.readResource(POLYFILL_REACT4XP_DEFAULT_FILE);
+            Renderer.evalAndGetByKey(engine, assetContent, null);
+
+            // if (!IS_PRODMODE) {
+            LOG.info("#" + id + ": successfully loaded '" + POLYFILL_REACT4XP_DEFAULT_FILE + "'");
+            // }
+
+        } catch (RenderException e1) {
             ErrorHandler errorHandler = new ErrorHandler();
             LOG.error(
+                    (e1.getStacktraceString() == null ? "" : e1.getStacktraceString() + "\n") +
                     errorHandler.getLoggableStackTrace(e1, null) + "\n\n" +
                             e1.getClass().getSimpleName()  + ": " + e1.getMessage() + "\n" +
-                            "in " + ServerSideRenderer.class.getName() + ".loadAsset\n" +
+                            "in " + EngineFactory.class.getName() + "#" + id + ".buildEngine\n" +
                             "assetName = '" + POLYFILL_REACT4XP_DEFAULT_FILE + "'\n" +
                             errorHandler.getSolutionTips());
-            LOG.info(errorHandler.getCodeDump(e1, assetContent, POLYFILL_REACT4XP_DEFAULT_FILE));
+            LOG.info(errorHandler.getCodeDump(assetContent, POLYFILL_REACT4XP_DEFAULT_FILE));
 
             throw e1;
         }
