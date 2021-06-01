@@ -1,4 +1,4 @@
-package com.enonic.lib.react4xp;
+package com.enonic.lib.react4xp.html;
 
 import org.jdom2.Document;
 import org.jdom2.Element;

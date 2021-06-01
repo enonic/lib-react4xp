@@ -7,7 +7,7 @@ const {getComponentChunkNames} = require('./dependencies');
 const {getAssetRoot} = require('./serviceRoots');
 
 const htmlHandler = require('./htmlHandling');
-const HTMLinserter = __.newBean('com.enonic.lib.react4xp.HtmlInserter');
+const HTMLinserter = __.newBean('com.enonic.lib.react4xp.html.HtmlInserter');
 
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
 
@@ -508,8 +508,7 @@ class React4xp {
 
                     // Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props.
                     // Signature: <command>(entry, id, props?, isPage, hasRegions)
-                    `
-<script>${
+                    `<script>${
                         LIBRARY_NAME}.CLIENT.${command}(${
                         LIBRARY_NAME}['${this.jsxPath}'],${
                         JSON.stringify(this.react4xpId)},${
