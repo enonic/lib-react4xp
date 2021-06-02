@@ -87,7 +87,7 @@ public class ServerSideRenderer implements ScriptBean {
 
 
     private void setPoolConfig(Integer threadCount) {
-        poolConfig.setLifo(true);
+        poolConfig.setLifo(false);
         poolConfig.setMaxWaitMillis(200000);
         poolConfig.setTestOnBorrow(false);
         poolConfig.setTestOnReturn(true);
