@@ -621,14 +621,14 @@ class React4xp {
                     request
                 }),
 
-                // .render without a request object will skip renderPageContributions
-                pageContributions: request
-                    ? react4xp.renderPageContributions({
-                        pageContributions,
-                        clientRender,
-                        request
-                    })
-                    : pageContributions
+                // .render without a request object will enforce JS-suppressed renderPageContributions
+                pageContributions: react4xp.renderPageContributions({
+                    pageContributions,
+                    clientRender,
+                    request: request
+                        ? request
+                        : { mode: 'inline' }
+                })
             }
 
         } catch (e) {
