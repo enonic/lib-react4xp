@@ -274,8 +274,8 @@ class React4xp {
      * @returns The react4xp component itself, for builder-like pattern.
      */
     uniqueId() {
-        // Magic numbers: enforces a random 8-character base-64 string, in the range "10000000" - "zzzzzzzz" (78364164096 - 2821109907455)
-        return this.setId((this.react4xpId || "") + ":" + (78364164096 + Math.floor(Math.random() * 2742745743360)).toString(36));
+        // Magic numbers: enforces a random 8-character base-36 string, in the range "10000000" - "zzzzzzzz" (78364164096 - 2821109907455)
+        return this.setId((this.react4xpId || "r") + "-" + (78364164096 + Math.floor(Math.random() * 2742745743360)).toString(36));
     }
 
     setIsPage(isPage) {
@@ -454,9 +454,11 @@ class React4xp {
     }
 
     renderBody = params => {
-        // The rendered body depends on the rendered context:
-        // SSR is default behavior, but can be overriden by clientRender = true - UNLESS a supplied request object (if any) signals an XP view mode of 'inline' or 'edit'.
         const {body, clientRender, request} = params || {};
+
+        // The rendered body depends on the rendered context:
+        // SSR is default behavior, but can be overriden by clientRender = true
+        // - UNLESS request.mode reveals rendering in Content studio, which will enforce SSR.
         const viewMode = (request || {}).mode;
         return (
             !clientRender
@@ -491,8 +493,8 @@ class React4xp {
         let output = null;
         try {
 
-            // Context 1: Content studio or request-less context: always SSR without trigger call or JS sources.
-            const suppressJS = (!request || request.mode === "edit" || request.mode === "inline");
+            // If request.mode reveals rendering in Content studio: SSR without trigger call or JS sources.
+            const suppressJS = (request && (request.mode === "edit" || request.mode === "inline"));
 
             const command = clientRender
                 ? 'render'
@@ -609,15 +611,23 @@ class React4xp {
 
             return {
                 ...options,
+
+                // .render without a request object will enforce SSR
                 body: react4xp.renderBody({
                     body,
-                    clientRender,
+                    clientRender: request
+                        ? clientRender
+                        : false,
                     request
                 }),
+
+                // .render without a request object will enforce JS-suppressed renderPageContributions
                 pageContributions: react4xp.renderPageContributions({
                     pageContributions,
                     clientRender,
-                    request
+                    request: request
+                        ? request
+                        : { mode: 'inline' }
                 })
             }
 
