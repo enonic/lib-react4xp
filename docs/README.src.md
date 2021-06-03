@@ -47,6 +47,7 @@ This library, lib-react4xp, is installed as a regular XP library in a parent app
 | 1.1.1 | 1.1.4 |
 | 1.4.0 | 1.4.0 |
 | 1.5.0 | 1.5.4 |
+| 1.6.0 | 1.5.7 |
 | **###LIB_VERSION###** | ###NPM_BUNDLE_VERSION### |
 
 
@@ -260,16 +261,8 @@ To install the built library in local maven cache, available for building react4
 <a name="lib-usage"></a>
 ## Usage
 
-Basic library import in XP controllers:
-
-```
-const React4xp = require('/lib/enonic/react4xp'); 
-```
-
-Beyond this, using react4xp is beste explained in the [React4xp introduction guide](https://developer.enonic.com/templates/react4xp).
+Best explained in the [React4xp introduction guide](https://developer.enonic.com/templates/react4xp). 
 
 <br/>
 
 **Happy reacting!**
-
-
