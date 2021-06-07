@@ -429,6 +429,7 @@ class React4xp {
         return result;
     };
 
+    // DEPRECATED! Remove at 2.0.0
     renderEntryToHtml = overrideProps => {
         const { html, error } = this.doRenderSSR(overrideProps);
         return error ? undefined : html;
