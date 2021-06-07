@@ -429,6 +429,10 @@ class React4xp {
         return result;
     };
 
+    renderEntryToHtml = overrideProps => {
+        const { html, error } = this.doRenderSSR(overrideProps);
+        return error ? undefined : html;
+    };
 
     /** Server-side rendering: Renders a static HTML markup and inserts it into an ID-matching target container in an HTML body. This is the same as renderBody({body: body}). If a
      * matching-ID container (or a body) is missing, it will be generated.
