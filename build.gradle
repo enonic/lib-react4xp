@@ -85,7 +85,6 @@ if (BUILD_ENV == 'development') {
 
 
 def ROOT = project.projectDir.toString()
-println "ROOT:" + ROOT
 
 task react4xp_nashornPolyfills(type: NodeTask) {
     group 'lib-react4xp'
