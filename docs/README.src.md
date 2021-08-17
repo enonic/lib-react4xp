@@ -48,6 +48,7 @@ This library, lib-react4xp, is installed as a regular XP library in a parent app
 | 1.4.0 | 1.4.0 |
 | 1.5.0 | 1.5.4 |
 | 1.6.0 | 1.5.7 |
+| 1.7.0 | 1.7.0 |
 | **###LIB_VERSION###** | ###NPM_BUNDLE_VERSION### |
 
 
