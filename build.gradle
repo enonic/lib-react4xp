@@ -6,7 +6,7 @@ plugins {
     id 'maven-publish'
     id 'com.enonic.defaults' version '2.0.1'
     id 'com.enonic.xp.base' version '3.0.0'
-    id "com.moowork.node" version "1.3.1"
+    id "com.github.node-gradle.node" version "3.1.0"
 }
 
 dependencies {
@@ -93,12 +93,12 @@ task react4xp_nashornPolyfills(type: NodeTask) {
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
             '--config', 'node_modules/react4xp-runtime-nashornpolyfills/webpack.config.js',
-            '--env.NASHORNPOLYFILLS_SOURCE=' + 'node_modules/react4xp-runtime-nashornpolyfills/nashornPolyfills.es6',
+            '--env', 'NASHORNPOLYFILLS_SOURCE=' + 'node_modules/react4xp-runtime-nashornpolyfills/nashornPolyfills.es6',
 
             // (env.BUILD_R4X + env.NASHORNPOLYFILLS_FILENAME) must match ('build/resources/main' + defaultPolyfillFileName)
             // in com/enonic/lib/react4xp/ssr/EngineFactory.java!
-            '--env.BUILD_R4X="' + ROOT + '/build/resources/main/lib/enonic/react4xp/default"',
-            '--env.NASHORNPOLYFILLS_FILENAME=nashornPolyfills'
+            '--env', 'BUILD_R4X="' + ROOT + '/build/resources/main/lib/enonic/react4xp/default"',
+            '--env', 'NASHORNPOLYFILLS_FILENAME=nashornPolyfills'
     ]
 }
 react4xp_nashornPolyfills.dependsOn += 'babelXP'
@@ -112,15 +112,15 @@ task react4xp_client(type: NodeTask) {
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
             '--config', 'node_modules/react4xp-runtime-client/webpack.config.js',
-            '--env.BUILD_R4X="' + ROOT + '/build/resources/main/services/react4xp-client"',
-            '--env.BUILD_ENV=' + BUILD_ENV,
-            '--env.CHUNK_CONTENTHASH=[name].js',
-            '--env.CLIENT_CHUNKS_FILENAME=__delete_me_im_redundant__',
-            '--env.ROOT="' + ROOT + '"',
+            '--env', 'BUILD_R4X="' + ROOT + '/build/resources/main/services/react4xp-client"',
+            '--env', 'BUILD_ENV=' + BUILD_ENV,
+            '--env', 'CHUNK_CONTENTHASH=[name].js',
+            '--env', 'CLIENT_CHUNKS_FILENAME=__delete_me_im_redundant__',
+            '--env', 'ROOT="' + ROOT + '"',
 
             // Placeholders used in services/react4xp-client/react4xp-client.es6. Keep up to date!
-            '--env.LIBRARY_NAME="__REACT4XP__RUNTIME__CLIENT__LIBRARY_NAME__PLACEHOLDER__"',
-            '--env.SERVICE_ROOT_URL="__REACT4XP__RUNTIME__CLIENT__SERVICE_ROOT_URL__PLACEHOLDER__"'
+            '--env', 'LIBRARY_NAME="__REACT4XP__RUNTIME__CLIENT__LIBRARY_NAME__PLACEHOLDER__"',
+            '--env', 'SERVICE_ROOT_URL="__REACT4XP__RUNTIME__CLIENT__SERVICE_ROOT_URL__PLACEHOLDER__"'
     ]
 
     doLast {

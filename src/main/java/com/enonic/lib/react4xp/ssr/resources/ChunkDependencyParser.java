@@ -89,7 +89,16 @@ public class ChunkDependencyParser {
             JSONObject entryData = (JSONObject)entrypoints.get(entryName);
             JSONArray assets = (JSONArray)entryData.get("assets");
             for (Object obj : assets) {
-                String fileName = (String)obj;
+                String fileName = null;
+                try {
+                    fileName = (String)((JSONObject)obj).get("name");
+                } catch (Exception e) {
+                    try {
+                        fileName = (String)obj;
+                    } catch (Exception e2) {
+                        throw new RuntimeException("Couldn't parse dependency file name from stats file - asset obj seems to be neither a JSONObject with a .name attribute, nor a string. Asset obj = " + obj.toString());
+                    }
+                }
                 if (!accumulator.contains(fileName) && !entries.contains(fileName) && fileName.endsWith(".js")) {
                     accumulator.add(fileName);
                 }

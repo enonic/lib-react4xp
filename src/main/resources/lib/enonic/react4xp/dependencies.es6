@@ -122,6 +122,17 @@ const readComponentChunkNames = entryNames => {
 
             const myself = entry + ".js";
             data.assets
+                // Each asset can be a string (webpack 4) or an object with a subattribute string .name (webpack 5)
+                .map(asset => {
+                    if (typeof asset === 'string') {
+                        return asset;
+                    }
+                    if (typeof asset === 'object' && typeof asset.name === 'string') {
+                        return asset.name
+                    }
+
+                    throw Error(`Unexpected 'assets' structure in ${COMPONENT_STATS_FILENAME}: ${JSON.stringify(data.assets)}`);
+                })
                 .filter(asset => !asset.endsWith(".map") && asset !== myself)
                 .forEach(asset => {
                     if (output.indexOf(asset) === -1) {
