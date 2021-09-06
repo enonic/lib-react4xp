@@ -19,6 +19,7 @@ const SSR_DEFAULT_CACHE_SIZE = 0;
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: use <projectRoot>/react4xp.properties and the build.gradle from https://www.npmjs.com/package/react4xp
 const {
+    BUILD_ENV,
     LIBRARY_NAME,
     R4X_TARGETSUBDIR,
     NASHORNPOLYFILLS_FILENAME,
