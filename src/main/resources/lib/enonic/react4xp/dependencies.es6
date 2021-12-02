@@ -1,13 +1,12 @@
 const ioLib = require("/lib/xp/io");
 const cacheLib = require("/lib/cache");
+const {getSite} = require('/lib/xp/portal');
 
 // XP runmode: IS_PRODMODE is true in prod mode, false in dev mode.
 const IS_PRODMODE = ("" + Java.type('com.enonic.xp.server.RunMode').get()) === 'PROD';
 
 
-
-
-import { getAssetRoot, getClientRoot } from "./serviceRoots";
+import {getAssetRoot, getClientRoot} from "./serviceRoots";
 
 // Tolerate and remove file extensions ts(x), js(x), es(6) and/or trailing slash or space
 const TOLERATED_ENTRY_EXTENSIONS = /([/ ]+|\.(tsx?|jsx?|es6?)[/ ]*)$/i;
@@ -16,10 +15,10 @@ const TOLERATED_ENTRY_EXTENSIONS = /([/ ]+|\.(tsx?|jsx?|es6?)[/ ]*)$/i;
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
 const {
-  R4X_TARGETSUBDIR,
-  CLIENT_CHUNKS_FILENAME,
-  EXTERNALS_CHUNKS_FILENAME,
-  COMPONENT_STATS_FILENAME
+    R4X_TARGETSUBDIR,
+    CLIENT_CHUNKS_FILENAME,
+    EXTERNALS_CHUNKS_FILENAME,
+    COMPONENT_STATS_FILENAME
 } = require("./react4xp_constants.json");
 // TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use readResourceAsJson instead!
 
@@ -27,8 +26,8 @@ let BUILD_STATS_ENTRYPOINTS;
 
 const dependenciesCache = IS_PRODMODE
     ? cacheLib.newCache({
-      size: 100,
-      expire: 10800 // 30 hours
+        size: 100,
+        expire: 10800 // 30 hours
     })
     : null;
 
@@ -36,7 +35,7 @@ const FULL_EXTERNALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_
 const FULL_CLIENT_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${CLIENT_CHUNKS_FILENAME}`;
 const FULL_COMPONENT_STATS_FILENAME = `/${R4X_TARGETSUBDIR}/${COMPONENT_STATS_FILENAME}`;
 
-const forceTrimmedArray = (entryNames=[]) => {
+const forceTrimmedArray = (entryNames = []) => {
     if (typeof entryNames === "string") {
         const trimmed = entryNames.trim();
         return (trimmed === "")
@@ -155,12 +154,15 @@ const readComponentChunkNames = entryNames => {
     return output;
 }
 
-// Cached version of readComponentChunkNames - used in prod mode
-const readComponentChunkNamesCached = entryNames => {
-  entryNames = normalizeEntryNames(entryNames);
-  const entryNamesKey = entryNames.join("*");
 
-  return dependenciesCache.get(entryNamesKey, () => readComponentChunkNames(entryNames));
+
+// Cached version of readComponentChunkNames - used in prod mode
+const readComponentChunkNamesCached = (entryNames, siteId) => {
+    siteId = siteId || getSite()._id;
+    entryNames = normalizeEntryNames(entryNames);
+    const entryNamesKey = entryNames.join("*");
+
+    return dependenciesCache.get(siteId + "_*_" + entryNamesKey, () => readComponentChunkNames(entryNames));
 };
 
 const getComponentChunkNames = IS_PRODMODE
@@ -171,24 +173,19 @@ const getComponentChunkNames = IS_PRODMODE
 
 
 
-
-
-const getComponentChunkUrls = entries =>
-  getComponentChunkNames(entries).map(name => getAssetRoot() + name);
-
-
-
-
-
-
+const getComponentChunkUrls = (entries, siteId) => {
+    siteId = siteId || getSite()._id;
+    return getComponentChunkNames(entries, siteId).map(name => getAssetRoot(siteId) + name);
+};
 
 
 /** Returns the asset-via-service URL for the externals chunk */
-const readExternalsUrls = () => {
+const readExternalsUrls = (siteId) => {
     // This should not break if there are no added externals. Externals should be optional.
     try {
+        siteId = siteId || getSite()._id;
         return getNamesFromChunkfile(FULL_EXTERNALS_CHUNKS_FILENAME).map(
-            name => getAssetRoot() + name
+            name => getAssetRoot(siteId) + name
         );
     } catch (e) {
         log.warning(e);
@@ -199,104 +196,104 @@ const readExternalsUrls = () => {
     }
 };
 
-const readExternalsUrlsCached = () =>
-  dependenciesCache.get(FULL_EXTERNALS_CHUNKS_FILENAME, readExternalsUrls);
+const readExternalsUrlsCached = (siteId) => {
+    siteId = siteId || getSite()._id;
+    return dependenciesCache.get(siteId + "_*_" + FULL_EXTERNALS_CHUNKS_FILENAME, () => readExternalsUrls(siteId));
+}
 
 const getExternalsUrls = IS_PRODMODE
     ? readExternalsUrlsCached
     : readExternalsUrls;
 
 
-
-
-
-const readClientUrls = () => {
+const readClientUrls = (siteId) => {
     // Special case: if there is a chunkfile for a client wrapper, use that. If not, fall back to
     // a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
     try {
+        siteId = siteId || getSite()._id;
         return getNamesFromChunkfile(FULL_CLIENT_CHUNKS_FILENAME).map(
-            name => getAssetRoot() + name
+            name => getAssetRoot(siteId) + name
         );
     } catch (e) {
         log.debug(e);
         log.debug(
-            `No optional clientwrapper was found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's okay, there's a fallback one at: ${getClientRoot()}`
+            `No optional clientwrapper was found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's okay, there's a fallback one at: ${getClientRoot(siteId)}`
         );
-        return [getClientRoot()];
+        return [getClientRoot(siteId)];
     }
 };
 
 /** Returns the asset-via-service URL for the frontend client */
-const readClientUrlsCached = () =>
-  dependenciesCache.get(FULL_CLIENT_CHUNKS_FILENAME, readClientUrls);
+const readClientUrlsCached = (siteId) => {
+    siteId = siteId || getSite()._id;
+    return dependenciesCache.get(siteId + "_*_" + FULL_CLIENT_CHUNKS_FILENAME, () => readClientUrls(siteId));
+}
 
 const getClientUrls = IS_PRODMODE
     ? readClientUrlsCached
     : readClientUrls;
 
 
-
-
-
-
-const getAllUrls = (entries, suppressJS) => [
-  ...getExternalsUrls(),
-  ...getComponentChunkUrls(entries),
-  ...suppressJS
-      ? []
-      : getClientUrls()
-].filter(!suppressJS
-    ? chunkUrl => chunkUrl
-    : chunkUrl => !chunkUrl.endsWith(".js")
-);
+const getAllUrls = (entries, suppressJS) => {
+    const siteId = getSite()._id;
+    return [
+        ...getExternalsUrls(siteId),
+        ...getComponentChunkUrls(entries, siteId),
+        ...suppressJS
+            ? []
+            : getClientUrls(siteId)
+    ].filter(!suppressJS
+        ? chunkUrl => chunkUrl
+        : chunkUrl => !chunkUrl.endsWith(".js")
+    );
+}
 
 /** Open a chunkfile, read the contents and return the domain-relative urls for non-entry JS file references in the chunk file.
  * Throws an error if not found or if unexpected format. */
 const getNamesFromChunkfile = chunkFile => {
 
-  const chunks = readResourceAsJson(chunkFile);
+    const chunks = readResourceAsJson(chunkFile);
 
-  return Object.keys(chunks).map(chunkName => {
-    let chunk = chunks[chunkName].js;
+    return Object.keys(chunks).map(chunkName => {
+        let chunk = chunks[chunkName].js;
 
-    while (Array.isArray(chunk)) {
-      if (chunk.length > 1) {
-        throw Error(
-          `Unexpected value in ${chunkFile}: [${chunkName}].js is an array with more than 1 array: ${JSON.stringify(
-            chunk,
-            null,
-            2
-          )}`
-        );
-      }
-      chunk = chunk[0];
-    }
+        while (Array.isArray(chunk)) {
+            if (chunk.length > 1) {
+                throw Error(
+                    `Unexpected value in ${chunkFile}: [${chunkName}].js is an array with more than 1 array: ${JSON.stringify(
+                        chunk,
+                        null,
+                        2
+                    )}`
+                );
+            }
+            chunk = chunk[0];
+        }
 
-    if (chunk.startsWith("/")) {
-      chunk = chunk.substring(1);
-    }
+        if (chunk.startsWith("/")) {
+            chunk = chunk.substring(1);
+        }
 
-    // Fail fast: verify that it exists and has a content
-    const resource = ioLib.getResource(`/${R4X_TARGETSUBDIR}/${chunk}`);
-    if (!resource || !resource.exists()) {
-      throw Error(
-        `React4xp dependency chunk not found: /${R4X_TARGETSUBDIR}/${chunk}`
-      );
-    }
+        // Fail fast: verify that it exists and has a content
+        const resource = ioLib.getResource(`/${R4X_TARGETSUBDIR}/${chunk}`);
+        if (!resource || !resource.exists()) {
+            throw Error(
+                `React4xp dependency chunk not found: /${R4X_TARGETSUBDIR}/${chunk}`
+            );
+        }
 
-    return chunk;
-  });
+        return chunk;
+    });
 };
 
 // ------------------------------------------------------------------
 
 module.exports = {
-  normalizeEntryNames,
-  getComponentChunkNames,
-  getComponentChunkUrls,
-  getClientUrls,
-  getNamesFromChunkfile,
-  getExternalsUrls,
-  getAllUrls,
-  getAssetRoot
+    normalizeEntryNames,
+    getComponentChunkNames,
+    getComponentChunkUrls,
+    getClientUrls,
+    getNamesFromChunkfile,
+    getExternalsUrls,
+    getAllUrls
 };

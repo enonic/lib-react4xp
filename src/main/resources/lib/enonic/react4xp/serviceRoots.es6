@@ -1,52 +1,49 @@
 const portal = require('/lib/xp/portal');
 
-const initServiceUrlRoot = (serviceName, label) => {
-    const url = portal.serviceUrl({service: serviceName}) + '/';
-    return url;
-};
+const ROOT_URLS = {};
 
-let ASSET_ROOT_URL;
-const getAssetRoot = () => {
-    if (ASSET_ROOT_URL === undefined) {
-        ASSET_ROOT_URL = initServiceUrlRoot('react4xp', 'ASSET_ROOT_URL');
+const initServiceUrlRoot = (siteId, serviceName, key) => {
+    if (siteId === undefined) {
+        throw Error('siteId is undefined, cant getAssetRoot');
     }
-    return ASSET_ROOT_URL;
-};
-
-let CLIENT_ROOT_URL;
-const getClientRoot = () => {
-    if (CLIENT_ROOT_URL === undefined) {
-        CLIENT_ROOT_URL = initServiceUrlRoot('react4xp-client', 'CLIENT_ROOT_URL');
+    let rootUrlsForSite = ROOT_URLS[siteId];
+    if (rootUrlsForSite === undefined) {
+        ROOT_URLS[siteId] = {};
+        rootUrlsForSite = ROOT_URLS[siteId];
     }
-    return CLIENT_ROOT_URL;
-};
-
-
-let DEPENDENCIES_ROOT_URL
-const getDependenciesRoot = () => {
-    if (DEPENDENCIES_ROOT_URL === undefined) {
-        DEPENDENCIES_ROOT_URL = initServiceUrlRoot('react4xp-dependencies', 'DEPENDENCIES_ROOT_URL');
+    const existingUrl = rootUrlsForSite[key];
+    if (existingUrl !== undefined) {
+        return existingUrl;
     }
-    return DEPENDENCIES_ROOT_URL;
+    const siteUrl = portal.pageUrl({id: siteId})
+    //const url = portal.serviceUrl({service: serviceName, type:'server'}) + '/';
+    const altUrl = (`${siteUrl}/_/service/${app.name}/${serviceName}/`).replace(/\/+/, '/');
+    ROOT_URLS[siteId][key] = altUrl;
+    return altUrl;
+};
+
+const getAssetRoot = (siteId) => {
+    return initServiceUrlRoot(siteId,'react4xp', 'ASSET_ROOT_URL');
+};
+
+const getClientRoot = (siteId) => {
+    return initServiceUrlRoot(siteId, 'react4xp-client', 'CLIENT_ROOT_URL');
 };
 
 
-let SERVICE_ROOT_URL;
-const getServiceRoot = () => {
-    if (SERVICE_ROOT_URL === undefined) {
-        SERVICE_ROOT_URL = initServiceUrlRoot('', 'SERVICE_ROOT_URL');
-    }
-    return SERVICE_ROOT_URL;
+const getDependenciesRoot = (siteId) => {
+    return initServiceUrlRoot(siteId, 'react4xp-dependencies', 'DEPENDENCIES_ROOT_URL');
 };
 
+
+const getServiceRoot = (siteId) => {
+    return initServiceUrlRoot(siteId, '', 'SERVICE_ROOT_URL');
+};
+
+const slashesAtBeginning = /^\/+/;
+const slashesAtEnd = /\/+$/;
 const stripSlashes = suffix => {
-    while (suffix.startsWith('/')) {
-        suffix = suffix.substring(1);
-    }
-    while (suffix.endsWith('/')) {
-        suffix = suffix.substring(0, suffix.length - 1);
-    }
-    return suffix;
+    return suffix.replace(slashesAtBeginning, '').replace(slashesAtEnd, '');
 };
 
 // Strips away the beginning of a service URL - the root path of the service - and returns everything after that,
