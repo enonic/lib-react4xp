@@ -26,7 +26,7 @@ let BUILD_STATS_ENTRYPOINTS;
 
 const dependenciesCache = IS_PRODMODE
     ? cacheLib.newCache({
-        size: 100,
+        size: 300,
         expire: 10800 // 30 hours
     })
     : null;
@@ -155,14 +155,14 @@ const readComponentChunkNames = entryNames => {
 }
 
 
+const getSiteLocalCacheKey = (rawKey) => `${getSite()._id}_*_${rawKey}`;
 
 // Cached version of readComponentChunkNames - used in prod mode
-const readComponentChunkNamesCached = (entryNames, siteId) => {
-    siteId = siteId || getSite()._id;
+const readComponentChunkNamesCached = (entryNames) => {
     entryNames = normalizeEntryNames(entryNames);
-    const entryNamesKey = entryNames.join("*");
 
-    return dependenciesCache.get(siteId + "_*_" + entryNamesKey, () => readComponentChunkNames(entryNames));
+    const cacheKey = getSiteLocalCacheKey(entryNames.join("*"));
+    return dependenciesCache.get(cacheKey, () => readComponentChunkNames(entryNames));
 };
 
 const getComponentChunkNames = IS_PRODMODE
@@ -173,19 +173,17 @@ const getComponentChunkNames = IS_PRODMODE
 
 
 
-const getComponentChunkUrls = (entries, siteId) => {
-    siteId = siteId || getSite()._id;
-    return getComponentChunkNames(entries, siteId).map(name => getAssetRoot(siteId) + name);
+const getComponentChunkUrls = (entries) => {
+    return getComponentChunkNames(entries).map(name => getAssetRoot() + name);
 };
 
 
 /** Returns the asset-via-service URL for the externals chunk */
-const readExternalsUrls = (siteId) => {
+const readExternalsUrls = () => {
     // This should not break if there are no added externals. Externals should be optional.
     try {
-        siteId = siteId || getSite()._id;
         return getNamesFromChunkfile(FULL_EXTERNALS_CHUNKS_FILENAME).map(
-            name => getAssetRoot(siteId) + name
+            name => getAssetRoot() + name
         );
     } catch (e) {
         log.warning(e);
@@ -196,9 +194,9 @@ const readExternalsUrls = (siteId) => {
     }
 };
 
-const readExternalsUrlsCached = (siteId) => {
-    siteId = siteId || getSite()._id;
-    return dependenciesCache.get(siteId + "_*_" + FULL_EXTERNALS_CHUNKS_FILENAME, () => readExternalsUrls(siteId));
+const readExternalsUrlsCached = () => {
+    const cacheKey = getSiteLocalCacheKey(FULL_EXTERNALS_CHUNKS_FILENAME);
+    return dependenciesCache.get(cacheKey, () => readExternalsUrls());
 }
 
 const getExternalsUrls = IS_PRODMODE
@@ -206,27 +204,26 @@ const getExternalsUrls = IS_PRODMODE
     : readExternalsUrls;
 
 
-const readClientUrls = (siteId) => {
+const readClientUrls = () => {
     // Special case: if there is a chunkfile for a client wrapper, use that. If not, fall back to
     // a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
     try {
-        siteId = siteId || getSite()._id;
         return getNamesFromChunkfile(FULL_CLIENT_CHUNKS_FILENAME).map(
-            name => getAssetRoot(siteId) + name
+            name => getAssetRoot() + name
         );
     } catch (e) {
         log.debug(e);
         log.debug(
-            `No optional clientwrapper was found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's okay, there's a fallback one at: ${getClientRoot(siteId)}`
+            `No optional clientwrapper was found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's okay, there's a fallback one at: ${getClientRoot()}`
         );
-        return [getClientRoot(siteId)];
+        return [getClientRoot()];
     }
 };
 
 /** Returns the asset-via-service URL for the frontend client */
-const readClientUrlsCached = (siteId) => {
-    siteId = siteId || getSite()._id;
-    return dependenciesCache.get(siteId + "_*_" + FULL_CLIENT_CHUNKS_FILENAME, () => readClientUrls(siteId));
+const readClientUrlsCached = () => {
+    const cacheKey = getSiteLocalCacheKey(FULL_CLIENT_CHUNKS_FILENAME);
+    return dependenciesCache.get(cacheKey, () => readClientUrls());
 }
 
 const getClientUrls = IS_PRODMODE
@@ -235,13 +232,12 @@ const getClientUrls = IS_PRODMODE
 
 
 const getAllUrls = (entries, suppressJS) => {
-    const siteId = getSite()._id;
     return [
-        ...getExternalsUrls(siteId),
-        ...getComponentChunkUrls(entries, siteId),
+        ...getExternalsUrls(),
+        ...getComponentChunkUrls(entries),
         ...suppressJS
             ? []
-            : getClientUrls(siteId)
+            : getClientUrls()
     ].filter(!suppressJS
         ? chunkUrl => chunkUrl
         : chunkUrl => !chunkUrl.endsWith(".js")
@@ -295,5 +291,6 @@ module.exports = {
     getClientUrls,
     getNamesFromChunkfile,
     getExternalsUrls,
-    getAllUrls
+    getAllUrls,
+    getSiteLocalCacheKey
 };

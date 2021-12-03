@@ -1,43 +1,44 @@
+
+const {getSite} = require('/lib/xp/portal');
 const portal = require('/lib/xp/portal');
 
 const ROOT_URLS = {};
 
-const initServiceUrlRoot = (siteId, serviceName, key) => {
-    if (siteId === undefined) {
-        throw Error('siteId is undefined, cant getAssetRoot');
-    }
-    let rootUrlsForSite = ROOT_URLS[siteId];
-    if (rootUrlsForSite === undefined) {
+const initServiceUrlRoot = (serviceName) => {
+    const siteId = getSite()._id;
+    const serviceKey = serviceName || '_SERVICEROOT_';
+
+    if (ROOT_URLS[siteId] === undefined) {
         ROOT_URLS[siteId] = {};
-        rootUrlsForSite = ROOT_URLS[siteId];
     }
-    const existingUrl = rootUrlsForSite[key];
+    const existingUrl = ROOT_URLS[siteId][serviceKey];
     if (existingUrl !== undefined) {
         return existingUrl;
     }
-    const siteUrl = portal.pageUrl({id: siteId})
-    //const url = portal.serviceUrl({service: serviceName, type:'server'}) + '/';
+
+    const siteUrl = portal.pageUrl({id: siteId});
     const altUrl = (`${siteUrl}/_/service/${app.name}/${serviceName}/`).replace(/\/+/, '/');
-    ROOT_URLS[siteId][key] = altUrl;
+
+    ROOT_URLS[siteId][serviceKey] = altUrl;
     return altUrl;
 };
 
-const getAssetRoot = (siteId) => {
-    return initServiceUrlRoot(siteId,'react4xp', 'ASSET_ROOT_URL');
+const getAssetRoot = () => {
+    return initServiceUrlRoot('react4xp');
 };
 
-const getClientRoot = (siteId) => {
-    return initServiceUrlRoot(siteId, 'react4xp-client', 'CLIENT_ROOT_URL');
-};
-
-
-const getDependenciesRoot = (siteId) => {
-    return initServiceUrlRoot(siteId, 'react4xp-dependencies', 'DEPENDENCIES_ROOT_URL');
+const getClientRoot = () => {
+    return initServiceUrlRoot( 'react4xp-client');
 };
 
 
-const getServiceRoot = (siteId) => {
-    return initServiceUrlRoot(siteId, '', 'SERVICE_ROOT_URL');
+const getDependenciesRoot = () => {
+    return initServiceUrlRoot( 'react4xp-dependencies');
+};
+
+
+const getServiceRoot = () => {
+    return initServiceUrlRoot( '');
 };
 
 const slashesAtBeginning = /^\/+/;
@@ -56,13 +57,9 @@ const stripSlashes = suffix => {
 // Returns empty string if there is no suffix. Strips slashes from both ends.
 // Throws an error if the path doesn't match any known variation of the service path.
 // Logs a warning when the fallback is used.
-const SERVICE_ROOTS = {};
 let LOGGEDWARNING = false;
 const getSuffix = (path, serviceName) => {
-    const standardRoot = SERVICE_ROOTS[serviceName] = (
-        SERVICE_ROOTS[serviceName] ||
-        (portal.serviceUrl({service: serviceName}))
-    );
+    const standardRoot = initServiceUrlRoot(serviceName).replace(/\/$/, '');
 
     let location = path.indexOf(standardRoot);
     if (location !== -1) {

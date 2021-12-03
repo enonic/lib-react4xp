@@ -1,11 +1,11 @@
 const util = require('./util');
 const cacheLib = require("/lib/cache");
 const pageContributionsCache = cacheLib.newCache({
-  size: 750,
+  size: 1200,
   expire: 10800 // 30 hours
 });
 
-const { normalizeEntryNames, getAllUrls } = require("./dependencies");
+const { normalizeEntryNames, getAllUrls, getSiteLocalCacheKey} = require("./dependencies");
 
 /** Wraps a url in a script tag and appends it to pageContributions.js.bodyEnd with an async tag. The reason for choosing
  *  bodyEnd is that this allows display of server-side-rendered content or placeholders before starting to load the
@@ -83,8 +83,9 @@ const getAndMergePageContributions = (
   suppressJS
 ) => {
   entryNames = normalizeEntryNames(entryNames);
-  const entriesPgContrib = pageContributionsCache.get(
-    entryNames.join("*")+"_"+suppressJS,
+    const cacheKey = getSiteLocalCacheKey(entryNames.join("*")+"_"+suppressJS);
+    const entriesPgContrib = pageContributionsCache.get(
+        cacheKey,
     () => buildPageContributions(entryNames, suppressJS)
   );
 

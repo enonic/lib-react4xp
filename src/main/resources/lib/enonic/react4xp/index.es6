@@ -1,4 +1,4 @@
-const {getContent, getComponent, getSite} = require('/lib/xp/portal');
+const {getContent, getComponent} = require('/lib/xp/portal');
 const {newCache} = require('/lib/cache');
 const contentLib = require('/lib/xp/content');
 
@@ -512,7 +512,7 @@ class React4xp {
             const bodyEnd = (!suppressJS)
                 ? [
                     // Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
-                    `<script src="${getAssetRoot(getSite()._id)}${this.jsxPath}.js"></script>`,
+                    `<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
 
                     // Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props.
                     // Signature: <command>(entry, id, props?, isPage, hasRegions)

@@ -8,6 +8,14 @@ t.mock('/lib/enonic/react4xp/react4xp_constants.json',
     }
 );
 
+t.mock('/lib/xp/portal.js', {
+    getSite: function () {
+        //log.info("Mocking getSite --> { _id: '0cypfoiaun0hq3587yfnvpwuahdpq89yc3'}")
+        return { _id: '0cypfoiaun0hq3587yfnvpwuahdpq89yc3'};
+    }
+});
+
+
 var lib = require('./dependencies');
 
 
@@ -142,7 +150,7 @@ exports.test_getDependencies_multipleNonmatchingArgs_should_failAndIdeallyReport
         t.assertTrue(false, "Unexpectedly, got a result instead of an error:\n" + JSON.stringify(result));
 
     } catch (e) {
-        log.info("Error report, as expected:\n" + e.message);  
+        log.info("Error report, as expected:\n" + e.message);
     }
 };
 
