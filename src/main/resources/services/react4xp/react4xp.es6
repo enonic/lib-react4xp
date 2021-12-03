@@ -36,7 +36,6 @@ exports.get = function (req) {
     //log.info("/react4xp/ service: GET req (" + typeof req + "): " + JSON.stringify(req, null, 2));
     try {
         let target = getSuffix(req.path, "react4xp").trim();
-        log.info(`React4xp service target asset: '${JSON.stringify(target, null, 2)}'\nreq.path: ${req.path}`);
 
         if (!target) {
             throw Error(`Missing target asset in URL ('${req.path}')`);
