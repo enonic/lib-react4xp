@@ -2,25 +2,34 @@
 const {getSite} = require('/lib/xp/portal');
 const portal = require('/lib/xp/portal');
 
+const NO_SITE = "#\\NO_SITE_CONTEXT/#";
+
 const ROOT_URLS = {};
 
+
 const initServiceUrlRoot = (serviceName) => {
-    const siteId = getSite()._id;
+    const siteId = (getSite() || {})._id;
     const serviceKey = serviceName || '_SERVICEROOT_';
 
-    if (ROOT_URLS[siteId] === undefined) {
-        ROOT_URLS[siteId] = {};
+    const siteIdKey = siteId || NO_SITE;
+    if (ROOT_URLS[siteIdKey] === undefined) {
+        ROOT_URLS[siteIdKey] = {};
     }
-    const existingUrl = ROOT_URLS[siteId][serviceKey];
+    const existingUrl = ROOT_URLS[siteIdKey][serviceKey];
     if (existingUrl !== undefined) {
         return existingUrl;
     }
 
-    const siteUrl = portal.pageUrl({id: siteId});
-    const altUrl = (`${siteUrl}/_/service/${app.name}/${serviceName}/`).replace(/\/+/, '/');
+    let url;
+    if (siteId) {
+        const siteUrl = portal.pageUrl({id: siteId});
+        url = (`${siteUrl}/_/service/${app.name}/${serviceName}/`).replace(/\/+/, '/');
+    } else {
+        url = portal.serviceUrl({service: serviceName});
+    }
 
-    ROOT_URLS[siteId][serviceKey] = altUrl;
-    return altUrl;
+    ROOT_URLS[siteIdKey][serviceKey] = url;
+    return url;
 };
 
 const getAssetRoot = () => {

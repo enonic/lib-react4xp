@@ -154,8 +154,12 @@ const readComponentChunkNames = entryNames => {
     return output;
 }
 
+const NO_SITE = "#NO_SITE_CONTEXT#";
 
-const getSiteLocalCacheKey = (rawKey) => `${getSite()._id}_*_${rawKey}`;
+const getSiteLocalCacheKey = (rawKey) => {
+    const siteKey = (getSite() || {})._id || NO_SITE;
+    return `${siteKey}_*_${rawKey}`;
+}
 
 // Cached version of readComponentChunkNames - used in prod mode
 const readComponentChunkNamesCached = (entryNames) => {
