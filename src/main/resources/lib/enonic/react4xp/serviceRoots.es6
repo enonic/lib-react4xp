@@ -25,7 +25,7 @@ const initServiceUrlRoot = (serviceName) => {
         const siteUrl = portal.pageUrl({id: siteId});
         url = (`${siteUrl}/_/service/${app.name}/${serviceName}/`).replace(/\/+/, '/');
     } else {
-        url = portal.serviceUrl({service: serviceName});
+        url = portal.serviceUrl({service: serviceName}) + '/';
     }
 
     ROOT_URLS[siteIdKey][serviceKey] = url;
