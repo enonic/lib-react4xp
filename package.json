@@ -32,7 +32,7 @@
     },
     "homepage": "https://github.com/enonic/lib-react4xp#readme",
     "dependencies": {
-        "node-fetch": "^3.2.0",
+        "node-fetch": "^3.2.1",
         "react4xp": "2.0.0"
     },
     "devDependencies": {
