@@ -101,8 +101,8 @@ task react4xp_nashornPolyfills(type: NodeTask) {
 
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
-            '--config', 'node_modules/react4xp/nashornPolyfills/webpack.config.js',
-            '--env', 'NASHORNPOLYFILLS_SOURCE=' + 'node_modules/react4xp/nashornPolyfills/nashornPolyfills.es6',
+            '--config', 'node_modules/@enonic/react4xp/nashornPolyfills/webpack.config.js',
+            '--env', 'NASHORNPOLYFILLS_SOURCE=' + 'node_modules/@enonic/react4xp/nashornPolyfills/nashornPolyfills.es6',
 
             // (env.BUILD_R4X + env.NASHORNPOLYFILLS_FILENAME) must match ('build/resources/main' + defaultPolyfillFileName)
             // in com/enonic/lib/react4xp/ssr/EngineFactory.java!
@@ -120,7 +120,7 @@ task react4xp_client(type: NodeTask) {
 
     script = file('node_modules/webpack/bin/webpack.js')
     args = [
-            '--config', 'node_modules/react4xp/client/webpack.config.js',
+            '--config', 'node_modules/@enonic/react4xp/client/webpack.config.js',
             '--env', 'BUILD_R4X="' + ROOT + '/build/resources/main/services/react4xp-client"',
             '--env', 'BUILD_ENV=' + BUILD_ENV,
             '--env', 'CHUNK_CONTENTHASH=[name].js',

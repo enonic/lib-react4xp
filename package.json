@@ -32,8 +32,8 @@
     },
     "homepage": "https://github.com/enonic/lib-react4xp#readme",
     "dependencies": {
-        "node-fetch": "^3.2.0",
-        "react4xp": "2.0.0"
+        "@enonic/react-components": "^3.0.0",
+        "node-fetch": "^3.2.0"
     },
     "devDependencies": {
         "@babel/cli": "^7.17.6",
@@ -43,6 +43,7 @@
         "@babel/preset-env": "^7.16.11",
         "@babel/preset-react": "^7.16.7",
         "@babel/register": "^7.17.0",
+        "@enonic/react4xp": "^3.0.1",
         "babel-eslint": "^10.1.0",
         "babel-loader": "^8.2.3",
         "babel-polyfill": "^6.26.0",
