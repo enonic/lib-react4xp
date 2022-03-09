@@ -1,28 +1,44 @@
-const ioLib = require("/lib/xp/io");
-const cacheLib = require("/lib/cache");
-const {getSite} = require('/lib/xp/portal');
+//import {isString} from '@enonic/js-utils';
+import {isString} from '@enonic/js-utils/value/isString';
 
-// XP runmode: IS_PRODMODE is true in prod mode, false in dev mode.
-const IS_PRODMODE = ("" + Java.type('com.enonic.xp.server.RunMode').get()) === 'PROD';
+import {
+	getResource,
+	readText
+	//@ts-ignore
+} from '/lib/xp/io';
+//@ts-ignore
+import cacheLib from '/lib/cache';
+//@ts-ignore
+import {getSite} from '/lib/xp/portal';
 
-
-import {getAssetRoot, getClientRoot} from "./serviceRoots";
-
-// Tolerate and remove file extensions ts(x), js(x), es(6) and/or trailing slash or space
-const TOLERATED_ENTRY_EXTENSIONS = /([/ ]+|\.(tsx?|jsx?|es6?)[/ ]*)$/i;
+import {
+	getAssetRoot,
+	getClientRoot
+} from "./serviceRoots";
 
 // react4xp_constants.json is not part of lib-react4xp-runtime,
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
-const {
+import {
     R4X_TARGETSUBDIR,
     CLIENT_CHUNKS_FILENAME,
     EXTERNALS_CHUNKS_FILENAME,
     COMPONENT_STATS_FILENAME
-} = require("./react4xp_constants.json");
+	//@ts-ignore
+} from './react4xp_constants.json';
 // TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use readResourceAsJson instead!
 
-let BUILD_STATS_ENTRYPOINTS;
+type Asset = string|{name :string};
+type EntryNames = Array<string>;
+
+
+// XP runmode: IS_PRODMODE is true in prod mode, false in dev mode.
+const IS_PRODMODE = ("" + Java.type('com.enonic.xp.server.RunMode').get()) === 'PROD';
+
+// Tolerate and remove file extensions ts(x), js(x), es(6) and/or trailing slash or space
+const TOLERATED_ENTRY_EXTENSIONS = /([/ ]+|\.(tsx?|jsx?|es6?)[/ ]*)$/i;
+
+let buildStatsEntrypoints :Object|undefined;
 
 const dependenciesCache = IS_PRODMODE
     ? cacheLib.newCache({
@@ -35,8 +51,9 @@ const FULL_EXTERNALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_
 const FULL_CLIENT_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${CLIENT_CHUNKS_FILENAME}`;
 const FULL_COMPONENT_STATS_FILENAME = `/${R4X_TARGETSUBDIR}/${COMPONENT_STATS_FILENAME}`;
 
-const forceTrimmedArray = (entryNames = []) => {
-    if (typeof entryNames === "string") {
+
+function forceTrimmedArray(entryNames :EntryNames = []) :Array<string> {
+    if (isString(entryNames)) {
         const trimmed = entryNames.trim();
         return (trimmed === "")
             ? []
@@ -44,24 +61,24 @@ const forceTrimmedArray = (entryNames = []) => {
     }
     return entryNames.map(entryName => entryName.trim())
 }
-const normalizeEntryNames = (entryNames = []) => {
+
+
+export function normalizeEntryNames(entryNames :EntryNames = []) {
     const arr = forceTrimmedArray(entryNames);
     arr.sort()
     return arr;
-};
+}
 
 
-
-
-const readResourceAsJson = fileName => {
-                                                                                                                        log.debug("Reading resource: " + JSON.stringify(fileName, null, 2));
-    const resource = ioLib.getResource(fileName);
+function readResourceAsJson(fileName :string) :unknown {
+	log.debug("Reading resource: " + JSON.stringify(fileName, null, 2));
+    const resource = getResource(fileName);
     if (!resource || !resource.exists()) {
         throw Error("Empty or not found: " + fileName);
     }
-    let content;
+    let content :string;
     try {
-        content = ioLib.readText(resource.getStream());
+        content = readText(resource.getStream());
     } catch (e) {
         log.error(e.message);
         throw Error("dependencies.es6 # readResourceAsJson: couldn't read resource '" + fileName + "'");
@@ -75,42 +92,39 @@ const readResourceAsJson = fileName => {
         log.info("Content dump from '" + fileName + "':\n" + content);
         throw Error("dependencies.es6 # readResourceAsJson: couldn't parse as JSON content of resource  '" + fileName + "'");
     }
-};
-
-
-
-
-
+}
 
 
 /** Takes entry names (array or a single string) and returns an array of (hashed) dependency file names, the complete set of chunks required for the set of entries to run.
  *  ASSUMES that stats.json.entrypoints is an object where the keys are entry names without file extensions, mapping to values that are objects,
  *  which in turn have an "assets" key, under which are the full file names of the entry's dependencies.
  *  If the input array is empty or null, returns ALL dependency chunk names. */
-const readComponentChunkNames = entryNames => {
+function readComponentChunkNames(entryNames :EntryNames) {
 
     // Just verify that it exists and has a content:
-    let STATS = readResourceAsJson(FULL_COMPONENT_STATS_FILENAME);
+    let STATS = readResourceAsJson(FULL_COMPONENT_STATS_FILENAME) as {
+		entrypoints :Object
+	};
 
-    BUILD_STATS_ENTRYPOINTS = STATS.entrypoints;
+    buildStatsEntrypoints = STATS.entrypoints;
 
 
     if (entryNames.length === 0) {
-        entryNames = Object.keys(BUILD_STATS_ENTRYPOINTS);
+        entryNames = Object.keys(buildStatsEntrypoints);
     }
     const output = [];
     const missing = [];
 
     entryNames.forEach(entry => {
         try {
-            let data = BUILD_STATS_ENTRYPOINTS[entry];
+            let data = buildStatsEntrypoints[entry];
             if (!data) {
                 log.debug(`Cleaning entry name: '${entry}'`);
                 entry = entry.trim();
                 if (TOLERATED_ENTRY_EXTENSIONS.test(entry)) {
                     entry = entry.replace(TOLERATED_ENTRY_EXTENSIONS, '');
                 }
-                data = BUILD_STATS_ENTRYPOINTS[entry];
+                data = buildStatsEntrypoints[entry];
                 if (!data) {
                     throw new Error(`Requested entry '${entry}' not found in ${COMPONENT_STATS_FILENAME}`)
                 }
@@ -122,7 +136,7 @@ const readComponentChunkNames = entryNames => {
             const myself = entry + ".js";
             data.assets
                 // Each asset can be a string (webpack 4) or an object with a subattribute string .name (webpack 5)
-                .map(asset => {
+                .map((asset :Asset) => {
                     if (typeof asset === 'string') {
                         return asset;
                     }
@@ -132,8 +146,8 @@ const readComponentChunkNames = entryNames => {
 
                     throw Error(`Unexpected 'assets' structure in ${COMPONENT_STATS_FILENAME}: ${JSON.stringify(data.assets)}`);
                 })
-                .filter(asset => !asset.endsWith(".map") && asset !== myself)
-                .forEach(asset => {
+                .filter((asset :string) => !asset.endsWith(".map") && asset !== myself)
+                .forEach((asset :string) => {
                     if (output.indexOf(asset) === -1) {
                         output.push(asset);
                     }
@@ -156,34 +170,34 @@ const readComponentChunkNames = entryNames => {
 
 const NO_SITE = "#NO_SITE_CONTEXT#";
 
-const getSiteLocalCacheKey = (rawKey) => {
+
+export function getSiteLocalCacheKey(rawKey :string) {
     const siteKey = (getSite() || {})._id || NO_SITE;
     return `${siteKey}_*_${rawKey}`;
 }
 
+
 // Cached version of readComponentChunkNames - used in prod mode
-const readComponentChunkNamesCached = (entryNames) => {
+function readComponentChunkNamesCached(entryNames :EntryNames) {
     entryNames = normalizeEntryNames(entryNames);
 
     const cacheKey = getSiteLocalCacheKey(entryNames.join("*"));
     return dependenciesCache.get(cacheKey, () => readComponentChunkNames(entryNames));
-};
+}
 
-const getComponentChunkNames = IS_PRODMODE
+
+export const getComponentChunkNames = IS_PRODMODE
     ? readComponentChunkNamesCached
     : entryNames => readComponentChunkNames(forceTrimmedArray(entryNames));
 
 
-
-
-
-const getComponentChunkUrls = (entries) => {
+export function getComponentChunkUrls(entries :EntryNames) {
     return getComponentChunkNames(entries).map(name => getAssetRoot() + name);
-};
+}
 
 
 /** Returns the asset-via-service URL for the externals chunk */
-const readExternalsUrls = () => {
+function readExternalsUrls() {
     // This should not break if there are no added externals. Externals should be optional.
     try {
         return getNamesFromChunkfile(FULL_EXTERNALS_CHUNKS_FILENAME).map(
@@ -196,19 +210,20 @@ const readExternalsUrls = () => {
         );
         return [];
     }
-};
+}
 
-const readExternalsUrlsCached = () => {
+
+function readExternalsUrlsCached() {
     const cacheKey = getSiteLocalCacheKey(FULL_EXTERNALS_CHUNKS_FILENAME);
     return dependenciesCache.get(cacheKey, () => readExternalsUrls());
 }
 
-const getExternalsUrls = IS_PRODMODE
+export const getExternalsUrls = IS_PRODMODE
     ? readExternalsUrlsCached
     : readExternalsUrls;
 
 
-const readClientUrls = () => {
+function readClientUrls() {
     // Special case: if there is a chunkfile for a client wrapper, use that. If not, fall back to
     // a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
     try {
@@ -222,20 +237,23 @@ const readClientUrls = () => {
         );
         return [getClientRoot()];
     }
-};
+}
 
 /** Returns the asset-via-service URL for the frontend client */
-const readClientUrlsCached = () => {
+function readClientUrlsCached() {
     const cacheKey = getSiteLocalCacheKey(FULL_CLIENT_CHUNKS_FILENAME);
     return dependenciesCache.get(cacheKey, () => readClientUrls());
 }
 
-const getClientUrls = IS_PRODMODE
+export const getClientUrls = IS_PRODMODE
     ? readClientUrlsCached
     : readClientUrls;
 
 
-const getAllUrls = (entries, suppressJS) => {
+export function getAllUrls(
+	entries :EntryNames,
+	suppressJS :boolean
+) {
     return [
         ...getExternalsUrls(),
         ...getComponentChunkUrls(entries),
@@ -250,7 +268,7 @@ const getAllUrls = (entries, suppressJS) => {
 
 /** Open a chunkfile, read the contents and return the domain-relative urls for non-entry JS file references in the chunk file.
  * Throws an error if not found or if unexpected format. */
-const getNamesFromChunkfile = chunkFile => {
+export function getNamesFromChunkfile(chunkFile :string) {
 
     const chunks = readResourceAsJson(chunkFile);
 
@@ -275,7 +293,7 @@ const getNamesFromChunkfile = chunkFile => {
         }
 
         // Fail fast: verify that it exists and has a content
-        const resource = ioLib.getResource(`/${R4X_TARGETSUBDIR}/${chunk}`);
+        const resource = getResource(`/${R4X_TARGETSUBDIR}/${chunk}`);
         if (!resource || !resource.exists()) {
             throw Error(
                 `React4xp dependency chunk not found: /${R4X_TARGETSUBDIR}/${chunk}`
@@ -284,17 +302,4 @@ const getNamesFromChunkfile = chunkFile => {
 
         return chunk;
     });
-};
-
-// ------------------------------------------------------------------
-
-module.exports = {
-    normalizeEntryNames,
-    getComponentChunkNames,
-    getComponentChunkUrls,
-    getClientUrls,
-    getNamesFromChunkfile,
-    getExternalsUrls,
-    getAllUrls,
-    getSiteLocalCacheKey
-};
+}
