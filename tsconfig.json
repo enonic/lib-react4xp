@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+		"baseUrl": "./",
+		"inlineSourceMap": false,
+		"inlineSources": false,
+		"listEmittedFiles": false,
+		"listFiles": false,
+		"module": "es6",
+		"moduleResolution": "node",
+		"noImplicitAny": false,
+		"paths": {
+			"@enonic/js-utils": ["./node_modules/@enonic/js-utils/src"],
+			"@enonic/js-utils/*": ["./node_modules/@enonic/js-utils/src/*"],
+			"/lib/enonic/react4xp/*": ["./src/main/resources/lib/enonic/react4xp/*"],
+			"/lib/static": ["../lib-static/src/main/resources/lib/enonic/static"]
+		},
+		"removeComments": true,
+		"rootDir": "./src/main/resources",
+		"sourceMap": false,
+		"outDir": "build/resources/main",
+		"target": "es3",
+	}
+}
