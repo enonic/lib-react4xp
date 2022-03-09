@@ -43,7 +43,7 @@
         "@babel/preset-env": "^7.16.11",
         "@babel/preset-react": "^7.16.7",
         "@babel/register": "^7.17.0",
-        "@enonic/react4xp": "^3.0.3",
+        "@enonic/react4xp": "^3.0.4",
         "babel-eslint": "^10.1.0",
         "babel-loader": "^8.2.3",
         "babel-polyfill": "^6.26.0",
