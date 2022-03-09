@@ -1,65 +1,57 @@
 {
-    "name": "lib-react4xp",
-    "version": "2.0.0",
-    "description": "XP serverside runtime, handles the bulk of the React4xp work: server-side rendering, and handling and serving of client-side components and dependency chunks to the client, including the React4xp front-end rendering wrapper itself.\"",
-    "main": "src/main/resources/lib/enonic/react4xp/index.es6",
-    "directories": {
-        "doc": "docs"
-    },
-    "scripts": {
-        "test": "NODE_PATH=./ node_modules/mocha/bin/mocha --compilers js:@babel/register --require babel-polyfill --require src/test/test_helper.js \"src/test/**/*@(.js)\"",
-        "clean": "rimraf node_modules && ./gradlew clean --refresh-dependencies --info",
-        "reinstall": "npm run clean && npm run local",
-        "local": "./gradlew publishToMavenLocal -P development --info",
-        "local:watch": "./gradlew publishToMavenLocal -P development --info -t",
-        "dev": "npm run clean && npm run local:watch",
-        "install:nsi": "nsi"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/enonic/lib-react4xp.git"
-    },
-    "keywords": [
-        "React4xp",
-        "Enonic",
-        "XP",
-        "React"
+  "author": "Espen Norderud",
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
     ],
-    "author": "Espen Norderud",
-    "license": "Apache-2.0",
-    "bugs": {
-        "url": "https://github.com/enonic/lib-react4xp/issues"
-    },
-    "homepage": "https://github.com/enonic/lib-react4xp#readme",
-    "dependencies": {
-        "@enonic/react-components": "^3.0.0",
-        "node-fetch": "^3.2.1"
-    },
-    "devDependencies": {
-        "@babel/cli": "^7.17.6",
-        "@babel/core": "^7.17.5",
-        "@babel/plugin-proposal-class-properties": "^7.16.7",
-        "@babel/plugin-proposal-object-rest-spread": "^7.17.3",
-        "@babel/preset-env": "^7.16.11",
-        "@babel/preset-react": "^7.16.7",
-        "@babel/register": "^7.17.0",
-        "@enonic/react4xp": "^3.0.5",
-        "babel-eslint": "^10.1.0",
-        "babel-loader": "^8.2.3",
-        "babel-polyfill": "^6.26.0",
-        "eslint": "^8.10.0",
-        "lodash": "^4.17.21",
-        "mocha": "^9.2.1",
-        "webpack": "^5.70.0",
-        "webpack-cli": "^4.9.2"
-    },
-    "babel": {
-        "presets": [
-            "@babel/preset-env"
-        ],
-        "plugins": [
-            "@babel/plugin-proposal-object-rest-spread",
-            "@babel/plugin-proposal-class-properties"
-        ]
-    }
+    "plugins": [
+      "@babel/plugin-proposal-object-rest-spread",
+      "@babel/plugin-proposal-class-properties"
+    ]
+  },
+  "contributors": [
+    "Christian Westgaard <cwe@enonic.com>"
+  ],
+  "dependencies": {
+    "@enonic/react-components": "^3.0.0",
+    "node-fetch": "^3.2.1"
+  },
+  "description": "XP serverside runtime, handles the bulk of the React4xp work: server-side rendering, and handling and serving of client-side components and dependency chunks to the client, including the React4xp front-end rendering wrapper itself.\"",
+  "devDependencies": {
+    "@babel/cli": "^7.17.6",
+    "@babel/core": "^7.17.5",
+    "@babel/plugin-proposal-class-properties": "^7.16.7",
+    "@babel/plugin-proposal-object-rest-spread": "^7.17.3",
+    "@babel/preset-env": "^7.16.11",
+    "@babel/preset-react": "^7.16.7",
+    "@babel/register": "^7.17.0",
+    "@enonic/react4xp": "^3.0.5",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.2.3",
+    "babel-polyfill": "^6.26.0",
+    "eslint": "^8.10.0",
+    "lodash": "^4.17.21",
+    "mocha": "^9.2.1",
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "main": "src/main/resources/lib/enonic/react4xp/index.es6",
+  "name": "lib-react4xp",
+  "keywords": [
+    "React4xp",
+    "Enonic",
+    "XP",
+    "React"
+  ],
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "test": "NODE_PATH=./ node_modules/mocha/bin/mocha --compilers js:@babel/register --require babel-polyfill --require src/test/test_helper.js \"src/test/**/*@(.js)\"",
+    "clean": "rimraf node_modules && ./gradlew clean --refresh-dependencies --info",
+    "reinstall": "npm run clean && npm run local",
+    "local": "./gradlew publishToMavenLocal -P development --info",
+    "local:watch": "./gradlew publishToMavenLocal -P development --info -t",
+    "dev": "npm run clean && npm run local:watch",
+    "install:nsi": "nsi"
+  }
 }
