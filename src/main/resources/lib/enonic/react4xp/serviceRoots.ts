@@ -1,13 +1,16 @@
+import {
+	getSite,
+	pageUrl,
+	serviceUrl
+	//@ts-ignore
+} from '/lib/xp/portal';
 
-const {getSite} = require('/lib/xp/portal');
-const portal = require('/lib/xp/portal');
 
 const NO_SITE = "#\\NO_SITE_CONTEXT/#";
-
 const ROOT_URLS = {};
 
 
-const initServiceUrlRoot = (serviceName) => {
+function initServiceUrlRoot(serviceName :string) {
     const siteId = (getSite() || {})._id;
     const serviceKey = serviceName || '_SERVICEROOT_';
 
@@ -15,44 +18,47 @@ const initServiceUrlRoot = (serviceName) => {
     if (ROOT_URLS[siteIdKey] === undefined) {
         ROOT_URLS[siteIdKey] = {};
     }
-    const existingUrl = ROOT_URLS[siteIdKey][serviceKey];
+    const existingUrl :string = ROOT_URLS[siteIdKey][serviceKey];
     if (existingUrl !== undefined) {
         return existingUrl;
     }
 
-    let url;
+    let url :string;
     if (siteId) {
-        const siteUrl = portal.pageUrl({id: siteId});
+        const siteUrl = pageUrl({id: siteId});
         url = (`${siteUrl}/_/service/${app.name}/${serviceName}/`).replace(/\/+/, '/');
     } else {
-        url = portal.serviceUrl({service: serviceName}) + '/';
+        url = serviceUrl({service: serviceName}) + '/';
     }
 
     ROOT_URLS[siteIdKey][serviceKey] = url;
     return url;
-};
+}
 
-const getAssetRoot = () => {
+
+export function getAssetRoot() {
     return initServiceUrlRoot('react4xp');
 };
 
-const getClientRoot = () => {
-    return initServiceUrlRoot( 'react4xp-client');
+
+export function getClientRoot() {
+    return initServiceUrlRoot('react4xp-client');
 };
 
 
-const getDependenciesRoot = () => {
-    return initServiceUrlRoot( 'react4xp-dependencies');
+export function getDependenciesRoot() {
+    return initServiceUrlRoot('react4xp-dependencies');
 };
 
 
-const getServiceRoot = () => {
-    return initServiceUrlRoot( '');
+export function getServiceRoot() {
+    return initServiceUrlRoot('');
 };
+
 
 const slashesAtBeginning = /^\/+/;
 const slashesAtEnd = /\/+$/;
-const stripSlashes = suffix => {
+function stripSlashes(suffix :string) {
     return suffix.replace(slashesAtBeginning, '').replace(slashesAtEnd, '');
 };
 
@@ -67,7 +73,10 @@ const stripSlashes = suffix => {
 // Throws an error if the path doesn't match any known variation of the service path.
 // Logs a warning when the fallback is used.
 let LOGGEDWARNING = false;
-const getSuffix = (path, serviceName) => {
+export function getSuffix(
+	path :string,
+	serviceName :string
+) {
     const standardRoot = initServiceUrlRoot(serviceName).replace(/\/$/, '');
 
     let location = path.indexOf(standardRoot);
@@ -86,8 +95,4 @@ const getSuffix = (path, serviceName) => {
     }
 
     throw Error(`Unexpected service suffix lookup: requested path ('${path}') doesn't seem to belong to the service '${serviceName}'.`);
-};
-
-module.exports = {
-    getAssetRoot, getClientRoot, getDependenciesRoot, getServiceRoot, getSuffix
 };

@@ -1,24 +1,45 @@
-const util = require('./util');
-const cacheLib = require("/lib/cache");
-const pageContributionsCache = cacheLib.newCache({
+import type {PageContributions} from '../../../index.d';
+
+
+//import {forceArray} from '@enonic/js-utils';
+import {forceArray} from '@enonic/js-utils/array/forceArray';
+//@ts-ignore
+import {newCache} from '/lib/cache';
+
+import {
+	normalizeEntryNames,
+	getAllUrls,
+	getSiteLocalCacheKey
+} from './dependencies';
+
+
+type EntryNames = string|Array<string>;
+
+
+const pageContributionsCache = newCache({
   size: 1200,
   expire: 10800 // 30 hours
 });
 
-const { normalizeEntryNames, getAllUrls, getSiteLocalCacheKey} = require("./dependencies");
 
 /** Wraps a url in a script tag and appends it to pageContributions.js.bodyEnd with an async tag. The reason for choosing
  *  bodyEnd is that this allows display of server-side-rendered content or placeholders before starting to load the
  *  acrtive components. The component-render-triggering <script> tag should have a defer attribute in order to wait for
  *  these to load. */
-const appendScriptToBodyEnd = (url, pageContributions) => {
+function appendScriptToBodyEnd(
+	url :string,
+	pageContributions :PageContributions
+) {
   pageContributions.bodyEnd = [
     ...(pageContributions.bodyEnd || []),
     `<script src="${url}"></script>\n`
   ];
 };
 
-const appendCssToHeadEnd = (url, pageContributions) => {
+function appendCssToHeadEnd(
+	url :string,
+	pageContributions :PageContributions
+) {
   pageContributions.headEnd = [
     ...(pageContributions.headEnd || []),
     `<link href="${url}" rel="stylesheet" type="text/css" />\n`
@@ -33,10 +54,13 @@ const appendCssToHeadEnd = (url, pageContributions) => {
  * @param entries An array (also accepts string, if only one item) of Entry names for React4xp components, for which we want to build the set
  * of dependencies.
  * @returns an object ready to be returned as a pageContributions.js from an XP component. Puts dependencies into the bodyEnd attribute. */
-const buildPageContributions = (entries, suppressJS) => {
+function buildPageContributions(
+	entries :EntryNames,
+	suppressJS :boolean
+) {
   const chunkUrls = getAllUrls(entries, suppressJS);
 
-  const pageContributions = {};
+  const pageContributions :PageContributions = {};
   chunkUrls.forEach(chunkUrl => {
     if (chunkUrl.endsWith(".css")) {
       appendCssToHeadEnd(chunkUrl, pageContributions);
@@ -48,16 +72,19 @@ const buildPageContributions = (entries, suppressJS) => {
   });
 
   return pageContributions;
-};
+}
+
 
 // ---------------------------------------------------------------
 
 
-
-const getUniqueEntries = (arrayOfArrays, controlSet) => {
+function getUniqueEntries(
+	arrayOfArrays :Array<Array<string>>,
+	controlSet :Array<string>
+) {
   const uniqueEntries = [];
   arrayOfArrays.forEach(arr => {
-    util.forceArray(arr).forEach(item => {
+    forceArray(arr).forEach(item => {
       if (controlSet.indexOf(item) === -1) {
         uniqueEntries.push(item);
         controlSet.push(item);
@@ -65,7 +92,8 @@ const getUniqueEntries = (arrayOfArrays, controlSet) => {
     });
   });
   return uniqueEntries;
-};
+}
+
 
 /** Adds page contributions for an (optional) set of entries.  Merges different pageContributions.js objects into one. Prevents duplicates: no single pageContribution entry is
  * repeated, this prevents resource-wasting by loading/running the same script twice).
@@ -76,15 +104,15 @@ const getUniqueEntries = (arrayOfArrays, controlSet) => {
  *
  * Also part of the merge: PAGE_CONTRIBUTIONS, the common standard React4xp page contributions
  */
-const getAndMergePageContributions = (
-  entryNames,
-  incomingPgContrib,
-  newPgContrib,
-  suppressJS
-) => {
+export function getAndMergePageContributions(
+  entryNames :EntryNames,
+  incomingPgContrib :PageContributions,
+  newPgContrib :PageContributions,
+  suppressJS :boolean
+) :PageContributions {
   entryNames = normalizeEntryNames(entryNames);
     const cacheKey = getSiteLocalCacheKey(entryNames.join("*")+"_"+suppressJS);
-    const entriesPgContrib = pageContributionsCache.get(
+    const entriesPgContrib :PageContributions = pageContributionsCache.get(
         cacheKey,
     () => buildPageContributions(entryNames, suppressJS)
   );
@@ -132,10 +160,4 @@ const getAndMergePageContributions = (
       controlSet
     )
   };
-};
-
-// ------------------------------------------------------------------
-
-module.exports = {
-  getAndMergePageContributions
 };

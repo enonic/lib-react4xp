@@ -19,6 +19,7 @@ dependencies {
 //    compile "com.enonic.xp:lib-node:${xpVersion}"
 
     compile 'com.enonic.lib:lib-cache:2.1.1'
+    compile 'com.enonic.lib:lib-static:1.0.2'
 
     compile group: 'org.jdom', name: 'jdom', version: '2.0.2'
     compile group: 'org.json', name: 'json', version: '20220320'
@@ -37,6 +38,7 @@ dependencies {
 processResources {
   exclude '**/.gitkeep'
   exclude '**/*.es6'
+  exclude '**/*.ts'
 }
 
 repositories {
@@ -70,6 +72,10 @@ task babelXP(type: NodeTask) {
 babelXP.dependsOn += 'processResources'
 
 
+task rollup(type: NpmTask) {
+	args = ['run', 'rollup']
+}
+rollup.dependsOn += 'processResources'
 
 
 if (BUILD_ENV == 'development') {
@@ -87,7 +93,8 @@ if (BUILD_ENV == 'development') {
     // npmInstall.outputs.dir("node_modules")
     npmInstall.outputs.file file("package-lock.json")
 
-    babelXP.dependsOn += 'npmInstall'
+	babelXP.dependsOn += 'npmInstall'
+	rollup.dependsOn += 'npmInstall'
 }
 
 
@@ -111,6 +118,8 @@ task react4xp_nashornPolyfills(type: NodeTask) {
     ]
 }
 react4xp_nashornPolyfills.dependsOn += 'babelXP'
+react4xp_nashornPolyfills.dependsOn += 'rollup'
+
 
 
 
@@ -138,6 +147,7 @@ task react4xp_client(type: NodeTask) {
     }
 }
 react4xp_client.dependsOn += 'babelXP'
+react4xp_client.dependsOn += 'rollup'
 
 jar.dependsOn += 'react4xp_nashornPolyfills'
 jar.dependsOn += 'react4xp_client'
