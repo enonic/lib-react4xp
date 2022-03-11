@@ -1,5 +1,13 @@
+import type {
+	OneOrMore,
+	//PageContributions,
+	React4xp as React4xpNamespace
+} from '../../../index.d';
+
+
 //import {isString} from '@enonic/js-utils';
 import {isString} from '@enonic/js-utils/value/isString';
+import {toStr} from '@enonic/js-utils/value/toStr';
 
 import {
 	getResource,
@@ -25,11 +33,11 @@ import {
     EXTERNALS_CHUNKS_FILENAME,
     COMPONENT_STATS_FILENAME
 	//@ts-ignore
-} from './react4xp_constants.json';
+//} from './react4xp_constants.json';
+} from '/lib/enonic/react4xp/react4xp_constants.json';
 // TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use readResourceAsJson instead!
 
 type Asset = string|{name :string};
-type EntryNames = Array<string>;
 
 
 // XP runmode: IS_PRODMODE is true in prod mode, false in dev mode.
@@ -52,7 +60,7 @@ const FULL_CLIENT_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${CLIENT_CHUNKS_FILENA
 const FULL_COMPONENT_STATS_FILENAME = `/${R4X_TARGETSUBDIR}/${COMPONENT_STATS_FILENAME}`;
 
 
-function forceTrimmedArray(entryNames :EntryNames = []) :Array<string> {
+function forceTrimmedArray(entryNames :OneOrMore<React4xpNamespace.EntryName> = []) :Array<React4xpNamespace.EntryName> {
     if (isString(entryNames)) {
         const trimmed = entryNames.trim();
         return (trimmed === "")
@@ -63,7 +71,7 @@ function forceTrimmedArray(entryNames :EntryNames = []) :Array<string> {
 }
 
 
-export function normalizeEntryNames(entryNames :EntryNames = []) {
+export function normalizeEntryNames(entryNames :OneOrMore<React4xpNamespace.EntryName> = []) :Array<React4xpNamespace.EntryName> {
     const arr = forceTrimmedArray(entryNames);
     arr.sort()
     return arr;
@@ -71,7 +79,7 @@ export function normalizeEntryNames(entryNames :EntryNames = []) {
 
 
 function readResourceAsJson(fileName :string) :unknown {
-	log.debug("Reading resource: " + JSON.stringify(fileName, null, 2));
+	//log.debug("Reading resource: " + JSON.stringify(fileName, null, 2));
     const resource = getResource(fileName);
     if (!resource || !resource.exists()) {
         throw Error("Empty or not found: " + fileName);
@@ -99,7 +107,7 @@ function readResourceAsJson(fileName :string) :unknown {
  *  ASSUMES that stats.json.entrypoints is an object where the keys are entry names without file extensions, mapping to values that are objects,
  *  which in turn have an "assets" key, under which are the full file names of the entry's dependencies.
  *  If the input array is empty or null, returns ALL dependency chunk names. */
-function readComponentChunkNames(entryNames :EntryNames) {
+function readComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.EntryName>) {
 
     // Just verify that it exists and has a content:
     let STATS = readResourceAsJson(FULL_COMPONENT_STATS_FILENAME) as {
@@ -110,16 +118,16 @@ function readComponentChunkNames(entryNames :EntryNames) {
 
 
     if (entryNames.length === 0) {
-        entryNames = Object.keys(buildStatsEntrypoints);
+        entryNames = Object.keys(buildStatsEntrypoints)// as Array<React4xpNamespace.EntryName>;
     }
     const output = [];
     const missing = [];
 
-    entryNames.forEach(entry => {
+    (entryNames as Array<React4xpNamespace.EntryName>).forEach(entry => {
         try {
             let data = buildStatsEntrypoints[entry];
             if (!data) {
-                log.debug(`Cleaning entry name: '${entry}'`);
+                //log.debug(`Cleaning entry name: '${entry}'`);
                 entry = entry.trim();
                 if (TOLERATED_ENTRY_EXTENSIONS.test(entry)) {
                     entry = entry.replace(TOLERATED_ENTRY_EXTENSIONS, '');
@@ -165,6 +173,7 @@ function readComponentChunkNames(entryNames :EntryNames) {
         );
     }
 
+	//log.debug('readComponentChunkNames() output:%s', toStr(output));
     return output;
 }
 
@@ -178,7 +187,7 @@ export function getSiteLocalCacheKey(rawKey :string) {
 
 
 // Cached version of readComponentChunkNames - used in prod mode
-function readComponentChunkNamesCached(entryNames :EntryNames) {
+function readComponentChunkNamesCached(entryNames :OneOrMore<React4xpNamespace.EntryName>) :Array<string> {
     entryNames = normalizeEntryNames(entryNames);
 
     const cacheKey = getSiteLocalCacheKey(entryNames.join("*"));
@@ -186,12 +195,14 @@ function readComponentChunkNamesCached(entryNames :EntryNames) {
 }
 
 
-export const getComponentChunkNames = IS_PRODMODE
-    ? readComponentChunkNamesCached
-    : entryNames => readComponentChunkNames(forceTrimmedArray(entryNames));
+export function getComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.EntryName>) {
+	return IS_PRODMODE
+    	? readComponentChunkNamesCached(entryNames)
+    	: readComponentChunkNames(forceTrimmedArray(entryNames));
+}
 
 
-export function getComponentChunkUrls(entries :EntryNames) {
+export function getComponentChunkUrls(entries :OneOrMore<React4xpNamespace.EntryName>) {
     return getComponentChunkNames(entries).map(name => getAssetRoot() + name);
 }
 
@@ -231,7 +242,7 @@ function readClientUrls() {
             name => getAssetRoot() + name
         );
     } catch (e) {
-        log.debug(e);
+        log.debug('Stacktrace', e);
         log.debug(
             `No optional clientwrapper was found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's okay, there's a fallback one at: ${getClientRoot()}`
         );
@@ -251,7 +262,7 @@ export const getClientUrls = IS_PRODMODE
 
 
 export function getAllUrls(
-	entries :EntryNames,
+	entries :OneOrMore<React4xpNamespace.EntryName>,
 	suppressJS :boolean
 ) {
     return [

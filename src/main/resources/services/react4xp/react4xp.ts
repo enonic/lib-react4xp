@@ -7,9 +7,9 @@ import type {
 } from '../../index.d';
 
 
+//import {toStr} from '@enonic/js-utils/value/toStr';
 //@ts-ignore
 //import {buildGetter} from '/lib/static';
-
 import {
 	getResource,
 	readLines
@@ -52,6 +52,7 @@ export function get(req :Request) :Response {
     //log.info("/react4xp/ service: GET req (" + typeof req + "): " + JSON.stringify(req, null, 2));
     try {
         let target = getSuffix(req.path, "react4xp").trim();
+		//log.debug('get() target:%s', target);
 
         if (!target) {
             throw Error(`Missing target asset in URL ('${req.path}')`);
@@ -72,16 +73,22 @@ export function get(req :Request) :Response {
                 target += ".js";
             }
         }
+		//log.debug('get() target:%s', target);
 
         const isCss = target.endsWith(".css");
+		//log.debug('get() isCss:%s', isCss);
 
         const cacheKey = getSiteLocalCacheKey(target);
+		//log.debug('get() cacheKey:%s', cacheKey);
+
         if (ENTRIES.indexOf(target) === -1) {
+			//log.debug('get() getReact4xpHashedChunk');
             return componentsCache.get(cacheKey, function () {
                 //log.info("Caching React4XP component: " + target);
                 return getReact4xpHashedChunk(resource, isCss);
             });
         } else {
+			//log.debug('get() getReact4xpEntry');
             return componentsCache.get(cacheKey, function () {
                 //log.info("Caching React4XP entry: " + target);
                 return getReact4xpEntry(resource);

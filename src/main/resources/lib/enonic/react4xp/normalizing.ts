@@ -1,14 +1,31 @@
+import {isNumber} from '@enonic/js-utils/value/isNumber';
+import {isString} from '@enonic/js-utils/value/isString';
+
+
 const COMMA_PLACEHOLDER = "##U+FE10##";
 
-const singleQuoteCounter = item => (item.match(/'/g) || []).length;
-const replaceSurroundingSingleQuotes = item => (item.startsWith("'"))
-    ? item.replace(/^'/, "").replace(/'$/, "").trim()
-    : item.trim();
 
-const doubleQuoteCounter = item => (item.match(/"/g) || []).length;
-const replaceSurroundingDoubleQuotes = item => (item.startsWith('"'))
-    ? item.replace(/^"/, "").replace(/"$/, "").trim()
-    : item.trim();
+function singleQuoteCounter(item :string) {
+	return (item.match(/'/g) || []).length;
+}
+
+function replaceSurroundingSingleQuotes(item :string) {
+	return (item.startsWith("'"))
+		? item.replace(/^'/, "").replace(/'$/, "").trim()
+		: item.trim();
+}
+
+
+function doubleQuoteCounter(item :string) {
+	return (item.match(/"/g) || []).length;
+}
+
+
+function replaceSurroundingDoubleQuotes(item :string) {
+	return (item.startsWith('"'))
+    	? item.replace(/^"/, "").replace(/"$/, "").trim()
+    	: item.trim();
+}
 
 
 const preventUnclosedQuotes = (isInsideQuote) => (item) => {
@@ -26,7 +43,14 @@ const preventUnclosedQuotes = (isInsideQuote) => (item) => {
 };
 
 
-const isQuoteSoMaybeFlagAsInside = (char, c, targetQuote, otherQuote, isInsideQuote, fullString) => {
+function isQuoteSoMaybeFlagAsInside(
+	char,
+	c,
+	targetQuote,
+	otherQuote,
+	isInsideQuote,
+	fullString
+) {
     if (char === targetQuote) {
         if (isInsideQuote[targetQuote]) {
             if (c > 0 && fullString[c - 1] !== "\\") {
@@ -38,11 +62,14 @@ const isQuoteSoMaybeFlagAsInside = (char, c, targetQuote, otherQuote, isInsideQu
         return true;
     }
     return false;
-};
+}
 
 
 /** Normalize engine settings to string array */
-const normalizeSSREngineSettings = (ssrEngineSettingsString, ssrDefaultCacheSize) => {
+export function normalizeSSREngineSettings(
+	ssrEngineSettingsString :string,
+	ssrDefaultCacheSize
+) {
 
     // When iterating over strings, flags whether a character is inside a quote or not:
     const isInsideQuote = {
@@ -96,12 +123,14 @@ const normalizeSSREngineSettings = (ssrEngineSettingsString, ssrDefaultCacheSize
 
 
 // Accepts numerical values (which may or may not be in strings), null or undefined, returns number > 0 or null.
-const normalizeSSRMaxThreads = (ssrMaxThreadsSetting) => {
-    let ssrMaxThreads;
+export function normalizeSSRMaxThreads(ssrMaxThreadsSetting :number|string) :number {
+    let ssrMaxThreads :number;
     try {
-        ssrMaxThreads = (typeof ssrMaxThreadsSetting === 'number' || typeof ssrMaxThreadsSetting === 'string')
-            ? parseInt(ssrMaxThreadsSetting, 10)
-            : 0;
+        ssrMaxThreads = isNumber(ssrMaxThreadsSetting)
+			? ssrMaxThreadsSetting
+			: isString(ssrMaxThreadsSetting)
+            	? parseInt(ssrMaxThreadsSetting, 10)
+            	: 0;
     } catch (e) {
         log.error("Looks like the value of ssrMaxThreads from react4xp.properties (or SSR_MAX_THREADS from react4xp_constants.json) is illegal: " + JSON.stringify(ssrMaxThreadsSetting))
     }
@@ -109,9 +138,4 @@ const normalizeSSRMaxThreads = (ssrMaxThreadsSetting) => {
     return (!ssrMaxThreads || isNaN(ssrMaxThreads) || ssrMaxThreads < 1)
         ? 0
         : ssrMaxThreads;
-}
-
-module.exports = {
-    normalizeSSREngineSettings,
-    normalizeSSRMaxThreads
 }
