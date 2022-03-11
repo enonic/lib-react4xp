@@ -3,6 +3,7 @@ export interface Request<
 	PathParams extends {} = {}
 > {
 	body? :string
+	contextPath? :string
 	headers? :{
 		Accept? :string
 		Authorization? :string
@@ -12,4 +13,5 @@ export interface Request<
 	params? :Params
 	path? :string
 	pathParams? :PathParams
+	rawPath? :string
 }

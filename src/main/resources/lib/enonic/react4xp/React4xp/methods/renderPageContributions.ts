@@ -8,6 +8,7 @@ import {toStr} from '@enonic/js-utils/value/toStr';
 import {buildErrorContainer} from '../../htmlHandling';
 import {getAndMergePageContributions}  from '../../pageContributions';
 import {getAssetRoot}  from '../../serviceRoots';
+import {buildAssetUrl} from '../../asset';
 
 // react4xp_constants.json is not part of lib-react4xp:
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
@@ -24,8 +25,8 @@ import {
     SSR_MAX_THREADS,                // <-- set to 0/undefined/null for unlimited, otherwise a number for an upper concurrency limit (to save memory)
     SSR_ENGINE_SETTINGS*/             // <-- set to 0 to switch off nashorn cache, otherwise cache size (number) or full settings (comma-separated string referring to https://github.com/openjdk/nashorn/blob/main/src/org.openjdk.nashorn/share/classes/org/openjdk/nashorn/internal/runtime/resources/Options.properties )
 	//@ts-ignore
-//}  from '../../react4xp_constants.json';
-}  from '/lib/enonic/react4xp/react4xp_constants.json';
+//} from '../../react4xp_constants.json';
+} from '/lib/enonic/react4xp/react4xp_constants.json';
 // TODO: The above (require) doesn't seem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use dependencies.readResourceAsJson instead!
 
 /** Generates or modifies existing enonic XP pageContributions. Adds client-side dependency chunks (core React4xp frontend,
@@ -52,23 +53,34 @@ export function renderPageContributions({
 	clientRender? :boolean,
 	request? :Request
 } = {}) {
+	//log.debug('renderPageContributions() pageContributions:%s', toStr(pageContributions));
+	//log.debug('renderPageContributions() clientRender:%s', toStr(clientRender));
+	//log.debug('renderPageContributions() request:%s', toStr(request));
+
 	let output = null;
 	try {
 
 		// If request.mode reveals rendering in Content studio: SSR without trigger call or JS sources.
 		const suppressJS = (request && (request.mode === "edit" || request.mode === "inline"));
+		//log.debug('renderPageContributions() suppressJS:%s', toStr(suppressJS));
 
 		const command = clientRender
 			? 'render'
 			: 'hydrate';
+		//log.debug('renderPageContributions() command:%s', toStr(command));
 
 		this.ensureAndLockBeforeRendering();
+
+		const assetUrl = buildAssetUrl({
+			assetPath: `${this.jsxPath}.js`
+		});
+		log.debug('renderPageContributions() assetUrl:%s', toStr(assetUrl));
 
 		// TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
 		const bodyEnd = (!suppressJS)
 			? [
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
-				`<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
+				`<script src="${getAssetRoot()}${assetUrl}"></script>`,
 
 				// Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props.
 				// Signature: <command>(entry, id, props?, isPage, hasRegions)
@@ -90,6 +102,7 @@ export function renderPageContributions({
 		output = getAndMergePageContributions(
 			this.jsxPath, pageContributions, {bodyEnd}, suppressJS
 		);
+	log.debug('renderPageContributions() bodyEnd:%s', toStr(bodyEnd));
 
 	} catch (e) {
 		log.error(e);
