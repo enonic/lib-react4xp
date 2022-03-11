@@ -2,7 +2,7 @@ import type {React4xp as React4xpNamespace} from '../../../..';
 
 import {isObject} from '@enonic/js-utils/value/isObject';
 import {isString} from '@enonic/js-utils/value/isString';
-import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from '@enonic/js-utils/value/toStr';
 
 
 import {
@@ -73,7 +73,7 @@ export function constructor<
 		react4xpId? :React4xpNamespace.Id
 	} = {}
 >(entry :React4xpNamespace.Entry) {
-	log.debug('React4xp.constructor() entry:%s', toStr(entry));
+	//log.debug('React4xp.constructor() entry:%s', toStr(entry));
 
 	const obj :React4xpNamespace.Class<Props> = {
 		// Public fields/properties
