@@ -8,6 +8,7 @@ export interface Request<
 		Authorization? :string
 	}
 	method? :string
+	mode? :'edit'|'inline'|'live'|'preview'
 	params? :Params
 	path? :string
 	pathParams? :PathParams

@@ -1,4 +1,8 @@
-import type {PageContributions} from '../../../index.d';
+import type {
+	OneOrMore,
+	PageContributions,
+	React4xp as React4xpNamespace
+} from '../../../index.d';
 
 
 //import {forceArray} from '@enonic/js-utils';
@@ -11,9 +15,6 @@ import {
 	getAllUrls,
 	getSiteLocalCacheKey
 } from './dependencies';
-
-
-type EntryNames = string|Array<string>;
 
 
 const pageContributionsCache = newCache({
@@ -55,7 +56,7 @@ function appendCssToHeadEnd(
  * of dependencies.
  * @returns an object ready to be returned as a pageContributions.js from an XP component. Puts dependencies into the bodyEnd attribute. */
 function buildPageContributions(
-	entries :EntryNames,
+	entries :OneOrMore<React4xpNamespace.EntryName>,
 	suppressJS :boolean
 ) {
   const chunkUrls = getAllUrls(entries, suppressJS);
@@ -105,7 +106,7 @@ function getUniqueEntries(
  * Also part of the merge: PAGE_CONTRIBUTIONS, the common standard React4xp page contributions
  */
 export function getAndMergePageContributions(
-  entryNames :EntryNames,
+  entryNames :OneOrMore<React4xpNamespace.EntryName>,
   incomingPgContrib :PageContributions,
   newPgContrib :PageContributions,
   suppressJS :boolean

@@ -1,24 +1,51 @@
-const {getContent, getComponent} = require('/lib/xp/portal');
-const {newCache} = require('/lib/cache');
-const contentLib = require('/lib/xp/content');
+import type {
+	ComponentGeneric,
+	ComponentType,
+	PageContributions,
+	React4xp as React4xpNamespace,
+	Request,
+	Response
+} from '../../..';
 
-const {getAndMergePageContributions} = require('./pageContributions');
-const {getComponentChunkNames} = require('./dependencies');
-const {getAssetRoot} = require('./serviceRoots');
 
-const htmlHandler = require('./htmlHandling');
-const HTMLinserter = __.newBean('com.enonic.lib.react4xp.html.HtmlInserter');
+import {isObject} from '@enonic/js-utils/value/isObject';
+import {isString} from '@enonic/js-utils/value/isString';
+import {toStr} from '@enonic/js-utils/value/toStr';
+import {
+	getContent,
+	getComponent
+	//@ts-ignore
+}  from '/lib/xp/portal';
+//@ts-ignore
+import {newCache}  from '/lib/cache';
+//@ts-ignore
+import contentLib from '/lib/xp/content';
 
-const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
-
-const { normalizeSSREngineSettings, normalizeSSRMaxThreads } = require('./normalizing');
-
-const SSR_DEFAULT_CACHE_SIZE = 0;
+import {
+	insertAtEndOfRoot,
+	insertInsideContainer
+} from './html/inserter';
+import {
+	render as renderSSRJava,
+	setup as setupSSRJava
+} from './ssr'
+import {getAndMergePageContributions}  from './pageContributions';
+import {getComponentChunkNames}  from './dependencies';
+import {getAssetRoot}  from './serviceRoots';
+import {
+	buildContainer,
+	buildErrorContainer,
+	makeErrorMessage
+} from './htmlHandling';
+import {
+	normalizeSSREngineSettings,
+	normalizeSSRMaxThreads
+}  from './normalizing';
 
 // react4xp_constants.json is not part of lib-react4xp:
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
 // Easiest: use <projectRoot>/react4xp.properties and the build.gradle from https://www.npmjs.com/package/react4xp
-const {
+import {
     BUILD_ENV,
     LIBRARY_NAME,
     R4X_TARGETSUBDIR,
@@ -29,23 +56,31 @@ const {
     SSR_LAZYLOAD,                   // <-- lazyLoading main switch: true/false
     SSR_MAX_THREADS,                // <-- set to 0/undefined/null for unlimited, otherwise a number for an upper concurrency limit (to save memory)
     SSR_ENGINE_SETTINGS,            // <-- set to 0 to switch off nashorn cache, otherwise cache size (number) or full settings (comma-separated string referring to https://github.com/openjdk/nashorn/blob/main/src/org.openjdk.nashorn/share/classes/org/openjdk/nashorn/internal/runtime/resources/Options.properties )
-} = require("./react4xp_constants.json");
+	//@ts-ignore
+//} from './react4xp_constants.json';
+} from '/lib/enonic/react4xp/react4xp_constants.json';
 // TODO: The above (require) doesn't seem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use dependencies.readResourceAsJson instead!
 
 
-SSRreact4xp.setup(
-    app.name,
-    `/${R4X_TARGETSUBDIR}`,
-    LIBRARY_NAME,
-    `/${R4X_TARGETSUBDIR}/`,
-    NASHORNPOLYFILLS_FILENAME ? `${NASHORNPOLYFILLS_FILENAME}.js` : null,
-    ENTRIES_FILENAME,
-    EXTERNALS_CHUNKS_FILENAME,
-    COMPONENT_STATS_FILENAME,
-    !!SSR_LAZYLOAD && SSR_LAZYLOAD !== 'false',
-    normalizeSSRMaxThreads(SSR_MAX_THREADS),
-    normalizeSSREngineSettings(SSR_ENGINE_SETTINGS, SSR_DEFAULT_CACHE_SIZE)
-);
+const isArray = Array.isArray;
+
+
+const SSR_DEFAULT_CACHE_SIZE = 0;
+
+
+setupSSRJava({
+    appName: app.name,
+	chunkfilesHome: `/${R4X_TARGETSUBDIR}/`,
+	chunksExternalsJsonFilename: EXTERNALS_CHUNKS_FILENAME,
+	entriesJsonFilename: ENTRIES_FILENAME,
+	lazyload: !!SSR_LAZYLOAD && SSR_LAZYLOAD !== 'false',
+	libraryName: LIBRARY_NAME,
+	scriptEngineSettings: normalizeSSREngineSettings(SSR_ENGINE_SETTINGS, SSR_DEFAULT_CACHE_SIZE),
+    scriptsHome: `/${R4X_TARGETSUBDIR}`,
+    ssrMaxThreads: normalizeSSRMaxThreads(SSR_MAX_THREADS),
+	statsComponentsFilename: COMPONENT_STATS_FILENAME,
+	userAddedNashornpolyfillsFilename: NASHORNPOLYFILLS_FILENAME ? `${NASHORNPOLYFILLS_FILENAME}.js` : null
+});
 
 
 const BASE_PATHS = {
@@ -60,45 +95,59 @@ const templateDescriptorCache = newCache({
 });
 
 
+function getDescriptorFromTemplate(
+	componentType :ComponentType,
+	templateId :string
+) {
+	return templateDescriptorCache.get(templateId, () => {
+		if (!templateId) {
+			log.warning(`Template ID is '${JSON.stringify(templateId)}'. Not ID of a template.`);
+			return undefined;
+		}
+		if (componentType !== 'page') {
+			log.warning(`Template ID '${templateId}' not accompanied by component type 'page' (component type is ${JSON.stringify(componentType)}).`);
+			return undefined;
+		}
 
-const getDescriptorFromTemplate = (componentType, templateId) =>
-    templateDescriptorCache.get(templateId, () => {
-        if (!templateId) {
-            log.warn(`Template ID is '${JSON.stringify(templateId)}'. Not ID of a template.`);
-            return undefined;
-        }
-        if (componentType !== 'page') {
-            log.warn(`Template ID '${templateId}' not accompanied by component type 'page' (component type is ${JSON.stringify(componentType)}).`);
-            return undefined;
-        }
+		const content = contentLib.get({
+			key: templateId
+		});
 
-        const content = contentLib.get({
-            key: templateId
-        });
+		if (!content || content.type !== "portal:page-template") {
+			log.warning(`Content not found or not a template (content.type!=="portal:page-template"). Template ID is '${JSON.stringify(templateId)}', retrieved content: ${JSON.stringify(content)}`);
+			return undefined;
+		}
+		if (!content.page || content.page.type !== "page" || !(((content.page.descriptor || '') + '').trim())) {
+			log.warning(`Template doesn't seem to have a page controller attached. Template ID is '${JSON.stringify(templateId)}', retrieved template content: ${JSON.stringify(content)}`);
+			return undefined;
+		}
 
-        if (!content || content.type !== "portal:page-template") {
-            log.warn(`Content not found or not a template (content.type!=="portal:page-template"). Template ID is '${JSON.stringify(templateId)}', retrieved content: ${JSON.stringify(content)}`);
-            return undefined;
-        }
-        if (!content.page || content.page.type !== "page" || !(((content.page.descriptor || '') + '').trim())) {
-            log.warn(`Template doesn't seem to have a page controller attached. Template ID is '${JSON.stringify(templateId)}', retrieved template content: ${JSON.stringify(content)}`);
-            return undefined;
-        }
-
-        return content.page.descriptor;
-    });
+		return content.page.descriptor;
+	});
+}
 
 
-const bodyHasMatchingIdContainer = (body, react4xpId) => {
+function bodyHasMatchingIdContainer(
+	body :string,
+	react4xpId :string
+) {
     const react4xpPattern = new RegExp("<[^>]+\\s+id\\s*=\\s*[\"']" + react4xpId + "[\"']", 'i');
 
     return !!body.match(react4xpPattern);
-};
+}
 
 
-//////////////////////////////////////////////////////////////////////
 
-class React4xp {
+export class React4xp<Props extends {
+	react4xpId? :React4xpNamespace.Id
+} = {}> {
+	component :ComponentGeneric;
+	hasRegions :0|1;
+	jsxPath :string;
+	isPage :0|1;
+	props :Props;
+	react4xpId :React4xpNamespace.Id;
+	react4xpIdIsLocked :boolean;
 
     /** Mandatory constructor entry, one of two options (pseudo-overloaded function):
      * @param component {Object} If entry is an object: the portal.getComponent() object of the Enonic
@@ -109,7 +158,8 @@ class React4xp {
      *     relative to the folder where the transpiled (JS) react components are found - assets/react4xp. Overview of available entry
      *     paths is built to: build/resources/main/react4xp/entries.json.
      */
-    constructor(entry) {
+    constructor(entry :React4xpNamespace.Entry) {
+		//log.debug('React4xp.constructor() entry:%s', toStr(entry));
         this.react4xpId = null;
         this.jsxPath = null;
         this.component = null;
@@ -119,7 +169,7 @@ class React4xp {
         this.hasRegions = 0;        // boolean using 0 for false and 1 for true, for the sake of more compact client-side .render and .hydrate calls.
         this.react4xpIdIsLocked = false;
 
-        if (typeof entry === 'string') {
+        if (isString(entry)) {
             // Use jsxPath, regular flow
             this.jsxPath = entry.trim();
 
@@ -129,7 +179,7 @@ class React4xp {
                 throw Error(`Can't initialize React4xp component with initParam = ${JSON.stringify(entry)}. XP component object or jsxPath string only, please.`);
             }
 
-        } else if (!entry || (typeof entry === 'object' && !Array.isArray(entry))) {
+        } else if (!entry || (isObject(entry) && !isArray(entry))) {
             const comp = getComponent();
             if (comp) {
                 // Component. Use entry in component flow. Derive jsxPath and default ID from local part/layout folder, same name.
@@ -159,7 +209,7 @@ class React4xp {
             };
             Object.keys(buildingBlockData).forEach(attribute => {
                 if (!buildingBlockData[attribute]) {
-                    throw Error(htmlHandler.makeErrorMessage(attribute, this.component));
+                    throw Error(makeErrorMessage(attribute, this.component));
                 }
             });
 
@@ -194,9 +244,17 @@ class React4xp {
      *      - id {string} sets the target container element id. If this matches an ID in an input body, the react component will be rendered there. If not, a container with this ID will be added.
      *      - uniqueId {boolean|string} If set, ensures that the ID is unique. If id is set (previous param), a random integer will be postfixed to it. If uniqueId is a string, this is the prefix before the random postfix. If the id param is used in addition to a uniqueId string, uniqueId takes presedence and overrides id.
      */
-    static _buildFromParams = (params) => {
-        const {entry, id, uniqueId, props} = params || {};
-
+    public static _buildFromParams<Props extends object = {}>({
+		entry,
+		id,
+		uniqueId,
+		props
+	} :{
+		entry? :React4xpNamespace.Entry,
+		id? :React4xpNamespace.Id,
+		uniqueId? :boolean|string,
+		props? :Props
+	} = {}) {
         const react4xp = new React4xp(entry);
 
         if (props) {
@@ -212,7 +270,7 @@ class React4xp {
         }
 
         if (uniqueId) {
-            if (typeof uniqueId === "string") {
+            if (isString(uniqueId)) {
                 react4xp.setId(uniqueId);
             } else {
                 react4xp.uniqueId();
@@ -220,7 +278,7 @@ class React4xp {
         }
 
         return react4xp;
-    };
+    } // static _buildFromParams
 
 
     //---------------------------------------------------------------
@@ -262,7 +320,7 @@ class React4xp {
      * Deletes the ID if argument is omitted.
      * @returns The react4xp component itself, for builder-like pattern.
      */
-    setId(react4xpId) {
+    setId(react4xpId :React4xpNamespace.Id) {
         this.checkIdLock();
         this.react4xpId = react4xpId;
         if (this.props) {
@@ -279,12 +337,12 @@ class React4xp {
         return this.setId((this.react4xpId || "r4x") + "-" + (78364164096 + Math.floor(Math.random() * 2742745743360)).toString(36));
     }
 
-    setIsPage(isPage) {
+    setIsPage(isPage :boolean) {
         this.isPage = isPage ? 1 : 0;
         return this;
     }
 
-    setHasRegions(hasRegions) {
+    setHasRegions(hasRegions :boolean) {
         this.hasRegions = hasRegions ? 1 : 0;
         return this;
     }
@@ -302,7 +360,7 @@ class React4xp {
      *
      * @returns The React4xp object itself, for builder-like pattern.
      */
-    setJsxPath(jsxPath) {
+    setJsxPath(jsxPath :string) {
         // Enforce a clean jsxPath - it's not just a file reference, but a react4xp component name!
         this.checkIdLock()
         if (
@@ -342,8 +400,8 @@ class React4xp {
      * @param props {object} Props to be stored in the component. Must be a string-serializeable object!
      * @returns The react4xp component itself, for builder-like pattern.
      */
-    setProps(props) {
-        if (!props || typeof props !== 'object') {
+    setProps(props :Props) {
+        if (!props || !isObject(props)) {
             throw Error("Top-level props must be a string-serializeable object.");
         }
         this.props = props;
@@ -365,11 +423,15 @@ class React4xp {
      * @param content {string} HTML content that, if included, is inserted into the container with the matching Id.
      * @returns {string} adjusted or generated HTML body with rendered react component.
      */
-    renderTargetContainer(body, content, appendErrorContainer = false) {
+    renderTargetContainer(
+		body :string = '', // '' is Falsy
+		content :string = '', // '' is Falsy
+		appendErrorContainer = false
+	) {
         this.ensureAndLockId();
 
         // True if no (or empty) body is supplied:
-        const noBody = ((body || '') + "").replace(/(^\s+)|(\s+$)/g, "") === "";
+        const noBody = ((body) + "").replace(/(^\s+)|(\s+$)/g, "") === "";
         // True if a body is supplied but it contains no matching-ID element:
         const noMatch = !noBody && !bodyHasMatchingIdContainer(body, this.react4xpId);
 
@@ -378,9 +440,9 @@ class React4xp {
             : appendErrorContainer
                 ? `<div id="${this.react4xpId}__error__" style="border:1px solid #8B0000; padding:15px; background-color:#FFB6C1">${
                     content}${
-                    htmlHandler.buildContainer(this.react4xpId)
+                    buildContainer(this.react4xpId)
                 }</div>`
-                : htmlHandler.buildContainer(this.react4xpId, content);
+                : buildContainer(this.react4xpId, content);
 
 
         // If no (or empty) body is supplied: generate a minimal container body with only a target container element.
@@ -391,15 +453,16 @@ class React4xp {
         // If there is a body but it's missing a target container element:
         // Make a container and insert it right before the closing tag.
         if (noMatch) {
-            return HTMLinserter.insertAtEndOfRoot(body, output);
+            return insertAtEndOfRoot(body, output);
         }
 
         if (content) {
-            return HTMLinserter.insertInsideContainer(body, content, this.react4xpId, appendErrorContainer);
+            return insertInsideContainer(body, content, this.react4xpId, appendErrorContainer);
         }
 
         return body;
-    }
+    } // renderTargetContainer
+
 
     // TODO: Check docs! Is 'doRenderSSR' an API-breaking name and signature change? Re-insert old name!
     /** Renders a purely static HTML markup of ONLY the react4xp entry (without a surrounding HTML markup or container).
@@ -410,10 +473,13 @@ class React4xp {
      *  ...where 'html' is a rendered HTML string if successful component rendering (undefined on error),
      *  and 'error' an error message string from the Nashorn engine if any error occurred (undefined if successful rendering).
      */
-    doRenderSSR = overrideProps => {
-        let result = {};
+    doRenderSSR(overrideProps? :Props) {
+        let result :{
+			error? :string
+			html? :string
+		} = {};
         try {
-            result = __.toNativeObject(SSRreact4xp.render(
+            result = __.toNativeObject(renderSSRJava(
                 this.jsxPath,
                 JSON.stringify(overrideProps || this.props),
                 JSON.stringify(getComponentChunkNames(this.jsxPath))
@@ -428,25 +494,31 @@ class React4xp {
         }
 
         return result;
-    };
+    }
+
 
     // DEPRECATED! Remove at 2.0.0
-    renderEntryToHtml = overrideProps => {
+    renderEntryToHtml(overrideProps? :Props) {
         const { html, error } = this.doRenderSSR(overrideProps);
         return error ? undefined : html;
-    };
+    }
+
 
     /** Server-side rendering: Renders a static HTML markup and inserts it into an ID-matching target container in an HTML body. This is the same as renderBody({body: body}). If a
      * matching-ID container (or a body) is missing, it will be generated.
      * @param body {string} Existing HTML body, for example rendered from thymeleaf.
      * @returns {string} adjusted or generated HTML body with rendered react component.
      */
-    renderSSRIntoContainer(body, request, react4xpObj) {
+    renderSSRIntoContainer(
+		body :string,
+		request :Request,
+		react4xpObj :React4xp
+	) {
         const { html, error } = this.doRenderSSR();
         return error
             ? this.renderTargetContainer(
                 body,
-                htmlHandler.buildErrorContainer(
+                buildErrorContainer(
                     "React4xp SSR error",
                     error,
                     request,
@@ -457,11 +529,18 @@ class React4xp {
             : this.renderTargetContainer(
                 body,
                 html);
-    }
+    } // renderSSRIntoContainer
 
-    renderBody = params => {
-        const {body, clientRender, request} = params || {};
 
+    renderBody({
+		body,
+		clientRender,
+		request
+	} :{
+		body? :string
+		clientRender? :boolean
+		request? :Request
+	} = {}) {
         // The rendered body depends on the rendered context:
         // SSR is default behavior, but can be overriden by clientRender = true
         // - UNLESS request.mode reveals rendering in Content studio, which will enforce SSR.
@@ -473,7 +552,7 @@ class React4xp {
         )
             ? this.renderSSRIntoContainer(body, request, this)
             : this.renderTargetContainer(body);
-    };
+    } // renderBody
 
 
     //--------------------------------  RENDERING page contributions for importing entry / dependency chunks  --------------
@@ -493,9 +572,15 @@ class React4xp {
      *          in order to keep the error placeholder element visible
      *      TODO: Add option for more graceful failure? Render if error is true, instead of suppressing the trigger and displaying the error placeholder?
      */
-    renderPageContributions = params => {
-        const {pageContributions, clientRender, request} = params || {};
-
+    renderPageContributions({
+		pageContributions = {},
+		clientRender,
+		request
+	} :{
+		pageContributions? :PageContributions,
+		clientRender? :boolean,
+		request? :Request
+	} = {}) {
         let output = null;
         try {
 
@@ -531,19 +616,20 @@ class React4xp {
                 ]
                 : [];
 
-            output = getAndMergePageContributions(this.jsxPath, pageContributions, {bodyEnd}, suppressJS);
+            output = getAndMergePageContributions(
+				this.jsxPath, pageContributions, {bodyEnd}, suppressJS
+			);
 
         } catch (e) {
             log.error(e);
-            const { pageContributions } = params || {};
-            const {headBegin, headEnd, bodyBegin, bodyEnd } = pageContributions || {};
+            const {headBegin, headEnd, bodyBegin, bodyEnd } = pageContributions;
             output = {
                 headBegin,
                 headEnd,
                 bodyEnd,
                 bodyBegin: [
                     ...(bodyBegin || []),
-                    htmlHandler.buildErrorContainer(
+                    buildErrorContainer(
                         "React4xp renderPageContributions error",
                         e.message,
                         request,
@@ -552,8 +638,9 @@ class React4xp {
                 ],
             };
         }
+		//log.debug('renderPageContributions() output:%s', toStr(output));
     	return output;
-    };
+    } // renderPageContributions
 
 
     ///////////////////////////////////////////////// STATIC ALL-IN-ONE RENDERER
@@ -601,22 +688,50 @@ class React4xp {
      *
      * @returns a response object that can be directly returned from an XP controller, with body and pageContributions attributes
      */
-    static render = (entry, props = {}, request = null, options = {}) => {
+    public static render<
+		Props extends object = {}
+	>(
+		entry :React4xpNamespace.Entry,
+		props? :Props,
+		request :Request = null,
+		options :{
+			body? :string
+			clientRender? :boolean
+			//id? :string // TODO renamed?
+			pageContributions? :PageContributions
+			react4xpId? :React4xpNamespace.Id
+			uniqueId? :boolean|string
+		} = {}
+	) :Response {
         let react4xp = null;
         try {
-            options.entry = entry;
-            if (props && typeof props === 'object' && !Array.isArray(props)) {
-                options.props = props;
+			const dereffedOptions = JSON.parse(JSON.stringify(options)) as {
+				body? :string
+				entry :React4xpNamespace.Entry,
+				clientRender? :boolean
+				//id? :string // TODO renamed?
+				pageContributions? :PageContributions
+				props :Props
+				react4xpId? :React4xpNamespace.Id
+				uniqueId? :boolean|string
+			};
+            dereffedOptions.entry = entry; // TODO modifying an incoming object!!!
+            if (props && isObject(props) && !isArray(props)) {
+                dereffedOptions.props = props;
             } else if (props) {
                 throw Error("React4xp props must be falsy or a regular JS object, not this: " + JSON.stringify(props));
             }
 
-            react4xp = React4xp._buildFromParams(options);
+            react4xp = React4xp._buildFromParams<Props>(dereffedOptions);
 
-            const {body, pageContributions, clientRender} = options || {};
+            const {
+				body,
+				clientRender,
+				pageContributions
+			} = options || {};
 
             return {
-                ...options,
+                ...dereffedOptions,
 
                 // .render without a request object will enforce SSR
                 body: react4xp.renderBody({
@@ -649,19 +764,18 @@ class React4xp {
             };
 
             return {
-                body: htmlHandler.buildErrorContainer(
+                body: buildErrorContainer(
                     "React4xp error during rendering",
                     e.message,
                     request,
                     errObj
                 )
             };
-        }
-    };
+        } // try/catch
+    } // public static render
 
-    static _clearCache = () => {
+
+    static _clearCache() {
         templateDescriptorCache.clear();
     }
-}
-
-module.exports = React4xp;
+} // class React4xp
