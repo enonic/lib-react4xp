@@ -242,7 +242,7 @@ function readClientUrls() {
             name => getAssetRoot() + name
         );
     } catch (e) {
-        log.debug('Stacktrace', e);
+        //log.debug('Stacktrace', e); // Error: Empty or not found: /assets/react4xp/chunks.client.json
         log.debug(
             `No optional clientwrapper was found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's okay, there's a fallback one at: ${getClientRoot()}`
         );
