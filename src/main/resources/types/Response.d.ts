@@ -1,3 +1,6 @@
+import type {PageContributions} from './PageContributions';
+
+
 export interface Response {
 	body? :string
 	contentType? :string
@@ -6,5 +9,6 @@ export interface Response {
 		'Cache-Control'? :string
 		ETag? :string|number
 	}
+	pageContributions? :PageContributions
 	status? :number
 }

@@ -7,10 +7,13 @@ import typescript from '@rollup/plugin-typescript';
 
 export default {
 	external: [
-		'./react4xp_constants.json',
 		'/lib/cache',
+
+		///\/lib\/enonic\/react4xp.*/, // Entry module cannot be external
 		'/lib/enonic/react4xp/react4xp_constants.json',
+
 		'/lib/xp/auth',
+		'/lib/xp/content',
 		'/lib/xp/context',
 		'/lib/xp/common',
 		'/lib/xp/io',

@@ -1,13 +1,20 @@
 import {
 	App,
-	Log
+	Log,
+	DoubleUnderscore
 } from './types/index.d';
 
 export {
-	App,
-	Application,
-	Log,
+	//App,
+	//Application,
+	Cache,
+	Component,
+	ComponentGeneric,
+	ComponentType,
+	//Log,
+	OneOrMore,
 	PageContributions,
+	React4xp,
 	Request,
 	Response,
 	Resource
@@ -16,6 +23,7 @@ export {
 
 // Global-modifying module, should be placed in moduleRoot/index.d.ts
 declare global {
+	const __ :DoubleUnderscore;
 	const app :App;
 	const log :Log;
 	const Java :{
