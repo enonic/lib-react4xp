@@ -7,6 +7,7 @@ import type {
 
 //import {forceArray} from '@enonic/js-utils';
 import {forceArray} from '@enonic/js-utils/array/forceArray';
+//import {toStr} from '@enonic/js-utils/value/toStr';
 //@ts-ignore
 import {newCache} from '/lib/cache';
 
@@ -59,21 +60,26 @@ function buildPageContributions(
 	entries :OneOrMore<React4xpNamespace.EntryName>,
 	suppressJS :boolean
 ) {
-  const chunkUrls = getAllUrls(entries, suppressJS);
+	//log.debug('buildPageContributions() entries:%s', toStr(entries));
 
-  const pageContributions :PageContributions = {};
-  chunkUrls.forEach(chunkUrl => {
-    if (chunkUrl.endsWith(".css")) {
-      appendCssToHeadEnd(chunkUrl, pageContributions);
+	const chunkUrls = getAllUrls(entries, suppressJS); // This is where the clientwrapper comes in...
+	//log.debug('buildPageContributions() chunkUrls:%s', toStr(chunkUrls));
 
-    // Treat other dependencies as JS and add them in a script tag. Unless suppressJS, in which case: skip them.
-    } else {
-        appendScriptToBodyEnd(chunkUrl, pageContributions);
-    }
-  });
+	const pageContributions :PageContributions = {};
+	chunkUrls.forEach(chunkUrl => {
+		//log.debug('buildPageContributions() chunkUrl:%s', toStr(chunkUrl));
+		if (chunkUrl.endsWith(".css")) {
+			appendCssToHeadEnd(chunkUrl, pageContributions);
 
-  return pageContributions;
-}
+			// Treat other dependencies as JS and add them in a script tag. Unless suppressJS, in which case: skip them.
+		} else {
+			appendScriptToBodyEnd(chunkUrl, pageContributions);
+		}
+	}); // forEach
+
+	//log.debug('buildPageContributions() pageContributions:%s', toStr(pageContributions));
+	return pageContributions;
+} // buildPageContributions
 
 
 // ---------------------------------------------------------------
@@ -111,54 +117,62 @@ export function getAndMergePageContributions(
   newPgContrib :PageContributions,
   suppressJS :boolean
 ) :PageContributions {
-  entryNames = normalizeEntryNames(entryNames);
+	//log.debug('getAndMergePageContributions() entryNames:%s', toStr(entryNames));
+	//log.debug('getAndMergePageContributions() incomingPgContrib:%s', toStr(incomingPgContrib));
+	//log.debug('getAndMergePageContributions() newPgContrib:%s', toStr(newPgContrib));
+	//log.debug('getAndMergePageContributions() suppressJS:%s', toStr(suppressJS));
+
+  	entryNames = normalizeEntryNames(entryNames);
+  	//log.debug('getAndMergePageContributions() normalized entryNames:%s', toStr(entryNames));
+
     const cacheKey = getSiteLocalCacheKey(entryNames.join("*")+"_"+suppressJS);
+	//log.debug('getAndMergePageContributions() cacheKey:%s', toStr(cacheKey));
+
     const entriesPgContrib :PageContributions = pageContributionsCache.get(
-        cacheKey,
-    () => buildPageContributions(entryNames, suppressJS)
-  );
+        cacheKey, () => buildPageContributions(entryNames, suppressJS)
+	);
 
-  if (!incomingPgContrib && !newPgContrib) {
-    return entriesPgContrib;
-  }
-  incomingPgContrib = incomingPgContrib || {};
-  newPgContrib = newPgContrib || {};
+	if (!incomingPgContrib && !newPgContrib) {
+		return entriesPgContrib;
+	}
+	incomingPgContrib = incomingPgContrib || {};
+	newPgContrib = newPgContrib || {};
 
-  // Keeps track of already-added entries across headBegin, headEnd, bodyBegin and bodyEnd
-  const controlSet = [];
+	// Keeps track of already-added entries across headBegin, headEnd, bodyBegin and bodyEnd
+	const controlSet = [];
 
-  return {
-    headBegin: getUniqueEntries(
-      [
-        entriesPgContrib.headBegin,
-        incomingPgContrib.headBegin,
-        newPgContrib.headBegin
-      ],
-      controlSet
-    ),
-    headEnd: getUniqueEntries(
-      [
-        entriesPgContrib.headEnd,
-        incomingPgContrib.headEnd,
-        newPgContrib.headEnd
-      ],
-      controlSet
-    ),
-    bodyBegin: getUniqueEntries(
-      [
-        entriesPgContrib.bodyBegin,
-        incomingPgContrib.bodyBegin,
-        newPgContrib.bodyBegin
-      ],
-      controlSet
-    ),
-    bodyEnd: getUniqueEntries(
-      [
-        entriesPgContrib.bodyEnd,
-        incomingPgContrib.bodyEnd,
-        newPgContrib.bodyEnd
-      ],
-      controlSet
-    )
-  };
+	return {
+		headBegin: getUniqueEntries(
+			[
+				entriesPgContrib.headBegin,
+				incomingPgContrib.headBegin,
+				newPgContrib.headBegin
+			],
+			controlSet
+		),
+		headEnd: getUniqueEntries(
+			[
+				entriesPgContrib.headEnd,
+				incomingPgContrib.headEnd,
+				newPgContrib.headEnd
+			],
+			controlSet
+		),
+		bodyBegin: getUniqueEntries(
+			[
+				entriesPgContrib.bodyBegin,
+				incomingPgContrib.bodyBegin,
+				newPgContrib.bodyBegin
+			],
+			controlSet
+		),
+		bodyEnd: getUniqueEntries(
+			[
+				entriesPgContrib.bodyEnd,
+				incomingPgContrib.bodyEnd,
+				newPgContrib.bodyEnd
+			],
+			controlSet
+		)
+	};
 };

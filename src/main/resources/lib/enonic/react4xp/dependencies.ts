@@ -7,7 +7,7 @@ import type {
 
 //import {isString} from '@enonic/js-utils';
 import {isString} from '@enonic/js-utils/value/isString';
-import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from '@enonic/js-utils/value/toStr';
 
 import {
 	getResource,
@@ -235,6 +235,7 @@ export const getExternalsUrls = IS_PRODMODE
 
 
 function readClientUrls() {
+	//log.debug('readClientUrls()');
     // Special case: if there is a chunkfile for a client wrapper, use that. If not, fall back to
     // a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
     try {
@@ -252,6 +253,7 @@ function readClientUrls() {
 
 /** Returns the asset-via-service URL for the frontend client */
 function readClientUrlsCached() {
+	//log.debug('readClientUrlsCached()');
     const cacheKey = getSiteLocalCacheKey(FULL_CLIENT_CHUNKS_FILENAME);
     return dependenciesCache.get(cacheKey, () => readClientUrls());
 }
@@ -265,6 +267,8 @@ export function getAllUrls(
 	entries :OneOrMore<React4xpNamespace.EntryName>,
 	suppressJS :boolean
 ) {
+	//log.debug('getAllUrls() entries:%s', toStr(entries));
+	//log.debug('getAllUrls() suppressJS:%s', toStr(suppressJS));
     return [
         ...getExternalsUrls(),
         ...getComponentChunkUrls(entries),
