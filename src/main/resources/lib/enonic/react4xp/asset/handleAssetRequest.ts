@@ -56,9 +56,29 @@ for (let i = 0; i < entryNames.length; i++) {
 }
 //log.debug('handleAssetRequest dependencyChunks:%s', toStr(dependencyChunks));
 
-
+// https://simonhearne.com/2022/caching-header-best-practices
+//
+// In general we want browsers to cache everything forever. This can be achieved
+// quite simply by setting a Cache-Control: max-age=31536000 response header -
+// using the maximum TTL value of one year.
+//
+// Allowing an HTML asset to be cached for a short period can improve user
+// experience with minimal risk. Setting a TTL of five minutes (300s) for
+// example should be fine, you can also add:
+//
+// must-revalidate
+//  to ensure that browsers do not use a stale version of the asset after the
+//  TTL has expired. This will benefit visitors who click links returning them
+//  to previously visited pages, this does not affect the back/forward cache
+//
+// stale-while-revalidate
+//  causes the revalidation request to happen asynchronously, improving
+//  performance at the potential risk of using stale content with a second time
+//  to live (TTL) value for how long the stale asset may be used.
 const eTagGetter = buildGetter({
 	cacheControl: 'no-cache',
+	//cacheControl: 'max-age=0, must-revalidate'
+	//cacheControl: 'max-age=604800, stale-while-revalidate=86400'
 	etag: true, // default is true in production and false in development
 	root: R4X_TARGETSUBDIR // assets/react4xp
 });
@@ -69,7 +89,7 @@ const immuteableGetter = buildGetter({
 });
 
 
-export function handleAssetRequest(request :Request) :Response {
+export function handleAssetRequest(request :Request<{ETag? :string}>) :Response {
 	//log.debug('handleAssetRequest() request:%s', toStr(request));
 
 	const externalsUrls = getExternalsUrls();
@@ -82,6 +102,9 @@ export function handleAssetRequest(request :Request) :Response {
 
 	const {
 		contextPath,
+		params: {
+			ETag
+		} = {},
 		path,
 		rawPath
 	} = request;
@@ -96,6 +119,9 @@ export function handleAssetRequest(request :Request) :Response {
 	}
 
 	if (includes(ENTRIES, cleanPath)) {
+		if (ETag) {
+			return immuteableGetter(request);
+		}
 		return eTagGetter(request);
 	}
 
@@ -103,6 +129,6 @@ export function handleAssetRequest(request :Request) :Response {
 		return immuteableGetter(request);
 	}
 
-	log.debug('handleAssetRequest() unable to determine whether entry or externals cleanPath:%s', toStr(cleanPath));
+	log.debug('handleAssetRequest() unable to determine whether entry, externals or dependencyChunk cleanPath:%s', toStr(cleanPath));
 	return eTagGetter(request);
 } // handleAssetRequest
