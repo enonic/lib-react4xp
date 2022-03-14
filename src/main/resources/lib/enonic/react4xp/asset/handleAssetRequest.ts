@@ -75,8 +75,18 @@ for (let i = 0; i < entryNames.length; i++) {
 //  causes the revalidation request to happen asynchronously, improving
 //  performance at the potential risk of using stale content with a second time
 //  to live (TTL) value for how long the stale asset may be used.
+//
+//
+// https://stackoverflow.com/questions/18148884/difference-between-no-cache-and-must-revalidate
+//
+// max-age=0, must-revalidate and no-cache aren't exactly identical.
+// With must-revalidate, if the server doesn't respond to a revalidation
+// request, the browser/proxy is supposed to return a 504 error. With no-cache,
+// it would just show the cached content, which would be probably preferred by
+// the user (better to have something stale than nothing at all).
+// This is why must-revalidate is intended for critical transactions only.
 const eTagGetter = buildGetter({
-	cacheControl: 'no-cache',
+	cacheControl: 'no-cache', // implies must-revalidate after 0 seconds
 	//cacheControl: 'max-age=0, must-revalidate'
 	//cacheControl: 'max-age=604800, stale-while-revalidate=86400'
 	etag: true, // default is true in production and false in development
