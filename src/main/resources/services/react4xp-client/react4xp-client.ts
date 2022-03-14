@@ -1,14 +1,22 @@
 /** Service that always delivers the out-of-the-box frontend client */
-var ioLib = require('/lib/xp/io');
+import type {
+	//Request,
+	Response
+} from '../..';
+
+//import {toStr} from '@enonic/js-utils/value/toStr';
+//@ts-ignore
+import {getResource} from '/lib/xp/io';
+
 import { getReact4xpEntry } from '/lib/enonic/react4xp/clientCacheResources';
 import { getServiceRoot } from '/lib/enonic/react4xp/serviceRoots';
 
-let RESPONSE;
-exports.get = (req) => {
+let RESPONSE :Response;
+export function get(/*req :Request*/) :Response {
     if (RESPONSE === undefined) {
         try {
             // TODO: ADD SUPPORT FOR BUILT-AND-HASHED CHUNK, NOT JUST THE FALLBACK!
-            const resource = ioLib.getResource('/services/react4xp-client/react4xpClient.js');
+            const resource = getResource('/services/react4xp-client/react4xpClient.js');
             if (!resource || !resource.exists()) {
                 throw Error(`File not found: /services/react4xp-client/react4xpClient.js`);
             }
@@ -22,6 +30,7 @@ exports.get = (req) => {
             // it's an external shared-constants file expected to exist in the react4xp lib build directory.
             // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
             const { LIBRARY_NAME } = require('/lib/enonic/react4xp/react4xp_constants.json');
+			//log.debug('react4xp-client.get() LIBRARY_NAME:%s', toStr(LIBRARY_NAME)); // React4xp
             // TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use dependencies.readResourceAsJson instead!
 
             // Placeholders defined in build.gradle. Keep up to date!

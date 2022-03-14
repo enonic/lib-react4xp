@@ -3,12 +3,11 @@ import type {
 	Request
 } from '../../../../..';
 
-import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from '@enonic/js-utils/value/toStr';
 
 import {buildErrorContainer} from '../../htmlHandling';
 import {getAndMergePageContributions}  from '../../pageContributions';
 import {getAssetRoot}  from '../../serviceRoots';
-import {buildAssetUrl} from '../../asset';
 
 // react4xp_constants.json is not part of lib-react4xp:
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
@@ -71,16 +70,16 @@ export function renderPageContributions({
 
 		this.ensureAndLockBeforeRendering();
 
-		const assetUrl = buildAssetUrl({
+		/*const assetUrl = buildAssetUrl({
 			assetPath: `${this.jsxPath}.js`
-		});
-		log.debug('renderPageContributions() assetUrl:%s', toStr(assetUrl));
+		});*/
+		//log.debug('renderPageContributions() assetUrl:%s', toStr(assetUrl));
 
 		// TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
 		const bodyEnd = (!suppressJS)
 			? [
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
-				`<script src="${getAssetRoot()}${assetUrl}"></script>`,
+				`<script src="${getAssetRoot()}${this.jsxPath}.js"></script>`,
 
 				// Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props.
 				// Signature: <command>(entry, id, props?, isPage, hasRegions)
@@ -98,11 +97,11 @@ export function renderPageContributions({
 				});</script>`
 			]
 			: [];
+		//log.debug('renderPageContributions() bodyEnd:%s', toStr(bodyEnd));
 
 		output = getAndMergePageContributions(
 			this.jsxPath, pageContributions, {bodyEnd}, suppressJS
 		);
-	log.debug('renderPageContributions() bodyEnd:%s', toStr(bodyEnd));
 
 	} catch (e) {
 		log.error(e);
