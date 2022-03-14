@@ -58,7 +58,7 @@ for (let i = 0; i < entryNames.length; i++) {
 
 
 const eTagGetter = buildGetter({
-	cacheControl: false,
+	cacheControl: 'no-cache',
 	etag: true, // default is true in production and false in development
 	root: R4X_TARGETSUBDIR // assets/react4xp
 });
