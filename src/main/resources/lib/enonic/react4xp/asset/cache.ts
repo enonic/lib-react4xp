@@ -6,7 +6,7 @@ import type {
 
 import {includes} from '@enonic/js-utils/array/includes';
 import {cleanAnyDoubleQuoteWrap} from '@enonic/js-utils/string/cleanAnyDoubleQuoteWrap';
-import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from '@enonic/js-utils/value/toStr';
 //@ts-ignore
 import {newCache} from '/lib/cache';
 import {eTagGetter} from './eTagGetter';
@@ -68,7 +68,7 @@ export function getCachedETag(assetPath :string) {
 			}
 		} = response;
 		const cleanedETag = cleanAnyDoubleQuoteWrap(ETag);
-		log.debug('getCachedETag() caching assetPath:%s to ETag:%s', assetPath, ETag);
+		//log.debug('getCachedETag() caching assetPath:%s to ETag:%s', assetPath, ETag);
 		return cleanedETag;
 	}) as string;
 } // getCachedETag
@@ -98,7 +98,7 @@ export function getCachedAssetResponse(request :Request<{ETag? :string}>) {
 	if (ETag) {
 		const cacheKey = `${cleanPath}?ETag=${ETag}`;
 		const cachedResponse = assetResponseCache.get(cacheKey, () => {
-			log.debug('getCachedAssetResponse() caching cacheKey:%s to response', cacheKey);
+			//log.debug('getCachedAssetResponse() caching cacheKey:%s to response', cacheKey);
 			return immuteableGetter(request);
 		}) as Response;
 		return cachedResponse;
@@ -109,7 +109,7 @@ export function getCachedAssetResponse(request :Request<{ETag? :string}>) {
 	}
 
 	if (!includes(ENTRIES, cleanPath)) {
-		log.debug('handleAssetRequest() unable to determine whether immuteable falling back to eTagGetter cleanPath:%s', toStr(cleanPath));
+		log.debug('handleAssetRequest() unable to determine whether immuteable falling back to eTagGetter cleanPath:%s', cleanPath);
 	}
 
 	return eTagGetter(request); // Handles ifNoneMatch requests?
