@@ -6,34 +6,35 @@ import type {
 
 import {includes} from '@enonic/js-utils/array/includes';
 import {toStr} from '@enonic/js-utils/value/toStr';
-import {
-	//getClientUrls,
-	getExternalsUrls
-} from '/lib/enonic/react4xp/dependencies';
+//import {getClientUrls} from '/lib/enonic/react4xp/dependencies';
 
 import {eTagGetter} from './eTagGetter';
-import {getEntries} from './getEntries';
 import {getDependencies} from './getDependencies';
+import {getEntries} from './getEntries';
+import {getExternals} from './getExternals';
 import {immuteableGetter} from './immuteableGetter';
 
 
 const ENTRIES = getEntries();
 //log.debug('handleAssetRequest ENTRIES:%s', toStr(ENTRIES));
 const dependencies = getDependencies(ENTRIES);
-const dependencyChunks = {};
+const externals = getExternals();
+//log.debug('handleAssetRequest externals:%s', toStr(externals));
+
+const IMMUTEABLES = {};
 for (let i = 0; i < dependencies.length; i++) {
-    const dependency = dependencies[i];
-	dependencyChunks[dependency] = true;
+	const dependency = dependencies[i];
+	IMMUTEABLES[dependency] = true;
 }
-//log.debug('handleAssetRequest dependencyChunks:%s', toStr(dependencyChunks));
+for (let i = 0; i < externals.length; i++) {
+	const external = externals[i];
+	IMMUTEABLES[external] = true;
+}
+//log.debug('handleAssetRequest IMMUTEABLES:%s', toStr(IMMUTEABLES));
 
 
 export function handleAssetRequest(request :Request<{ETag? :string}>) :Response {
 	//log.debug('handleAssetRequest() request:%s', toStr(request));
-
-	const externalsUrls = getExternalsUrls();
-	//log.debug('handleAssetRequest() externalsUrls:%s', toStr(externalsUrls));
-	// /admin/site/preview/default/draft/react4xp-site/_/service/com.enonic.app.react4xp/react4xp/externals.7b3f9703b.js
 
 	//const clientUrls = getClientUrls();
 	//log.debug('handleAssetRequest() clientUrls:%s', toStr(clientUrls));
@@ -44,7 +45,6 @@ export function handleAssetRequest(request :Request<{ETag? :string}>) :Response 
 		params: {
 			ETag
 		} = {},
-		path,
 		rawPath
 	} = request;
 	let cleanPath = rawPath.substring(contextPath.length);
@@ -53,7 +53,7 @@ export function handleAssetRequest(request :Request<{ETag? :string}>) :Response 
 	}
 	//log.debug('handleAssetRequest() cleanPath:%s', toStr(cleanPath));
 
-	if (includes(externalsUrls, path)) {
+	if (IMMUTEABLES[cleanPath]) {
 		return immuteableGetter(request);
 	}
 
@@ -64,10 +64,6 @@ export function handleAssetRequest(request :Request<{ETag? :string}>) :Response 
 		return eTagGetter(request);
 	}
 
-	if (dependencyChunks[cleanPath]) {
-		return immuteableGetter(request);
-	}
-
-	log.debug('handleAssetRequest() unable to determine whether entry, externals or dependencyChunk, falling back to eTagGetter cleanPath:%s', toStr(cleanPath));
+	log.debug('handleAssetRequest() unable to determine whether immuteable falling back to eTagGetter cleanPath:%s', toStr(cleanPath));
 	return eTagGetter(request);
 } // handleAssetRequest
