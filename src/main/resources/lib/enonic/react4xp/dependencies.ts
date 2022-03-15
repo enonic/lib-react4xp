@@ -285,7 +285,11 @@ export function getAllUrls(
  * Throws an error if not found or if unexpected format. */
 export function getNamesFromChunkfile(chunkFile :string) {
 
-    const chunks = readResourceAsJson(chunkFile);
+    const chunks = readResourceAsJson(chunkFile) as {
+		[key :PropertyKey] :{
+			js :string|Array<string>
+		}
+	};
 
     return Object.keys(chunks).map(chunkName => {
         let chunk = chunks[chunkName].js;
