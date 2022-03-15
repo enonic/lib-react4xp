@@ -1,4 +1,5 @@
-export {handleAssetRequest as get} from '/lib/enonic/react4xp/asset/handleAssetRequest';
+//export {handleAssetRequest as get} from '/lib/enonic/react4xp/asset/handleAssetRequest';
+export {getCachedAssetResponse as get} from '/lib/enonic/react4xp/asset/cache';
 
 // React4xp static-asset file server, with specified cache control headers
 
