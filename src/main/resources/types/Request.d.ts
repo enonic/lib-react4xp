@@ -7,6 +7,7 @@ export interface Request<
 	headers? :{
 		Accept? :string
 		Authorization? :string
+		'If-None-Match' ? :string
 	}
 	method? :string
 	mode? :'edit'|'inline'|'live'|'preview'
