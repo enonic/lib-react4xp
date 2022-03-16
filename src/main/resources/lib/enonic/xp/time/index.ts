@@ -1,0 +1,1 @@
+export {nanoTime} from './nanoTime';
