@@ -10,9 +10,14 @@ import {getResource} from '/lib/xp/io';
 
 import { getReact4xpEntry } from '/lib/enonic/react4xp/clientCacheResources';
 import { getServiceRoot } from '/lib/enonic/react4xp/serviceRoots';
+import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
+
 
 let RESPONSE :Response;
 export function get(/*req :Request*/) :Response {
+	if (IS_DEV_MODE) {
+		RESPONSE = undefined;
+	}
     if (RESPONSE === undefined) {
         try {
             // TODO: ADD SUPPORT FOR BUILT-AND-HASHED CHUNK, NOT JUST THE FALLBACK!
@@ -41,7 +46,7 @@ export function get(/*req :Request*/) :Response {
             // FIXME: ETAG not working, using standard client cache instead, limited to 1 hour since it's not hashed
             RESPONSE.headers = {
                 'Content-Type': 'application/javascript;charset=utf-8',
-                'Cache-Control': 'public, max-age=3600'
+                'Cache-Control': IS_DEV_MODE ? 'no-store, no-cache, max-age=0' : 'public, max-age=3600'
             };
 
         } catch (e) {

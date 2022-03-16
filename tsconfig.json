@@ -12,6 +12,7 @@
 			"@enonic/js-utils": ["./node_modules/@enonic/js-utils/src"],
 			"@enonic/js-utils/*": ["./node_modules/@enonic/js-utils/src/*"],
 			"/lib/enonic/react4xp/*": ["./src/main/resources/lib/enonic/react4xp/*"],
+			"/lib/enonic/xp/runMode":["./src/main/resources/lib/enonic/xp/runMode"],
 			"/lib/static": ["../lib-static/src/main/resources/lib/enonic/static"]
 		},
 		"removeComments": true,
