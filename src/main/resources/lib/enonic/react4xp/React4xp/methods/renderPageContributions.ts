@@ -8,7 +8,7 @@ import type {
 import {buildErrorContainer} from '../../htmlHandling';
 import {getAndMergePageContributions}  from '../../pageContributions';
 import {getAssetRoot}  from '../../serviceRoots';
-import {getETag} from '../../asset/getETag';
+//import {getETag} from '../../asset/getETag';
 import {getCachedETag} from '../../asset/cache';
 import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
 
@@ -73,14 +73,14 @@ export function renderPageContributions({
 
 		this.ensureAndLockBeforeRendering();
 
-		const ETag = IS_DEV_MODE ? getETag(`${this.jsxPath}.js`) : getCachedETag(`${this.jsxPath}.js`);
-		//log.debug('renderPageContributions() ETag:%s', toStr(ETag));
+		const postFix = IS_DEV_MODE ? '' : `?ETag=${getCachedETag(`${this.jsxPath}.js`)}`
+		//log.debug('renderPageContributions() postFix:%s', toStr(postFix));
 
 		// TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
 		const bodyEnd = (!suppressJS)
 			? [
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
-				`<script src="${getAssetRoot()}${this.jsxPath}.js?ETag=${ETag}"></script>`,
+				`<script src="${getAssetRoot()}${this.jsxPath}.js${postFix}"></script>`,
 
 				// Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props.
 				// Signature: <command>(entry, id, props?, isPage, hasRegions)
