@@ -29,7 +29,8 @@ const assetResponseCache = newCache({
 
 const eTagCache = newCache({
 	size: 300,
-	expire: 60 // 1 minute
+	//expire: 60 // 1 minute
+	expire: 60*60 // 1 hour
 });
 
 
@@ -58,7 +59,9 @@ export function expireAsset({
 
 
 export function getCachedETag(assetPath :string) {
-	return eTagCache.get(assetPath, () => {
+	//let fromCache = true;
+	const ETag = eTagCache.get(assetPath, () => {
+		//fromCache = false;
 		const response = eTagGetter({
 			rawPath: assetPath
 		});
@@ -68,9 +71,13 @@ export function getCachedETag(assetPath :string) {
 			}
 		} = response;
 		const cleanedETag = cleanAnyDoubleQuoteWrap(ETag);
-		//log.debug('getCachedETag() caching assetPath:%s to ETag:%s', assetPath, ETag);
+		//log.debug('getCachedETag(%s) --> %s (added to cache)', assetPath, ETag);
 		return cleanedETag;
 	}) as string;
+	/*if (fromCache) {
+		log.debug('getCachedETag(%s) --> %s (from cache)', assetPath, ETag);
+	}*/
+	return ETag;
 } // getCachedETag
 
 

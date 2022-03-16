@@ -12,6 +12,8 @@ import {eTagGetter} from './eTagGetter';
 import {getImmuteables} from './getImmuteables';
 import {getEntries} from './getEntries';
 import {immuteableGetter} from './immuteableGetter';
+import {noStoreGetter} from './noStoreGetter';
+import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
 
 
 const ENTRIES = getEntries();
@@ -23,6 +25,9 @@ const IMMUTEABLES = getImmuteables(ENTRIES);
 export function handleAssetRequest(request :Request<{ETag? :string}>) :Response {
 	//log.debug('handleAssetRequest() request:%s', toStr(request));
 
+	if (IS_DEV_MODE) {
+		return noStoreGetter(request);
+	}
 	//const clientUrls = getClientUrls();
 	//log.debug('handleAssetRequest() clientUrls:%s', toStr(clientUrls));
 	// /admin/site/preview/default/draft/react4xp-site/_/service/com.enonic.app.react4xp/react4xp-client/
