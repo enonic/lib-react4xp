@@ -82,8 +82,9 @@ export function getCachedETag(assetPath :string) {
 
 
 export function getCachedAssetResponse(request :Request<{ETag? :string}>) {
+	//log.debug('getCachedAssetResponse() request:%s', toStr(request));
 	const {
-		contextPath,
+		contextPath = '',
 		/*headers: {
 			'If-None-Match': ifNoneMatch // "4b9707302f03e8ba--gzip" // Same as ETag from previous Response
 		} = {},*/

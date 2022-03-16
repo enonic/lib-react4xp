@@ -37,5 +37,9 @@ export const noStoreGetter = buildGetter({
 	//cacheControl: 'no-store, no-cache, max-age=0, must-revalidate',
 	cacheControl: 'no-store, no-cache, max-age=0',
 	etag: false, // default is true in production and false in development
+	getCleanPath: (request :Request) => {
+        const prefix = request.contextPath;
+		return prefix ? request.rawPath.substring(prefix.length) : request.rawPath;
+    },
 	root: R4X_TARGETSUBDIR // assets/react4xp
 }) as (request: Request) => Response;
