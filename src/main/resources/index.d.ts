@@ -17,7 +17,8 @@ export {
 	React4xp,
 	Request,
 	Response,
-	Resource
+	Resource,
+	Stats
 } from './types/index.d';
 
 
