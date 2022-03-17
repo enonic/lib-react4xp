@@ -31,6 +31,7 @@ export function doRenderSSR<
 		result = __.toNativeObject( // Converts arrays or complex Java objects to JavaScript data types
 			renderSSRJava(
 				this.jsxPath,
+				//this.assetPath.slice(0, -3), // Remove .js
 				JSON.stringify(overrideProps || this.props),
 				JSON.stringify(getComponentChunkNames(this.jsxPath))
 			)
