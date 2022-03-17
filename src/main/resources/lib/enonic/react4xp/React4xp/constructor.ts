@@ -31,6 +31,7 @@ import {
 // TODO: The above (require) doesn't seem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use dependencies.readResourceAsJson instead!
 import {makeErrorMessage} from '../htmlHandling';
 import {getDescriptorFromTemplate} from './getDescriptorFromTemplate';
+import {jsxToAssetPath} from '/lib/enonic/react4xp/asset/jsxToAssetPath';
 
 // Import public methods
 import {checkIdLock} from './methods/checkIdLock';
@@ -81,6 +82,7 @@ export function constructor<
 		hasRegions: 0,        // boolean using 0 for false and 1 for true, for the sake of more compact client-side .render and .hydrate calls.
 		isPage: 0,            // boolean using 0 for false and 1 for true, for the sake of more compact client-side .render and .hydrate calls.
 		jsxPath: null,
+		assetPath: null,
 		props: null,
 		react4xpId: null,
 		react4xpIdIsLocked: false,
@@ -165,5 +167,9 @@ export function constructor<
 		// Missing entry
 		throw Error("React4xp got an invalid 'entry' reference. Either use falsy, a jsxPath string, or a component object (portal.getComponent() called from a component controller, i.e. part, layout). entry=" + JSON.stringify(entry));
 	}
+
+	obj.assetPath = jsxToAssetPath(obj.jsxPath);
+	//log.debug('React4xp.constructor() assetPath:%s', obj.assetPath);
+
 	return obj;
 } // constructor

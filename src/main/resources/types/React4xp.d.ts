@@ -26,9 +26,10 @@ export namespace React4xp {
 		templateDescriptorCache? :Cache
 
 		// Public fields/properties
+		assetPath :string; // 'path/filename.hash.js'
 		component :ComponentGeneric;
 		hasRegions :0|1;
-		jsxPath :string;
+		jsxPath :string; // 'path/filename' without '.hash.js'
 		isPage :0|1;
 		props :Props;
 		react4xpId :Id;
