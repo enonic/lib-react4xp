@@ -4,16 +4,16 @@ import type {
 } from '../../../..';
 
 
-import {includes} from '@enonic/js-utils/array/includes';
+//import {includes} from '@enonic/js-utils/array/includes';
 import {toStr} from '@enonic/js-utils/value/toStr';
 //import {getClientUrls} from '/lib/enonic/react4xp/dependencies';
 
-import {eTagGetter} from './eTagGetter';
+//import {eTagGetter} from './eTagGetter';
 import {getImmuteables} from './getImmuteables';
 import {getEntries} from './getEntries';
 import {immuteableGetter} from './immuteableGetter';
-import {noStoreGetter} from './noStoreGetter';
-import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
+//import {noStoreGetter} from './noStoreGetter';
+//import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
 
 
 const ENTRIES = getEntries();
@@ -25,18 +25,18 @@ const IMMUTEABLES = getImmuteables(ENTRIES);
 export function handleAssetRequest(request :Request<{ETag? :string}>) :Response {
 	//log.debug('handleAssetRequest() request:%s', toStr(request));
 
-	if (IS_DEV_MODE) {
+	/*if (IS_DEV_MODE) {
 		return noStoreGetter(request);
-	}
+	}*/
 	//const clientUrls = getClientUrls();
 	//log.debug('handleAssetRequest() clientUrls:%s', toStr(clientUrls));
 	// /admin/site/preview/default/draft/react4xp-site/_/service/com.enonic.app.react4xp/react4xp-client/
 
 	const {
 		contextPath,
-		params: {
+		/*params: {
 			ETag
-		} = {},
+		} = {},*/
 		rawPath
 	} = request;
 	let cleanPath = rawPath.substring(contextPath.length);
@@ -49,13 +49,17 @@ export function handleAssetRequest(request :Request<{ETag? :string}>) :Response 
 		return immuteableGetter(request);
 	}
 
-	if (includes(ENTRIES, cleanPath)) {
-		if (ETag) {
+	log.debug('handleAssetRequest() this should not happen! cleanPath:%s', toStr(cleanPath));
+	return { status: 404 };
+
+	/*if (includes(ENTRIES, cleanPath)) {
+		log.debug('handleAssetRequest() an entry cleanPath:%s', toStr(cleanPath));
+		/*if (ETag) {
 			return immuteableGetter(request);
-		}
+		}*
 		return eTagGetter(request);
 	}
 
 	log.debug('handleAssetRequest() unable to determine whether immuteable falling back to eTagGetter cleanPath:%s', toStr(cleanPath));
-	return eTagGetter(request);
+	return eTagGetter(request);*/
 } // handleAssetRequest
