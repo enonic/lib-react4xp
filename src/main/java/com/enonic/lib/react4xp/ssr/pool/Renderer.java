@@ -82,8 +82,10 @@ public class Renderer {
                 }
             }
         }
-        String fullEntryName = entryName + ".js";
-        runnableAssets.add(fullEntryName);
+		// Entries now has hash in the filename "entryname[hash].js", so this file no longer exist...
+		// But is not needed either because the "entryname[hash].js" is loaded as a dependency.
+        //String fullEntryName = entryName + ".js";
+        //runnableAssets.add(fullEntryName);
 
         return runnableAssets;
     }
@@ -176,6 +178,8 @@ public class Renderer {
             }
 
             LinkedList<String> runnableAssetNames = getRunnableAssetNames(entryName, dependencyNames);
+			LOG.info(this + ": runnableAssetNames '" + runnableAssetNames + "'");
+
             assetLoader.loadAssetsIntoEngine(runnableAssetNames, engine);
             Map<String, String> rendered = runSSR(entryName, props, runnableAssetNames);
             return rendered;
