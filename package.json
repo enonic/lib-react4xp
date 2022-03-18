@@ -15,7 +15,9 @@
   "dependencies": {
     "@enonic/js-utils": "^0.33.0",
     "@enonic/react-components": "^3.0.0",
-    "node-fetch": "^3.2.3"
+    "farmhash": "^3.2.2",
+    "node-fetch": "^3.2.3",
+    "xxhashjs": "^0.2.2"
   },
   "description": "XP serverside runtime, handles the bulk of the React4xp work: server-side rendering, and handling and serving of client-side components and dependency chunks to the client, including the React4xp front-end rendering wrapper itself.\"",
   "devDependencies": {
@@ -37,7 +39,7 @@
     "eslint": "^8.11.0",
     "lodash": "^4.17.21",
     "mocha": "^9.2.2",
-    "rollup": "^2.70.0",
+    "rollup": "^2.70.1",
     "rollup-plugin-typescript2": "^0.31.2",
     "typescript": "^4.6.2",
     "webpack": "^5.70.0",

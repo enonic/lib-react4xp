@@ -16,5 +16,6 @@ export {Request} from './Request.d'
 export {Response} from './Response.d';
 export {Resource} from './Resource.d';
 export {Stats} from './Stats.d';
+export {Stream} from './Stream.d';
 
 export type OneOrMore<T> = T | T[];

@@ -18,7 +18,8 @@ export {
 	Request,
 	Response,
 	Resource,
-	Stats
+	Stats,
+	Stream
 } from './types/index.d';
 
 
