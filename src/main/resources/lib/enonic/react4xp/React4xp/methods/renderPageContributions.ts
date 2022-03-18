@@ -3,13 +3,14 @@ import type {
 	Request
 } from '../../../../..';
 
-//import {toStr} from '@enonic/js-utils/value/toStr';
+import {toStr} from '@enonic/js-utils/value/toStr';
 
 import {buildErrorContainer} from '../../htmlHandling';
 import {getAndMergePageContributions}  from '../../pageContributions';
 import {getAssetRoot}  from '../../serviceRoots';
 //import {getETag} from '../../asset/getETag';
 //import {getCachedETag} from '../../asset/cache';
+import {hashResource} from '../../asset/hashResource';
 //import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
 
 // react4xp_constants.json is not part of lib-react4xp:
@@ -73,8 +74,8 @@ export function renderPageContributions({
 
 		this.ensureAndLockBeforeRendering();
 
-		//const ETag = getCachedETag(assetPath);
-		//log.debug('renderPageContributions() jsxPath:%s assetPath:%s ETag:%s', this.jsxPath, assetPath, ETag);
+		const hash = hashResource('/assets/react4xp/' + this.assetPath);
+		log.debug('renderPageContributions() jsxPath:%s assetPath:%s hash:%s', this.jsxPath, this.assetPath, toStr(hash));
 
 		//const postFix = IS_DEV_MODE ? '' : `?ETag=${getCachedETag(assetPath)}`
 		//log.debug('renderPageContributions() postFix:%s', toStr(postFix));

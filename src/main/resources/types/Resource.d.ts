@@ -1,4 +1,8 @@
+import type {Stream} from './Stream.d';
+
+
 export interface Resource {
 	exists :() => boolean
-	getStream :() => unknown
+	getStream :() => Stream
+	getSize :() => number
 }
