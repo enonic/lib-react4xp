@@ -3,7 +3,7 @@ import {getExternals} from './getExternals';
 
 
 export function getImmuteables(entries :Array<string>) {
-	const dependencies = getDependencies(entries);
+	const dependencies = getDependencies(entries); // includes entries with hash in filename?
 	const externals = getExternals();
 	//log.debug('handleAssetRequest externals:%s', toStr(externals));
 
