@@ -21,7 +21,7 @@ dependencies {
     compile 'com.enonic.lib:lib-cache:2.1.1'
 
     compile group: 'org.jdom', name: 'jdom', version: '2.0.2'
-    compile group: 'org.json', name: 'json', version: '20211205'
+    compile group: 'org.json', name: 'json', version: '20220320'
     compile group: 'jaxen', name: 'jaxen', version: '1.2.0'
 
     implementation 'org.apache.commons:commons-pool2:2.11.1'
