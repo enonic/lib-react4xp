@@ -23,7 +23,6 @@
     "@babel/plugin-proposal-class-properties": "^7.16.7",
     "@babel/plugin-proposal-object-rest-spread": "^7.17.3",
     "@babel/preset-env": "^7.16.11",
-    "@babel/preset-react": "^7.16.7",
     "@babel/register": "^7.17.7",
     "@rollup/plugin-alias": "^3.1.9",
     "@rollup/plugin-commonjs": "^21.0.2",
