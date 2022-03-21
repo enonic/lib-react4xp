@@ -8,10 +8,6 @@ import type {
 import {buildErrorContainer} from '../../htmlHandling';
 import {getAndMergePageContributions}  from '../../pageContributions';
 import {getAssetRoot}  from '../../serviceRoots';
-//import {getETag} from '../../asset/getETag';
-//import {getCachedETag} from '../../asset/cache';
-//import {hashResource} from '../../asset/hashResource';
-//import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
 
 // react4xp_constants.json is not part of lib-react4xp:
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
@@ -73,12 +69,6 @@ export function renderPageContributions({
 		//log.debug('renderPageContributions() command:%s', toStr(command));
 
 		this.ensureAndLockBeforeRendering();
-
-		//const hash = hashResource('/assets/react4xp/' + this.assetPath);
-		//log.debug('renderPageContributions() jsxPath:%s assetPath:%s hash:%s', this.jsxPath, this.assetPath, toStr(hash));
-
-		//const postFix = IS_DEV_MODE ? '' : `?ETag=${getCachedETag(assetPath)}`
-		//log.debug('renderPageContributions() postFix:%s', toStr(postFix));
 
 		// TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
 		const bodyEnd = (!suppressJS)
