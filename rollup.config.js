@@ -61,6 +61,7 @@ export default {
 	plugins: [
 		alias({
 			entries: [
+				{ find: '@enonic/react4xp', replacement: 'node_modules/@enonic/react4xp/dist' },
 				//{ find: '@enonic/js-utils', replacement: 'node_modules/@enonic/js-utils/src' } // [!] Error: Unexpected token (Note that you need plugins to import files that are not JavaScript)
 				{ find: '@enonic/js-utils', replacement: 'node_modules/@enonic/js-utils/dist/cjs' }
 				//{ find: '@enonic/js-utils', replacement: 'node_modules/@enonic/js-utils/dist/esm' } // [!] Error: Could not load node_modules/@enonic/js-utils/dist/esm (imported by src/main/resources/lib/enonic/react4xp/pageContributions.ts): EISDIR: illegal operation on a directory, read
