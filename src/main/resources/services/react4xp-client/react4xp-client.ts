@@ -4,6 +4,7 @@ import type {
 	Response
 } from '../..';
 
+import {LIBRARY_NAME} from '@enonic/react4xp';
 //import {toStr} from '@enonic/js-utils/value/toStr';
 //@ts-ignore
 import {getResource} from '/lib/xp/io';
@@ -29,14 +30,6 @@ export function get(/*req :Request*/) :Response {
             RESPONSE = getReact4xpEntry(resource);
 
             //log.info("RESPONSE (" + typeof RESPONSE + "): " + JSON.stringify(RESPONSE, null, 2));
-
-
-            // react4xp_constants.json is not part of lib-react4xp-runtime,
-            // it's an external shared-constants file expected to exist in the react4xp lib build directory.
-            // Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
-            const { LIBRARY_NAME } = require('/lib/enonic/react4xp/react4xp_constants.json');
-			//log.debug('react4xp-client.get() LIBRARY_NAME:%s', toStr(LIBRARY_NAME)); // React4xp
-            // TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use dependencies.readResourceAsJson instead!
 
             // Placeholders defined in build.gradle. Keep up to date!
             RESPONSE.body = RESPONSE.body
