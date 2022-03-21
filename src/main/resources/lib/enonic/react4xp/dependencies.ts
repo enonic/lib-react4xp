@@ -4,7 +4,11 @@ import type {
 	React4xp as React4xpNamespace
 } from '../../../index.d';
 
-
+import {
+	CLIENT_CHUNKS_FILENAME,
+	EXTERNALS_CHUNKS_FILENAME,
+    COMPONENT_STATS_FILENAME
+} from '@enonic/react4xp';
 //import {isString} from '@enonic/js-utils';
 import {isString} from '@enonic/js-utils/value/isString';
 //import {toStr} from '@enonic/js-utils/value/toStr';
@@ -24,17 +28,10 @@ import {
 	getClientRoot
 } from "./serviceRoots";
 
-// react4xp_constants.json is not part of lib-react4xp-runtime,
+// react4xp_constants.json is not part of lib-react4xp/build,
 // it's an external shared-constants file expected to exist in the build directory of this index.es6.
-// Easiest: the NPM package react4xp-buildconstants creates this file and copies it here.
-import {
-    R4X_TARGETSUBDIR,
-    CLIENT_CHUNKS_FILENAME,
-    EXTERNALS_CHUNKS_FILENAME,
-    COMPONENT_STATS_FILENAME
-	//@ts-ignore
-//} from './react4xp_constants.json';
-} from '/lib/enonic/react4xp/react4xp_constants.json';
+//@ts-ignore
+import {R4X_TARGETSUBDIR} from '/lib/enonic/react4xp/react4xp_constants.json';
 // TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use readResourceAsJson instead!
 
 type Asset = string|{name :string};
