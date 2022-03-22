@@ -3,8 +3,7 @@ import type {
 	Response
 } from '../../../..';
 
-//@ts-ignore
-import {R4X_TARGETSUBDIR} from '/lib/enonic/react4xp/react4xp_constants.json'; // assets/react4xp
+import {R4X_TARGETSUBDIR} from '@enonic/react4xp';
 //@ts-ignore
 import {buildGetter} from '/lib/enonic/static';
 

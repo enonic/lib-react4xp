@@ -1,7 +1,8 @@
-import {EXTERNALS_CHUNKS_FILENAME} from '@enonic/react4xp';
-//@ts-ignore
-import {R4X_TARGETSUBDIR} from '/lib/enonic/react4xp/react4xp_constants.json';
-import {getNamesFromChunkfile} from '/lib/enonic/react4xp/dependencies';
+import {
+	EXTERNALS_CHUNKS_FILENAME,
+	R4X_TARGETSUBDIR
+} from '@enonic/react4xp';
+import {getNamesFromChunkfile} from '/lib/enonic/react4xp/chunk/getNamesFromChunkfile';
 
 
 export function getExternals() {

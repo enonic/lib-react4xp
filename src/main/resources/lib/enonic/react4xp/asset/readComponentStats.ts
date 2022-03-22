@@ -1,11 +1,10 @@
 import type {Stats} from '../../../..'
 
 
-import {COMPONENT_STATS_FILENAME} from '@enonic/react4xp';
 import {
-	R4X_TARGETSUBDIR  // assets/react4xp
-	//@ts-ignore
-} from '/lib/enonic/react4xp/react4xp_constants.json';
+	COMPONENT_STATS_FILENAME,
+	R4X_TARGETSUBDIR
+} from '@enonic/react4xp';
 import {
 	getResource,
 	readLines
