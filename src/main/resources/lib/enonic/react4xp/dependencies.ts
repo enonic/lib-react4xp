@@ -7,32 +7,25 @@ import type {
 import {
 	CLIENT_CHUNKS_FILENAME,
 	EXTERNALS_CHUNKS_FILENAME,
-    COMPONENT_STATS_FILENAME
+    COMPONENT_STATS_FILENAME,
+	R4X_TARGETSUBDIR
 } from '@enonic/react4xp';
 //import {isString} from '@enonic/js-utils';
 import {isString} from '@enonic/js-utils/value/isString';
 //import {toStr} from '@enonic/js-utils/value/toStr';
 
-import {
-	getResource,
-	readText
-	//@ts-ignore
-} from '/lib/xp/io';
 //@ts-ignore
 import cacheLib from '/lib/cache';
 //@ts-ignore
 import {getSite} from '/lib/xp/portal';
 
+import {getNamesFromChunkfile} from '/lib/enonic/react4xp/chunk/getNamesFromChunkfile';
+import {readResourceAsJson} from '/lib/enonic/react4xp/resource/readResourceAsJson';
 import {
 	getAssetRoot,
 	getClientRoot
 } from "./serviceRoots";
 
-// react4xp_constants.json is not part of lib-react4xp/build,
-// it's an external shared-constants file expected to exist in the build directory of this index.es6.
-//@ts-ignore
-import {R4X_TARGETSUBDIR} from '/lib/enonic/react4xp/react4xp_constants.json';
-// TODO: The above (require) doesn't sem to handle re-reading updated files in XP dev runmode. Is that necessary? If so, use readResourceAsJson instead!
 
 type Asset = string|{name :string};
 
@@ -75,29 +68,6 @@ export function normalizeEntryNames(entryNames :OneOrMore<React4xpNamespace.Entr
 }
 
 
-function readResourceAsJson(fileName :string) :unknown {
-	//log.debug("Reading resource: " + JSON.stringify(fileName, null, 2));
-    const resource = getResource(fileName);
-    if (!resource || !resource.exists()) {
-        throw Error("Empty or not found: " + fileName);
-    }
-    let content :string;
-    try {
-        content = readText(resource.getStream());
-    } catch (e) {
-        log.error(e.message);
-        throw Error("dependencies.es6 # readResourceAsJson: couldn't read resource '" + fileName + "'");
-    }
-
-    try {
-        return JSON.parse(content);
-
-    } catch (e) {
-        log.error(e.message);
-        log.info("Content dump from '" + fileName + "':\n" + content);
-        throw Error("dependencies.es6 # readResourceAsJson: couldn't parse as JSON content of resource  '" + fileName + "'");
-    }
-}
 
 
 /** Takes entry names (array or a single string) and returns an array of (hashed) dependency file names, the complete set of chunks required for the set of entries to run.
@@ -276,46 +246,4 @@ export function getAllUrls(
         ? chunkUrl => chunkUrl
         : chunkUrl => !chunkUrl.endsWith(".js")
     );
-}
-
-/** Open a chunkfile, read the contents and return the domain-relative urls for non-entry JS file references in the chunk file.
- * Throws an error if not found or if unexpected format. */
-export function getNamesFromChunkfile(chunkFile :string) {
-
-    const chunks = readResourceAsJson(chunkFile) as {
-		[key :PropertyKey] :{
-			js :string|Array<string>
-		}
-	};
-
-    return Object.keys(chunks).map(chunkName => {
-        let chunk = chunks[chunkName].js;
-
-        while (Array.isArray(chunk)) {
-            if (chunk.length > 1) {
-                throw Error(
-                    `Unexpected value in ${chunkFile}: [${chunkName}].js is an array with more than 1 array: ${JSON.stringify(
-                        chunk,
-                        null,
-                        2
-                    )}`
-                );
-            }
-            chunk = chunk[0];
-        }
-
-        if (chunk.startsWith("/")) {
-            chunk = chunk.substring(1);
-        }
-
-        // Fail fast: verify that it exists and has a content
-        const resource = getResource(`/${R4X_TARGETSUBDIR}/${chunk}`);
-        if (!resource || !resource.exists()) {
-            throw Error(
-                `React4xp dependency chunk not found: /${R4X_TARGETSUBDIR}/${chunk}`
-            );
-        }
-
-        return chunk;
-    });
 }
