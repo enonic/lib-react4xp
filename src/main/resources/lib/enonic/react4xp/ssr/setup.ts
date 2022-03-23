@@ -2,24 +2,28 @@ import {
 	COMPONENT_STATS_FILENAME,
     ENTRIES_FILENAME,
 	EXTERNALS_CHUNKS_FILENAME,
+	FILE_STEM_NASHORNPOLYFILLS_USERADDED,
 	LIBRARY_NAME,
 	R4X_TARGETSUBDIR
 } from '@enonic/react4xp';
 import {isSet} from '@enonic/js-utils/value/isSet';
 import {toStr} from '@enonic/js-utils/value/toStr';
-import {getNashornPolyfills} from '/lib/enonic/react4xp/chunk/getNashornPolyfills';
 import {readRuntimeSettings} from '/lib/enonic/react4xp/asset/readRuntimeSettings';
 import {
 	normalizeSSREngineSettings,
 	normalizeSSRMaxThreads
-}  from '../normalizing';
+}  from '/lib/enonic/react4xp/normalizing';
+//@ts-ignore
+//import {getResource} from '/lib/xp/io';
 
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
 
-
-const NASHORNPOLYFILLS_FILENAME = getNashornPolyfills();
+//const FULL_EXTERNALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}`;
+const RESOURCE_PATH_RELATIVE_NASHORNPOLYFILLS_USERADDED = `${FILE_STEM_NASHORNPOLYFILLS_USERADDED}.js`;
 const SSR_DEFAULT_CACHE_SIZE = 0;
 
+//const resourceChunksExternalsJson = getResource(FULL_EXTERNALS_CHUNKS_FILENAME);
+//const booleanChunksExternalsJsonExist = resourceChunksExternalsJson && resourceChunksExternalsJson.exists();
 
 export function render(
 	entryName :string,
@@ -40,16 +44,13 @@ export function render(
 
 export function setup({
 		lazyload,
-		scriptEngineSettings,
 		ssrMaxThreads
 } :{
 	lazyload? :boolean,
 	scriptEngineSettings? :Array<string>,
 	ssrMaxThreads? :number
 } = {}) {
-	//log.debug('setup appName:%s', toStr(appName));
 	//log.debug('setup lazyload:%s', toStr(lazyload));
-	//log.debug('setup scriptEngineSettings:%s', toStr(scriptEngineSettings));
 	//log.debug('setup ssrMaxThreads:%s', toStr(ssrMaxThreads));
 
 	const runtimeSettings = readRuntimeSettings();
@@ -61,12 +62,18 @@ export function setup({
 		`/${R4X_TARGETSUBDIR}`, //scriptsHome,
 		LIBRARY_NAME,
 		`/${R4X_TARGETSUBDIR}/`, //chunkfilesHome,
-		NASHORNPOLYFILLS_FILENAME,
+		RESOURCE_PATH_RELATIVE_NASHORNPOLYFILLS_USERADDED,
 		ENTRIES_FILENAME,
+
+		//booleanChunksExternalsJsonExist ? EXTERNALS_CHUNKS_FILENAME : '',
 		EXTERNALS_CHUNKS_FILENAME,
+
 		COMPONENT_STATS_FILENAME,
 		isSet(lazyload) ? lazyload : runtimeSettings.SSR_LAZYLOAD,
 		normalizeSSRMaxThreads(isSet(ssrMaxThreads) ? ssrMaxThreads : runtimeSettings.SSR_MAX_THREADS),
-		normalizeSSREngineSettings(isSet(scriptEngineSettings) ? scriptEngineSettings : runtimeSettings.SSR_ENGINE_SETTINGS, SSR_DEFAULT_CACHE_SIZE)
+		normalizeSSREngineSettings(
+			runtimeSettings.SSR_ENGINE_SETTINGS,
+			SSR_DEFAULT_CACHE_SIZE
+		)
 	);
 }

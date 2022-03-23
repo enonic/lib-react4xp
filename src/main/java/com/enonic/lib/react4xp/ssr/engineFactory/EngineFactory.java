@@ -18,7 +18,8 @@ public class EngineFactory {
 
     // ['build/resources/main' + defaultPolyfillFileName] MUST match [env.BUILD_R4X + env.NASHORNPOLYFILLS_FILENAME]
     // in the nashornPolyfills task in build.gradle!
-    private final static String POLYFILL_REACT4XP_DEFAULT_FILE = "/lib/enonic/react4xp/default/nashornPolyfills.js";
+    //private final static String POLYFILL_REACT4XP_DEFAULT_FILE = "/lib/enonic/react4xp/default/nashornPolyfills.js";
+	private final static String POLYFILL_REACT4XP_DEFAULT_FILE = "assets/react4xp/nashornPolyfills.js"; // TODO constants.runtime /R4X_TARGETSUBDIR/FILE_STEM_NASHORNPOLYFILLS
 
     // Basic-level polyfills. For some reason, these must be run hardcoded from here, not from nashornPolyfills.js.
     // TODO: shouldn't be a string here, but read from a JS file. From react4xp-runtime-nashornpolyfills package? Or make it available in the jar (/lib)?
