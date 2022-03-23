@@ -11,10 +11,10 @@ import {forceArray} from '@enonic/js-utils/array/forceArray';
 //@ts-ignore
 import {newCache} from '/lib/cache';
 
+import {getSiteLocalCacheKey} from '/lib/enonic/react4xp/asset/getSiteLocalCacheKey';
 import {
 	normalizeEntryNames,
-	getAllUrls,
-	getSiteLocalCacheKey
+	getAllUrls
 } from './dependencies';
 
 
