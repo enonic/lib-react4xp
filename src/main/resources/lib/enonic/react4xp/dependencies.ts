@@ -6,7 +6,6 @@ import type {
 
 import {
 	CLIENT_CHUNKS_FILENAME,
-	EXTERNALS_CHUNKS_FILENAME,
     COMPONENT_STATS_FILENAME,
 	R4X_TARGETSUBDIR
 } from '@enonic/react4xp';
@@ -14,38 +13,28 @@ import {
 import {isString} from '@enonic/js-utils/value/isString';
 //import {toStr} from '@enonic/js-utils/value/toStr';
 
-//@ts-ignore
-import cacheLib from '/lib/cache';
-//@ts-ignore
-import {getSite} from '/lib/xp/portal';
-
+import {dependenciesCache} from '/lib/enonic/react4xp/asset/dependenciesCache';
+import {getSiteLocalCacheKey} from '/lib/enonic/react4xp/asset/getSiteLocalCacheKey';
 import {getNamesFromChunkfile} from '/lib/enonic/react4xp/chunk/getNamesFromChunkfile';
+import {getExternalsUrls} from '/lib/enonic/react4xp/asset/externals/getExternalsUrls';
 import {readResourceAsJson} from '/lib/enonic/react4xp/resource/readResourceAsJson';
 import {
 	getAssetRoot,
 	getClientRoot
-} from "./serviceRoots";
+} from '/lib/enonic/react4xp/serviceRoots';
+import {IS_PROD_MODE} from '/lib/enonic/xp/runMode';
 
 
 type Asset = string|{name :string};
 
-
-// XP runmode: IS_PRODMODE is true in prod mode, false in dev mode.
-const IS_PRODMODE = ("" + Java.type('com.enonic.xp.server.RunMode').get()) === 'PROD';
 
 // Tolerate and remove file extensions ts(x), js(x), es(6) and/or trailing slash or space
 const TOLERATED_ENTRY_EXTENSIONS = /([/ ]+|\.(tsx?|jsx?|es6?)[/ ]*)$/i;
 
 let buildStatsEntrypoints :Object|undefined;
 
-const dependenciesCache = IS_PRODMODE
-    ? cacheLib.newCache({
-        size: 300,
-        expire: 10800 // 30 hours
-    })
-    : null;
 
-const FULL_EXTERNALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}`;
+
 const FULL_CLIENT_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${CLIENT_CHUNKS_FILENAME}`;
 const FULL_COMPONENT_STATS_FILENAME = `/${R4X_TARGETSUBDIR}/${COMPONENT_STATS_FILENAME}`;
 
@@ -144,14 +133,6 @@ function readComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.EntryNa
     return output;
 }
 
-const NO_SITE = "#NO_SITE_CONTEXT#";
-
-
-export function getSiteLocalCacheKey(rawKey :string) {
-    const siteKey = (getSite() || {})._id || NO_SITE;
-    return `${siteKey}_*_${rawKey}`;
-}
-
 
 // Cached version of readComponentChunkNames - used in prod mode
 function readComponentChunkNamesCached(entryNames :OneOrMore<React4xpNamespace.EntryName>) :Array<string> {
@@ -163,7 +144,7 @@ function readComponentChunkNamesCached(entryNames :OneOrMore<React4xpNamespace.E
 
 
 export function getComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.EntryName>) {
-	return IS_PRODMODE
+	return IS_PROD_MODE
     	? readComponentChunkNamesCached(entryNames)
     	: readComponentChunkNames(forceTrimmedArray(entryNames));
 }
@@ -172,33 +153,6 @@ export function getComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.E
 export function getComponentChunkUrls(entries :OneOrMore<React4xpNamespace.EntryName>) {
     return getComponentChunkNames(entries).map(name => getAssetRoot() + name);
 }
-
-
-/** Returns the asset-via-service URL for the externals chunk */
-function readExternalsUrls() {
-    // This should not break if there are no added externals. Externals should be optional.
-    try {
-        return getNamesFromChunkfile(FULL_EXTERNALS_CHUNKS_FILENAME).map(
-            name => getAssetRoot() + name
-        );
-    } catch (e) {
-        log.warning(e);
-        log.warning(
-            `No optional externals were found (chunkfile reference: ${FULL_EXTERNALS_CHUNKS_FILENAME}). That might be okay, or a problem.`
-        );
-        return [];
-    }
-}
-
-
-function readExternalsUrlsCached() {
-    const cacheKey = getSiteLocalCacheKey(FULL_EXTERNALS_CHUNKS_FILENAME);
-    return dependenciesCache.get(cacheKey, () => readExternalsUrls());
-}
-
-export const getExternalsUrls = IS_PRODMODE
-    ? readExternalsUrlsCached
-    : readExternalsUrls;
 
 
 function readClientUrls() {
@@ -225,7 +179,7 @@ function readClientUrlsCached() {
     return dependenciesCache.get(cacheKey, () => readClientUrls());
 }
 
-export const getClientUrls = IS_PRODMODE
+export const getClientUrls = IS_PROD_MODE
     ? readClientUrlsCached
     : readClientUrls;
 
