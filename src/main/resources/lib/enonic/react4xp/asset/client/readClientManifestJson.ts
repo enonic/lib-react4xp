@@ -1,5 +1,5 @@
 //import {toStr} from '@enonic/js-utils/value/toStr';
-import {FILE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON} from '/lib/enonic/react4xp/constants';
+import {RESOURCE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON} from '/lib/enonic/react4xp/constants';
 import {
 	getResource,
 	readText
@@ -10,10 +10,10 @@ import {
 export function readClientManifestJson() :string {
 	//log.debug('readClientManifestJson()');
 
-	const resource = getResource(FILE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON);
+	const resource = getResource(RESOURCE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON);
 	if (!resource || !resource.exists()) {
 		throw new Error(
-			`Resource empty or not found: ${FILE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON}`
+			`Resource empty or not found: ${RESOURCE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON}`
 		);
 	}
 
@@ -22,7 +22,7 @@ export function readClientManifestJson() :string {
         content = readText(resource.getStream());
     } catch (e) {
         log.error(e.message);
-        throw new Error(`Error when readText(${FILE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON})!`);
+        throw new Error(`Error when readText(${RESOURCE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON})!`);
     }
 	//log.debug('readClientManifestJson() content:%s', toStr(content));
 
@@ -34,7 +34,7 @@ export function readClientManifestJson() :string {
 
     } catch (e) {
         log.error(e.message);
-		log.info(`Dump from resource:${FILE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON} content:${content}`);
-        throw new Error(`Error when JSON.parse(${FILE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON})`);
+		log.info(`Dump from resource:${RESOURCE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON} content:${content}`);
+        throw new Error(`Error when JSON.parse(${RESOURCE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON})`);
     }
 } // readClientManifestJson
