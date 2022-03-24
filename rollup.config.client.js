@@ -15,7 +15,6 @@ export default {
 		dir: outDir,
 
 		entryFileNames: '[name].[hash].js',
-		//entryFileNames: 'react4xpClient.[hash].js',
 
 		//format: 'cjs',
 		//format: 'es',
