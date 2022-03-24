@@ -14,7 +14,7 @@ export function setProps<
 	} = {}
 >(props :Props) {
 	if (!props || !isObject(props)) {
-		throw Error("Top-level props must be a string-serializeable object.");
+		throw new Error("Top-level props must be a string-serializeable object.");
 	}
 	this.props = props;
 	return this;

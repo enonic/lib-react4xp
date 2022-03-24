@@ -2,17 +2,11 @@ import alias from '@rollup/plugin-alias';
 import commonjs from '@rollup/plugin-commonjs';
 //import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
-//import typescript from 'rollup-plugin-typescript2';
-
 
 export default {
 	external: [
 		'/lib/cache',
 		'/lib/enonic/static',
-
-		///\/lib\/enonic\/react4xp.*/, // Entry module cannot be external
-		'/lib/enonic/react4xp/react4xp_constants.json',
-
 		'/lib/xp/auth',
 		'/lib/xp/content',
 		'/lib/xp/context',
@@ -25,20 +19,11 @@ export default {
 		'/lib/xp/task',
 		'/lib/xp/value'
 	],
-	//input: 'src/main/resources/**/*.ts', // Nope includes *.d.ts files!
-	/*input: [
-		'src/main/resources/lib/enonic/react4xp/clientCacheResources.ts',
-		'src/main/resources/lib/enonic/react4xp/dependencies.ts'
-	],*/
-	/*input: {
-		'lib/enonic/react4xp/clientCacheResources' :'src/main/resources/lib/enonic/react4xp/clientCacheResources.ts',
-		'lib/enonic/react4xp/dependencies': 'src/main/resources/lib/enonic/react4xp/dependencies.ts',
-		'lib/enonic/react4xp/serviceRoots': 'src/main/resources/lib/enonic/react4xp/serviceRoots.ts',
-		'services/react4xp/react4xp': 'src/main/resources/services/react4xp/react4xp.ts'
-	},*/
 	output: {
 		chunkFileNames: '[name].js',
+
 		dir: 'build/resources/main',
+
 		// (!) Entry module "node_modules/@enonic/js-utils/dist/cjs/index.js"
 		// is implicitly using "default" export mode, which means for CommonJS
 		// output that its default export is assigned to "module.exports".
@@ -54,7 +39,7 @@ export default {
 		freeze: false,
 		interop: false,
 		//makeAbsoluteExternalsRelative: false, // Only works on CLI!
-		preserveModules: true, // Copy modules into build/resources/main/node_modules
+		preserveModules: true, // Copy modules into build/resources/main/node_modules instead of bundling them
 		preserveModulesRoot: 'src/main/resources',
 		sourcemap: false
 	},
@@ -75,6 +60,6 @@ export default {
 			]
 		}),*/
 		typescript(),
-		commonjs()
+		commonjs(),
 	]
 };
