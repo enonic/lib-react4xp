@@ -21,7 +21,7 @@ export function getNamesFromChunkfile(chunkFile :string) {
 
         while (Array.isArray(chunk)) {
             if (chunk.length > 1) {
-                throw Error(
+                throw new Error(
                     `Unexpected value in ${chunkFile}: [${chunkName}].js is an array with more than 1 array: ${JSON.stringify(
                         chunk,
                         null,
@@ -39,7 +39,7 @@ export function getNamesFromChunkfile(chunkFile :string) {
         // Fail fast: verify that it exists and has a content
         const resource = getResource(`/${R4X_TARGETSUBDIR}/${chunk}`);
         if (!resource || !resource.exists()) {
-            throw Error(
+            throw new Error(
                 `React4xp dependency chunk not found: /${R4X_TARGETSUBDIR}/${chunk}`
             );
         }

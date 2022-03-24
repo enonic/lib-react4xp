@@ -95,7 +95,7 @@ function readComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.EntryNa
                         return asset.name
                     }
 
-                    throw Error(`Unexpected 'assets' structure in ${COMPONENT_STATS_FILENAME}: ${JSON.stringify(data.assets)}`);
+                    throw new Error(`Unexpected 'assets' structure in ${COMPONENT_STATS_FILENAME}: ${JSON.stringify(data.assets)}`);
                 })
                 .filter((asset :string) => !asset.endsWith(".map") && asset !== myself)
                 .forEach((asset :string) => {
@@ -111,7 +111,7 @@ function readComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.EntryNa
     });
 
     if (missing.length > 0) {
-        throw Error(
+        throw new Error(
             `Couldn't find dependencies for ${missing.length} entries: '${missing.join(', ')}'`
         );
     }

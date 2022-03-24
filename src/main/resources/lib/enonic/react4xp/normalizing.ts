@@ -37,7 +37,7 @@ const preventUnclosedQuotes = (isInsideQuote) => (item) => {
         isQuoteSoMaybeFlagAsInside(char, c, "'", '"', isInsideQuote, item);
     }
     if (isInsideQuote["'"] || isInsideQuote['"']) {
-        throw Error("Malformed SSR engine setting item: " + item);
+        throw new Error("Malformed SSR engine setting item: " + item);
     }
     return item;
 };
@@ -105,7 +105,7 @@ export function normalizeSSREngineSettings(
         }
     }
     if (isInsideQuote["'"] || isInsideQuote['"']) {
-        throw Error("Malformed SSR engine settings: " + ssrEngineSettings);
+        throw new Error("Malformed SSR engine settings: " + ssrEngineSettings);
     }
 
 
