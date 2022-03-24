@@ -4,24 +4,17 @@ import type {
 	React4xp as React4xpNamespace
 } from '../../../index.d';
 
-import {
-	CLIENT_CHUNKS_FILENAME,
-    COMPONENT_STATS_FILENAME,
-	R4X_TARGETSUBDIR
-} from '@enonic/react4xp';
+import {COMPONENT_STATS_FILENAME} from '@enonic/react4xp';
 //import {isString} from '@enonic/js-utils';
 import {isString} from '@enonic/js-utils/value/isString';
 //import {toStr} from '@enonic/js-utils/value/toStr';
 
 import {dependenciesCache} from '/lib/enonic/react4xp/asset/dependenciesCache';
+import {getComponentStats} from '/lib/enonic/react4xp/asset/getComponentStats';
 import {getSiteLocalCacheKey} from '/lib/enonic/react4xp/asset/getSiteLocalCacheKey';
-import {getNamesFromChunkfile} from '/lib/enonic/react4xp/chunk/getNamesFromChunkfile';
+import {getClientUrls} from '/lib/enonic/react4xp/asset/client/getClientUrls';
 import {getExternalsUrls} from '/lib/enonic/react4xp/asset/externals/getExternalsUrls';
-import {readResourceAsJson} from '/lib/enonic/react4xp/resource/readResourceAsJson';
-import {
-	getAssetRoot,
-	getClientRoot
-} from '/lib/enonic/react4xp/serviceRoots';
+import {getAssetRoot} from '/lib/enonic/react4xp/serviceRoots';
 import {IS_PROD_MODE} from '/lib/enonic/xp/runMode';
 
 
@@ -33,10 +26,6 @@ const TOLERATED_ENTRY_EXTENSIONS = /([/ ]+|\.(tsx?|jsx?|es6?)[/ ]*)$/i;
 
 let buildStatsEntrypoints :Object|undefined;
 
-
-
-const FULL_CLIENT_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${CLIENT_CHUNKS_FILENAME}`;
-const FULL_COMPONENT_STATS_FILENAME = `/${R4X_TARGETSUBDIR}/${COMPONENT_STATS_FILENAME}`;
 
 
 function forceTrimmedArray(entryNames :OneOrMore<React4xpNamespace.EntryName> = []) :Array<React4xpNamespace.EntryName> {
@@ -66,9 +55,7 @@ export function normalizeEntryNames(entryNames :OneOrMore<React4xpNamespace.Entr
 function readComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.EntryName>) {
 
     // Just verify that it exists and has a content:
-    let STATS = readResourceAsJson(FULL_COMPONENT_STATS_FILENAME) as {
-		entrypoints :Object
-	};
+    let STATS = getComponentStats();
 
     buildStatsEntrypoints = STATS.entrypoints;
 
@@ -153,35 +140,6 @@ export function getComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.E
 export function getComponentChunkUrls(entries :OneOrMore<React4xpNamespace.EntryName>) {
     return getComponentChunkNames(entries).map(name => getAssetRoot() + name);
 }
-
-
-function readClientUrls() {
-	//log.debug('readClientUrls()');
-    // Special case: if there is a chunkfile for a client wrapper, use that. If not, fall back to
-    // a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
-    try {
-        return getNamesFromChunkfile(FULL_CLIENT_CHUNKS_FILENAME).map(
-            name => getAssetRoot() + name
-        );
-    } catch (e) {
-        //log.debug('Stacktrace', e); // Error: Empty or not found: /assets/react4xp/chunks.client.json
-        log.debug(
-            `No optional clientwrapper was found (chunkfile reference: ${FULL_CLIENT_CHUNKS_FILENAME}). That's okay, there's a fallback one at: ${getClientRoot()}`
-        );
-        return [getClientRoot()];
-    }
-}
-
-/** Returns the asset-via-service URL for the frontend client */
-function readClientUrlsCached() {
-	//log.debug('readClientUrlsCached()');
-    const cacheKey = getSiteLocalCacheKey(FULL_CLIENT_CHUNKS_FILENAME);
-    return dependenciesCache.get(cacheKey, () => readClientUrls());
-}
-
-export const getClientUrls = IS_PROD_MODE
-    ? readClientUrlsCached
-    : readClientUrls;
 
 
 export function getAllUrls(

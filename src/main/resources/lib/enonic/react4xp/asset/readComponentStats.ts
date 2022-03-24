@@ -5,19 +5,9 @@ import {
 	COMPONENT_STATS_FILENAME,
 	R4X_TARGETSUBDIR
 } from '@enonic/react4xp';
-import {
-	getResource,
-	readLines
-	//@ts-ignore
-} from '/lib/xp/io';
-
-
-const REACT4XP_ROOT = `/${R4X_TARGETSUBDIR}/`;
+import {readResourceAsJson} from '/lib/enonic/react4xp/resource/readResourceAsJson';
 
 
 export function readComponentStats() {
-	return JSON.parse(
-	    readLines(getResource(REACT4XP_ROOT + COMPONENT_STATS_FILENAME).getStream())
-	        .join(" ")
-	) as Stats;
+	return readResourceAsJson(`/${R4X_TARGETSUBDIR}/${COMPONENT_STATS_FILENAME}`) as Stats;
 }
