@@ -94,5 +94,5 @@ export function getSuffix(
         return stripSlashes(path.substring(location + fallbackRoot.length));
     }
 
-    throw Error(`Unexpected service suffix lookup: requested path ('${path}') doesn't seem to belong to the service '${serviceName}'.`);
+    throw new Error(`Unexpected service suffix lookup: requested path ('${path}') doesn't seem to belong to the service '${serviceName}'.`);
 };

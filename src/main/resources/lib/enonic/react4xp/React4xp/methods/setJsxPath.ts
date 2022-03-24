@@ -22,7 +22,7 @@ export function setJsxPath(jsxPath :string) {
 		jsxPath.indexOf('\\\\') !== -1 ||
 		jsxPath.startsWith("\\")
 	) {
-		throw Error(`React4xp.setJsxFileName: invalid jsxPath (${JSON.stringify(jsxPath)}). This is a NAME, not a relative path, so it can't be missing/empty, or contain '..', '//', '/./' or start with '.' or '/'.${this.component ? ` Component: ${JSON.stringify(this.component)}` : ''}`);
+		throw new Error(`React4xp.setJsxFileName: invalid jsxPath (${JSON.stringify(jsxPath)}). This is a NAME, not a relative path, so it can't be missing/empty, or contain '..', '//', '/./' or start with '.' or '/'.${this.component ? ` Component: ${JSON.stringify(this.component)}` : ''}`);
 	}
 
 	// TODO: Get this from entryExtensions instead of hardcoded

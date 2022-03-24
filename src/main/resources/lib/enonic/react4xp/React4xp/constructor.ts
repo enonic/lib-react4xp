@@ -94,7 +94,7 @@ export function constructor<
 		//obj.component = getComponent();
 
 		if (obj.jsxPath === "") {
-			throw Error(`Can't initialize React4xp component with initParam = ${JSON.stringify(entry)}. XP component object or jsxPath string only, please.`);
+			throw new Error(`Can't initialize React4xp component with initParam = ${JSON.stringify(entry)}. XP component object or jsxPath string only, please.`);
 		}
 
 	} else if (!entry || (isObject(entry) && !isArray(entry))) {
@@ -115,7 +115,7 @@ export function constructor<
 
 			} else {
 				// Missing content.page.descriptor as well as component and jsxPath
-				throw Error("React4xp seems to be called from an invalid context. Looks like you tried to derive jsxPath from a non-jsxPath 'entry' parameter, using either a falsy or component object (portal.getComponent() called from a component controller, i.e. part, layout). But both in-constructor calls portal.getComponent() and portal.getContent() yielded invalid results: no component data and no content.page.  |  entry=" + JSON.stringify(entry) + "  |  portal.getComponent=" + JSON.stringify(comp) + "  |  portal.getContent=" + JSON.stringify(cont));
+				throw new Error("React4xp seems to be called from an invalid context. Looks like you tried to derive jsxPath from a non-jsxPath 'entry' parameter, using either a falsy or component object (portal.getComponent() called from a component controller, i.e. part, layout). But both in-constructor calls portal.getComponent() and portal.getContent() yielded invalid results: no component data and no content.page.  |  entry=" + JSON.stringify(entry) + "  |  portal.getComponent=" + JSON.stringify(comp) + "  |  portal.getContent=" + JSON.stringify(cont));
 			}
 		}
 
@@ -127,7 +127,7 @@ export function constructor<
 		};
 		Object.keys(buildingBlockData).forEach(attribute => {
 			if (!buildingBlockData[attribute]) {
-				throw Error(makeErrorMessage(attribute, obj.component));
+				throw new Error(makeErrorMessage(attribute, obj.component));
 			}
 		});
 
@@ -148,7 +148,7 @@ export function constructor<
 
 	} else {
 		// Missing entry
-		throw Error("React4xp got an invalid 'entry' reference. Either use falsy, a jsxPath string, or a component object (portal.getComponent() called from a component controller, i.e. part, layout). entry=" + JSON.stringify(entry));
+		throw new Error("React4xp got an invalid 'entry' reference. Either use falsy, a jsxPath string, or a component object (portal.getComponent() called from a component controller, i.e. part, layout). entry=" + JSON.stringify(entry));
 	}
 
 	obj.assetPath = jsxToAssetPath(obj.jsxPath);

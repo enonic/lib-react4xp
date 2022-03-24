@@ -3,8 +3,10 @@ import type {
 	Request
 } from '../../../../..';
 
-import {LIBRARY_NAME} from '@enonic/react4xp';
+
 //import {toStr} from '@enonic/js-utils/value/toStr';
+import {LIBRARY_NAME} from '@enonic/react4xp';
+import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
 
 import {buildErrorContainer} from '../../htmlHandling';
 import {getAndMergePageContributions}  from '../../pageContributions';
@@ -57,7 +59,7 @@ export function renderPageContributions({
 		const bodyEnd = (!suppressJS)
 			? [
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
-				`<script src="${getAssetRoot()}${this.assetPath}"></script>`,
+				`<script src="${getAssetRoot()}${this.assetPath}"></script>\n`,
 
 				// Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props.
 				// Signature: <command>(entry, id, props?, isPage, hasRegions)
@@ -68,11 +70,7 @@ export function renderPageContributions({
 					this.props
 						? JSON.stringify(this.props)
 						: 'null'
-				}${
-					(this.isPage || this.hasRegions)
-						? `,${this.isPage},${this.hasRegions}`
-						: ''
-				});</script>`
+				}${`,${this.isPage},${this.hasRegions},${IS_DEV_MODE ? 1 : 0}`});</script>\n`
 			]
 			: [];
 		//log.debug('renderPageContributions() bodyEnd:%s', toStr(bodyEnd));
