@@ -3,7 +3,7 @@ export interface Stats {
 	entrypoints :{
 		[entry :string] :{
 			name :string
-			chunks :Array<string>
+			chunks :Array<string|number> // I must have changed something in the build system since they went fron strings to integers :(
 			assets :Array<{
 				name :string
 				size? :number
