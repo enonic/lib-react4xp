@@ -9,12 +9,12 @@ import {
 import {isSet} from '@enonic/js-utils/value/isSet';
 import {toStr} from '@enonic/js-utils/value/toStr';
 import {readRuntimeSettings} from '/lib/enonic/react4xp/asset/readRuntimeSettings';
+import {exists} from '/lib/enonic/react4xp/resource/exists';
 import {
 	normalizeSSREngineSettings,
 	normalizeSSRMaxThreads
 }  from '/lib/enonic/react4xp/normalizing';
-//@ts-ignore
-//import {getResource} from '/lib/xp/io';
+//import {getResource} from '/lib/enonic/react4xp/resource/getResource';
 
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
 
@@ -62,7 +62,7 @@ export function setup({
 		`/${R4X_TARGETSUBDIR}`, //scriptsHome,
 		LIBRARY_NAME,
 		`/${R4X_TARGETSUBDIR}/`, //chunkfilesHome,
-		RESOURCE_PATH_RELATIVE_NASHORNPOLYFILLS_USERADDED,
+		exists(RESOURCE_PATH_RELATIVE_NASHORNPOLYFILLS_USERADDED) ? RESOURCE_PATH_RELATIVE_NASHORNPOLYFILLS_USERADDED : '',
 		ENTRIES_FILENAME,
 
 		//booleanChunksExternalsJsonExist ? EXTERNALS_CHUNKS_FILENAME : '',
