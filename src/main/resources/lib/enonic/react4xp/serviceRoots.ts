@@ -41,18 +41,8 @@ export function getAssetRoot() {
 };
 
 
-export function getClientRoot() {
-    return initServiceUrlRoot('react4xp-client');
-};
-
-
-export function getDependenciesRoot() {
-    return initServiceUrlRoot('react4xp-dependencies');
-};
-
-
-export function getServiceRoot() {
-    return initServiceUrlRoot('');
+export function getServiceRoot(serviceName :string = '') {
+    return initServiceUrlRoot(serviceName);
 };
 
 
