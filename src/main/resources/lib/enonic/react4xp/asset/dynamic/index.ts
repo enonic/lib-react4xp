@@ -26,7 +26,7 @@ export function cacheDynamicAsset(jsString :string) {
 
 export function dynamicScript(jsString :string) {
 	const key = cacheDynamicAsset(jsString);
-	return `<script src="${getServiceRoot('react4xpDynamic')}${key}.js"></script>`;
+	return `<script src="${getServiceRoot('react4xpDynamic')}dynamic.${key}.js"></script>`;
 }
 
 
@@ -41,7 +41,7 @@ export function handleDynamicAssetRequest(request: Request) :Response {
 	const filename = path.split('/').pop();
 	//log.debug('handleDynamicAssetRequest() filename:%s', toStr(filename));
 
-	const key = filename.replace(/\.js$/, '');
+	const key = filename.replace(/^dynamic\./, '').replace(/\.js$/, '');
 	//log.debug('handleDynamicAssetRequest() key:%s', toStr(key));
 
 	const body = SNIPPETS[key];
