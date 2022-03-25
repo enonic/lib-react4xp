@@ -1,9 +1,7 @@
 import {R4X_TARGETSUBDIR} from '@enonic/react4xp';
 
+import {getResource} from '/lib/enonic/react4xp/resource/getResource';
 import {readResourceAsJson} from '/lib/enonic/react4xp/resource/readResourceAsJson';
-
-//@ts-ignore
-import {getResource} from '/lib/xp/io';
 
 
 /** Open a chunkfile, read the contents and return the domain-relative urls for non-entry JS file references in the chunk file.
