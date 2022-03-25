@@ -1,8 +1,7 @@
-import {
-	getResource,
-	readText
-	//@ts-ignore
-} from '/lib/xp/io';
+import {getResource} from '/lib/enonic/react4xp/resource/getResource';
+
+//@ts-ignore
+import {readText} from '/lib/xp/io';
 
 
 export function readResourceAsJson(fileName :string) :unknown {
