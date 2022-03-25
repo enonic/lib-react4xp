@@ -6,6 +6,7 @@ import type {
 
 //import {toStr} from '@enonic/js-utils/value/toStr';
 import {h64} from 'xxhashjs';
+import {getServiceRoot} from '/lib/enonic/react4xp/serviceRoots';
 
 
 const SNIPPETS = {};
@@ -20,6 +21,12 @@ export function cacheDynamicAsset(jsString :string) {
 	//log.debug('cacheDynamicAsset() hex:%s', toStr(hex));
 	SNIPPETS[hex] = jsString;
 	return hex;
+}
+
+
+export function dynamicScript(jsString :string) {
+	const key = cacheDynamicAsset(jsString);
+	return `<script src="${getServiceRoot('react4xpDynamic')}${key}.js"></script>`;
 }
 
 
@@ -48,6 +55,6 @@ export function handleDynamicAssetRequest(request: Request) :Response {
 		contentType: 'application/javascript; charset=utf-8',
 		headers: {
 			'Cache-Control': 'public, max-age=31536000, immutable'
-		},
+		}
 	};
 }

@@ -14,7 +14,7 @@ import {
 	getAssetRoot,
 	getServiceRoot
 }  from '/lib/enonic/react4xp/serviceRoots';
-import {cacheDynamicAsset} from '/lib/enonic/react4xp/asset/dynamic';
+import {dynamicScript} from '/lib/enonic/react4xp/asset/dynamic';
 
 
 /** Generates or modifies existing enonic XP pageContributions. Adds client-side dependency chunks (core React4xp frontend,
@@ -59,32 +59,22 @@ export function renderPageContributions({
 
 		this.ensureAndLockBeforeRendering();
 
-		const key = cacheDynamicAsset(`${
-			LIBRARY_NAME}.CLIENT.${command}(${
-			LIBRARY_NAME}['${this.jsxPath}'],${
-			JSON.stringify(this.react4xpId)},${
-			this.props
-				? JSON.stringify(this.props)
-				: 'null'
-		}${`,${this.isPage},${this.hasRegions},${IS_DEV_MODE ? 1 : 0}`});`);
-
 		// TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
 		const bodyEnd = (!suppressJS)
 			? [
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
 				`<script src="${getAssetRoot()}${this.assetPath}"></script>\n`,
-				`<script src="${getServiceRoot('react4xpDynamic')}${key}.js"></script>\n`,
 
 				// Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props.
 				// Signature: <command>(entry, id, props?, isPage, hasRegions)
-				/*`<script>${
+				dynamicScript(`${
 					LIBRARY_NAME}.CLIENT.${command}(${
 					LIBRARY_NAME}['${this.jsxPath}'],${
 					JSON.stringify(this.react4xpId)},${
 					this.props
 						? JSON.stringify(this.props)
 						: 'null'
-				}${`,${this.isPage},${this.hasRegions},${IS_DEV_MODE ? 1 : 0}`});</script>\n`*/
+				}${`,${this.isPage},${this.hasRegions},${IS_DEV_MODE ? 1 : 0}`});`)
 			]
 			: [];
 		//log.debug('renderPageContributions() bodyEnd:%s', toStr(bodyEnd));
