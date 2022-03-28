@@ -1,5 +1,7 @@
-import {isNumber} from '@enonic/js-utils/value/isNumber';
-import {isString} from '@enonic/js-utils/value/isString';
+interface InsideQuoteState {
+	"'" :boolean
+	'"' :boolean
+}
 
 
 const COMMA_PLACEHOLDER = "##U+FE10##";
@@ -8,6 +10,7 @@ const COMMA_PLACEHOLDER = "##U+FE10##";
 function singleQuoteCounter(item :string) {
 	return (item.match(/'/g) || []).length;
 }
+
 
 function replaceSurroundingSingleQuotes(item :string) {
 	return (item.startsWith("'"))
@@ -28,7 +31,7 @@ function replaceSurroundingDoubleQuotes(item :string) {
 }
 
 
-const preventUnclosedQuotes = (isInsideQuote) => (item) => {
+const preventUnclosedQuotes = (isInsideQuote :InsideQuoteState) => (item :string) => {
     isInsideQuote['"'] = false;
     isInsideQuote["'"] = false;
     for (let c = 0; c < item.length; c++) {
@@ -44,12 +47,12 @@ const preventUnclosedQuotes = (isInsideQuote) => (item) => {
 
 
 function isQuoteSoMaybeFlagAsInside(
-	char,
-	c,
-	targetQuote,
-	otherQuote,
-	isInsideQuote,
-	fullString
+	char :string,
+	c :number,
+	targetQuote :'"'|"'",
+	otherQuote :'"'|"'",
+	isInsideQuote :InsideQuoteState,
+	fullString :string
 ) {
     if (char === targetQuote) {
         if (isInsideQuote[targetQuote]) {
@@ -67,12 +70,12 @@ function isQuoteSoMaybeFlagAsInside(
 
 /** Normalize engine settings to string array */
 export function normalizeSSREngineSettings(
-	ssrEngineSettingsString :string,
-	ssrDefaultCacheSize
+	ssrEngineSettingsString :string|unknown,
+	ssrDefaultCacheSize :number = 0
 ) {
 
     // When iterating over strings, flags whether a character is inside a quote or not:
-    const isInsideQuote = {
+    const isInsideQuote :InsideQuoteState = {
         "'": false,
         '"': false
     };
@@ -120,22 +123,3 @@ export function normalizeSSREngineSettings(
         .map(replaceSurroundingSingleQuotes)
         .map(preventUnclosedQuotes(isInsideQuote))
 };
-
-
-// Accepts numerical values (which may or may not be in strings), null or undefined, returns number > 0 or null.
-export function normalizeSSRMaxThreads(ssrMaxThreadsSetting :number|string) :number {
-    let ssrMaxThreads :number;
-    try {
-        ssrMaxThreads = isNumber(ssrMaxThreadsSetting)
-			? ssrMaxThreadsSetting
-			: isString(ssrMaxThreadsSetting)
-            	? parseInt(ssrMaxThreadsSetting, 10)
-            	: 0;
-    } catch (e) {
-        log.error("Looks like the value of ssrMaxThreads from react4xp.properties (or SSR_MAX_THREADS from react4xp_constants.json) is illegal: " + JSON.stringify(ssrMaxThreadsSetting))
-    }
-
-    return (!ssrMaxThreads || isNaN(ssrMaxThreads) || ssrMaxThreads < 1)
-        ? 0
-        : ssrMaxThreads;
-}

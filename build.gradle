@@ -9,6 +9,15 @@ plugins {
     id "com.github.node-gradle.node" version "3.2.1"
 }
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+    xp.enonicRepo()
+	maven {
+		url 'https://openxp.jfrog.io/artifactory/public'
+	}
+}
+
 dependencies {
     compileOnly "com.enonic.xp:core-api:${xpVersion}"
 
@@ -21,6 +30,9 @@ dependencies {
 
     compile 'com.enonic.lib:lib-cache:2.1.1'
     compile 'com.enonic.lib:lib-static:1.0.2'
+	compile 'com.enonic.lib:lib-text-encoding:2.0.0'
+
+	compile 'openxp.lib:filesystem:0.9.6'
 
     compile group: 'org.jdom', name: 'jdom', version: '2.0.2'
     compile group: 'org.json', name: 'json', version: '20220320'
@@ -40,12 +52,6 @@ processResources {
   exclude '**/.gitkeep'
   exclude '**/*.es6'
   exclude '**/*.ts'
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-    xp.enonicRepo()
 }
 
 tasks.withType(Copy) {
