@@ -7,6 +7,7 @@ export default {
 	external: [
 		'/lib/cache',
 		'/lib/enonic/static',
+		'/lib/openxp/file-system',
 		'/lib/xp/auth',
 		'/lib/xp/content',
 		'/lib/xp/context',
@@ -17,7 +18,10 @@ export default {
 		'/lib/xp/portal',
 		'/lib/xp/repo',
 		'/lib/xp/task',
-		'/lib/xp/value'
+		'/lib/xp/value',
+		'prop-types',
+		'react',
+		'react-dom'
 	],
 	output: {
 		chunkFileNames: '[name].js',
@@ -37,6 +41,13 @@ export default {
 
 		format: 'cjs',
 		freeze: false,
+
+		globals: {
+			'prop-types': 'PropTypes',
+			'react': 'React',
+			'react-dom': 'ReactDOM'
+		},
+
 		interop: false,
 		//makeAbsoluteExternalsRelative: false, // Only works on CLI!
 		preserveModules: true, // Copy modules into build/resources/main/node_modules instead of bundling them

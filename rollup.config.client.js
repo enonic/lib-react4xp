@@ -8,6 +8,8 @@ var outDir = 'build/resources/main/assets/react4xp';
 
 export default {
 	external: [
+		//'prop-types',
+		'react',
 		'react-dom'
 	],
 	input: 'src/main/resources/assets/react4xp/client.ts',
@@ -21,6 +23,12 @@ export default {
 		//format: 'esm',
 		//format: 'iife',
 		format: 'umd',
+
+		globals: {
+			//'prop-types': 'PropTypes',
+			'react': 'React',
+			'react-dom': 'ReactDOM'
+		},
 
 		name: 'React4xp.CLIENT', // bundle name (required by at least umd)
 

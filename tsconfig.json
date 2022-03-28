@@ -14,6 +14,8 @@
 			"@enonic/js-utils": ["./node_modules/@enonic/js-utils/src"],
 			"@enonic/js-utils/*": ["./node_modules/@enonic/js-utils/src/*"],
 			"/lib/enonic/react4xp/*": ["./src/main/resources/lib/enonic/react4xp/*"],
+			"/lib/enonic/xp/getAppConfigFilePathAbsolute":["./src/main/resources/lib/enonic/xp/getAppConfigFilePathAbsolute"],
+			"/lib/enonic/xp/getXpHomeDirPathAbsolute":["./src/main/resources/lib/enonic/xp/getXpHomeDirPathAbsolute"],
 			"/lib/enonic/xp/time/*":["./src/main/resources/lib/enonic/xp/time/*"],
 			"/lib/enonic/xp/runMode":["./src/main/resources/lib/enonic/xp/runMode"],
 			"/lib/static": ["../lib-static/src/main/resources/lib/enonic/static"]
