@@ -21,6 +21,12 @@ import {IS_PROD_MODE} from '/lib/enonic/xp/runMode';
 type Asset = string|{name :string};
 
 
+const appConfig = app.config;
+//log.debug(`appConfig:%s`, toStr(appConfig));
+
+const SERVE_EXTERNALS = appConfig['react4xp.serveExternals'] !== 'false';
+//log.debug(`SERVE_EXTERNALS:%s`, SERVE_EXTERNALS);
+
 // Tolerate and remove file extensions ts(x), js(x), es(6) and/or trailing slash or space
 const TOLERATED_ENTRY_EXTENSIONS = /([/ ]+|\.(tsx?|jsx?|es6?)[/ ]*)$/i;
 
@@ -149,7 +155,7 @@ export function getAllUrls(
 	//log.debug('getAllUrls() entries:%s', toStr(entries));
 	//log.debug('getAllUrls() suppressJS:%s', toStr(suppressJS));
     return [
-        ...getExternalsUrls(),
+        ...(SERVE_EXTERNALS ? getExternalsUrls() : []),
         ...getComponentChunkUrls(entries),
         ...suppressJS
             ? []
