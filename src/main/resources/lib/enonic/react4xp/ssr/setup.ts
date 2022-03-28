@@ -12,7 +12,7 @@ import {exists} from '/lib/enonic/react4xp/resource/exists';
 import {normalizeSSREngineSettings}  from '/lib/enonic/react4xp/ssr/normalizeSSREngineSettings';
 import {normalizeSSRMaxThreads} from '/lib/enonic/react4xp/ssr/normalizeSSRMaxThreads';
 //import {getResource} from '/lib/enonic/react4xp/resource/getResource';
-import {getAppConfigFilePathAbsolute} from '/lib/enonic/xp/getAppConfigFilePathAbsolute';
+/*import {getAppConfigFilePathAbsolute} from '/lib/enonic/xp/getAppConfigFilePathAbsolute';
 import {
 	//getContent as getFileContent,
 	readFile,
@@ -20,7 +20,7 @@ import {
 	//@ts-ignore
 } from '/lib/openxp/file-system';
 //@ts-ignore
-import {newStream} from '/lib/xp/io';
+import {newStream} from '/lib/xp/io';*/
 
 
 const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
@@ -28,7 +28,7 @@ const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer')
 //const FULL_EXTERNALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}`;
 const RESOURCE_PATH_RELATIVE_NASHORNPOLYFILLS_USERADDED = `${FILE_STEM_NASHORNPOLYFILLS_USERADDED}.js`;
 
-const absoluteFilePath = getAppConfigFilePathAbsolute();
+/*const absoluteFilePath = getAppConfigFilePathAbsolute();
 //log.debug(`absoluteFilePath:%s exists`, absoluteFilePath);
 
 const file = readFile(absoluteFilePath);
@@ -104,7 +104,7 @@ if (!file.exists) {
 	//log.debug(`created:%s`, created);
 }
 //const fileContent = getFileContent(file);
-//log.debug(`fileContent:%s`, fileContent);
+//log.debug(`fileContent:%s`, fileContent);*/
 
 const appConfig = app.config;
 //log.debug(`appConfig:%s`, appConfig);
