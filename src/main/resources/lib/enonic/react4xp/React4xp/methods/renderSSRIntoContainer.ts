@@ -14,7 +14,7 @@ import {buildErrorContainer} from '../../htmlHandling';
 export function renderSSRIntoContainer(
 	body :string,
 	request :Request,
-	react4xpObj :React4xp.Class
+	react4xpObj :React4xp.Instance
 ) :string {
 	const { html, error } = this.doRenderSSR();
 	return error
