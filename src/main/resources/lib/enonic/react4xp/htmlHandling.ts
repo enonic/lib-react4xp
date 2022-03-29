@@ -17,7 +17,7 @@ export function buildErrorContainer(
 	heading :string,
 	message :string,
 	request :Request,
-	react4xpObj :React4xp.Class | {
+	react4xpObj :React4xp.Instance | {
 		jsxPath :string|object
 		react4xpId :React4xp.Id
 	},

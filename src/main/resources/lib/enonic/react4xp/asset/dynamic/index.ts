@@ -24,9 +24,12 @@ export function cacheDynamicAsset(jsString :string) {
 }
 
 
-export function dynamicScript(jsString :string) {
+export function dynamicScript(
+	jsString :string,
+	defer :boolean = false
+) {
 	const key = cacheDynamicAsset(jsString);
-	return `<script src="${getServiceRoot('react4xpDynamic')}dynamic.${key}.js"></script>`;
+	return `<script${defer ? ' defer': ''} src="${getServiceRoot('react4xpDynamic')}dynamic.${key}.js"></script>`;
 }
 
 

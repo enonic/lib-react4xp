@@ -59,7 +59,7 @@ export function constructor<
 >(entry :React4xpNamespace.Entry) {
 	//log.debug('React4xp.constructor() entry:%s', toStr(entry));
 
-	const obj :React4xpNamespace.Class<Props> = {
+	const obj :React4xpNamespace.Instance<Props> = {
 		// Public fields/properties
 		component: null,
 		hasRegions: 0,        // boolean using 0 for false and 1 for true, for the sake of more compact client-side .render and .hydrate calls.

@@ -7,7 +7,7 @@ import type {
 
 
 import {isObject} from '@enonic/js-utils/value/isObject';
-import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from '@enonic/js-utils/value/toStr';
 
 import {buildFromParams} from './buildFromParams';
 import {buildErrorContainer} from '../../htmlHandling';
@@ -77,7 +77,7 @@ export function render<
 	} = {}
 ) :Response {
 	//log.debug('render entry:%s', toStr(entry));
-	let react4xp :React4xpNamespace.Class = null;
+	let react4xp :React4xpNamespace.Instance = null;
 	try {
 		const dereffedOptions = JSON.parse(JSON.stringify(options)) as {
 			body? :string
