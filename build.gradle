@@ -13,9 +13,6 @@ repositories {
     mavenLocal()
     mavenCentral()
     xp.enonicRepo()
-	/*maven {
-		url 'https://openxp.jfrog.io/artifactory/public'
-	}*/
 }
 
 dependencies {
@@ -31,8 +28,6 @@ dependencies {
     compile 'com.enonic.lib:lib-cache:2.1.1'
     compile 'com.enonic.lib:lib-static:1.0.2'
 	//compile 'com.enonic.lib:lib-text-encoding:2.0.0'
-
-	//compile 'openxp.lib:filesystem:0.9.6'
 
     compile group: 'org.jdom', name: 'jdom', version: '2.0.2'
     compile group: 'org.json', name: 'json', version: '20220320'
