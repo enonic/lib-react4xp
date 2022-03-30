@@ -2,8 +2,8 @@ import type {React4xp as React4xpNamespace} from '../../../../../index.d';
 
 //import {toStr} from '@enonic/js-utils/value/toStr';
 
-import {getComponentChunkNames}  from '../../dependencies';
-import {render as renderSSRJava} from '../../ssr'
+import {getComponentChunkNames}  from '/lib/enonic/react4xp/dependencies/getComponentChunkNames';
+import {render as renderSSRJava} from '/lib/enonic/react4xp/ssr/render';
 
 
 // TODO: Check docs! Is 'doRenderSSR' an API-breaking name and signature change? Re-insert old name!

@@ -73,6 +73,7 @@ export function render<
 		//id? :string // TODO renamed?
 		pageContributions? :PageContributions
 		react4xpId? :React4xpNamespace.Id
+		serveExternals? :boolean
 		uniqueId? :boolean|string
 	} = {}
 ) :Response {
@@ -87,6 +88,7 @@ export function render<
 			pageContributions? :PageContributions
 			props :Props
 			react4xpId? :React4xpNamespace.Id
+			serveExternals? :boolean
 			uniqueId? :boolean|string
 		};
 		dereffedOptions.entry = entry; // TODO modifying an incoming object!!!
@@ -101,7 +103,8 @@ export function render<
 		const {
 			body,
 			clientRender,
-			pageContributions
+			pageContributions, // TODO deref?
+			serveExternals = true
 		} = options || {};
 
 		return {
@@ -122,7 +125,8 @@ export function render<
 				clientRender,
 				request: request
 					? request
-					: { mode: 'inline' }
+					: { mode: 'inline' },
+				serveExternals
 			})
 		}
 

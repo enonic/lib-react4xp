@@ -1,64 +1,28 @@
 import type {
 	OneOrMore,
-	//PageContributions,
 	React4xp as React4xpNamespace
-} from '../../../index.d';
+} from '../../../../index.d';
+
 
 import {COMPONENT_STATS_FILENAME} from '@enonic/react4xp';
-//import {isString} from '@enonic/js-utils';
-import {isString} from '@enonic/js-utils/value/isString';
-//import {toStr} from '@enonic/js-utils/value/toStr';
-
-import {dependenciesCache} from '/lib/enonic/react4xp/asset/dependenciesCache';
 import {getComponentStats} from '/lib/enonic/react4xp/asset/getComponentStats';
-import {getSiteLocalCacheKey} from '/lib/enonic/react4xp/asset/getSiteLocalCacheKey';
-import {getClientUrls} from '/lib/enonic/react4xp/asset/client/getClientUrls';
-import {getExternalsUrls} from '/lib/enonic/react4xp/asset/externals/getExternalsUrls';
-import {getAssetRoot} from '/lib/enonic/react4xp/serviceRoots';
-import {IS_PROD_MODE} from '/lib/enonic/xp/runMode';
 
 
 type Asset = string|{name :string};
 
 
-const appConfig = app.config;
-//log.debug(`appConfig:%s`, toStr(appConfig));
-
-const SERVE_EXTERNALS = appConfig['react4xp.serveExternals'] !== 'false';
-//log.debug(`SERVE_EXTERNALS:%s`, SERVE_EXTERNALS);
-
 // Tolerate and remove file extensions ts(x), js(x), es(6) and/or trailing slash or space
 const TOLERATED_ENTRY_EXTENSIONS = /([/ ]+|\.(tsx?|jsx?|es6?)[/ ]*)$/i;
 
+
 let buildStatsEntrypoints :Object|undefined;
-
-
-
-function forceTrimmedArray(entryNames :OneOrMore<React4xpNamespace.EntryName> = []) :Array<React4xpNamespace.EntryName> {
-    if (isString(entryNames)) {
-        const trimmed = entryNames.trim();
-        return (trimmed === "")
-            ? []
-            : [trimmed];
-    }
-    return entryNames.map(entryName => entryName.trim())
-}
-
-
-export function normalizeEntryNames(entryNames :OneOrMore<React4xpNamespace.EntryName> = []) :Array<React4xpNamespace.EntryName> {
-    const arr = forceTrimmedArray(entryNames);
-    arr.sort()
-    return arr;
-}
-
-
 
 
 /** Takes entry names (array or a single string) and returns an array of (hashed) dependency file names, the complete set of chunks required for the set of entries to run.
  *  ASSUMES that stats.json.entrypoints is an object where the keys are entry names without file extensions, mapping to values that are objects,
  *  which in turn have an "assets" key, under which are the full file names of the entry's dependencies.
  *  If the input array is empty or null, returns ALL dependency chunk names. */
-function readComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.EntryName>) {
+export function readComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.EntryName>) {
 
     // Just verify that it exists and has a content:
     let STATS = getComponentStats();
@@ -124,44 +88,4 @@ function readComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.EntryNa
 
 	//log.debug('readComponentChunkNames() output:%s', toStr(output));
     return output;
-}
-
-
-// Cached version of readComponentChunkNames - used in prod mode
-function readComponentChunkNamesCached(entryNames :OneOrMore<React4xpNamespace.EntryName>) :Array<string> {
-    entryNames = normalizeEntryNames(entryNames);
-
-    const cacheKey = getSiteLocalCacheKey(entryNames.join("*"));
-    return dependenciesCache.get(cacheKey, () => readComponentChunkNames(entryNames));
-}
-
-
-export function getComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.EntryName>) {
-	return IS_PROD_MODE
-    	? readComponentChunkNamesCached(entryNames)
-    	: readComponentChunkNames(forceTrimmedArray(entryNames));
-}
-
-
-export function getComponentChunkUrls(entries :OneOrMore<React4xpNamespace.EntryName>) {
-    return getComponentChunkNames(entries).map(name => getAssetRoot() + name);
-}
-
-
-export function getAllUrls(
-	entries :OneOrMore<React4xpNamespace.EntryName>,
-	suppressJS :boolean
-) {
-	//log.debug('getAllUrls() entries:%s', toStr(entries));
-	//log.debug('getAllUrls() suppressJS:%s', toStr(suppressJS));
-    return [
-        ...(SERVE_EXTERNALS ? getExternalsUrls() : []),
-        ...getComponentChunkUrls(entries),
-        ...suppressJS
-            ? []
-            : getClientUrls()
-    ].filter(!suppressJS
-        ? chunkUrl => chunkUrl
-        : chunkUrl => !chunkUrl.endsWith(".js")
-    );
 }

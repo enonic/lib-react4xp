@@ -43,14 +43,15 @@ export namespace React4xp {
 			html? :string
 		}
 		renderBody :(params :{
-			body? :string,
-			clientRender? :boolean,
+			body? :string
+			clientRender? :boolean
 			request? :Request
 		}) => string
 		renderPageContributions :(params :{
-			pageContributions? :PageContributions,
-			clientRender? :boolean,
+			pageContributions? :PageContributions
+			clientRender? :boolean
 			request? :Request
+			serveExternals? :boolean
 		}) => unknown
 		renderSSRIntoContainer :(
 			body :string,
@@ -98,6 +99,7 @@ export namespace React4xp {
 				//id? :string // TODO renamed?
 				pageContributions? :PageContributions
 				react4xpId? :Id
+				serveExternals? :boolean
 				uniqueId? :boolean|string
 			}
 		) => Response

@@ -9,11 +9,8 @@ import {LIBRARY_NAME} from '@enonic/react4xp';
 import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
 
 import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
-import {getAndMergePageContributions}  from '/lib/enonic/react4xp/pageContributions';
-import {
-	getAssetRoot,
-	getServiceRoot
-}  from '/lib/enonic/react4xp/serviceRoots';
+import {getAndMerge as getAndMergePageContributions} from '/lib/enonic/react4xp/pageContributions/getAndMerge';
+import {getAssetRoot} from '/lib/enonic/react4xp/serviceRoots';
 import {dynamicScript} from '/lib/enonic/react4xp/asset/dynamic';
 
 
@@ -35,11 +32,13 @@ import {dynamicScript} from '/lib/enonic/react4xp/asset/dynamic';
 export function renderPageContributions({
 	pageContributions = {},
 	clientRender,
-	request
+	request,
+	serveExternals = true
 } :{
 	pageContributions? :PageContributions,
 	clientRender? :boolean,
-	request? :Request
+	request? :Request,
+	serveExternals? :boolean
 } = {}) {
 	//log.debug('renderPageContributions() pageContributions:%s', toStr(pageContributions));
 	//log.debug('renderPageContributions() clientRender:%s', toStr(clientRender));
@@ -79,9 +78,15 @@ export function renderPageContributions({
 			: [];
 		//log.debug('renderPageContributions() bodyEnd:%s', toStr(bodyEnd));
 
-		output = getAndMergePageContributions(
-			this.jsxPath, pageContributions, {bodyEnd}, suppressJS
-		);
+		output = getAndMergePageContributions({
+			entryNames: this.jsxPath,
+			incomingPgContrib: pageContributions,
+			newPgContrib: {
+				bodyEnd
+			},
+			suppressJS,
+			serveExternals
+		});
 
 	} catch (e) {
 		log.error(e);
