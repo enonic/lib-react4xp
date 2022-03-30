@@ -18,7 +18,10 @@ const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer')
 
 //const FULL_EXTERNALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}`;
 const RESOURCE_PATH_RELATIVE_NASHORNPOLYFILLS_USERADDED = `${FILE_STEM_NASHORNPOLYFILLS_USERADDED}.js`;
+//log.debug(`RESOURCE_PATH_RELATIVE_NASHORNPOLYFILLS_USERADDED:%s`, RESOURCE_PATH_RELATIVE_NASHORNPOLYFILLS_USERADDED);
 
+const RESOURCE_PATH_ABSOLUTE_NASHORNPOLYFILLS_USERADDED = `/${R4X_TARGETSUBDIR}/${RESOURCE_PATH_RELATIVE_NASHORNPOLYFILLS_USERADDED}`;
+//log.debug(`RESOURCE_PATH_ABSOLUTE_NASHORNPOLYFILLS_USERADDED:%s`, RESOURCE_PATH_ABSOLUTE_NASHORNPOLYFILLS_USERADDED);
 
 const appConfig = app.config;
 //log.debug(`appConfig:%s`, appConfig);
@@ -45,13 +48,16 @@ export function setup({
 	//log.debug('setup lazyload:%s', toStr(lazyload));
 	//log.debug('setup ssrMaxThreads:%s', toStr(ssrMaxThreads));
 
+	const usedAddedExists = exists(RESOURCE_PATH_ABSOLUTE_NASHORNPOLYFILLS_USERADDED);
+	//log.debug('setup usedAddedExists:%s', toStr(usedAddedExists));
+
 	//@ts-ignore
 	return SSRreact4xp.setup(
 		app.name,
 		`/${R4X_TARGETSUBDIR}`, //scriptsHome,
 		LIBRARY_NAME,
 		`/${R4X_TARGETSUBDIR}/`, //chunkfilesHome,
-		exists(RESOURCE_PATH_RELATIVE_NASHORNPOLYFILLS_USERADDED) ? RESOURCE_PATH_RELATIVE_NASHORNPOLYFILLS_USERADDED : '',
+		usedAddedExists ? RESOURCE_PATH_RELATIVE_NASHORNPOLYFILLS_USERADDED : '',
 		ENTRIES_FILENAME,
 
 		//booleanChunksExternalsJsonExist ? EXTERNALS_CHUNKS_FILENAME : '',
