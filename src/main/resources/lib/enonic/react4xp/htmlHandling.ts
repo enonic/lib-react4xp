@@ -5,14 +5,6 @@ import type {
 //import type {React4xp} from './React4xp';
 
 
-export function buildContainer(
-	react4xpId :string,
-	content :string = ''
-) {
-	return `<div id="${react4xpId}">${content}</div>`;
-}
-
-
 export function buildErrorContainer(
 	heading :string,
 	message :string,
