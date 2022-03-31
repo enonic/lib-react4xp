@@ -33,6 +33,7 @@ public class AssetLoader {
         this.config = config;
     }
 
+	@SuppressWarnings("removal")
     public void loadAssetsIntoEngine(LinkedList<String> runnableAssets, NashornScriptEngine engine) {
         ensureMarkers(runnableAssets);
         for (String assetName : runnableAssets) {
@@ -68,6 +69,7 @@ public class AssetLoader {
 
 
     /** Load both entry assets and JS dependency chunks into the Nashorn engine */
+	@SuppressWarnings("removal")
     private void loadAssetIntoEngine(String assetName, NashornScriptEngine engine) {
 
         // if (!IS_PRODMODE) {
