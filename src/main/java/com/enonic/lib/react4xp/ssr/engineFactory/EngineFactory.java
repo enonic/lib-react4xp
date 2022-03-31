@@ -4,6 +4,7 @@ import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
 import com.enonic.lib.react4xp.ssr.errors.RenderException;
 import com.enonic.lib.react4xp.ssr.pool.Renderer;
 import com.enonic.lib.react4xp.ssr.resources.ResourceReader;
+import com.enonic.xp.resource.ResourceNotFoundException;
 import jdk.nashorn.api.scripting.NashornScriptEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,11 +17,8 @@ public class EngineFactory {
     private final EngineBuilder engineBuilder;
     private final ResourceReader resourceReader;
 
-    // ['build/resources/main' + defaultPolyfillFileName] MUST match [env.BUILD_R4X + env.NASHORNPOLYFILLS_FILENAME]
-    // in the nashornPolyfills task in build.gradle!
-    //private final static String POLYFILL_REACT4XP_DEFAULT_FILE = "/lib/enonic/react4xp/default/nashornPolyfills.js";
 	private final static String POLYFILL_REACT4XP_DEFAULT_FILE = "/lib/enonic/react4xp/nashornPolyfills.js";
-	//private final static String POLYFILL_REACT4XP_DEFAULT_FILE = "assets/react4xp/nashornPolyfills.js"; // TODO constants.runtime /R4X_TARGETSUBDIR/FILE_STEM_NASHORNPOLYFILLS
+	private final static String POLYFILL_REACT4XP_USER_ADDED_FILE = "/lib/enonic/react4xp/nashornPolyfills.userAdded.js";
 
     // Basic-level polyfills. For some reason, these must be run hardcoded from here, not from nashornPolyfills.js.
     // TODO: shouldn't be a string here, but read from a JS file. From react4xp-runtime-nashornpolyfills package? Or make it available in the jar (/lib)?
@@ -93,6 +91,7 @@ public class EngineFactory {
      * Scripts found in chunks.json depend on the previous and must be the last!
      * nashornPolyfills.js script is the basic dependency, and will be added at the very beginning
      * outside of this list. */
+	 @SuppressWarnings("removal")
     public NashornScriptEngine buildEngine(long id) throws IOException, RenderException {
         NashornScriptEngine engine = engineBuilder.buildEngine();
 
@@ -118,7 +117,7 @@ public class EngineFactory {
         String assetContent = null;
         try {
             // if (!IS_PRODMODE) {
-            LOG.info("#" + id + ": loading asset '" + POLYFILL_REACT4XP_DEFAULT_FILE + "'");
+            LOG.info("#" + id + ": loading resource '" + POLYFILL_REACT4XP_DEFAULT_FILE + "'");
             // }
 
             assetContent =  resourceReader.readResource(POLYFILL_REACT4XP_DEFAULT_FILE);
@@ -141,6 +140,34 @@ public class EngineFactory {
 
             throw e1;
         }
+
+		String anotherAssetContent = null;
+		try {
+			// if (!IS_PRODMODE) {
+			LOG.info("#" + id + ": loading resource '" + POLYFILL_REACT4XP_USER_ADDED_FILE + "'");
+			// }
+
+			anotherAssetContent =  resourceReader.readResource(POLYFILL_REACT4XP_USER_ADDED_FILE);
+			Renderer.evalAndGetByKey(engine, anotherAssetContent, null);
+
+			// if (!IS_PRODMODE) {
+			LOG.info("#" + id + ": ...'" + POLYFILL_REACT4XP_USER_ADDED_FILE + "' ok.");
+			// }
+		} catch (ResourceNotFoundException r) {
+			LOG.info("Resource " + POLYFILL_REACT4XP_USER_ADDED_FILE + " not found, but that's probably ok :)");
+		} catch (RenderException e2) {
+			ErrorHandler errorHandler = new ErrorHandler();
+			LOG.error(
+					(e2.getStacktraceString() == null ? "" : e2.getStacktraceString() + "\n") +
+					errorHandler.getLoggableStackTrace(e2, null) + "\n\n" +
+							e2.getClass().getSimpleName()  + ": " + e2.getMessage() + "\n" +
+							"in " + EngineFactory.class.getName() + "#" + id + ".buildEngine\n" +
+							"assetName = '" + POLYFILL_REACT4XP_USER_ADDED_FILE + "'\n" +
+							errorHandler.getSolutionTips());
+			LOG.info(errorHandler.getCodeDump(assetContent, POLYFILL_REACT4XP_USER_ADDED_FILE));
+
+			throw e2;
+		}
 
         return engine;
     }

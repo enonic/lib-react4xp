@@ -11,7 +11,6 @@ public class Config {
     public final String ENTRIES_JSON_FILENAME;
     public final String CHUNKSEXTERNALS_JSON_FILENAME;
     public final String STATS_COMPONENTS_FILENAME;
-    public final String USERADDED_NASHORNPOLYFILLS_FILENAME;
     public final boolean LAZYLOAD;
     public final int THREAD_COUNT;
 
@@ -23,7 +22,6 @@ public class Config {
             String entriesJsonFilename,
             String chunksExternalsJsonFilename,
             String statsComponentsFilename,
-            String userAddedNashornpolyfillsFilename,
             boolean lazyload,
             int threadCount) {
         this.APP_NAME = appName;
@@ -33,7 +31,6 @@ public class Config {
         this.ENTRIES_JSON_FILENAME = entriesJsonFilename;
         this.CHUNKSEXTERNALS_JSON_FILENAME = chunksExternalsJsonFilename;
         this.STATS_COMPONENTS_FILENAME = statsComponentsFilename;
-        this.USERADDED_NASHORNPOLYFILLS_FILENAME = userAddedNashornpolyfillsFilename;
         this.LAZYLOAD = lazyload;
         this.THREAD_COUNT = threadCount;
     }

@@ -32,12 +32,16 @@ public class Renderer {
     //public static final boolean IS_PRODMODE = (RunMode.get() == RunMode.PROD);
 
     private boolean valid = true;
+
+	@SuppressWarnings("removal")
     private NashornScriptEngine engine;
+
     private final Config config;
     private AssetLoader assetLoader;
 
     public static final String KEY_HTML = "html";
 
+	@SuppressWarnings("removal")
     public Renderer(EngineFactory engineFactory, ResourceReader resourceReader, Config config, long id) throws ScriptException, IOException {
         this.id = id;
 
@@ -51,9 +55,6 @@ public class Renderer {
             engine = engineFactory.buildEngine(id);
 
             LinkedList<String> dependencies = new ChunkDependencyParser(resourceReader, id).getScriptDependencyNames(config);
-            if (config.USERADDED_NASHORNPOLYFILLS_FILENAME != null && !"".equals(config.USERADDED_NASHORNPOLYFILLS_FILENAME.trim())) {
-                dependencies.addFirst(config.USERADDED_NASHORNPOLYFILLS_FILENAME);
-            }
 
             assetLoader = new AssetLoader(resourceReader, config, id);
 
@@ -92,6 +93,7 @@ public class Renderer {
 
     ///////////////////////////////////////////////////////////////////////////////
 
+	@SuppressWarnings("removal")
     public static String evalAndGetByKey(NashornScriptEngine engine, String runnableCode, String key) throws RenderException {
         StringBuilder scriptBuilder = new StringBuilder(
                 "var __react4xp__internal__nashorn__obj__ = {};" +
