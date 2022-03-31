@@ -46,7 +46,6 @@ public class ServerSideRenderer implements ScriptBean {
             String scriptsHome,
             String libraryName,
             String chunkfilesHome,
-            String userAddedNashornpolyfillsFilename,
             String entriesJsonFilename,
             String chunksExternalsJsonFilename,
             String statsComponentsFilename,
@@ -63,7 +62,7 @@ public class ServerSideRenderer implements ScriptBean {
 
                 LOG.info("Setting up " + (lazyload ? "lazy-loading " : "") + "SSR with " + threadCount + " engine" + (threadCount == 1 ? "" : "s") + "...");
 
-                config = new Config(appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksExternalsJsonFilename, statsComponentsFilename, userAddedNashornpolyfillsFilename, lazyload, threadCount);
+                config = new Config(appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksExternalsJsonFilename, statsComponentsFilename, lazyload, threadCount);
 
                 ResourceReader resourceReader = new ResourceReader(resourceServiceSupplier, config, 0);
                 EngineFactory engineFactory = new EngineFactory(scriptEngineSettings, resourceReader);
