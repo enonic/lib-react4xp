@@ -53,16 +53,18 @@ export namespace React4xp {
 			request? :Request
 			serveExternals? :boolean
 		}) => unknown
-		renderSSRIntoContainer :(
-			body :string,
-			request :Request,
+		renderSSRIntoContainer :(params :{
+			body :string
+			clientRender? :boolean
 			react4xpObj :Instance
-		) => string
-		renderTargetContainer :(
-			body :string,
-			content :string,
+			request :Request
+		}) => string
+		renderTargetContainer :(params :{
 			appendErrorContainer :boolean
-		) => string
+			body :string
+			clientRender? :boolean
+			content :string
+		}) => string
 		setHasRegions :(hasRegions :boolean) => Instance
 		setId :(react4xpId :Id) => Instance
 		setIsPage :(isPage :boolean) => Instance

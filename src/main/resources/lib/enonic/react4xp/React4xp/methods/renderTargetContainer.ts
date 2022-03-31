@@ -1,4 +1,4 @@
-import {buildContainer} from '../../htmlHandling';
+import {buildContainer} from '../../html/buildContainer';
 import {
 	insertAtEndOfRoot,
 	insertInsideContainer
@@ -15,11 +15,17 @@ import {bodyHasMatchingIdContainer} from '../bodyHasMatchingIdContainer';
  * @param content {string} HTML content that, if included, is inserted into the container with the matching Id.
  * @returns {string} adjusted or generated HTML body with rendered react component.
  */
-export function renderTargetContainer(
-	body :string = '', // '' is Falsy
-	content :string = '', // '' is Falsy
-	appendErrorContainer = false
-) {
+export function renderTargetContainer({
+	appendErrorContainer = false,
+	body = '', // '' is Falsy
+	clientRender = true,
+	content = '' // '' is Falsy
+} :{
+	appendErrorContainer? :boolean
+	body? :string // '' is Falsy
+	clientRender? :boolean
+	content? :string // '' is Falsy
+}) {
 	this.ensureAndLockId();
 
 	// True if no (or empty) body is supplied:
@@ -27,14 +33,23 @@ export function renderTargetContainer(
 	// True if a body is supplied but it contains no matching-ID element:
 	const noMatch = !noBody && !bodyHasMatchingIdContainer(body, this.react4xpId);
 
+	const container = buildContainer({
+		content,
+		command: clientRender ? 'render' : 'hydrate',
+		hasRegions: this.hasRegions,
+		id: this.react4xpId,
+		isPage: this.isPage,
+		jsxPath: this.jsxPath,
+		propsObj: this.props
+	});
+
 	const output = (!noBody && !noMatch)
 		? undefined
 		: appendErrorContainer
 			? `<div id="${this.react4xpId}__error__" style="border:1px solid #8B0000; padding:15px; background-color:#FFB6C1">${
-				content}${
-				buildContainer(this.react4xpId)
+				content}${container})
 			}</div>`
-			: buildContainer(this.react4xpId, content);
+			: container;
 
 
 	// If no (or empty) body is supplied: generate a minimal container body with only a target container element.

@@ -66,14 +66,36 @@ export function renderPageContributions({
 
 				// Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props.
 				// Signature: <command>(entry, id, props?, isPage, hasRegions)
-				dynamicScript(`${
+				/*dynamicScript(`${
 					LIBRARY_NAME}.CLIENT.${command}(${
 					LIBRARY_NAME}['${this.jsxPath}'],${
 					JSON.stringify(this.react4xpId)},${
 					this.props
 						? JSON.stringify(this.props)
 						: 'null'
-				}${`,${this.isPage},${this.hasRegions},${IS_DEV_MODE ? 1 : 0}`});`)
+				}${`,${this.isPage},${this.hasRegions},${IS_DEV_MODE ? 1 : 0}`});`)*/
+				dynamicScript(`(() => {const components = Array.from(document.querySelectorAll('div[data-command][data-jsx-path][id]'));
+for (let index = 0; index < components.length; index++) {
+    const element = components[index];
+    const {id} = element;
+    const {
+        command,
+        devMode,
+        hasRegions,
+        isPage,
+        jsxPath,
+        propsJson
+    } = element.dataset;
+	let props = {}
+	if (propsJson) {
+		try {
+			props = JSON.parse(propsJson);
+		} catch (e) {
+			console.error(\`Something went wrong while trying to JSON.parse(\${propsJson})\`);
+		}
+	}
+    React4xp.CLIENT[command](React4xp[jsxPath],id,props,isPage,hasRegions,devMode)
+}})();`, true)
 			]
 			: [];
 		//log.debug('renderPageContributions() bodyEnd:%s', toStr(bodyEnd));

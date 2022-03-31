@@ -19,6 +19,14 @@ export function renderBody({
 		||
 		viewMode === 'edit' || viewMode === 'inline'
 	)
-		? this.renderSSRIntoContainer(body, request, this)
-		: this.renderTargetContainer(body);
+		? this.renderSSRIntoContainer({
+			body,
+			clientRender,
+			react4xpObj: this,
+			request
+		})
+		: this.renderTargetContainer({
+			body,
+			clientRender
+		});
 } // renderBody
