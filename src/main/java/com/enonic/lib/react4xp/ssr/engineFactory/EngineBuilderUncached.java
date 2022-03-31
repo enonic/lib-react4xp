@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
  */
 public class EngineBuilderUncached implements EngineBuilder {
     private final static Logger LOG = LoggerFactory.getLogger( EngineBuilderUncached.class );
+
+	@SuppressWarnings("removal")
     public NashornScriptEngine buildEngine() {
         LOG.info("Init SSR engine: no settings, uncached");
         return (NashornScriptEngine) new NashornScriptEngineFactory().getScriptEngine();
