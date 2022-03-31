@@ -11,24 +11,34 @@ import {buildErrorContainer} from '../../htmlHandling';
  * @param body {string} Existing HTML body, for example rendered from thymeleaf.
  * @returns {string} adjusted or generated HTML body with rendered react component.
  */
-export function renderSSRIntoContainer(
-	body :string,
-	request :Request,
+export function renderSSRIntoContainer({
+	body,
+	clientRender = true,
+	react4xpObj,
+	request
+} : {
+	body :string
+	clientRender? :boolean
 	react4xpObj :React4xp.Instance
-) :string {
+	request :Request
+}) :string {
 	const { html, error } = this.doRenderSSR();
 	return error
-		? this.renderTargetContainer(
+		? this.renderTargetContainer({
+			appendErrorContainer: true,
 			body,
-			buildErrorContainer(
+			clientRender,
+			content: buildErrorContainer(
 				"React4xp SSR error",
 				error,
 				request,
 				react4xpObj,
 				false
 			),
-			true)
-		: this.renderTargetContainer(
+		})
+		: this.renderTargetContainer({
 			body,
-			html);
+			clientRender,
+			content: html
+		});
 } // renderSSRIntoContainer
