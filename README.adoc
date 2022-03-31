@@ -1,5 +1,3 @@
-// lib-react4xp readme: USE THIS FILE TO EDIT THE ROOT's README.md! This will be copied to root and and verions inserted before commit. Gradle task: copyReadme. Version placeholder: 3.0.0-SNAPSHOT. Leave this line in place
-
 = lib-react4xp
 :toc: right
 
@@ -26,9 +24,9 @@ This library, lib-react4xp, is installed as a regular XP library in a parent app
 
 [%header,cols=2]
 |===
-| **lib-react4xp** | @enonic/react4xp package (in both lib and app) 
+| **lib-react4xp** | @enonic/react4xp package (in both lib and app)
 
-| 3.0.0 | 3.0.6 
+| 3.0.0 | 3.0.6
 
 {zwsp} +
 
