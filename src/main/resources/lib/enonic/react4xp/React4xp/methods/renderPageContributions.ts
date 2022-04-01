@@ -5,12 +5,12 @@ import type {
 
 
 //import {toStr} from '@enonic/js-utils/value/toStr';
-import {LIBRARY_NAME} from '@enonic/react4xp';
-import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
+//import {LIBRARY_NAME} from '@enonic/react4xp';
+//import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
 
 import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
 import {getAndMerge as getAndMergePageContributions} from '/lib/enonic/react4xp/pageContributions/getAndMerge';
-import {getAssetRoot} from '/lib/enonic/react4xp/serviceRoots';
+import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 import {dynamicScript} from '/lib/enonic/react4xp/asset/dynamic';
 
 
@@ -51,9 +51,9 @@ export function renderPageContributions({
 		const suppressJS = (request && (request.mode === "edit" || request.mode === "inline"));
 		//log.debug('renderPageContributions() suppressJS:%s', toStr(suppressJS));
 
-		const command = clientRender
+		/*const command = clientRender
 			? 'render'
-			: 'hydrate';
+			: 'hydrate';*/
 		//log.debug('renderPageContributions() command:%s', toStr(command));
 
 		this.ensureAndLockBeforeRendering();

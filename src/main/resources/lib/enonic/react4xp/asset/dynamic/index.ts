@@ -6,7 +6,7 @@ import type {
 
 //import {toStr} from '@enonic/js-utils/value/toStr';
 import {h64} from 'xxhashjs';
-import {getServiceRoot} from '/lib/enonic/react4xp/serviceRoots';
+import {getServiceRoot} from '/lib/enonic/react4xp/dependencies/getServiceRoot';
 
 
 const SNIPPETS = {};

@@ -1,12 +1,7 @@
 //import {toStr} from '@enonic/js-utils/value/toStr';
 //import {RESOURCE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON} from '/lib/enonic/react4xp/constants';
 import {readClientManifestJson} from '/lib/enonic/react4xp/asset/client/readClientManifestJson';
-import {
-	getAssetRoot,
-	//getClientRoot
-} from '/lib/enonic/react4xp/serviceRoots';
-
-
+import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 
 
 export function readClientUrls() {
