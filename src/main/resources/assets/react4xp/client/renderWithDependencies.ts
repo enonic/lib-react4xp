@@ -43,13 +43,9 @@ export function renderWithDependencies(
     fetch(`${localServiceUrlRoot}/react4xp-dependencies?${entryNames.join("&")}`)
       .then((data) => data.json())
       .then((dependencyUrls) => {
-        loadScripts(dependencyUrls, () => {
-          loadScripts(
-            entryNames.map((name) => `${localServiceUrlRoot}/react4xp/${name}.js`),
-            () =>
-              runEntryCalls(entriesWithTargetIdsAndProps, entryNames, callback)
-          );
-        });
+		  loadScripts(dependencyUrls, () =>
+		  	runEntryCalls(entriesWithTargetIdsAndProps, entryNames, callback)
+        );
       })
       .catch((error) => {
         console.error(error);
