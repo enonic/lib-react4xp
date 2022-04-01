@@ -3,7 +3,7 @@ import {
 	R4X_TARGETSUBDIR
 } from '@enonic/react4xp';
 import {getNamesFromChunkfile} from '/lib/enonic/react4xp/chunk/getNamesFromChunkfile';
-import {getAssetRoot} from '/lib/enonic/react4xp/serviceRoots';
+import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 
 
 const FULL_EXTERNALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}`;

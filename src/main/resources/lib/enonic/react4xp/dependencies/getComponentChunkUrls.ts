@@ -4,7 +4,7 @@ import type {
 } from '../../../../index.d';
 
 
-import {getAssetRoot} from '/lib/enonic/react4xp/serviceRoots';
+import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 import {getComponentChunkNames} from './getComponentChunkNames';
 
 

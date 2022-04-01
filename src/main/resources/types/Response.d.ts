@@ -1,8 +1,10 @@
 import type {PageContributions} from './PageContributions';
 
 
-export interface Response {
-	body? :string
+export interface Response<
+	Body extends unknown = string
+> {
+	body? :Body
 	contentType? :string
 	headers? :{
 		'Content-Type'? :string
