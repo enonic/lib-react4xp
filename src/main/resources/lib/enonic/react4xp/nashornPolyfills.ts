@@ -15,16 +15,67 @@ if (typeof console === 'undefined') {
     console.error = print;
 }
 */
+
+
+//──────────────────────────────────────────────────────────────────────────────
+// core-js Only required features (global namespace pollution)
+//──────────────────────────────────────────────────────────────────────────────
+//import 'core-js/actual/map'; // Expected an operand but found import
+//import * from 'core-js/actual/map'; // ReferenceError: "Map" is not defined
+//import * from 'core-js/actual/set';
+
+//──────────────────────────────────────────────────────────────────────────────
+// core-js Without global namespace pollution
+//──────────────────────────────────────────────────────────────────────────────
+import Map from 'core-js-pure/actual/map';
+import Set from 'core-js-pure/actual/set';
+import Symbol from 'core-js-pure/actual/symbol';
+
+//──────────────────────────────────────────────────────────────────────────────
+// @mrhenry/core-web
+//──────────────────────────────────────────────────────────────────────────────
+//import '@mrhenry/core-web'; // Expected an operand but found import
+//import '@mrhenry/core-web/lib'; // Expected an operand but found import
+//import '@mrhenry/core-web/modules/TextEncoder'; // ReferenceError: "self" is not defined
+
+//──────────────────────────────────────────────────────────────────────────────
+// text-encoding
+//──────────────────────────────────────────────────────────────────────────────
+import {TextEncoder} from 'text-encoding';
+
+//──────────────────────────────────────────────────────────────────────────────
+// es6-set-and-map
+//──────────────────────────────────────────────────────────────────────────────
+/*import { // This works
+	map as Map//,
+	//set as Set
+} from 'es6-set-and-map';*/
 //import {map, set} from 'es6-set-and-map';
-import {
-	map as Map,
-	set as Set
-} from 'es6-set-and-map';
 //import * as SetAndMap from 'es6-set-and-map';
 //import SetAndMap from 'es6-set-and-map'; // Error: 'default' is not exported
 //const setAndMap = SetAndMap();
 
-const context = typeof window !== 'undefined' ? window : global;
+//──────────────────────────────────────────────────────────────────────────────
+// es6-symbol
+//──────────────────────────────────────────────────────────────────────────────
+//const Symbol = require('es6-symbol'); // Ponyfill // rollup doesn't bundle require?
+//import Symbol from 'es6-symbol'; // Ponyfill // Doesn't appear in transpiled file
+//require('es6-symbol/implement'); // rollup doesn't bundle require?
+
+//import Symbol from 'es6-symbol/polyfill'; // Since I have a undefined check below: Import the Polyfill rather than the Ponyfill.
+
+
+const context = typeof globalThis !== 'undefined'
+	? globalThis
+	: typeof window !== 'undefined'
+		? window
+		: typeof global !== 'undefined'
+			? global
+			: typeof self !== 'undefined'
+				? self
+				: (1, eval)('this'); // https://stackoverflow.com/questions/9107240/1-evalthis-vs-evalthis-in-javascript;
+
+
 
 // Polyfills Set, Map and empty event listener (since nashorn is only used for SSR, where event listener is irrelevant):
 
@@ -36,18 +87,25 @@ const context = typeof window !== 'undefined' ? window : global;
 //const Set = require('es6-set-and-map').set;
 //const Set = set;
 //const Set = setAndMap.set;
-
-(function (window) {
-	if (typeof window.Map === 'undefined') window.Map = Map; // eslint-disable-line no-param-reassign
-	if (typeof window.Set === 'undefined') window.Set = Set; // eslint-disable-line no-param-reassign
-	if (typeof window.addEventListener !== 'function') {
-		window.addEventListener = function () {}; // eslint-disable-line no-param-reassign
+(function (context) {
+	if (typeof context.Map === 'undefined') context.Map = Map; // eslint-disable-line no-param-reassign
+	if (typeof context.Set === 'undefined') context.Set = Set; // eslint-disable-line no-param-reassign
+	if (typeof context.Symbol === 'undefined') context.Symbol = Symbol;
+	if (typeof context.TextEncoder === 'undefined') context.Symbol = TextEncoder;
+	if (typeof context.addEventListener !== 'function') {
+		context.addEventListener = function () {}; // eslint-disable-line no-param-reassign
 	}
-	if (typeof window.document === 'undefined') {
+	if (typeof context.document === 'undefined') {
 		//@ts-ignore TS2740: Type '{}' is missing the following properties from type 'Document': URL, alinkColor, all, anchors, and 247 more.
-		window.document = {}; // eslint-disable-line no-param-reassign
+		context.document = {}; // eslint-disable-line no-param-reassign
 	}
+	/*if (typeof context.globalThis === 'undefined') { context.globalThis = context; }
+	if (typeof context.window === 'undefined') { context.window = context; }
+	if (typeof context.global === 'undefined') { context.global = context; }
+	if (typeof context.self === 'undefined') { context.self = context; }
+	if (typeof context.frames === 'undefined') { context.frames = context; }*/
 })(context);
+
 
 type PhaserConstructor = ()=>void;
 interface PhaserInstance {
@@ -171,7 +229,7 @@ interface TimerInstance {
 		};
 	}
 
-})(context);
+})(global);
 
 
 // Object.assign
@@ -206,6 +264,21 @@ if (typeof Object.assign !== 'function') {
 	});
 }
 
+/*if (!Array.prototype.flat) {
+	Object.defineProperty(Array.prototype, 'flat', {
+		value: function(depth = 1) {
+			return this.reduce(function (flat :Array<unknown>, toFlatten :Array<unknown>) {
+				return flat.concat((Array.isArray(toFlatten) && (depth>1)) ? toFlatten.flat(depth-1) : toFlatten);
+			}, []);
+		}
+	});
+}
+
+Number.isInteger = Number.isInteger || function(value) {
+	return typeof value === 'number' &&
+	isFinite(value) &&
+	Math.floor(value) === value;
+};*/
 
 // KEEP THIS LAST:
 // NOTE from https://gist.github.com/josmardias/20493bd205e24e31c0a406472330515a:
