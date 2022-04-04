@@ -23,9 +23,11 @@ public class EngineFactory {
     // Basic-level polyfills. For some reason, these must be run hardcoded from here, not from nashornPolyfills.js.
     // TODO: shouldn't be a string here, but read from a JS file. From react4xp-runtime-nashornpolyfills package? Or make it available in the jar (/lib)?
     private final static String POLYFILL_BASICS = "" +
+			"if (typeof globalThis === 'undefined') { var globalThis = this; }\n" +
+			"if (typeof window === 'undefined') { var window = this; }\n" +
+			"if (typeof global === 'undefined') { var global = this; }\n" +
+			"if (typeof self === 'undefined') { var self = this; }\n" + // Needed by @mrhenry/core-web/modules/TextEncoder
             "if (typeof exports === 'undefined') { var exports = {}; }\n" +
-            "if (typeof global === 'undefined') { var global = this; }\n" +
-            "if (typeof window === 'undefined') { var window = this; }\n" +
             "if (typeof process === 'undefined') { var process = {env:{}}; }\n" +
             "if (typeof console === 'undefined') { " +
             "var console = {};" +
