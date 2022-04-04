@@ -13,7 +13,7 @@ import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getCompon
 setupSSRJava();
 
 
-/*export const React4xp :React4xpNamespace.Class = (function () { // iife, seems new React4xp doesn't work!!!
+/*export const React4xp :React4xpNamespace.Class = (function () { // iife, new React4xp doesn't work!!!
     return {
 		constructor,
 		// Static methods
@@ -29,11 +29,18 @@ setupSSRJava();
 })();*/
 
 export const React4xp = constructor;
-React4xp.prototype._buildFromParams = buildFromParams;
-React4xp.prototype._clearCache = () => {
+// Adding React4xp.prototype.someName just adds methods, not static methods
+//@ts-ignore
+React4xp._buildFromParams = buildFromParams;
+//@ts-ignore
+React4xp._clearCache = () => {
 	templateDescriptorCache.clear();
 };
-React4xp.prototype.dynamicScript = dynamicScript;
-React4xp.prototype.getClientUrls = getClientUrls;
-React4xp.prototype.getComponentChunkUrls = getComponentChunkUrls;
-React4xp.prototype.render = render;
+//@ts-ignore
+React4xp.dynamicScript = dynamicScript;
+//@ts-ignore
+React4xp.getClientUrls = getClientUrls;
+//@ts-ignore
+React4xp.getComponentChunkUrls = getComponentChunkUrls;
+//@ts-ignore
+React4xp.render = render;
