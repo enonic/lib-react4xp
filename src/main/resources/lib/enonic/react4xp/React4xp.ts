@@ -1,4 +1,4 @@
-import type {React4xp as React4xpNamespace} from '../../..';
+//import type {React4xp as React4xpNamespace} from '../../..';
 
 
 import {setup as setupSSRJava} from './ssr'
@@ -13,7 +13,7 @@ import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getCompon
 setupSSRJava();
 
 
-export const React4xp :React4xpNamespace.Class = (function () { // iife
+/*export const React4xp :React4xpNamespace.Class = (function () { // iife, seems new React4xp doesn't work!!!
     return {
 		constructor,
 		// Static methods
@@ -26,4 +26,14 @@ export const React4xp :React4xpNamespace.Class = (function () { // iife
 		dynamicScript,
 		render
 	};
-})();
+})();*/
+
+export const React4xp = constructor;
+React4xp.prototype._buildFromParams = buildFromParams;
+React4xp.prototype._clearCache = () => {
+	templateDescriptorCache.clear();
+};
+React4xp.prototype.dynamicScript = dynamicScript;
+React4xp.prototype.getClientUrls = getClientUrls;
+React4xp.prototype.getComponentChunkUrls = getComponentChunkUrls;
+React4xp.prototype.render = render;
