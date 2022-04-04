@@ -5,6 +5,9 @@ import type {Response} from './Response';
 //import type {Cache} from './Cache';
 
 
+type OneOrMore<T> = T | T[]
+
+
 export namespace React4xp {
 
 	type Entry = string|object
@@ -86,12 +89,14 @@ export namespace React4xp {
 			uniqueId? :boolean|string,
 			props? :Props
 		}) => Instance
-		_clearCache? :() => void
-		dynamicScript? :(
+		_clearCache :() => void
+		dynamicScript :(
 			jsString :string,
 			defer? :boolean
 		) => string
-		render? :<Props extends object = {}>(
+		getClientUrls :() => Array<string>
+		getComponentChunkUrls :(entries :OneOrMore<EntryName>) => Array<string>
+		render :<Props extends object = {}>(
 			entry :Entry,
 			props? :Props,
 			request? :Request,

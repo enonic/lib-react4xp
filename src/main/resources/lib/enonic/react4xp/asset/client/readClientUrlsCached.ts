@@ -8,7 +8,7 @@ import {getSiteLocalCacheKey} from '/lib/enonic/react4xp/asset/getSiteLocalCache
 
 
 /** Returns the asset-via-service URL for the frontend client */
-export function readClientUrlsCached() {
+export function readClientUrlsCached() :Array<string> {
 	//log.debug('readClientUrlsCached()');
     const cacheKey = getSiteLocalCacheKey(RESOURCE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON);
 	//log.debug('readClientUrlsCached() cacheKey:%s', toStr(cacheKey));
