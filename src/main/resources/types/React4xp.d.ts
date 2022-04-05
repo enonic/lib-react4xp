@@ -94,7 +94,7 @@ export namespace React4xp {
 			jsString :string,
 			defer? :boolean
 		) => string
-		getClientUrls :() => Array<string>
+		getClientUrl :() => string
 		getComponentChunkUrls :(entries :OneOrMore<EntryName>) => Array<string>
 		render :<Props extends object = {}>(
 			entry :Entry,
