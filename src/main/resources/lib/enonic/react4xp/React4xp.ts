@@ -26,6 +26,6 @@ React4xp.dynamicScript = dynamicScript;
 //@ts-ignore
 React4xp.getClientUrl = getClientUrl;
 //@ts-ignore
-React4xp.getComponentChunkUrls = getComponentChunkUrls;
+React4xp.getAssetUrls = getComponentChunkUrls;
 //@ts-ignore
 React4xp.render = render;
