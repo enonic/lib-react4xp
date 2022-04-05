@@ -6,7 +6,6 @@ import type {
 
 //import {includes} from '@enonic/js-utils/array/includes';
 import {toStr} from '@enonic/js-utils/value/toStr';
-//import {getClientUrls} from '/lib/enonic/react4xp/dependencies';
 
 //import {eTagGetter} from './eTagGetter';
 import {getImmuteables} from './getImmuteables';
@@ -28,9 +27,6 @@ export function handleAssetRequest(request :Request<{ETag? :string}>) :Response 
 	/*if (IS_DEV_MODE) {
 		return noStoreGetter(request);
 	}*/
-	//const clientUrls = getClientUrls();
-	//log.debug('handleAssetRequest() clientUrls:%s', toStr(clientUrls));
-	// /admin/site/preview/default/draft/react4xp-site/_/service/com.enonic.app.react4xp/react4xp-client/
 
 	const {
 		contextPath,

@@ -7,26 +7,11 @@ import {buildFromParams} from './React4xp/static/buildFromParams';
 import {render} from './React4xp/static/render';
 import {templateDescriptorCache} from './React4xp/templateDescriptorCache';
 import {dynamicScript} from '/lib/enonic/react4xp/asset/dynamic';
-import {getClientUrls} from '/lib/enonic/react4xp/asset/client/getClientUrls';
+import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
 import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
 
 setupSSRJava();
 
-
-/*export const React4xp :React4xpNamespace.Class = (function () { // iife, new React4xp doesn't work!!!
-    return {
-		constructor,
-		// Static methods
-		_buildFromParams: buildFromParams,
-		_clearCache: () => {
-			templateDescriptorCache.clear();
-		},
-		getClientUrls,
-		getComponentChunkUrls,
-		dynamicScript,
-		render
-	};
-})();*/
 
 export const React4xp = constructor;
 // Adding React4xp.prototype.someName just adds methods, not static methods
@@ -39,7 +24,7 @@ React4xp._clearCache = () => {
 //@ts-ignore
 React4xp.dynamicScript = dynamicScript;
 //@ts-ignore
-React4xp.getClientUrls = getClientUrls;
+React4xp.getClientUrl = getClientUrl;
 //@ts-ignore
 React4xp.getComponentChunkUrls = getComponentChunkUrls;
 //@ts-ignore
