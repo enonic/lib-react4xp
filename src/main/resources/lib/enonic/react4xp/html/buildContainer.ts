@@ -1,3 +1,5 @@
+import {encode} from 'html-entities';
+
 import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
 
 
@@ -26,7 +28,12 @@ export function buildContainer({
 	data-jsx-path="${jsxPath}"${
 		propsObj
 			? `
-	data-props-json='${JSON.stringify(propsObj)}'` // Yes the single-quotes are on purpose
+	data-props-json='${encode(
+		JSON.stringify(propsObj),
+		{
+			level: 'xml',
+			mode: 'specialChars' // encodes only HTML special characters (default).
+		})}'` // Yes the single-quotes are on purpose
 			: ''
 	}
 	id="${id}"
