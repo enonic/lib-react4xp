@@ -5,13 +5,13 @@ import type {
 
 
 //import {toStr} from '@enonic/js-utils/value/toStr';
-//import {LIBRARY_NAME} from '@enonic/react4xp';
-//import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
 
-import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
-import {getAndMerge as getAndMergePageContributions} from '/lib/enonic/react4xp/pageContributions/getAndMerge';
-import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 import {dynamicScript} from '/lib/enonic/react4xp/asset/dynamic';
+import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
+import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
+import {encodeForInlineJson} from '/lib/enonic/react4xp/html/encodeForInlineJson';
+import {getAndMerge as getAndMergePageContributions} from '/lib/enonic/react4xp/pageContributions/getAndMerge';
+import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
 
 
 /** Generates or modifies existing enonic XP pageContributions. Adds client-side dependency chunks (core React4xp frontend,
@@ -51,11 +51,6 @@ export function renderPageContributions({
 		const suppressJS = (request && (request.mode === "edit" || request.mode === "inline"));
 		//log.debug('renderPageContributions() suppressJS:%s', toStr(suppressJS));
 
-		/*const command = clientRender
-			? 'render'
-			: 'hydrate';*/
-		//log.debug('renderPageContributions() command:%s', toStr(command));
-
 		this.ensureAndLockBeforeRendering();
 
 		// TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
@@ -64,38 +59,55 @@ export function renderPageContributions({
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
 				`<script src="${getAssetRoot()}${this.assetPath}"></script>\n`,
 
-				// Calls 'render' or 'hydrate' on the entry (e.g. React4Xp.CLIENT.render( ... )), along with the target container ID, and props.
-				// Signature: <command>(entry, id, props?, isPage, hasRegions)
-				/*dynamicScript(`${
-					LIBRARY_NAME}.CLIENT.${command}(${
-					LIBRARY_NAME}['${this.jsxPath}'],${
-					JSON.stringify(this.react4xpId)},${
-					this.props
-						? JSON.stringify(this.props)
-						: 'null'
-				}${`,${this.isPage},${this.hasRegions},${IS_DEV_MODE ? 1 : 0}`});`)*/
-				dynamicScript(`(() => {const components = Array.from(document.querySelectorAll('div[data-command][data-jsx-path][id]'));
-for (let index = 0; index < components.length; index++) {
-    const element = components[index];
-    const {id} = element;
-    const {
-        command,
-        devMode,
-        hasRegions,
-        isPage,
-        jsxPath,
-        propsJson
-    } = element.dataset;
-	let props = {}
-	if (propsJson) {
-		try {
-			props = JSON.parse(propsJson);
-		} catch (e) {
-			console.error(\`Something went wrong while trying to JSON.parse(\${propsJson})\`);
-		}
+				`<script data-react4xp-ref="${this.react4xpId}" type="application/json">${encodeForInlineJson({
+					command: clientRender ? 'render' : 'hydrate',
+					devMode: IS_DEV_MODE,
+					hasRegions: this.hasRegions,
+					isPage: this.isPage,
+					jsxPath: this.jsxPath,
+					props: this.props || {},
+					whatever: '</script>'
+				})}</script>`,
+
+				dynamicScript(`(() => {
+const inlineJsonElements = Array.from(document.querySelectorAll('script[data-react4xp-ref][type="application/json"]'));
+for (let index = 0; index < inlineJsonElements.length; index++) {
+	const inlineJsonElement = inlineJsonElements[index];
+
+	const id = inlineJsonElement.dataset.react4xpRef;
+	//console.debug('id', id);
+
+	const json = inlineJsonElement.textContent;
+	//console.debug('json', json);
+
+	const decodedJson = json.replace(/&#60;/g,'<');
+	//console.debug('decodedJson', decodedJson);
+
+	let data = {};
+	try {
+		data = JSON.parse(decodedJson);
+	} catch (e) {
+		console.error('Something went wrong while trying to JSON.parse('+json+')');
 	}
-    React4xp.CLIENT[command](React4xp[jsxPath],id,props,isPage,hasRegions,devMode)
-}})();`, true)
+	//console.debug('data', data);
+
+	const {
+		command,
+		devMode,
+		hasRegions,
+		isPage,
+		jsxPath,
+		props
+	} = data;
+	/*console.debug('command', command);
+	console.debug('devMode', devMode);
+	console.debug('hasRegions', hasRegions);
+	console.debug('isPage', isPage);
+	console.debug('jsxPath', jsxPath);
+	console.debug('props', props);*/
+	React4xp.CLIENT[command](React4xp[jsxPath],id,props,isPage,hasRegions,devMode);
+} // for
+})();`, true)
 			]
 			: [];
 		//log.debug('renderPageContributions() bodyEnd:%s', toStr(bodyEnd));

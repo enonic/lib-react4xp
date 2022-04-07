@@ -1,12 +1,9 @@
 import {buildContainer} from '/lib/enonic/react4xp/html/buildContainer';
-import {encodeEntities} from '/lib/enonic/react4xp/html/encodeEntities';
-import {dataAttributeObjToArr} from '/lib/enonic/react4xp/html/dataAttributeObjToArr';
-import {getContainerUntilId} from '/lib/enonic/react4xp/html/getContainerUntilId';
+import {hasElementWithId} from '/lib/enonic/react4xp/html/hasElementWithId';
 import {
 	insertAtEndOfRoot,
 	insertInsideContainer
 } from '/lib/enonic/react4xp/html/inserter';
-import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
 
 
 interface RenderTargetContainerParams {
@@ -36,7 +33,6 @@ export function renderTargetContainer(params :RenderTargetContainerParams) :stri
 	const {
 		appendErrorContainer = false,
 		body = '', // '' is Falsy
-		clientRender = true,
 		content = '' // '' is Falsy
 	} = params;
 	//log.debug('renderTargetContainer clientRender:%s jsxPath:%s', clientRender, this.jsxPath);
@@ -45,26 +41,15 @@ export function renderTargetContainer(params :RenderTargetContainerParams) :stri
 	const hasBody = ((body) + "").replace(/(^\s+)|(\s+$)/g, "") !== "";
 	//log.debug('renderTargetContainer hasBody:%s jsxPath:%s', hasBody, this.jsxPath);
 
-	const containerUntilId = getContainerUntilId({
+	const hasContainerWithId = hasElementWithId({
 		id: this.react4xpId,
 		htmlString: body
 	});
-	//log.debug('renderTargetContainer containerUntilId:%s jsxPath:%s', containerUntilId, this.jsxPath);
-
-	const hasContainerWithId = !!containerUntilId;
 	//log.debug('renderTargetContainer hasBody:%s hasContainerWithId:%s jsxPath:%s', hasBody, hasContainerWithId, this.jsxPath);
 
-	const command = clientRender ? 'render' : 'hydrate';
-	const propsJson = this.props ? encodeEntities(this.props) : '{}';
-
 	const container = buildContainer({
-		content,
-		command,
-		hasRegions: this.hasRegions,
 		id: this.react4xpId,
-		isPage: this.isPage,
-		jsxPath: this.jsxPath,
-		propsJson
+		content
 	});
 
 	const output = (hasBody && hasContainerWithId)
@@ -87,26 +72,9 @@ export function renderTargetContainer(params :RenderTargetContainerParams) :stri
 		return insertAtEndOfRoot(body, output);
 	}
 
-	const arr = dataAttributeObjToArr({
-		command,
-		'dev-mode': IS_DEV_MODE ? '1' : '0',
-		'has-regions': this.hasRegions,
-		'is-page': this.isPage,
-		'jsx-path': this.jsxPath,
-		'props-json': propsJson
-	});
-	//log.debug('renderTargetContainer arr:%s jsxPath:%s', arr, this.jsxPath);
-
-	const str = ` ${arr.join(' ')}`;
-	//log.debug('renderTargetContainer str:%s jsxPath:%s', str, this.jsxPath);
-
-	const modifiedBody = body.replace(containerUntilId, `${containerUntilId}${str}`);
-	//log.debug('renderTargetContainer modifiedBody:%s jsxPath:%s', modifiedBody, this.jsxPath);
-
 	if (content) {
-		return insertInsideContainer(modifiedBody, content, this.react4xpId, appendErrorContainer);
+		return insertInsideContainer(body, content, this.react4xpId, appendErrorContainer);
 	}
 
-	//log.debug('renderTargetContainer() noContent jsxPath:%s', this.jsxPath);
-	return modifiedBody
+	return body;
 } // renderTargetContainer

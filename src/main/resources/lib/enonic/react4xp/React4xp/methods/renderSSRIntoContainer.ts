@@ -10,7 +10,6 @@ import {buildErrorContainer} from '../../htmlHandling';
  */
 export function renderSSRIntoContainer({
 	body,
-	clientRender = true,
 	request
 } : {
 	body :string
@@ -19,11 +18,11 @@ export function renderSSRIntoContainer({
 }) :string {
 	//log.debug('renderSSRIntoContainer clientRender:%s jsxPath:%s', clientRender, this.jsxPath);
 	const { html, error } = this.doRenderSSR();
+	//log.debug('renderSSRIntoContainer after doRenderSSR jsxPath:%s html:%s ', this.jsxPath, html);
 	return error
 		? this.renderTargetContainer({
 			appendErrorContainer: true,
 			body,
-			clientRender,
 			content: buildErrorContainer(
 				"React4xp SSR error",
 				error,
@@ -34,7 +33,6 @@ export function renderSSRIntoContainer({
 		})
 		: this.renderTargetContainer({
 			body,
-			clientRender,
 			content: html
 		});
 } // renderSSRIntoContainer

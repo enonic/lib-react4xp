@@ -22,11 +22,9 @@ export function renderBody({
 	)
 		? this.renderSSRIntoContainer({
 			body,
-			clientRender,
 			request
 		})
 		: this.renderTargetContainer({
-			body,
-			clientRender
+			body
 		});
 } // renderBody
