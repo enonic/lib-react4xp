@@ -10,6 +10,7 @@ export function renderBody({
 	clientRender? :boolean
 	request? :Request
 } = {}) :string {
+	//log.debug('renderBody clientRender:%s jsxPath:%s', clientRender, this.jsxPath);
 	// The rendered body depends on the rendered context:
 	// SSR is default behavior, but can be overriden by clientRender = true
 	// - UNLESS request.mode reveals rendering in Content studio, which will enforce SSR.
@@ -22,7 +23,6 @@ export function renderBody({
 		? this.renderSSRIntoContainer({
 			body,
 			clientRender,
-			react4xpObj: this,
 			request
 		})
 		: this.renderTargetContainer({
