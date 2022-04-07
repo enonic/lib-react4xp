@@ -1,7 +1,4 @@
-import type {
-	React4xp,
-	Request
-} from '../../../../..';
+import type {Request} from '../../../../..';
 
 import {buildErrorContainer} from '../../htmlHandling';
 
@@ -14,14 +11,13 @@ import {buildErrorContainer} from '../../htmlHandling';
 export function renderSSRIntoContainer({
 	body,
 	clientRender = true,
-	react4xpObj,
 	request
 } : {
 	body :string
 	clientRender? :boolean
-	react4xpObj :React4xp.Instance
 	request :Request
 }) :string {
+	//log.debug('renderSSRIntoContainer clientRender:%s jsxPath:%s', clientRender, this.jsxPath);
 	const { html, error } = this.doRenderSSR();
 	return error
 		? this.renderTargetContainer({
@@ -32,7 +28,7 @@ export function renderSSRIntoContainer({
 				"React4xp SSR error",
 				error,
 				request,
-				react4xpObj,
+				this,
 				false
 			),
 		})

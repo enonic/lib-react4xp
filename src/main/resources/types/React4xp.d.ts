@@ -59,7 +59,6 @@ export namespace React4xp {
 		renderSSRIntoContainer :(params :{
 			body :string
 			clientRender? :boolean
-			react4xpObj :Instance
 			request :Request
 		}) => string
 		renderTargetContainer :(params :{
