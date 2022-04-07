@@ -65,8 +65,7 @@ export function renderPageContributions({
 					hasRegions: this.hasRegions,
 					isPage: this.isPage,
 					jsxPath: this.jsxPath,
-					props: this.props || {},
-					whatever: '</script>'
+					props: this.props || {}
 				})}</script>`,
 
 				dynamicScript(`(() => {
