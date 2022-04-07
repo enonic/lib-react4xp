@@ -14,7 +14,6 @@
   ],
   "dependencies": {
     "@enonic/js-utils": "^0.33.0",
-    "html-entities": "^2.3.3",
     "node-fetch": "^3.2.3",
     "xxhashjs": "^0.2.2"
   },

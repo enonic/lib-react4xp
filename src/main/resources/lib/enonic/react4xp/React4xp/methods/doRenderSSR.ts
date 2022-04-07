@@ -1,7 +1,6 @@
 import type {React4xp as React4xpNamespace} from '../../../../../index.d';
 
 //import {toStr} from '@enonic/js-utils/value/toStr';
-//import {encodeEntities} from '/lib/enonic/react4xp/html/encodeEntities';
 
 import {getComponentChunkNames}  from '/lib/enonic/react4xp/dependencies/getComponentChunkNames';
 import {render as renderSSRJava} from '/lib/enonic/react4xp/ssr/render';
@@ -33,7 +32,7 @@ export function doRenderSSR<
 			renderSSRJava(
 				this.jsxPath,
 				//this.assetPath.slice(0, -3), // Remove .js
-				JSON.stringify(overrideProps || this.props), // Do not use encodeEntities here
+				JSON.stringify(overrideProps || this.props),
 				JSON.stringify(getComponentChunkNames(this.jsxPath))
 			)
 		);

@@ -58,13 +58,11 @@ export namespace React4xp {
 		}) => unknown
 		renderSSRIntoContainer :(params :{
 			body :string
-			clientRender? :boolean
 			request :Request
 		}) => string
 		renderTargetContainer :(params :{
 			appendErrorContainer :boolean
 			body :string
-			clientRender? :boolean
 			content :string
 		}) => string
 		setHasRegions :(hasRegions :boolean) => Instance

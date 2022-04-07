@@ -59,10 +59,9 @@ export default {
 			entries: [
 				{ find: '@enonic/react4xp', replacement: 'node_modules/@enonic/react4xp/dist' },
 				//{ find: '@enonic/js-utils', replacement: 'node_modules/@enonic/js-utils/src' } // [!] Error: Unexpected token (Note that you need plugins to import files that are not JavaScript)
-				{ find: '@enonic/js-utils', replacement: 'node_modules/@enonic/js-utils/dist/cjs' },
+				{ find: '@enonic/js-utils', replacement: 'node_modules/@enonic/js-utils/dist/cjs' }
 				//{ find: '@enonic/js-utils', replacement: 'node_modules/@enonic/js-utils/dist/esm' } // [!] Error: Could not load node_modules/@enonic/js-utils/dist/esm (imported by src/main/resources/lib/enonic/react4xp/pageContributions.ts): EISDIR: illegal operation on a directory, read
 				//{ find: '/lib/xp/io', replacement: '/lib/xp/io' } // [!] Error: Could not load /lib/xp/io (imported by src/main/resources/lib/enonic/react4xp/dependencies.ts): ENOENT: no such file or directory, open '/lib/xp/io'
-				{ find: 'html-entities', replacement: 'node_modules/html-entities/lib/index.js' },
 			]
 		}),
 		/*nodeResolve({
