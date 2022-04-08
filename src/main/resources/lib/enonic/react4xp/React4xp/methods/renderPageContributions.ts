@@ -67,12 +67,12 @@ export function renderPageContributions({
 					jsxPath: this.jsxPath,
 					props: this.props || {}/*,
 					alert: "</script><script>alert('security problem')</script><script>",
-					backticks: '``',
 					cdata: '<![CDATA[<script>John Doe</script>]]>',
-					quotesDouble: '""',
-					quotesSingle: "''",
+					threeBackticks: '```',
+					threeDoubleQuotes: '"""',
+					threeSingleQuotes: "'''",
 					script: '<script>',
-					scriptEnd: '</script>',*/
+					scriptEnd: '</script>'*/
 				})}</script>`,
 
 				dynamicScript(`(() => {
