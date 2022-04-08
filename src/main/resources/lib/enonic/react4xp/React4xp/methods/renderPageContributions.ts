@@ -9,7 +9,7 @@ import type {
 import {dynamicScript} from '/lib/enonic/react4xp/asset/dynamic';
 import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
-import {encodeForInlineJson} from '/lib/enonic/react4xp/html/encodeForInlineJson';
+import {encodeJsonForScriptTypeTextPlain} from '/lib/enonic/react4xp/html/encodeJsonForScriptTypeTextPlain';
 import {getAndMerge as getAndMergePageContributions} from '/lib/enonic/react4xp/pageContributions/getAndMerge';
 import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
 
@@ -59,17 +59,24 @@ export function renderPageContributions({
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
 				`<script src="${getAssetRoot()}${this.assetPath}"></script>\n`,
 
-				`<script data-react4xp-ref="${this.react4xpId}" type="application/json">${encodeForInlineJson({
+				`<script data-react4xp-ref="${this.react4xpId}" type="text/plain">${encodeJsonForScriptTypeTextPlain({
 					command: clientRender ? 'render' : 'hydrate',
 					devMode: IS_DEV_MODE,
 					hasRegions: this.hasRegions,
 					isPage: this.isPage,
 					jsxPath: this.jsxPath,
-					props: this.props || {}
+					props: this.props || {}/*,
+					alert: "</script><script>alert('security problem')</script><script>",
+					backticks: '``',
+					cdata: '<![CDATA[<script>John Doe</script>]]>',
+					quotesDouble: '""',
+					quotesSingle: "''",
+					script: '<script>',
+					scriptEnd: '</script>',*/
 				})}</script>`,
 
 				dynamicScript(`(() => {
-const inlineJsonElements = Array.from(document.querySelectorAll('script[data-react4xp-ref][type="application/json"]'));
+const inlineJsonElements = Array.from(document.querySelectorAll('script[data-react4xp-ref][type="text/plain"]'));
 for (let index = 0; index < inlineJsonElements.length; index++) {
 	const inlineJsonElement = inlineJsonElements[index];
 
@@ -79,14 +86,16 @@ for (let index = 0; index < inlineJsonElements.length; index++) {
 	const json = inlineJsonElement.textContent;
 	//console.debug('json', json);
 
-	const decodedJson = json.replace(/&#60;/g,'<');
+	// Three consecutive doublequotes can never appear inside JSON.
+	// Which makes it perfect for encoding/decoding purposes.
+	const decodedJson = json.replace(/("*)"""/g,'$1<');
 	//console.debug('decodedJson', decodedJson);
 
 	let data = {};
 	try {
 		data = JSON.parse(decodedJson);
 	} catch (e) {
-		console.error('Something went wrong while trying to JSON.parse('+json+')');
+		console.error('Something went wrong while trying to JSON.parse('+decodedJson+')');
 	}
 	//console.debug('data', data);
 
