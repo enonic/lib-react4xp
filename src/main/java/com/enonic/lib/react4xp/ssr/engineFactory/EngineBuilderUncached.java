@@ -13,7 +13,7 @@ public class EngineBuilderUncached implements EngineBuilder {
 
 	@SuppressWarnings("removal")
     public NashornScriptEngine buildEngine() {
-        LOG.info("Init SSR engine: no settings, uncached");
+        LOG.debug("Init SSR engine: no settings, uncached");
         return (NashornScriptEngine) new NashornScriptEngineFactory().getScriptEngine();
     }
 }

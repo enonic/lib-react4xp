@@ -46,7 +46,7 @@ public class Renderer {
         this.id = id;
 
         // if (!IS_PRODMODE) {
-        LOG.info(this + ": starting init" + (config.LAZYLOAD ? " (lazyloading)" : "") + "...");
+        LOG.debug(this + ": starting init" + (config.LAZYLOAD ? " (lazyloading)" : "") + "...");
         // }
 
         this.config = config;
@@ -61,7 +61,7 @@ public class Renderer {
             assetLoader.loadAssetsIntoEngine(dependencies, engine);
 
             // if (!IS_PRODMODE) {
-            LOG.info(this + ": init is done.");
+            LOG.debug(this + ": init is done.");
             // }
 
         } catch (Exception e) {
@@ -180,7 +180,7 @@ public class Renderer {
             }
 
             LinkedList<String> runnableAssetNames = getRunnableAssetNames(entryName, dependencyNames);
-			LOG.info(this + ": runnableAssetNames '" + runnableAssetNames + "'");
+			LOG.debug(this + ": runnableAssetNames '" + runnableAssetNames + "'");
 
             assetLoader.loadAssetsIntoEngine(runnableAssetNames, engine);
             Map<String, String> rendered = runSSR(entryName, props, runnableAssetNames);
@@ -225,7 +225,7 @@ public class Renderer {
         valid = false;
 
         // if (!IS_PRODMODE) {
-        LOG.info(this + ": destroyed.");
+        LOG.debug(this + ": destroyed.");
         // }
 
         engine = null;

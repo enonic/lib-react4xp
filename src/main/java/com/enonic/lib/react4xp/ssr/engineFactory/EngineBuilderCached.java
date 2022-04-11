@@ -18,7 +18,7 @@ public class EngineBuilderCached implements EngineBuilder {
 
 	@SuppressWarnings("removal")
     public NashornScriptEngine buildEngine() {
-        LOG.info("Init SSR engine (cacheSize=" + cacheSize + "): `--persistent-code-cache`, `--class-cache-size=" + cacheSize + "`");
+        LOG.debug("Init SSR engine (cacheSize=" + cacheSize + "): `--persistent-code-cache`, `--class-cache-size=" + cacheSize + "`");
         return (NashornScriptEngine) new NashornScriptEngineFactory().getScriptEngine("--persistent-code-cache", "--class-cache-size=" + cacheSize);
     }
 }

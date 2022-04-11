@@ -60,7 +60,7 @@ public class ServerSideRenderer implements ScriptBean {
                         ? Runtime.getRuntime().availableProcessors()
                         : ssrMaxThreads;
 
-                LOG.info("Setting up " + (lazyload ? "lazy-loading " : "") + "SSR with " + threadCount + " engine" + (threadCount == 1 ? "" : "s") + "...");
+                LOG.debug("Setting up " + (lazyload ? "lazy-loading " : "") + "SSR with " + threadCount + " engine" + (threadCount == 1 ? "" : "s") + "...");
 
                 config = new Config(appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksExternalsJsonFilename, statsComponentsFilename, lazyload, threadCount);
 
