@@ -73,7 +73,7 @@ public class AssetLoader {
     private void loadAssetIntoEngine(String assetName, NashornScriptEngine engine) {
 
         // if (!IS_PRODMODE) {
-        LOG.info(this + ": loading asset '" + assetName + "'");
+        LOG.debug(this + ": loading asset '" + assetName + "'");
         // }
 
         try {
@@ -81,7 +81,7 @@ public class AssetLoader {
             Renderer.evalAndGetByKey(engine, content, null);
 
             // if (!IS_PRODMODE) {
-            LOG.info(this + ": ...'" + assetName + "' ok.");
+            LOG.debug(this + ": ...'" + assetName + "' ok.");
             // }
 
             markAssetLoaded(assetName);

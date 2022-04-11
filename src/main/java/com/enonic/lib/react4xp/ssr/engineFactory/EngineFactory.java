@@ -98,35 +98,35 @@ public class EngineFactory {
         NashornScriptEngine engine = engineBuilder.buildEngine();
 
         // if (!IS_PRODMODE) {
-        LOG.info("#" + id + ": loading polyfill basics");
+        LOG.debug("#" + id + ": loading polyfill basics");
         // }
 
         try {
             Renderer.evalAndGetByKey(engine, POLYFILL_BASICS, null);
 
             // if (!IS_PRODMODE) {
-            LOG.info("#" + id + ": ...polyfill basics ok.");
+            LOG.debug("#" + id + ": ...polyfill basics ok.");
             // }
 
         } catch (RenderException e) {
             ErrorHandler errorHandler = new ErrorHandler();
             // LOG.error(errorHandler.getLoggableStackTrace(e, e.getClass().getSimpleName() + " in " + EngineFactory.class.getName() + ".initEngine"));
             LOG.error(EngineFactory.class.getName() + "#" + id + ".buildEngine:");
-            LOG.info(errorHandler.getCodeDump(POLYFILL_BASICS, null));
+            LOG.debug(errorHandler.getCodeDump(POLYFILL_BASICS, null));
             throw e;
         }
 
         String assetContent = null;
         try {
             // if (!IS_PRODMODE) {
-            LOG.info("#" + id + ": loading resource '" + POLYFILL_REACT4XP_DEFAULT_FILE + "'");
+            LOG.debug("#" + id + ": loading resource '" + POLYFILL_REACT4XP_DEFAULT_FILE + "'");
             // }
 
             assetContent =  resourceReader.readResource(POLYFILL_REACT4XP_DEFAULT_FILE);
             Renderer.evalAndGetByKey(engine, assetContent, null);
 
             // if (!IS_PRODMODE) {
-            LOG.info("#" + id + ": ...'" + POLYFILL_REACT4XP_DEFAULT_FILE + "' ok.");
+            LOG.debug("#" + id + ": ...'" + POLYFILL_REACT4XP_DEFAULT_FILE + "' ok.");
             // }
 
         } catch (RenderException e1) {
@@ -138,7 +138,7 @@ public class EngineFactory {
                             "in " + EngineFactory.class.getName() + "#" + id + ".buildEngine\n" +
                             "assetName = '" + POLYFILL_REACT4XP_DEFAULT_FILE + "'\n" +
                             errorHandler.getSolutionTips());
-            LOG.info(errorHandler.getCodeDump(assetContent, POLYFILL_REACT4XP_DEFAULT_FILE));
+            LOG.debug(errorHandler.getCodeDump(assetContent, POLYFILL_REACT4XP_DEFAULT_FILE));
 
             throw e1;
         }
@@ -146,17 +146,17 @@ public class EngineFactory {
 		String anotherAssetContent = null;
 		try {
 			// if (!IS_PRODMODE) {
-			LOG.info("#" + id + ": loading resource '" + POLYFILL_REACT4XP_USER_ADDED_FILE + "'");
+			LOG.debug("#" + id + ": loading resource '" + POLYFILL_REACT4XP_USER_ADDED_FILE + "'");
 			// }
 
 			anotherAssetContent =  resourceReader.readResource(POLYFILL_REACT4XP_USER_ADDED_FILE);
 			Renderer.evalAndGetByKey(engine, anotherAssetContent, null);
 
 			// if (!IS_PRODMODE) {
-			LOG.info("#" + id + ": ...'" + POLYFILL_REACT4XP_USER_ADDED_FILE + "' ok.");
+			LOG.debug("#" + id + ": ...'" + POLYFILL_REACT4XP_USER_ADDED_FILE + "' ok.");
 			// }
 		} catch (ResourceNotFoundException r) {
-			LOG.info("Resource " + POLYFILL_REACT4XP_USER_ADDED_FILE + " not found, but that's probably ok :)");
+			LOG.debug("Resource " + POLYFILL_REACT4XP_USER_ADDED_FILE + " not found, but that's probably ok :)");
 		} catch (RenderException e2) {
 			ErrorHandler errorHandler = new ErrorHandler();
 			LOG.error(
@@ -166,7 +166,7 @@ public class EngineFactory {
 							"in " + EngineFactory.class.getName() + "#" + id + ".buildEngine\n" +
 							"assetName = '" + POLYFILL_REACT4XP_USER_ADDED_FILE + "'\n" +
 							errorHandler.getSolutionTips());
-			LOG.info(errorHandler.getCodeDump(assetContent, POLYFILL_REACT4XP_USER_ADDED_FILE));
+			LOG.debug(errorHandler.getCodeDump(assetContent, POLYFILL_REACT4XP_USER_ADDED_FILE));
 
 			throw e2;
 		}
