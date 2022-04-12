@@ -65,8 +65,8 @@ export function renderPageContributions({
 					isPage: this.isPage,
 					jsxPath: this.jsxPath,
 					props: this.props || {},
-					//script: '</script><script>alert(\'hello\')</script><script>'
-				})}</script>`.replace(/<(\/?script|!--)/gi, "\\u003C$1"),
+					script: '</script><script>alert(\'hello\')</script><script>'
+				}).replace(/<(\/?script|!--)/gi, "\\u003C$1")}</script>`,
 
 				dynamicScript(`(() => {
 const inlineJsonElements = Array.from(document.querySelectorAll('script[data-react4xp-ref][type="application/json"]'));
