@@ -64,8 +64,7 @@ export function renderPageContributions({
 					hasRegions: this.hasRegions,
 					isPage: this.isPage,
 					jsxPath: this.jsxPath,
-					props: this.props || {},
-					script: '</script><script>alert(\'hello\')</script><script>'
+					props: this.props || {}
 				}).replace(/<(\/?script|!--)/gi, "\\u003C$1")}</script>`,
 
 				dynamicScript(`(() => {
