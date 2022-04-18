@@ -13,7 +13,7 @@
     "Christian Westgaard <cwe@enonic.com>"
   ],
   "dependencies": {
-    "@enonic/js-utils": "^0.33.3",
+    "@enonic/js-utils": "^0.34.3",
     "node-fetch": "^3.2.3",
     "xxhashjs": "^0.2.2"
   },
