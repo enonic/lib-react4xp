@@ -52,10 +52,10 @@ export function renderPageContributions({
 		this.ensureAndLockBeforeRendering();
 
 		// TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
-		const bodyEnd = (!suppressJS)
+		const headEnd = (!suppressJS)
 			? [
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
-				`<script src="${getAssetRoot()}${this.assetPath}"></script>\n`,
+				`<script defer src="${getAssetRoot()}${this.assetPath}"></script>\n`,
 
 				`<script data-react4xp-ref="${this.react4xpId}" type="application/json">${JSON.stringify({
 					command: clientRender ? 'render' : 'hydrate',
@@ -67,13 +67,13 @@ export function renderPageContributions({
 				}).replace(/<(\/?script|!--)/gi, "\\u003C$1")}</script>`,
 			]
 			: [];
-		//log.debug('renderPageContributions() bodyEnd:%s', toStr(bodyEnd));
+		//log.debug('renderPageContributions() headEnd:%s', toStr(headEnd));
 
 		output = getAndMergePageContributions({
 			entryNames: this.jsxPath,
 			incomingPgContrib: pageContributions,
 			newPgContrib: {
-				bodyEnd
+				headEnd
 			},
 			suppressJS,
 			serveExternals

@@ -5,6 +5,7 @@ import type {
 } from '../../../../index.d';
 
 
+import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
 import {getSiteLocalCacheKey} from '/lib/enonic/react4xp/asset/getSiteLocalCacheKey';
 import {normalizeEntryNames} from '/lib/enonic/react4xp/dependencies/normalizeEntryNames';
 import {buildPageContributions} from '/lib/enonic/react4xp/pageContributions/buildPageContributions';
@@ -67,8 +68,12 @@ export function getAndMerge({
 	incomingPgContrib = incomingPgContrib || {};
 	newPgContrib = newPgContrib || {};
 
+	const executorEntry = `<script defer src="${getExecutorUrl()}"></script>\n`;
+
 	// Keeps track of already-added entries across headBegin, headEnd, bodyBegin and bodyEnd
-	const controlSet = [];
+	const controlSet = [
+		executorEntry // Skip until manually added, must be last...
+	];
 
 	return {
 		headBegin: getUniqueEntries(
@@ -102,6 +107,6 @@ export function getAndMerge({
 				newPgContrib.bodyEnd
 			],
 			controlSet
-		)
+		).concat(suppressJS ? [] : executorEntry) // Manually added last :)
 	};
 };
