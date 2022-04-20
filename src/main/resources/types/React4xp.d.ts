@@ -87,12 +87,9 @@ export namespace React4xp {
 			props? :Props
 		}) => Instance
 		_clearCache :() => void
-		dynamicScript :(
-			jsString :string,
-			defer? :boolean
-		) => string
 		getAssetUrls :(entries :OneOrMore<EntryName>) => Array<string>
 		getClientUrl :() => string
+		getExecutorUrl :() => string
 		render :<Props extends object = {}>(
 			entry :Entry,
 			props? :Props,

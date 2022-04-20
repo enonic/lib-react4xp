@@ -6,7 +6,6 @@ import type {
 
 //import {toStr} from '@enonic/js-utils/value/toStr';
 
-import {dynamicScript} from '/lib/enonic/react4xp/asset/dynamic';
 import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
 import {getAndMerge as getAndMergePageContributions} from '/lib/enonic/react4xp/pageContributions/getAndMerge';
@@ -66,43 +65,6 @@ export function renderPageContributions({
 					jsxPath: this.jsxPath,
 					props: this.props || {}
 				}).replace(/<(\/?script|!--)/gi, "\\u003C$1")}</script>`,
-
-				dynamicScript(`(() => {
-const inlineJsonElements = Array.from(document.querySelectorAll('script[data-react4xp-ref][type="application/json"]'));
-for (let index = 0; index < inlineJsonElements.length; index++) {
-	const inlineJsonElement = inlineJsonElements[index];
-
-	const id = inlineJsonElement.dataset.react4xpRef;
-	//console.debug('id', id);
-
-	const json = inlineJsonElement.textContent;
-	//console.debug('json', json);
-
-	let data = {};
-	try {
-		data = JSON.parse(json);
-	} catch (e) {
-		console.error('Something went wrong while trying to JSON.parse('+json+')');
-	}
-	//console.debug('data', data);
-
-	const {
-		command,
-		devMode,
-		hasRegions,
-		isPage,
-		jsxPath,
-		props
-	} = data;
-	/*console.debug('command', command);
-	console.debug('devMode', devMode);
-	console.debug('hasRegions', hasRegions);
-	console.debug('isPage', isPage);
-	console.debug('jsxPath', jsxPath);
-	console.debug('props', props);*/
-	React4xp.CLIENT[command](React4xp[jsxPath],id,props,isPage,hasRegions,devMode);
-} // for
-})();`, true)
 			]
 			: [];
 		//log.debug('renderPageContributions() bodyEnd:%s', toStr(bodyEnd));

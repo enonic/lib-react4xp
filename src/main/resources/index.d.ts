@@ -33,4 +33,24 @@ declare global {
 			get :() => void
 		})
 	}
+	const React4xp :{
+		CLIENT :{
+			hydrate :(
+				component :object,
+				id :string,
+				props :object,
+				isPage :'1'|'0'|1|0|boolean,
+				hasRegions :'1'|'0'|1|0|boolean,
+				devMode:'1'|'0'|1|0|boolean
+			)=>void
+			render :(
+				component :object,
+				id :string,
+				props :object,
+				isPage :'1'|'0'|1|0|boolean,
+				hasRegions :'1'|'0'|1|0|boolean,
+				devMode:'1'|'0'|1|0|boolean
+			)=>void
+		}
+	}
 }
