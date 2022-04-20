@@ -5,10 +5,10 @@ import type {
 } from '../../../../index.d';
 
 
-import {appendCssToHeadEnd} from './appendCssToHeadEnd';
-import {appendScriptToBodyEnd} from './appendScriptToBodyEnd';
-import {getAllUrls} from '/lib/enonic/react4xp/dependencies/getAllUrls';
-
+import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
+import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
+import {getExternalsUrls} from '/lib/enonic/react4xp/asset/externals/getExternalsUrls';
+import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
 
 /** Use the json files built by webpack in other libraries (react4xp-build-components, react4xp-runtime-externals, react4xp-runtime-client)
  *  to fetch items of <script src="url" /> for common chunks:
@@ -29,24 +29,32 @@ export function buildPageContributions({
 }) {
 	//log.debug('buildPageContributions() entries:%s', toStr(entries));
 
-	const chunkUrls = getAllUrls({  // This is where the clientwrapper comes in...
-		entries,
-		suppressJS,
-		serveExternals
-	});
-	//log.debug('buildPageContributions() chunkUrls:%s', toStr(chunkUrls));
+	const pageContributions :PageContributions = {
+		headBegin: []
+	};
 
-	const pageContributions :PageContributions = {};
-	chunkUrls.forEach(chunkUrl => {
-		//log.debug('buildPageContributions() chunkUrl:%s', toStr(chunkUrl));
-		if (chunkUrl.endsWith(".css")) {
-			appendCssToHeadEnd(chunkUrl, pageContributions);
+	// https://www.growingwiththeweb.com/2014/02/async-vs-defer-attributes.html
+	// * If the script is modular and does not rely on any scripts then use async.
+	// * If the script relies upon or is relied upon by another script then use defer.
 
-			// Treat other dependencies as JS and add them in a script tag. Unless suppressJS, in which case: skip them.
-		} else {
-			appendScriptToBodyEnd(chunkUrl, pageContributions);
+	if (serveExternals) {
+		pageContributions.headBegin.push(`<script async src="${getExternalsUrls()}"></script>\n`);
+	}
+
+	const componentChunkUrls = getComponentChunkUrls(entries);
+	for (let i = 0; i < componentChunkUrls.length; i++) {
+		const componentChunkUrl = componentChunkUrls[i];
+		if (componentChunkUrl.endsWith('.css')) {
+			pageContributions.headBegin.push(`<link href="${componentChunkUrl}" rel="stylesheet" type="text/css" />\n`);
+		} else if(!suppressJS) { // Treat other dependencies as JS and add them in a script tag. Unless suppressJS, in which case: skip them.
+			pageContributions.headBegin.push(`<script defer src="${componentChunkUrl}"></script>\n`);
 		}
-	}); // forEach
+	}
+
+	if (!suppressJS) {
+		pageContributions.headBegin.push(`<script defer src="${getClientUrl()}"></script>\n`);
+		pageContributions.headBegin.push(`<script defer src="${getExecutorUrl()}"></script>\n`);
+	}
 
 	//log.debug('buildPageContributions() pageContributions:%s', toStr(pageContributions));
 	return pageContributions;
