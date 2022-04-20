@@ -5,6 +5,7 @@ import type {
 
 
 import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
+import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
 import {getExternalsUrls} from '/lib/enonic/react4xp/asset/externals/getExternalsUrls';
 import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
 
@@ -25,7 +26,7 @@ export function getAllUrls({
         ...getComponentChunkUrls(entries),
         ...suppressJS
             ? []
-            : [getClientUrl()]
+            : [getClientUrl(), getExecutorUrl()]
     ].filter(!suppressJS
         ? chunkUrl => chunkUrl
         : chunkUrl => !chunkUrl.endsWith('.js')

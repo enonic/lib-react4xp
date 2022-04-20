@@ -9,7 +9,7 @@ export function readClientUrl() {
     // Special case: if there is a chunkfile for a client wrapper, use that. If not, fall back to
     // a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
     try {
-		const clientUrl = [getAssetRoot() + readClientManifestJson()['client.js']][0];
+		const clientUrl = getAssetRoot() + readClientManifestJson()['client.js'];
 		//log.debug('readClientUrl() clientUrls:%s', toStr(clientUrls));
         return clientUrl;
     } catch (e) {

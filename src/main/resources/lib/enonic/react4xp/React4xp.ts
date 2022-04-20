@@ -6,8 +6,8 @@ import {constructor} from './React4xp/constructor';
 import {buildFromParams} from './React4xp/static/buildFromParams';
 import {render} from './React4xp/static/render';
 import {templateDescriptorCache} from './React4xp/templateDescriptorCache';
-import {dynamicScript} from '/lib/enonic/react4xp/asset/dynamic';
 import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
+import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
 import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
 
 setupSSRJava();
@@ -22,10 +22,10 @@ React4xp._clearCache = () => {
 	templateDescriptorCache.clear();
 };
 //@ts-ignore
-React4xp.dynamicScript = dynamicScript;
+React4xp.getAssetUrls = getComponentChunkUrls;
 //@ts-ignore
 React4xp.getClientUrl = getClientUrl;
 //@ts-ignore
-React4xp.getAssetUrls = getComponentChunkUrls;
+React4xp.getExecutorUrl = getExecutorUrl
 //@ts-ignore
 React4xp.render = render;
