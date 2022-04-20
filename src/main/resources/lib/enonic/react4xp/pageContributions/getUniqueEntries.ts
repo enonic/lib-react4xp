@@ -5,7 +5,7 @@ export function getUniqueEntries(
 	arrayOfArrays :Array<Array<string>>,
 	controlSet :Array<string>
 ) {
-  const uniqueEntries = [];
+  const uniqueEntries :Array<string> = [];
   arrayOfArrays.forEach(arr => {
     forceArray(arr).forEach(item => {
       if (controlSet.indexOf(item) === -1) {

@@ -6,7 +6,6 @@ import type {
 
 
 import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
-import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
 import {getExternalsUrls} from '/lib/enonic/react4xp/asset/externals/getExternalsUrls';
 import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
 
@@ -30,7 +29,7 @@ export function buildPageContributions({
 	//log.debug('buildPageContributions() entries:%s', toStr(entries));
 
 	const pageContributions :PageContributions = {
-		headBegin: []
+		headEnd: [] // Lighthouse recommends meta charset in first 1024 bytes, thus we use headEnd not headBegin
 	};
 
 	// https://www.growingwiththeweb.com/2014/02/async-vs-defer-attributes.html
@@ -38,22 +37,21 @@ export function buildPageContributions({
 	// * If the script relies upon or is relied upon by another script then use defer.
 
 	if (serveExternals) {
-		pageContributions.headBegin.push(`<script async src="${getExternalsUrls()}"></script>\n`);
+		pageContributions.headEnd.push(`<script defer src="${getExternalsUrls()}"></script>\n`);
 	}
 
 	const componentChunkUrls = getComponentChunkUrls(entries);
 	for (let i = 0; i < componentChunkUrls.length; i++) {
 		const componentChunkUrl = componentChunkUrls[i];
 		if (componentChunkUrl.endsWith('.css')) {
-			pageContributions.headBegin.push(`<link href="${componentChunkUrl}" rel="stylesheet" type="text/css" />\n`);
+			pageContributions.headEnd.push(`<link href="${componentChunkUrl}" rel="stylesheet" type="text/css" />\n`);
 		} else if(!suppressJS) { // Treat other dependencies as JS and add them in a script tag. Unless suppressJS, in which case: skip them.
-			pageContributions.headBegin.push(`<script defer src="${componentChunkUrl}"></script>\n`);
+			pageContributions.headEnd.push(`<script defer src="${componentChunkUrl}"></script>\n`);
 		}
 	}
 
 	if (!suppressJS) {
-		pageContributions.headBegin.push(`<script defer src="${getClientUrl()}"></script>\n`);
-		pageContributions.headBegin.push(`<script defer src="${getExecutorUrl()}"></script>\n`);
+		pageContributions.headEnd.push(`<script defer src="${getClientUrl()}"></script>\n`);
 	}
 
 	//log.debug('buildPageContributions() pageContributions:%s', toStr(pageContributions));
