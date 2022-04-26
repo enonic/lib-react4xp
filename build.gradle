@@ -24,6 +24,7 @@ dependencies {
     compile "com.enonic.xp:lib-portal:${xpVersion}"
 	//compile "com.enonic.xp:lib-repo:${xpVersion}"
 	compile "com.enonic.xp:lib-task:${xpVersion}"
+	//compile "com.enonic.xp:lib-vhost:${xpVersion}"
 
     compile 'com.enonic.lib:lib-cache:2.1.1'
     compile 'com.enonic.lib:lib-static:1.0.2'

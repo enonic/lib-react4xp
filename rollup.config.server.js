@@ -19,6 +19,7 @@ export default {
 		'/lib/xp/repo',
 		'/lib/xp/task',
 		'/lib/xp/value',
+		'/lib/xp/vhost',
 		'prop-types',
 		'react',
 		'react-dom'
