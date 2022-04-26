@@ -2,5 +2,6 @@ import {initServiceUrlRoot} from '/lib/enonic/react4xp/dependencies/initServiceU
 
 
 export function getAssetRoot() {
+	//log.debug('getAssetRoot()');
     return initServiceUrlRoot('react4xp');
 };

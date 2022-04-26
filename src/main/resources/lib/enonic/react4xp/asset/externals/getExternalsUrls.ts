@@ -1,8 +1,27 @@
-import {readExternalsUrlsCached} from '/lib/enonic/react4xp/asset/externals/readExternalsUrlsCached';
-import {readExternalsUrls} from '/lib/enonic/react4xp/asset/externals/readExternalsUrls';
-import {IS_PROD_MODE} from '/lib/enonic/xp/runMode';
+import {
+	EXTERNALS_CHUNKS_FILENAME,
+	R4X_TARGETSUBDIR
+} from '@enonic/react4xp';
+import {getNamesFromChunkfile} from '/lib/enonic/react4xp/chunk/getNamesFromChunkfile';
+import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 
 
-export const getExternalsUrls = IS_PROD_MODE
-    ? readExternalsUrlsCached
-    : readExternalsUrls;
+const FULL_EXTERNALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}`;
+
+
+// WARNING: Do not cache anything that contains assetRoot, it changes per context!
+/** Returns the asset-via-service URL for the externals chunk */
+export function getExternalsUrls() {
+    // This should not break if there are no added externals. Externals should be optional.
+    try {
+        return getNamesFromChunkfile(FULL_EXTERNALS_CHUNKS_FILENAME).map(
+            name => getAssetRoot() + name
+        );
+    } catch (e) {
+        log.warning(e);
+        log.warning(
+            `No optional externals were found (chunkfile reference: ${FULL_EXTERNALS_CHUNKS_FILENAME}). That might be okay, or a problem.`
+        );
+        return [];
+    }
+}

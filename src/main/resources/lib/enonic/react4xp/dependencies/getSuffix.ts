@@ -18,7 +18,10 @@ export function getSuffix(
 	path :string,
 	serviceName :string
 ) {
+	//log.debug('getSuffix(%s, %s)', path, serviceName);
+
     const standardRoot = initServiceUrlRoot(serviceName).replace(/\/$/, '');
+	//log.debug('getSuffix(%s, %s) standardRoot:%s', path, serviceName, standardRoot);
 
     let location = path.indexOf(standardRoot);
     if (location !== -1) {
