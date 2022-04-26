@@ -1,8 +1,24 @@
-import {readClientUrl} from '/lib/enonic/react4xp/asset/client/readClientUrl';
-import {readClientUrlCached} from '/lib/enonic/react4xp/asset/client/readClientUrlCached';
-import {IS_PROD_MODE} from '/lib/enonic/xp/runMode';
+import {readClientManifestJson} from '/lib/enonic/react4xp/asset/client/readClientManifestJson';
+import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 
 
-export const getClientUrl = IS_PROD_MODE
-    ? readClientUrlCached
-    : readClientUrl;
+// WARNING: Do not cache anything that contains assetRoot, it changes per context!
+export function getClientUrl() {
+	//log.debug('getClientUrl()');
+    // Special case: if there is a chunkfile for a client wrapper, use that. If not, fall back to
+    // a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
+    try {
+		const clientUrl = getAssetRoot() + readClientManifestJson()['client.js'];
+		//log.debug('getClientUrl() -> %s', clientUrl);
+        return clientUrl;
+    } catch (e) {
+		throw new Error(`Unable to find the client chunk file!!!`);
+        //log.debug('Stacktrace', e); // Error: Empty or not found: /assets/react4xp/chunks.client.json
+        /*log.debug(
+            `No optional clientwrapper was found (chunkfile reference: ${RESOURCE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON}). That's okay, there's a fallback one at: ${getClientRoot()}`
+        );
+		const clientRoot = getClientRoot();
+		//log.debug('getClientUrl() clientRoot:%s', toStr(clientRoot));
+        return clientRoot;*/
+    }
+}

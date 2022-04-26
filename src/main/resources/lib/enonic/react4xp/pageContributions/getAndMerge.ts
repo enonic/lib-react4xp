@@ -5,8 +5,9 @@ import type {
 } from '../../../../index.d';
 
 
+//import {toStr} from '@enonic/js-utils/value/toStr';
 import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
-import {getSiteLocalCacheKey} from '/lib/enonic/react4xp/asset/getSiteLocalCacheKey';
+//import {getSiteLocalCacheKey} from '/lib/enonic/react4xp/asset/getSiteLocalCacheKey';
 import {normalizeEntryNames} from '/lib/enonic/react4xp/dependencies/normalizeEntryNames';
 import {buildPageContributions} from '/lib/enonic/react4xp/pageContributions/buildPageContributions';
 import {getUniqueEntries} from '/lib/enonic/react4xp/pageContributions/getUniqueEntries';
@@ -15,10 +16,10 @@ import {getUniqueEntries} from '/lib/enonic/react4xp/pageContributions/getUnique
 import {newCache} from '/lib/cache';
 
 
-const pageContributionsCache = newCache({
+/*const pageContributionsCache = newCache({
   size: 1200,
   expire: 10800 // 30 hours
-});
+});*/
 
 
 /** Adds page contributions for an (optional) set of entries.  Merges different pageContributions.js objects into one. Prevents duplicates: no single pageContribution entry is
@@ -51,16 +52,18 @@ export function getAndMerge({
   	entryNames = normalizeEntryNames(entryNames);
   	//log.debug('getAndMerge() normalized entryNames:%s', toStr(entryNames));
 
-    const cacheKey = getSiteLocalCacheKey(entryNames.join("*")+"_"+suppressJS);
-	//log.debug('getAndMerge() cacheKey:%s', toStr(cacheKey));
+    /*const cacheKey = getSiteLocalCacheKey(entryNames.join("*")+"_"+suppressJS);
+	log.debug('getAndMerge() cacheKey:%s', cacheKey);*/
 
-    const entriesPgContrib :PageContributions = pageContributionsCache.get(
-        cacheKey, () => buildPageContributions({
+	// WARNING: Do not cache anything that contains assetRoot, it changes per context!!!
+    const entriesPgContrib :PageContributions = /*pageContributionsCache.get(
+        cacheKey, () =>*/ buildPageContributions({
 			entries: entryNames,
 			suppressJS,
 			serveExternals
 		})
-	);
+	/*)*/;
+	//log.debug('getAndMerge() entriesPgContrib:%s', toStr(entriesPgContrib));
 
 	if (!incomingPgContrib && !newPgContrib) {
 		return entriesPgContrib;
