@@ -9,6 +9,7 @@ export interface Request<
 		Authorization? :string
 		'If-None-Match' ? :string
 	}
+	host? :string
 	method? :string
 	mode? :'edit'|'inline'|'live'|'preview'
 	params? :Params
