@@ -1,4 +1,4 @@
-import alias from '@rollup/plugin-alias';
+//import alias from '@rollup/plugin-alias';
 import commonjs from '@rollup/plugin-commonjs';
 //import { nodeResolve } from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
@@ -34,6 +34,9 @@ export default {
 
 		dir: DIR_OUT_REL,
 
+		// [!] Error: "default" was specified for "output.exports", but entry module "src/main/resources/services/react4xp-dependencies/react4xp-dependencies.ts" has the following exports: get
+		//exports: 'default',
+
 		// (!) Entry module "node_modules/@enonic/js-utils/dist/cjs/index.js"
 		// is implicitly using "default" export mode, which means for CommonJS
 		// output that its default export is assigned to "module.exports".
@@ -44,6 +47,14 @@ export default {
 		// signature of "node_modules/@enonic/js-utils/dist/cjs/index.js"
 		// to use named exports only.
 		exports: 'auto',
+
+		//The following entry modules are using named and default exports together:
+		//node_modules/@enonic/js-utils/dist/cjs/array/forceArray.js
+		//node_modules/@enonic/js-utils/dist/cjs/array/includes.js
+		//node_modules/@enonic/js-utils/dist/cjs/string/cleanAnyDoubleQuoteWrap.js
+		//...and 5 other entry modules
+		//Consumers of your bundle will have to use chunk['default'] to access their default export, which may not be what you want. Use `output.exports: 'named'` to disable this warning
+		//exports: 'named',
 
 		format: 'cjs',
 		freeze: false,
@@ -61,14 +72,21 @@ export default {
 		sourcemap: false
 	},
 	plugins: [
-		alias({
+		/*alias({
 			entries: [
+				//{ find: 'JS_UTILS_ALIAS', replacement: 'node_modules/@enonic/js-utils/src' },
+				{ find: 'JS_UTILS_ALIAS', replacement: 'node_modules/@enonic/js-utils/dist/cjs' },
 				{ find: '@enonic/react4xp', replacement: 'node_modules/@enonic/react4xp/dist' }//,
 				//{ find: '/lib/xp/io', replacement: '/lib/xp/io' } // [!] Error: Could not load /lib/xp/io (imported by src/main/resources/lib/enonic/react4xp/dependencies.ts): ENOENT: no such file or directory, open '/lib/xp/io'
 			]
-		}),
+		}),*/
 		//nodeResolve(),
-		typescript(),
+		typescript({
+			compilerOptions: {
+				outDir: DIR_OUT_REL,
+				target: 'es3' // esnext gives runtime ERROR ES6 destructuring is not yet implemented
+			}
+		}),
 		commonjs(),
 	]
 };

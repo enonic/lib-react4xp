@@ -1,9 +1,9 @@
 import type {React4xp as React4xpNamespace} from '../../../..';
 
 
-import {isObject} from '@enonic/js-utils/value/isObject';
-import {isString} from '@enonic/js-utils/value/isString';
-//import {toStr} from '@enonic/js-utils/value/toStr';
+import {isObject} from 'JS_UTILS_ALIAS/value/isObject';
+import {isString} from 'JS_UTILS_ALIAS/value/isString';
+//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 
 
 import {

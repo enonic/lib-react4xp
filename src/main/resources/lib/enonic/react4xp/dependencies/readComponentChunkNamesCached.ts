@@ -4,7 +4,7 @@ import type {
 } from '../../../../index.d';
 
 
-//import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 import {dependenciesCache} from '/lib/enonic/react4xp/asset/dependenciesCache';
 import {getSiteLocalCacheKey} from '/lib/enonic/react4xp/asset/getSiteLocalCacheKey';
 import {normalizeEntryNames} from '/lib/enonic/react4xp/dependencies/normalizeEntryNames'

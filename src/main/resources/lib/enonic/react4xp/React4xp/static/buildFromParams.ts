@@ -1,7 +1,7 @@
 import type {React4xp as React4xpNamespace} from '../../../../../index.d';
 
 
-import {isString} from '@enonic/js-utils/value/isString';
+import {isString} from 'JS_UTILS_ALIAS/value/isString';
 import {constructor} from '../constructor'; // circular dependency?
 
 

@@ -1,6 +1,6 @@
 import {readComponentStats} from '/lib/enonic/react4xp/asset/readComponentStats';
 import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
-//import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 
 
 let COMPONENT_STATS = readComponentStats();

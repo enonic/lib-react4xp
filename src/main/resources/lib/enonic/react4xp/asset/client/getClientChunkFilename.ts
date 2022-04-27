@@ -1,4 +1,4 @@
-//import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 import {readClientManifestJson} from '/lib/enonic/react4xp/asset/client/readClientManifestJson';
 import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
 

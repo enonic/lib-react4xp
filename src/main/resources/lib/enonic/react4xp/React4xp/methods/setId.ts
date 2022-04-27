@@ -1,7 +1,7 @@
 import type {React4xp as React4xpNamespace} from '../../../../../index.d';
 
 
-//import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 
 
 /** Sets the react4xpId - the HTML ID of the target container this component will be rendered into.

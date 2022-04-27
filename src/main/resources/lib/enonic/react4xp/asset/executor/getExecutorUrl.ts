@@ -1,4 +1,4 @@
-//import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 import {getExecutorChunkFilename} from '/lib/enonic/react4xp/asset/executor/getExecutorChunkFilename'
 

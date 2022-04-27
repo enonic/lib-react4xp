@@ -4,7 +4,7 @@ import type {
 } from '../../../../index.d';
 
 
-//import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 import {forceTrimmedArray} from '/lib/enonic/react4xp/dependencies/forceTrimmedArray';
 import {readComponentChunkNames} from '/lib/enonic/react4xp/dependencies/readComponentChunkNames';
 import {readComponentChunkNamesCached} from '/lib/enonic/react4xp/dependencies/readComponentChunkNamesCached';

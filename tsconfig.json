@@ -1,28 +1,44 @@
 {
+	// This file is mainly for letting your code editor use typings.
+	// It's also used when doing a simple yarn tsc, to check all files.
+	// Rollup overrides some of these options when doing the actual build.
 	"compilerOptions": {
-		"baseUrl": ".",
+		"allowJs": true,
+		"baseUrl": "./",
 		"inlineSourceMap": false,
 		"inlineSources": false,
 		"listEmittedFiles": false,
 		"listFiles": false,
-		"module": "esnext",
+		"module": "esnext", // What rollup wants
 		"moduleResolution": "node",
 		"noImplicitAny": false,
 		"paths": {
+			// A series of entries which re-map imports to lookup locations relative to the baseUrl.
+			// In order to get all of the correct typing in your favourite editor.
+			// yarn tsc doesn't change the import/require paths based on this
 			"@enonic/react4xp": ["./node_modules/@enonic/react4xp/src"],
 			"@enonic/react4xp/*": ["./node_modules/@enonic/react4xp/src/*"],
-			"@enonic/js-utils": ["./node_modules/@enonic/js-utils/dist/cjs"],
-			"@enonic/js-utils/*": ["./node_modules/@enonic/js-utils/dist/cjs/*"],
+			"JS_UTILS_ALIAS": ["./node_modules/@enonic/js-utils/src"],
+			"JS_UTILS_ALIAS/*": ["./node_modules/@enonic/js-utils/src/*"],
 			"/lib/enonic/react4xp/*": ["./src/main/resources/lib/enonic/react4xp/*"],
-			"/lib/enonic/xp/getAppConfigFilePathAbsolute":["./src/main/resources/lib/enonic/xp/getAppConfigFilePathAbsolute"],
-			"/lib/enonic/xp/getXpHomeDirPathAbsolute":["./src/main/resources/lib/enonic/xp/getXpHomeDirPathAbsolute"],
-			"/lib/enonic/xp/time/*":["./src/main/resources/lib/enonic/xp/time/*"],
-			"/lib/enonic/xp/runMode":["./src/main/resources/lib/enonic/xp/runMode"]
+			"/lib/enonic/xp/*": ["./src/main/resources/lib/enonic/xp/*"],
 		},
 		"removeComments": true,
-		"rootDir": "./src/main/resources",
+		"rootDir": "./",
+		"rootDirs": [
+			"src/main/resources",
+			"node_modules"
+		],
 		"sourceMap": false,
-		"outDir": "build/resources/main",
-		"target": "es3",
-	}
+		"outDir": "build/tsc", // This is just for a simple yarn tsc command, rollup overrides this to build/resources/main
+		"target": "es3" // esnext gives runtime ERROR ES6 destructuring is not yet implemented
+	},
+	"exclude": [
+		"**/*.d.ts"
+	],
+	"include": [
+		"src/main/resources/**/*.ts",
+		"node_modules/@enonic/react4xp/**/*.ts",
+		"node_modules/@enonic/js-utils/**/*.ts"
+	]
 }

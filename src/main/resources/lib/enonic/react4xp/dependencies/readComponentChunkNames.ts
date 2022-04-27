@@ -4,7 +4,7 @@ import type {
 } from '../../../../index.d';
 
 
-//import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 import {COMPONENT_STATS_FILENAME} from '@enonic/react4xp';
 import {getComponentStats} from '/lib/enonic/react4xp/asset/getComponentStats';
 

@@ -6,8 +6,8 @@ import type {
 } from '../../../../../index.d';
 
 
-import {isObject} from '@enonic/js-utils/value/isObject';
-//import {toStr} from '@enonic/js-utils/value/toStr';
+import {isObject} from 'JS_UTILS_ALIAS/value/isObject';
+//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 
 import {buildFromParams} from './buildFromParams';
 import {buildErrorContainer} from '../../htmlHandling';

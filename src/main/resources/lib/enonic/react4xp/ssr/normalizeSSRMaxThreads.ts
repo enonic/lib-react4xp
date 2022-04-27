@@ -1,5 +1,5 @@
-import {isNumber} from '@enonic/js-utils/value/isNumber';
-import {isString} from '@enonic/js-utils/value/isString';
+import {isNumber} from 'JS_UTILS_ALIAS/value/isNumber';
+import {isString} from 'JS_UTILS_ALIAS/value/isString';
 import {getAppConfigFilePathAbsolute} from '/lib/enonic/xp/getAppConfigFilePathAbsolute';
 
 

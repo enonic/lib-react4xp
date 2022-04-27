@@ -1,4 +1,4 @@
-//import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 
 
 // For now, it seems like a good idea to ensure two things when starting the client side rendering:

@@ -4,9 +4,9 @@ import type {
 } from '../../../..';
 
 
-import {includes} from '@enonic/js-utils/array/includes';
-import {cleanAnyDoubleQuoteWrap} from '@enonic/js-utils/string/cleanAnyDoubleQuoteWrap';
-//import {toStr} from '@enonic/js-utils/value/toStr';
+import {includes} from 'JS_UTILS_ALIAS/array/includes';
+import {cleanAnyDoubleQuoteWrap} from 'JS_UTILS_ALIAS/string/cleanAnyDoubleQuoteWrap';
+//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 //@ts-ignore
 import {newCache} from '/lib/cache';
 import {eTagGetter} from './eTagGetter';

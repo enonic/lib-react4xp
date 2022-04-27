@@ -1,4 +1,4 @@
-//import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 
 
 /** Appends a unique target container ID postfix after the currently set reactXpId (if any).

@@ -1,4 +1,4 @@
-//import {toStr} from '@enonic/js-utils/value/toStr';
+//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 
 
 export function ensureAndLockBeforeRendering() {
