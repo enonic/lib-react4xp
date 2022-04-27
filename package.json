@@ -13,7 +13,7 @@
     "Christian Westgaard <cwe@enonic.com>"
   ],
   "dependencies": {
-    "@enonic/js-utils": "^0.33.3",
+    "@enonic/js-utils": "^0.34.3",
     "node-fetch": "^3.2.3",
     "xxhashjs": "^0.2.2"
   },
@@ -25,13 +25,13 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.17.3",
     "@babel/preset-env": "^7.16.11",
     "@babel/register": "^7.17.7",
-    "@enonic/react4xp": "^3.0.16",
+    "@enonic/react4xp": "^3.0.17",
     "@mrhenry/core-web": "^0.7.0",
     "@rollup/plugin-alias": "^3.1.9",
     "@rollup/plugin-commonjs": "^22.0.0",
     "@rollup/plugin-node-resolve": "^13.2.1",
     "@rollup/plugin-typescript": "^8.3.2",
-    "@types/react": "^18.0.6",
+    "@types/react": "^18.0.8",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.5",
     "babel-polyfill": "^6.26.0",
