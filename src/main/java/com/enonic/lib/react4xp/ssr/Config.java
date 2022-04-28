@@ -12,7 +12,6 @@ public class Config {
     public final String CHUNKSEXTERNALS_JSON_FILENAME;
     public final String STATS_COMPONENTS_FILENAME;
     public final boolean LAZYLOAD;
-    public final int THREAD_COUNT;
 
     public Config(
             String appName,
@@ -22,8 +21,7 @@ public class Config {
             String entriesJsonFilename,
             String chunksExternalsJsonFilename,
             String statsComponentsFilename,
-            boolean lazyload,
-            int threadCount) {
+            boolean lazyload) {
         this.APP_NAME = appName;
         this.SCRIPTS_HOME = scriptsHome;                                 // Usually: "/react4xp"
         this.LIBRARY_NAME = libraryName;                                 // "React4xp"
@@ -32,6 +30,5 @@ public class Config {
         this.CHUNKSEXTERNALS_JSON_FILENAME = chunksExternalsJsonFilename;
         this.STATS_COMPONENTS_FILENAME = statsComponentsFilename;
         this.LAZYLOAD = lazyload;
-        this.THREAD_COUNT = threadCount;
     }
 }

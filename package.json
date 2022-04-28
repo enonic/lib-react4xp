@@ -45,6 +45,7 @@
     "rollup-plugin-output-manifest": "^2.0.0",
     "rollup-plugin-polyfill": "^4.0.0",
     "text-encoding": "^0.7.0",
+    "tslib": "^2.4.0",
     "typescript": "^4.6.4",
     "webpack": "^5.72.0",
     "webpack-cli": "^4.9.2"
@@ -67,11 +68,12 @@
     "local:watch": "./gradlew publishToMavenLocal -P development --info -t",
     "install:nsi": "nsi",
     "reinstall": "npm run clean && npm run local",
-    "rollup": "npm-run-all --parallel rollup:client rollup:executor rollup:nashornPolyfills rollup:server",
+    "rollup": "npm-run-all --parallel rollup:client rollup:executor rollup:nashornPolyfills rollup:nodePolyfills rollup:server",
     "rollup:client": "npx rollup --config rollup.config.client.js",
     "rollup:executor": "npx rollup --config rollup.config.executor.js",
-    "rollup:nashornPolyfills": "npx rollup --config rollup.config.nashornPolyfills.js --no-makeAbsoluteExternalsRelative",
-    "rollup:server": "npx rollup --config rollup.config.server.js --no-makeAbsoluteExternalsRelative $(find src/main/resources ! -path 'src/main/resources/assets*' -a ! -path 'src/main/resources/lib/enonic/react4xp/nashornPolyfills.ts' -a -name '*.ts' -a ! -name '*.d.ts')",
+    "rollup:nashornPolyfills": "npx rollup --config rollup.config.nashornPolyfills.js",
+    "rollup:nodePolyfills": "npx rollup --config rollup.config.nodePolyfills.js",
+    "rollup:server": "npx rollup --config rollup.config.server.js src/main/resources/lib/enonic/react4xp/index.ts src/main/resources/services/react4xp/react4xp.ts src/main/resources/services/react4xp-dependencies/react4xp-dependencies.ts",
     "test": "NODE_PATH=./ node_modules/mocha/bin/mocha --compilers js:@babel/register --require babel-polyfill --require src/test/test_helper.js \"src/test/**/*@(.js)\"",
     "tsc": "npx tsc"
   }

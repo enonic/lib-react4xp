@@ -21,7 +21,6 @@
 			"JS_UTILS_ALIAS": ["./node_modules/@enonic/js-utils/src"],
 			"JS_UTILS_ALIAS/*": ["./node_modules/@enonic/js-utils/src/*"],
 			"/lib/enonic/react4xp/*": ["./src/main/resources/lib/enonic/react4xp/*"],
-			"/lib/enonic/xp/*": ["./src/main/resources/lib/enonic/xp/*"],
 		},
 		"removeComments": true,
 		"rootDir": "./",

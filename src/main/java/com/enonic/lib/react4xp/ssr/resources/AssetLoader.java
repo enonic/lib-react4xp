@@ -1,111 +1,115 @@
 package com.enonic.lib.react4xp.ssr.resources;
 
-import com.enonic.lib.react4xp.ssr.Config;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+
+import javax.script.ScriptEngine;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.enonic.lib.react4xp.ssr.ServerSideRenderer;
 import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
 import com.enonic.lib.react4xp.ssr.errors.RenderException;
 import com.enonic.lib.react4xp.ssr.pool.Renderer;
+import com.enonic.xp.resource.ResourceNotFoundException;
 import com.enonic.xp.server.RunMode;
-import jdk.nashorn.api.scripting.NashornScriptEngine;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 
 
-public class AssetLoader {
-    private final static Logger LOG = LoggerFactory.getLogger( AssetLoader.class );
+public class AssetLoader
+{
+    private static final Logger LOG = LoggerFactory.getLogger( AssetLoader.class );
 
-    public static final boolean IS_PRODMODE = (RunMode.get() == RunMode.PROD);
-    private final HashMap<String, Boolean> ASSET_LOADED_MARKERS = new HashMap<>();
+    public static final boolean IS_PRODMODE = RunMode.get() == RunMode.PROD;
 
+    private final HashSet<String> assetLoadedMarkers = new HashSet<>();
 
     private final long id;
-    private final ResourceReader resourceReader;
-    private final Config config;
 
-    public AssetLoader(ResourceReader resourceReader, Config config, long id) {
+    private final ResourceReader resourceReader;
+
+    private final String scriptsHome;
+
+    private final ScriptEngine engine;
+
+    public AssetLoader( ResourceReader resourceReader, String scriptsHome, long id, ScriptEngine engine )
+    {
         this.id = id;
         this.resourceReader = resourceReader;
-        this.config = config;
+        this.scriptsHome = scriptsHome;
+        this.engine = engine;
     }
 
-	@SuppressWarnings("removal")
-    public void loadAssetsIntoEngine(LinkedList<String> runnableAssets, NashornScriptEngine engine) {
-        ensureMarkers(runnableAssets);
-        for (String assetName : runnableAssets) {
-            if (shouldLoadAsset(assetName)) {
-                loadAssetIntoEngine(assetName, engine);
+    public void loadAssetsIntoEngine( List<String> runnableAssets )
+    {
+        for ( String assetName : runnableAssets )
+        {
+            if ( shouldLoadAsset( assetName ) )
+            {
+                final String asset = assetName.startsWith( "/" ) ? assetName : scriptsHome + "/" + assetName;
+                loadAssetIntoEngine( asset, true );
+                markAssetLoaded( assetName );
             }
         }
     }
 
+    private boolean shouldLoadAsset( String assetName )
+    {
+        return ( !IS_PRODMODE || ! assetLoadedMarkers.contains( assetName ) );
+    }
 
-
-
-    private void ensureMarkers(List<String> assetNames) {
-        if (!IS_PRODMODE) {
-            return;
+    private void markAssetLoaded( String assetName )
+    {
+        if ( IS_PRODMODE )
+        {
+            assetLoadedMarkers.add( assetName );
         }
-        for (String assetName : assetNames) {
-            if (!ASSET_LOADED_MARKERS.containsKey(assetName)) {
-                ASSET_LOADED_MARKERS.put(assetName, false);
+    }
+
+
+    public void loadAssetIntoEngine( final String asset, final boolean failOnNotFound )
+    {
+        String assetContent = null;
+        try
+        {
+            LOG.debug( "#" + id + ": loading resource '" + asset + "'" );
+
+            assetContent = resourceReader.readResource( asset );
+            Renderer.evalAndGetByKey( engine, assetContent, null );
+
+            LOG.debug( "#" + id + ": ...'" + asset + "' ok." );
+        } catch ( IOException e) {
+            throw new RenderException( e );
+        }
+        catch ( ResourceNotFoundException r )
+        {
+            if ( failOnNotFound )
+            {
+                throw r;
+            }
+            else
+            {
+                LOG.debug( "Resource " + asset + " not found, but that's probably ok :)" );
             }
         }
-    }
-
-    private boolean shouldLoadAsset(String assetName) {
-        return (!IS_PRODMODE || !ASSET_LOADED_MARKERS.get(assetName));
-    }
-
-    private void markAssetLoaded(String assetName) {
-        if (IS_PRODMODE) {
-            ASSET_LOADED_MARKERS.put(assetName, true);
-        }
-    }
-
-
-    /** Load both entry assets and JS dependency chunks into the Nashorn engine */
-	@SuppressWarnings("removal")
-    private void loadAssetIntoEngine(String assetName, NashornScriptEngine engine) {
-
-        // if (!IS_PRODMODE) {
-        LOG.debug(this + ": loading asset '" + assetName + "'");
-        // }
-
-        try {
-            String content = resourceReader.readResource(config.SCRIPTS_HOME + "/" + assetName);
-            Renderer.evalAndGetByKey(engine, content, null);
-
-            // if (!IS_PRODMODE) {
-            LOG.debug(this + ": ...'" + assetName + "' ok.");
-            // }
-
-            markAssetLoaded(assetName);
-
-        } catch (IOException e1) {
-            throw new RenderException(e1);
-
-        } catch (RenderException e2) {
+        catch ( RenderException e )
+        {
             ErrorHandler errorHandler = new ErrorHandler();
             LOG.error(
-                    (e2.getStacktraceString() == null ? "" : e2.getStacktraceString() + "\n") +
-                            errorHandler.getLoggableStackTrace(e2, e2.getMessage()) + "\n\n" +
-                            e2.getClass().getSimpleName() + ": " + e2.getMessage() + "\n" +
-                            "in " + ServerSideRenderer.class.getName() + ".loadAsset\n" +
-                            "assetName = '" +assetName + "'\n" +
-                            errorHandler.getSolutionTips());
+                ( e.getStacktraceString() == null ? "" : e.getStacktraceString() + "\n" ) + errorHandler.getLoggableStackTrace( e, null ) +
+                    "\n\n" + e.getClass().getSimpleName() + ": " + e.getMessage() + "\n" +
+                    "Engine #" + id + "\n" +
+                    "in " + ServerSideRenderer.class.getName() + ".loadAsset\n" +
+                    "assetName = '" + asset + "'\n" + errorHandler.getSolutionTips() );
+            LOG.debug( errorHandler.getCodeDump( assetContent, asset ) );
 
-            throw e2;
+            throw e;
         }
     }
 
-
-
-    public String toString() {
+    public String toString()
+    {
         return AssetLoader.class.getSimpleName() + "#" + id;
     }
 }

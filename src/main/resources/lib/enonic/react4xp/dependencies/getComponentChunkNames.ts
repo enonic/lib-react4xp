@@ -8,7 +8,7 @@ import type {
 import {forceTrimmedArray} from '/lib/enonic/react4xp/dependencies/forceTrimmedArray';
 import {readComponentChunkNames} from '/lib/enonic/react4xp/dependencies/readComponentChunkNames';
 import {readComponentChunkNamesCached} from '/lib/enonic/react4xp/dependencies/readComponentChunkNamesCached';
-import {IS_PROD_MODE} from '/lib/enonic/xp/runMode';
+import {IS_PROD_MODE} from '/lib/enonic/react4xp/xp/runMode';
 
 
 export function getComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.EntryName>) {

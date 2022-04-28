@@ -4,7 +4,7 @@ import typescript from '@rollup/plugin-typescript';
 const outDir = 'build/resources/main/lib/enonic/polyfill-react4xp';
 
 export default {
-    input: 'src/main/resources/lib/enonic/polyfill-react4xp/nashornPolyfills.ts',
+    input: 'src/main/resources/lib/enonic/polyfill-react4xp/nodePolyfills.ts',
     output: {
         dir: outDir,
 

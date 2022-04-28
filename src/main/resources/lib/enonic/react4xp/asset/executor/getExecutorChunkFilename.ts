@@ -3,7 +3,7 @@ import {RESOURCE_PATH_ABSOLUTE_EXECUTOR_MANIFEST_JSON} from '/lib/enonic/react4x
 import {getResource} from '/lib/enonic/react4xp/resource/getResource';
 //@ts-ignore
 import {readText} from '/lib/xp/io';
-import {IS_PROD_MODE} from '/lib/enonic/xp/runMode';
+import {IS_PROD_MODE} from '/lib/enonic/react4xp/xp/runMode';
 
 
 let CACHED_EXECUTOR_CHUNK_FILE_NAME :string;
