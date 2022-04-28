@@ -1,5 +1,16 @@
 package com.enonic.lib.react4xp.ssr.pool;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
+
+import org.json.JSONArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.enonic.lib.react4xp.ssr.Config;
 import com.enonic.lib.react4xp.ssr.ServerSideRenderer;
 import com.enonic.lib.react4xp.ssr.engineFactory.EngineFactory;
@@ -8,17 +19,6 @@ import com.enonic.lib.react4xp.ssr.errors.RenderException;
 import com.enonic.lib.react4xp.ssr.resources.AssetLoader;
 import com.enonic.lib.react4xp.ssr.resources.ChunkDependencyParser;
 import com.enonic.lib.react4xp.ssr.resources.ResourceReader;
-import jdk.nashorn.api.scripting.NashornScriptEngine;
-import jdk.nashorn.api.scripting.ScriptObjectMirror;
-import org.json.JSONArray;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.script.ScriptException;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
 
 import static com.enonic.lib.react4xp.ssr.errors.ErrorHandler.KEY_ERROR;
 import static com.enonic.lib.react4xp.ssr.errors.ErrorHandler.KEY_STACKTRACE;
@@ -31,18 +31,14 @@ public class Renderer {
 
     //public static final boolean IS_PRODMODE = (RunMode.get() == RunMode.PROD);
 
-    private boolean valid = true;
-
-	@SuppressWarnings("removal")
-    private NashornScriptEngine engine;
+    private final ScriptEngine engine;
 
     private final Config config;
-    private AssetLoader assetLoader;
+    private final AssetLoader assetLoader;
 
     public static final String KEY_HTML = "html";
 
-	@SuppressWarnings("removal")
-    public Renderer(EngineFactory engineFactory, ResourceReader resourceReader, Config config, long id) throws ScriptException, IOException {
+    public Renderer( EngineFactory engineFactory, ResourceReader resourceReader, Config config, long id) {
         this.id = id;
 
         // if (!IS_PRODMODE) {
@@ -54,34 +50,34 @@ public class Renderer {
         try {
             engine = engineFactory.buildEngine(id);
 
-            LinkedList<String> dependencies = new ChunkDependencyParser(resourceReader, id).getScriptDependencyNames(config);
+			List<String> dependencies = new ChunkDependencyParser( resourceReader, id ).getScriptDependencyNames( config );
 
-            assetLoader = new AssetLoader(resourceReader, config, id);
+			assetLoader = new AssetLoader( resourceReader, config.SCRIPTS_HOME, id, engine );
 
-            assetLoader.loadAssetsIntoEngine(dependencies, engine);
+            assetLoader.loadAssetsIntoEngine(dependencies);
 
             // if (!IS_PRODMODE) {
             LOG.debug(this + ": init is done.");
             // }
 
         } catch (Exception e) {
-            destroy();
             throw new RenderException(e, "Couldn't init " + this);
         }
     }
 
-    private LinkedList<String> getRunnableAssetNames(String entryName, String dependencyNames) {
-        LinkedList<String> runnableAssets = new LinkedList<>();
+    private List<String> getRunnableAssetNames(String entryName, String dependencyNames) {
+        List<String> runnableAssets = new ArrayList<>();
 
         if (dependencyNames != null && !"".equals(dependencyNames.trim())) {
             JSONArray array = new JSONArray(dependencyNames);
-            Iterator<Object> it = array.iterator();
-            while (it.hasNext()) {
-                String assetName = (String)it.next();
-                if (assetName.endsWith(".js")) {
-                    runnableAssets.add(assetName);
-                }
-            }
+			for ( final Object o : array )
+			{
+				String assetName = (String) o;
+				if ( assetName.endsWith( ".js" ) )
+				{
+					runnableAssets.add( assetName );
+				}
+			}
         }
 		// Entries now has hash in the filename "entryname[hash].js", so this file no longer exist...
 		// But is not needed either because the "entryname[hash].js" is loaded as a dependency.
@@ -93,14 +89,13 @@ public class Renderer {
 
     ///////////////////////////////////////////////////////////////////////////////
 
-	@SuppressWarnings("removal")
-    public static String evalAndGetByKey(NashornScriptEngine engine, String runnableCode, String key) throws RenderException {
+    public static String evalAndGetByKey( ScriptEngine engine, String runnableCode, String key) throws RenderException {
         StringBuilder scriptBuilder = new StringBuilder(
                 "var __react4xp__internal__nashorn__obj__ = {};" +
                 "try {\n"
         );
             if (key != null) {
-                scriptBuilder.append("__react4xp__internal__nashorn__obj__." + key + "=");
+                scriptBuilder.append( "__react4xp__internal__nashorn__obj__." ).append( key ).append( "=" );
             }
             scriptBuilder.append(runnableCode);
         scriptBuilder.append("\n}catch (__react4xp__internal__nashorn_error__){");
@@ -115,14 +110,22 @@ public class Renderer {
 
         String callScript = scriptBuilder.toString();
 
-        ScriptObjectMirror __react4xp__internal__nashorn__obj__;
-
         try {
-            __react4xp__internal__nashorn__obj__ = (ScriptObjectMirror) engine.eval(callScript);
+            Map __react4xp__internal__nashorn__obj__;
+            final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader( engine.getClass().getClassLoader() );
+            try
+            {
+                __react4xp__internal__nashorn__obj__ = (Map) engine.eval( callScript);
+            }
+            finally
+            {
+                Thread.currentThread().setContextClassLoader( classLoader );
+            }
 
             String errorMessage = (String) __react4xp__internal__nashorn__obj__.get(KEY_ERROR);
 
-            if (errorMessage != null && !"".equals(errorMessage.trim())) {
+            if (errorMessage != null && !errorMessage.isBlank()) {
                 String errorStack = (String) __react4xp__internal__nashorn__obj__.get(KEY_STACKTRACE);
                 // LOG.warn(errorStack);
                 // LOG.warn("The above is a nashorn-internal stack trace for the following error:");
@@ -139,7 +142,7 @@ public class Renderer {
     }
 
 
-    private Map<String, String> runSSR(String entry, String props, LinkedList<String> assetsInvolved) {
+    private Map<String, String> runSSR(String entry, String props, List<String> assetsInvolved) {
 
         String call = "ReactDOMServer.renderToString(" + config.LIBRARY_NAME + "['" + entry + "'].default(" + props  + "));";
 
@@ -161,7 +164,6 @@ public class Renderer {
                             "Failing call: '" + call + "'\n" +
                             errorHandler.getSolutionTips());
 
-            destroy();
             return Map.of( KEY_ERROR, cleanErrorMessage );
         }
     }
@@ -171,25 +173,20 @@ public class Renderer {
      * @param entryName name of a transpiled JSX component, i.e. jsxPath: the filextension-less path to the compiled entry asset under assets/react4xp/, e.g: "site/parts/simple-reactive/simple-reactive"
      * @param props valid stringified JSON object: the entry's react props, e.g. '{"insertedMessage": "this is a prop!"}'
      * @param dependencyNames valid stringified JSON array: a set of file names to load into the engine (if not already done during initialization), needed by the entry before running it
-     * @returns {Map} Under the key 'html' (KEY_HTML), naked rendered HTML if successful. Under the key 'error' (KEY_ERROR), error message if failed.
+     * @return {Map} Under the key 'html' (KEY_HTML), naked rendered HTML if successful. Under the key 'error' (KEY_ERROR), error message if failed.
      */
     public Map<String, String> render(String entryName, String props, String dependencyNames) {
         try {
-            if (!valid) {
-                throw new RenderException("Concurrency failure: " + this + " has been killed because of a previous error.");
-            }
 
-            LinkedList<String> runnableAssetNames = getRunnableAssetNames(entryName, dependencyNames);
+            List<String> runnableAssetNames = getRunnableAssetNames(entryName, dependencyNames);
 			LOG.debug(this + ": runnableAssetNames '" + runnableAssetNames + "'");
 
-            assetLoader.loadAssetsIntoEngine(runnableAssetNames, engine);
-            Map<String, String> rendered = runSSR(entryName, props, runnableAssetNames);
-            return rendered;
+            assetLoader.loadAssetsIntoEngine(runnableAssetNames);
+			return runSSR( entryName, props, runnableAssetNames);
 
         } catch (RenderException r) {
             ErrorHandler errorHandler = new ErrorHandler();
             LOG.error(errorHandler.getLoggableStackTrace(r, null));
-            destroy();
             return Map.of(
                     KEY_ERROR, r.getMessage()
             );
@@ -197,7 +194,6 @@ public class Renderer {
         } catch (Exception e) {
             ErrorHandler errorHandler = new ErrorHandler();
             LOG.error(errorHandler.getLoggableStackTrace(e, null));
-            destroy();
             return Map.of(
                     KEY_ERROR, e.getClass().getName() + ": " + e.getMessage()
             );
@@ -212,25 +208,4 @@ public class Renderer {
         return Renderer.class.getSimpleName() + "#" + id;
     }
 
-
-
-
-    /////////////////////////////////////////////////////////////////////////////// Apache commons pool2 lifecycle
-
-
-    public boolean validate() {
-        return valid;
-    }
-    public void destroy() {
-        valid = false;
-
-        // if (!IS_PRODMODE) {
-        LOG.debug(this + ": destroyed.");
-        // }
-
-        engine = null;
-        System.gc();
-        // FIXME: This doesn't seem to be enough? https://stackoverflow.com/questions/32520413/scriptengine-clear-and-dispose
-        // TODO: How to completely displose of a running nashorn engine? If not, this will accumulate memory over time!
-    }
 }

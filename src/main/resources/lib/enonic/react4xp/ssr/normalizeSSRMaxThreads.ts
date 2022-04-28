@@ -1,6 +1,6 @@
 import {isNumber} from 'JS_UTILS_ALIAS/value/isNumber';
 import {isString} from 'JS_UTILS_ALIAS/value/isString';
-import {getAppConfigFilePathAbsolute} from '/lib/enonic/xp/getAppConfigFilePathAbsolute';
+import {getAppConfigFilePathAbsolute} from '/lib/enonic/react4xp/xp/getAppConfigFilePathAbsolute';
 
 
 // Accepts numerical values (which may or may not be in strings), null or undefined, returns number > 0 or null.

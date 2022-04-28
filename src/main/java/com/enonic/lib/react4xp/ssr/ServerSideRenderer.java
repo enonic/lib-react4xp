@@ -1,32 +1,35 @@
 package com.enonic.lib.react4xp.ssr;
 
-import com.enonic.lib.react4xp.ssr.engineFactory.EngineFactory;
-import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
-import com.enonic.lib.react4xp.ssr.pool.Renderer;
-import com.enonic.lib.react4xp.ssr.pool.RendererFactory;
-import com.enonic.lib.react4xp.ssr.resources.ResourceReader;
-import com.enonic.xp.resource.ResourceService;
-import com.enonic.xp.script.bean.BeanContext;
-import com.enonic.xp.script.bean.ScriptBean;
+import java.time.Duration;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Supplier;
+
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.function.Supplier;
-
-
+import com.enonic.lib.react4xp.ssr.engineFactory.EngineFactory;
+import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
+import com.enonic.lib.react4xp.ssr.pool.Renderer;
+import com.enonic.lib.react4xp.ssr.pool.RendererFactory;
+import com.enonic.lib.react4xp.ssr.resources.ResourceReader;
+import com.enonic.lib.react4xp.ssr.resources.ResourceReaderImpl;
+import com.enonic.xp.resource.ResourceService;
+import com.enonic.xp.script.bean.BeanContext;
+import com.enonic.xp.script.bean.ScriptBean;
 
 
 public class ServerSideRenderer implements ScriptBean {
-    private final static Logger LOG = LoggerFactory.getLogger( ServerSideRenderer.class );
+    private static final Logger LOG = LoggerFactory.getLogger( ServerSideRenderer.class );
 
-    private static final GenericObjectPoolConfig<Renderer> poolConfig = new GenericObjectPoolConfig<>();
-    private static GenericObjectPool<Renderer> rendererPool;
-    private static boolean isInitialized = false;
+    private final GenericObjectPoolConfig<Renderer> poolConfig = new GenericObjectPoolConfig<>();
+    private GenericObjectPool<Renderer> rendererPool;
+    private boolean isInitialized = false;
 
-    private Config config;
+	private final ExecutorService asyncInitializer = Executors.newCachedThreadPool();
     private Supplier<ResourceService> resourceServiceSupplier;
 
     ////////////////////////////////////////////////////////////////////////// Bean init
@@ -51,32 +54,31 @@ public class ServerSideRenderer implements ScriptBean {
             String statsComponentsFilename,
             boolean lazyload,
             Integer ssrMaxThreads,
+            String engineName,
             String[] scriptEngineSettings
     ) {
         // There can be only one poolConfig, so this will only happen once.
         synchronized (poolConfig) {
             if (!isInitialized) {
-                int threadCount = (ssrMaxThreads == null || ssrMaxThreads < 1)
+                int poolSize = (ssrMaxThreads == null || ssrMaxThreads < 1)
                         ? Runtime.getRuntime().availableProcessors()
                         : ssrMaxThreads;
 
-                LOG.debug("Setting up " + (lazyload ? "lazy-loading " : "") + "SSR with " + threadCount + " engine" + (threadCount == 1 ? "" : "s") + "...");
+                LOG.debug("Setting up " + (lazyload ? "lazy-loading " : "") + "SSR with " + poolSize + " engine" + (poolSize == 1 ? "" : "s") + "...");
 
-                config = new Config(appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksExternalsJsonFilename, statsComponentsFilename, lazyload, threadCount);
+				final Config config = new Config(appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksExternalsJsonFilename, statsComponentsFilename, lazyload);
 
-                ResourceReader resourceReader = new ResourceReader(resourceServiceSupplier, config, 0);
-                EngineFactory engineFactory = new EngineFactory(scriptEngineSettings, resourceReader);
+                ResourceReader resourceReader = new ResourceReaderImpl( resourceServiceSupplier, config, 0);
+                EngineFactory engineFactory = new EngineFactory(engineName, scriptEngineSettings, resourceReader);
                 RendererFactory rendererFactory = new RendererFactory(engineFactory, resourceReader, config);
 
-
-
-                setPoolConfig(threadCount);
+                configPool( poolSize );
 
                 rendererPool = new GenericObjectPool<>(rendererFactory, poolConfig);
 
                 // When eager-loading, init all the renderers. All ready to go!
                 if (!lazyload) {
-                    asyncInitRenderers(threadCount);
+                    asyncInitRenderers();
                 }
 
                 isInitialized = true;
@@ -85,59 +87,42 @@ public class ServerSideRenderer implements ScriptBean {
     }
 
 
-    private void setPoolConfig(Integer threadCount) {
+    private void configPool( int poolSize) {
         poolConfig.setLifo(false);
-        poolConfig.setMaxWaitMillis(200000);
-        poolConfig.setTestOnBorrow(false);
+		poolConfig.setMaxWait( Duration.ofMillis( 200000 ) );
         poolConfig.setTestOnReturn(true);
-        poolConfig.setMaxIdle(threadCount);
-        poolConfig.setMaxTotal(threadCount);
-        poolConfig.setMinIdle(threadCount);
+        poolConfig.setMaxIdle(poolSize);
+        poolConfig.setMaxTotal(poolSize);
+        poolConfig.setMinIdle(poolSize);
     }
 
     // Start initialization of N renderers in the pool, asynchronously
-    private void asyncInitRenderers(int threadCount) {
-        for (int i=0; i<threadCount; i++) {
-            new AsyncPoolRendererInitializer().start();
-        }
-    }
-
-    // Init a new renderer in the pool, asynchronously:
-    private class AsyncPoolRendererInitializer extends Thread {
-
-        public void run() {
-            Renderer renderer = null;
-            try {
-                renderer = rendererPool.borrowObject();
-
-                // Why sleep? When initializing multiple Renderers at once, this prevents them from borrowing one and returning
-                // that before the next one is borrowed: if a non-destroyed Renderer is cycled like that, nothing is actually initialized.
-                Thread.sleep(3);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-
-            } finally {
-                if (renderer != null) {
-                    rendererPool.returnObject(renderer);
+    private void asyncInitRenderers()
+    {
+        for ( int i = 0; i < rendererPool.getMinIdle(); i++ )
+        {
+            asyncInitializer.submit( () -> {
+                try
+                {
+                    rendererPool.addObject();
                 }
-            }
+                catch ( Exception e )
+                {
+                    LOG.error( "Error during async init", e );
+                }
+            } );
         }
     }
-
-
-
-
 
     ////////////////////////////////////////////////////////////////////////// RENDER
 
     public Map<String, String> render(String entryName, String props, String dependencyNames) {
         Renderer renderer = null;
-        Map<String, String> result = null;
+        Map<String, String> result;
 
-        try {
-            renderer = rendererPool.borrowObject();
-            result = renderer.render(entryName, props, dependencyNames);
+		try {
+			renderer = rendererPool.borrowObject();
+			result = renderer.render(entryName, props, dependencyNames);
 
         } catch (Exception e1) {
             LOG.error(new ErrorHandler().getLoggableStackTrace(e1, null));
@@ -146,16 +131,6 @@ public class ServerSideRenderer implements ScriptBean {
         } finally {
             if (renderer != null) {
                 rendererPool.returnObject(renderer);
-            }
-
-            try {
-                // If an error occurred, force-init a new Renderer by borrowing one Renderer in excess of the available ones - enforcing one re-init.
-                if (result == null || result.containsKey(ErrorHandler.KEY_ERROR)) { // && !config.LAZYLOAD) {
-                    asyncInitRenderers(rendererPool.getNumIdle() + 1);
-                }
-            } catch (Exception e2) {
-                LOG.error("Error when trying to reinitialize Renderer(s) in rendererPool after earlier error:");
-                LOG.error(new ErrorHandler().getLoggableStackTrace(e2, null));
             }
         }
 

@@ -12,7 +12,7 @@ import {normalizeSSRMaxThreads} from '/lib/enonic/react4xp/ssr/normalizeSSRMaxTh
 //import {getResource} from '/lib/enonic/react4xp/resource/getResource';
 
 
-const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
+import {SSRreact4xp} from './render';
 
 //const FULL_EXTERNALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}`;
 
@@ -20,9 +20,10 @@ const SSRreact4xp = __.newBean('com.enonic.lib.react4xp.ssr.ServerSideRenderer')
 const appConfig = app.config;
 //log.debug(`appConfig:%s`, appConfig);
 
-const SSR_LAZYLOAD = appConfig['react4xp.ssr.lazyLoad']; // Can be undefined, default in java?
-const SSR_MAX_THREADS = appConfig['react4xp.ssr.maxThreads']; // Can be undefined, default in java?
-const SSR_ENGINE_SETTINGS = appConfig['react4xp.ssr.settings']; // Can be undefined, default in java?
+const SSR_LAZYLOAD = appConfig['react4xp.ssr.lazyLoad'];
+const SSR_MAX_THREADS = appConfig['react4xp.ssr.maxThreads'];
+const SSR_ENGINE_SETTINGS = appConfig['react4xp.ssr.settings'];
+const SSR_ENGINE_NAME = appConfig['react4xp.ssr.engineName'];
 //log.debug(`SSR_LAZYLOAD:%s`, SSR_LAZYLOAD);
 //log.debug(`SSR_MAX_THREADS:%s`, SSR_MAX_THREADS);
 //log.debug(`SSR_ENGINE_SETTINGS:%s`, SSR_ENGINE_SETTINGS);
@@ -56,6 +57,7 @@ export function setup({
 		COMPONENT_STATS_FILENAME,
 		isSet(lazyload) ? lazyload : SSR_LAZYLOAD,
 		normalizeSSRMaxThreads(isSet(ssrMaxThreads) ? ssrMaxThreads : SSR_MAX_THREADS),
+        __.nullOrValue(SSR_ENGINE_NAME),
 		normalizeSSREngineSettings(SSR_ENGINE_SETTINGS)
 	);
 }

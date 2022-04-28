@@ -1,6 +1,6 @@
 //import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 import {readClientManifestJson} from '/lib/enonic/react4xp/asset/client/readClientManifestJson';
-import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
+import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/runMode';
 
 
 const CLIENT_CHUNKS_FILENAME = readClientManifestJson()['client.js'];
