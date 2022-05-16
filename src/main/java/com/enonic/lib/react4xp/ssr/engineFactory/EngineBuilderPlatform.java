@@ -26,11 +26,13 @@ public class EngineBuilderPlatform
     public ScriptEngine buildEngine()
     {
         final String resolvedEngineName = Objects.requireNonNullElse( engineName, "JavaScript" );
-        LOG.debug( "Init SSR engine: platform {}", engineName );
+        LOG.debug( "Init SSR engine: platform {}", resolvedEngineName );
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader( ClassLoader.getSystemClassLoader() );
         try {
-            return new ScriptEngineManager().getEngineByName( resolvedEngineName );
+            final ScriptEngine engineByName = new ScriptEngineManager().getEngineByName( resolvedEngineName );
+            LOG.debug( "Got platform engine {}", engineByName.getFactory().getEngineName() );
+            return engineByName;
         } finally
         {
             Thread.currentThread().setContextClassLoader( classLoader );
