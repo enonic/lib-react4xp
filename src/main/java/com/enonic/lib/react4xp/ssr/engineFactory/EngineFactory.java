@@ -14,6 +14,7 @@ public class EngineFactory
     private final static Logger LOG = LoggerFactory.getLogger( EngineFactory.class );
 
     private final EngineBuilder engineBuilder;
+
     private final ResourceReader resourceReader;
 
     private final static String POLYFILL_BASICS_FILE = "/lib/enonic/polyfill-react4xp/polyfillBasics.js";
@@ -26,35 +27,21 @@ public class EngineFactory
 
     /////////////////////////////////////////////////////////// INIT
 
-    public EngineFactory(String engineName, String[] scriptEngineSettings, ResourceReader resourceReader) {
-        engineBuilder = getEngineBuilder(engineName, scriptEngineSettings);
+    public EngineFactory( String engineName, String[] scriptEngineSettings, ResourceReader resourceReader )
+    {
+        engineBuilder = getEngineBuilder( engineName, scriptEngineSettings );
         this.resourceReader = resourceReader;
     }
 
     private EngineBuilder getEngineBuilder( String engineName, String[] scriptEngineSettings )
     {
-        if ( scriptEngineSettings == null || scriptEngineSettings.length == 0 ||
-            ( scriptEngineSettings.length == 1 && scriptEngineSettings[0] == null ) )
+        if ( "Nashorn".equalsIgnoreCase( engineName ) || ( engineName == null && EngineBuilderPlatform.preferredEngineName().equals( "Nashorn" ) ) )
         {
-            return new EngineBuilderPlatform( engineName );
-
-        }
-        else if ( scriptEngineSettings.length == 1 &&
-            ( "" + Integer.parseInt( scriptEngineSettings[0] ) ).equals( scriptEngineSettings[0].trim() ) )
-        {
-            int cacheSize = Integer.parseInt( scriptEngineSettings[0] );
-            if ( cacheSize > 0 )
-            {
-                return new EngineBuilderCached( cacheSize );
-            }
-            else
-            {
-                return new EngineBuilderPlatform( engineName );
-            }
+            return new EngineBuilderNashorn( scriptEngineSettings );
         }
         else
         {
-            return new EngineBuilderCustom( scriptEngineSettings );
+            return new EngineBuilderPlatform( engineName );
         }
     }
 
@@ -77,12 +64,12 @@ public class EngineFactory
 
         final AssetLoader assetLoader = new AssetLoader( resourceReader, null, id, engine );
         assetLoader.loadAssetIntoEngine( POLYFILL_BASICS_FILE, true );
-        if (engine.getFactory().getEngineName().contains( "Nashorn" ) )
+        if ( engine.getFactory().getEngineName().contains( "Nashorn" ) )
         {
             assetLoader.loadAssetIntoEngine( POLYFILL_REACT4XP_NASHORN_FILE, true );
         }
         assetLoader.loadAssetIntoEngine( POLYFILL_REACT4XP_NODE_FILE, true );
-        assetLoader.loadAssetIntoEngine(  POLYFILL_REACT4XP_USER_ADDED_FILE, false );
+        assetLoader.loadAssetIntoEngine( POLYFILL_REACT4XP_USER_ADDED_FILE, false );
 
         return engine;
     }
