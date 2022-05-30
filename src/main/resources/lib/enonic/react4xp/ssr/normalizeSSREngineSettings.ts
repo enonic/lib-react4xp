@@ -70,8 +70,7 @@ function isQuoteSoMaybeFlagAsInside(
 
 /** Normalize engine settings to string array */
 export function normalizeSSREngineSettings(
-	ssrEngineSettingsString :string|unknown,
-	ssrDefaultCacheSize :number = 0
+    ssrEngineSettingsString :string | undefined
 ) {
 
     // When iterating over strings, flags whether a character is inside a quote or not:
@@ -83,7 +82,7 @@ export function normalizeSSREngineSettings(
 
     // 1. ------------ If the entire multi-setting-items-stringis surrounded by a single set of double (or single) quotes, strip that away.
 
-    let ssrEngineSettings = ((ssrEngineSettingsString || ssrDefaultCacheSize) + "").trim();
+    let ssrEngineSettings = ssrEngineSettingsString?.trim() || "";
 
     if (ssrEngineSettings.endsWith("'") && singleQuoteCounter(ssrEngineSettings) === 2) {
         ssrEngineSettings = replaceSurroundingSingleQuotes(ssrEngineSettings);
@@ -122,4 +121,4 @@ export function normalizeSSREngineSettings(
         .map(replaceSurroundingDoubleQuotes)
         .map(replaceSurroundingSingleQuotes)
         .map(preventUnclosedQuotes(isInsideQuote))
-};
+}

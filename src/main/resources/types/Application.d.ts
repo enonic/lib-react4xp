@@ -1,6 +1,6 @@
 export namespace Application {
 	interface Config {
-		readonly [key :string] :unknown
+		readonly [key :string] : string | undefined
 	}
 	type Key = string
 	type Version = string

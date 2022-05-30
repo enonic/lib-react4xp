@@ -1,7 +1,6 @@
 package com.enonic.lib.react4xp.ssr.engineFactory;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
@@ -20,48 +19,63 @@ public class EngineBuilderPlatform
 
     private final String engineName;
 
+    private static final ScriptEngineManager SCRIPT_ENGINE_MANAGER;
+
+    private static final String PREFERRED_ENGINE;
+
     public EngineBuilderPlatform( final String engineName )
     {
         this.engineName = engineName;
     }
 
-    public ScriptEngine buildEngine()
+    static
     {
-
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         Thread.currentThread().setContextClassLoader( ClassLoader.getSystemClassLoader() );
         try
         {
-            final ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
-            final String resolvedEngineName;
-            if ( engineName == null )
-            {
-                final List<String> engineNames = scriptEngineManager.getEngineFactories()
-                    .stream()
-                    .map( ScriptEngineFactory::getEngineName )
-                    .collect( Collectors.toList() );
-                LOG.debug( "Available engines {}", engineNames );
-                if ( engineNames.contains( "Graal.js" ) )
-                {
-                    resolvedEngineName = "Graal.js";
-                }
-                else
-                {
-                    resolvedEngineName = "JavaScript";
-                }
-            }
-            else
-            {
-                resolvedEngineName = engineName;
-            }
-            LOG.debug( "Init SSR engine: platform {}", resolvedEngineName );
-            final ScriptEngine engineByName = scriptEngineManager.getEngineByName( resolvedEngineName );
-            LOG.debug( "Got platform engine {}", engineByName.getFactory().getEngineName() );
-            return engineByName;
+            SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
         }
         finally
         {
             Thread.currentThread().setContextClassLoader( classLoader );
         }
+
+        boolean hasGraalJs = SCRIPT_ENGINE_MANAGER.getEngineFactories()
+            .stream()
+            .map( ScriptEngineFactory::getEngineName )
+            .anyMatch( name -> name.contains( "Graal.js" ) );
+
+        boolean hasNashorn = SCRIPT_ENGINE_MANAGER.getEngineFactories()
+            .stream()
+            .map( ScriptEngineFactory::getEngineName )
+            .anyMatch( name -> name.contains( "Nashorn" ) );
+        PREFERRED_ENGINE = hasGraalJs ? "Graal.js" : hasNashorn ? "Nashorn" : "JavaScript";
+    }
+
+    public static String preferredEngineName()
+    {
+        return PREFERRED_ENGINE;
+    }
+
+    public ScriptEngine buildEngine()
+    {
+        final String resolvedEngineName = Objects.requireNonNullElse( engineName, PREFERRED_ENGINE );
+
+        LOG.debug( "Init SSR engine: platform {}", resolvedEngineName );
+        final ScriptEngine engineByName;
+
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader( ClassLoader.getSystemClassLoader() );
+        try
+        {
+            engineByName = SCRIPT_ENGINE_MANAGER.getEngineByName( resolvedEngineName );
+        }
+        finally
+        {
+            Thread.currentThread().setContextClassLoader( classLoader );
+        }
+        LOG.debug( "Got platform engine {}", engineByName.getFactory().getEngineName() );
+        return engineByName;
     }
 }
