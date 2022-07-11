@@ -16,18 +16,19 @@ This library runs on link:https://enonic.com/developer-tour[Enonic XP] server si
 
 [[versions-and-compatibility]]
 == Versions and compatibility
-This is version **3.1.0** for XP 7.
 
 This library, lib-react4xp, is installed as a regular XP library in a parent app/project. It also needs to run alongside a suite of *NPM packages*. These are bundled (by dependency) in the link:https://www.npmjs.com/package/react4xp[react4xp package], so by installing that one, you get the necessary packages.
 
-*This package is needed both in this library and in the parent project* that uses the library - and preferrably with _matching package version_ in both places. The library versions correspond with particular package versions. Whenever a library upgrade requires a new package version, whis table will be updated:
+*This package is needed both in this library and in the parent project* that uses the library - and preferably with _matching package version_ in both places. The library versions correspond with particular package versions. Whenever a library upgrade requires a new package version, whis table will be updated:
 
 
 [%header,cols=2]
 |===
 | **lib-react4xp** | @enonic/react4xp package (in both lib and app)
-| 3.1.0 | 3.0.6 
-| 3.0.0 | 3.0.6 
+| 3.3.0 | 3.1.0
+| 3.2.0 | 3.0.18
+| 3.1.0 | 3.0.17
+| 3.0.0 | 3.0.6
 |===
 
 {zwsp} +

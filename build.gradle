@@ -18,16 +18,16 @@ repositories {
 dependencies {
     compileOnly "com.enonic.xp:core-api:${xpVersion}"
 
-    compile "com.enonic.xp:lib-io:${xpVersion}"
-    compile "com.enonic.xp:lib-portal:${xpVersion}"
-    compile "com.enonic.xp:lib-task:${xpVersion}"
+    implementation "com.enonic.xp:lib-io:${xpVersion}"
+    implementation "com.enonic.xp:lib-portal:${xpVersion}"
+    implementation "com.enonic.xp:lib-task:${xpVersion}"
 
-    compile 'com.enonic.lib:lib-cache:2.1.1'
-    compile 'com.enonic.lib:lib-static:1.0.2'
+    implementation 'com.enonic.lib:lib-cache:2.1.1'
+    implementation 'com.enonic.lib:lib-static:1.0.2'
 
-    compile 'org.jdom:jdom2:2.0.6.1'
-    compile group: 'org.json', name: 'json', version: '20220320'
-    compile group: 'jaxen', name: 'jaxen', version: '1.2.0'
+    implementation 'org.jdom:jdom2:2.0.6.1'
+    implementation group: 'org.json', name: 'json', version: '20220320'
+    implementation group: 'jaxen', name: 'jaxen', version: '1.2.0'
 
     implementation 'org.apache.commons:commons-pool2:2.11.1'
 

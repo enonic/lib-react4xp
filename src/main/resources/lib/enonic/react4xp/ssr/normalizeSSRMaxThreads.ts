@@ -10,7 +10,7 @@ export function normalizeSSRMaxThreads(ssrMaxThreadsSetting :number|string|unkno
         ssrMaxThreads = isNumber(ssrMaxThreadsSetting)
 			? ssrMaxThreadsSetting
 			: isString(ssrMaxThreadsSetting)
-            	? parseInt(ssrMaxThreadsSetting, 10)
+            	? parseInt(<string>ssrMaxThreadsSetting, 10)
             	: 0;
     } catch (e) {
         log.error(`Looks like the value of react4xp.ssr.maxThreads from ${
