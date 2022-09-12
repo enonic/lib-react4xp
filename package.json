@@ -31,7 +31,7 @@
     "@rollup/plugin-commonjs": "^22.0.2",
     "@rollup/plugin-node-resolve": "^14.0.1",
     "@rollup/plugin-typescript": "^8.5.0",
-    "@types/react": "^18.0.18",
+    "@types/react": "^18.0.19",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.5",
     "babel-polyfill": "^6.26.0",
