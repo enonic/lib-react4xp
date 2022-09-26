@@ -26,7 +26,7 @@ dependencies {
     implementation 'com.enonic.lib:lib-static:1.0.2'
 
     implementation 'org.jdom:jdom2:2.0.6.1'
-    implementation group: 'org.json', name: 'json', version: '20220320'
+    implementation group: 'org.json', name: 'json', version: '20220924'
     implementation group: 'jaxen', name: 'jaxen', version: '1.2.0'
 
     implementation 'org.apache.commons:commons-pool2:2.11.1'
