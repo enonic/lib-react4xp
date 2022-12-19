@@ -28,7 +28,7 @@
     "@enonic/react4xp": "^3.1.0",
     "@mrhenry/core-web": "^1.0.3",
     "@rollup/plugin-alias": "^4.0.2",
-    "@rollup/plugin-commonjs": "^23.0.4",
+    "@rollup/plugin-commonjs": "^24.0.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-typescript": "^10.0.1",
     "@types/react": "^18.0.26",
