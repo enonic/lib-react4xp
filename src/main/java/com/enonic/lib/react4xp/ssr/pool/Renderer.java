@@ -3,6 +3,7 @@ package com.enonic.lib.react4xp.ssr.pool;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.enonic.lib.react4xp.ssr.Config;
+import com.enonic.lib.react4xp.ssr.RendererCache;
 import com.enonic.lib.react4xp.ssr.ServerSideRenderer;
 import com.enonic.lib.react4xp.ssr.engineFactory.EngineFactory;
 import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
@@ -38,7 +40,10 @@ public class Renderer {
 
     public static final String KEY_HTML = "html";
 
-    public Renderer( EngineFactory engineFactory, ResourceReader resourceReader, Config config, long id) {
+    private final RendererCache rendererCache;
+
+    public Renderer( EngineFactory engineFactory, ResourceReader resourceReader, Config config, long id, RendererCache rendererCache) {
+        this.rendererCache = rendererCache;
         this.id = id;
 
         // if (!IS_PRODMODE) {
@@ -143,14 +148,19 @@ public class Renderer {
 
 
     private Map<String, String> runSSR(String entry, String props, List<String> assetsInvolved) {
+        final String cashKey = generateCacheKey( entry, props );
+        if ( rendererCache.hasKey( cashKey ) )
+        {
+            return rendererCache.get( cashKey );
+        }
 
         String call = "ReactDOMServer.renderToString(" + config.LIBRARY_NAME + "['" + entry + "'].default(" + props  + "));";
 
         try {
-            String rendered = evalAndGetByKey(engine, call, KEY_HTML);
-
-            return Map.of( KEY_HTML, rendered );
-
+            String rendered = evalAndGetByKey( engine, call, KEY_HTML );
+            Map<String, String> resultAsMap = Map.of( KEY_HTML, rendered );
+            rendererCache.put( cashKey, resultAsMap );
+            return resultAsMap;
         } catch (RenderException e) {
             ErrorHandler errorHandler = new ErrorHandler();
             String cleanErrorMessage = errorHandler.getCleanErrorMessage(e);
@@ -200,7 +210,10 @@ public class Renderer {
         }
     }
 
-
+    private String generateCacheKey( final String entry, final String props )
+    {
+        return "hash@" + Objects.hash( entry, props );
+    }
 
     /////////////////////////////////////////////////////////////////////////////// Identity
 

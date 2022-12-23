@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.enonic.lib.react4xp.ssr.Config;
+import com.enonic.lib.react4xp.ssr.RendererCache;
 import com.enonic.lib.react4xp.ssr.engineFactory.EngineFactory;
 import com.enonic.lib.react4xp.ssr.resources.ResourceReader;
 
@@ -19,6 +20,7 @@ public class RendererFactory extends BasePooledObjectFactory<Renderer>
     private final EngineFactory engineFactory;
     private final ResourceReader resourceReader;
     private final Config config;
+    private final RendererCache rendererCache;
 
     private final AtomicLong id = new AtomicLong(0);
 
@@ -26,11 +28,12 @@ public class RendererFactory extends BasePooledObjectFactory<Renderer>
         this.engineFactory = engineFactory;
         this.resourceReader = resourceReader;
         this.config = config;
+        this.rendererCache = new RendererCache();
     }
 
     @Override
     public Renderer create() {
-        return new Renderer(engineFactory, resourceReader, config, id.incrementAndGet());
+        return new Renderer(engineFactory, resourceReader, config, id.incrementAndGet(), rendererCache);
     }
 
     @Override
