@@ -42,7 +42,7 @@ public class Renderer {
 
     private final RendererCache rendererCache;
 
-    public Renderer( EngineFactory engineFactory, ResourceReader resourceReader, Config config, long id, RendererCache rendererCache) {
+    public Renderer( ScriptEngine scriptEngine, ResourceReader resourceReader, Config config, long id, RendererCache rendererCache) {
         this.rendererCache = rendererCache;
         this.id = id;
 
@@ -51,11 +51,10 @@ public class Renderer {
         // }
 
         this.config = config;
+        this.engine = scriptEngine;
 
         try {
-            engine = engineFactory.buildEngine(id);
-
-			List<String> dependencies = new ChunkDependencyParser( resourceReader, id ).getScriptDependencyNames( config );
+            List<String> dependencies = new ChunkDependencyParser( resourceReader, id ).getScriptDependencyNames( config );
 
 			assetLoader = new AssetLoader( resourceReader, config.SCRIPTS_HOME, id, engine );
 

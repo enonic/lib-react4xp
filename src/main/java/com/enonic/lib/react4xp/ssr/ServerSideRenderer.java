@@ -4,7 +4,10 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
+
+import javax.script.ScriptEngine;
 
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -31,6 +34,8 @@ public class ServerSideRenderer implements ScriptBean {
 
 	private final ExecutorService asyncInitializer = Executors.newCachedThreadPool();
     private Supplier<ResourceService> resourceServiceSupplier;
+
+    private final AtomicLong id = new AtomicLong( 0 );
 
     ////////////////////////////////////////////////////////////////////////// Bean init
 
@@ -70,7 +75,9 @@ public class ServerSideRenderer implements ScriptBean {
 
                 ResourceReader resourceReader = new ResourceReaderImpl( resourceServiceSupplier, config, 0);
                 EngineFactory engineFactory = new EngineFactory(engineName, scriptEngineSettings, resourceReader);
-                RendererFactory rendererFactory = new RendererFactory(engineFactory, resourceReader, config);
+                long renderId = id.incrementAndGet();
+                ScriptEngine scriptEngine = engineFactory.buildEngine( renderId, config );
+                RendererFactory rendererFactory = new RendererFactory( scriptEngine, resourceReader, config, renderId );
 
                 configPool( poolSize );
 

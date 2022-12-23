@@ -5,6 +5,7 @@ import javax.script.ScriptEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.enonic.lib.react4xp.ssr.Config;
 import com.enonic.lib.react4xp.ssr.errors.RenderException;
 import com.enonic.lib.react4xp.ssr.resources.AssetLoader;
 import com.enonic.lib.react4xp.ssr.resources.ResourceReader;
@@ -57,12 +58,12 @@ public class EngineFactory
      * nashornPolyfills.js script is the basic dependency, and will be added at the very beginning
      * outside of this list.
      */
-    public ScriptEngine buildEngine( long id )
+    public ScriptEngine buildEngine( long id, Config config )
         throws RenderException
     {
         final ScriptEngine engine = engineBuilder.buildEngine();
 
-        final AssetLoader assetLoader = new AssetLoader( resourceReader, null, id, engine );
+        final AssetLoader assetLoader = new AssetLoader( resourceReader, config.SCRIPTS_HOME, id, engine );
         assetLoader.loadAssetIntoEngine( POLYFILL_BASICS_FILE, true );
         if ( engine.getFactory().getEngineName().contains( "Nashorn" ) )
         {
