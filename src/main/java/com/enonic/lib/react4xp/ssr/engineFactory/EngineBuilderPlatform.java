@@ -41,16 +41,15 @@ public class EngineBuilderPlatform
             Thread.currentThread().setContextClassLoader( classLoader );
         }
 
-        boolean hasGraalJs = SCRIPT_ENGINE_MANAGER.getEngineFactories()
-            .stream()
-            .map( ScriptEngineFactory::getEngineName )
-            .anyMatch( name -> name.contains( "Graal.js" ) );
+        PREFERRED_ENGINE = hasScriptEngine( "Graal.js" ) ? "Graal.js" : hasScriptEngine( "Nashorn" ) ? "Nashorn" : "JavaScript";
+    }
 
-        boolean hasNashorn = SCRIPT_ENGINE_MANAGER.getEngineFactories()
+    private static boolean hasScriptEngine( final String engineName )
+    {
+        return SCRIPT_ENGINE_MANAGER.getEngineFactories()
             .stream()
             .map( ScriptEngineFactory::getEngineName )
-            .anyMatch( name -> name.contains( "Nashorn" ) );
-        PREFERRED_ENGINE = hasGraalJs ? "Graal.js" : hasNashorn ? "Nashorn" : "JavaScript";
+            .anyMatch( name -> name.contains( engineName ) );
     }
 
     public static String preferredEngineName()
