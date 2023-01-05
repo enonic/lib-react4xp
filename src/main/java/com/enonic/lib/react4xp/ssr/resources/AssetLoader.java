@@ -3,8 +3,10 @@ package com.enonic.lib.react4xp.ssr.resources;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +14,11 @@ import org.slf4j.LoggerFactory;
 import com.enonic.lib.react4xp.ssr.ServerSideRenderer;
 import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
 import com.enonic.lib.react4xp.ssr.errors.RenderException;
-import com.enonic.lib.react4xp.ssr.pool.Renderer;
 import com.enonic.xp.resource.ResourceNotFoundException;
 import com.enonic.xp.server.RunMode;
+
+import static com.enonic.lib.react4xp.ssr.errors.ErrorHandler.KEY_ERROR;
+import static com.enonic.lib.react4xp.ssr.errors.ErrorHandler.KEY_STACKTRACE;
 
 
 public class AssetLoader
@@ -73,12 +77,12 @@ public class AssetLoader
         String assetContent = null;
         try
         {
-            LOG.debug( "#" + id + ": loading resource '" + asset + "'" );
+            LOG.debug( "#{}: loading resource '{}'", id, asset );
 
             assetContent = resourceReader.readResource( asset );
-            Renderer.evalAndGetByKey( engine, assetContent, null );
+            eval( engine, assetContent );
 
-            LOG.debug( "#" + id + ": ...'" + asset + "' ok." );
+            LOG.debug( "#{}: ...'{}' ok.", id, asset );
         } catch ( IOException e) {
             throw new RenderException( e );
         }
@@ -90,7 +94,7 @@ public class AssetLoader
             }
             else
             {
-                LOG.debug( "Resource " + asset + " not found, but that's probably ok :)" );
+                LOG.debug( "Resource {} not found, but that's probably ok :)", asset );
             }
         }
         catch ( RenderException e )
@@ -105,6 +109,41 @@ public class AssetLoader
             LOG.debug( errorHandler.getCodeDump( assetContent, asset ) );
 
             throw e;
+        }
+    }
+
+    private static void eval( final ScriptEngine engine, final String runnableCode )
+        throws RenderException
+    {
+        String callScript = "var __react4xp__internal__obj__ = {};" + "try {\n " + runnableCode + "\n}" +
+            "catch (error) { __react4xp__internal__obj__ = { stack: ''+error.stack, error: error.message }; }; " +
+            "__react4xp__internal__obj__;";
+        try
+        {
+            Map result;
+            final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader( engine.getClass().getClassLoader() );
+            try
+            {
+                result = (Map) engine.eval( callScript );
+            }
+            finally
+            {
+                Thread.currentThread().setContextClassLoader( classLoader );
+            }
+
+            String errorMessage = (String) result.get( KEY_ERROR );
+
+            if ( errorMessage != null && !errorMessage.isBlank() )
+            {
+                String errorStack = (String) result.get( KEY_STACKTRACE );
+                throw new RenderException( errorMessage, errorStack );
+            }
+
+        }
+        catch ( ScriptException s )
+        {
+            throw new RenderException( s );
         }
     }
 

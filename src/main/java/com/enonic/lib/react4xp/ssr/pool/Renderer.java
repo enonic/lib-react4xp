@@ -1,13 +1,14 @@
 package com.enonic.lib.react4xp.ssr.pool;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
+import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
-import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,7 @@ public class Renderer {
     private final ScriptEngine engine;
 
     private final Config config;
+
     private final AssetLoader assetLoader;
 
     public static final String KEY_HTML = "html";
@@ -41,130 +43,59 @@ public class Renderer {
     public Renderer( EngineFactory engineFactory, ResourceReader resourceReader, Config config, long id) {
         this.id = id;
 
-        // if (!IS_PRODMODE) {
-        LOG.debug(this + ": starting init" + (config.LAZYLOAD ? " (lazyloading)" : "") + "...");
-        // }
+        LOG.debug("{}: starting init {}...", this, (config.LAZYLOAD ? " (lazyloading)" : ""));
 
         this.config = config;
 
         try {
             engine = engineFactory.buildEngine(id);
 
-			List<String> dependencies = new ChunkDependencyParser( resourceReader, id ).getScriptDependencyNames( config );
+            assetLoader = new AssetLoader( resourceReader, config.SCRIPTS_HOME, id, engine );
 
-			assetLoader = new AssetLoader( resourceReader, config.SCRIPTS_HOME, id, engine );
+            final List<String> dependencies = new ChunkDependencyParser( engine, resourceReader ).getScriptDependencyNames( config );
 
-            assetLoader.loadAssetsIntoEngine(dependencies);
+            assetLoader.loadAssetsIntoEngine( dependencies );
 
-            // if (!IS_PRODMODE) {
-            LOG.debug(this + ": init is done.");
-            // }
+            LOG.debug("{}: init is done.", this);
 
         } catch (Exception e) {
             throw new RenderException(e, "Couldn't init " + this);
         }
     }
 
-    private List<String> getRunnableAssetNames(String entryName, String dependencyNames) {
-        List<String> runnableAssets = new ArrayList<>();
-
-        if (dependencyNames != null && !"".equals(dependencyNames.trim())) {
-            JSONArray array = new JSONArray(dependencyNames);
-			for ( final Object o : array )
-			{
-				String assetName = (String) o;
-				if ( assetName.endsWith( ".js" ) )
-				{
-					runnableAssets.add( assetName );
-				}
-			}
-        }
-		// Entries now has hash in the filename "entryname[hash].js", so this file no longer exist...
-		// But is not needed either because the "entryname[hash].js" is loaded as a dependency.
-        //String fullEntryName = entryName + ".js";
-        //runnableAssets.add(fullEntryName);
-
-        return runnableAssets;
-    }
-
     ///////////////////////////////////////////////////////////////////////////////
 
-    public static String evalAndGetByKey( ScriptEngine engine, String runnableCode, String key) throws RenderException {
-        StringBuilder scriptBuilder = new StringBuilder(
-                "var __react4xp__internal__nashorn__obj__ = {};" +
-                "try {\n"
-        );
-            if (key != null) {
-                scriptBuilder.append( "__react4xp__internal__nashorn__obj__." ).append( key ).append( "=" );
-            }
-            scriptBuilder.append(runnableCode);
-        scriptBuilder.append("\n}catch (__react4xp__internal__nashorn_error__){");
-            scriptBuilder.append("__react4xp__internal__nashorn__obj__.");
-            scriptBuilder.append(KEY_STACKTRACE);
-            scriptBuilder.append("=''+__react4xp__internal__nashorn_error__.stack;");
-            scriptBuilder.append("__react4xp__internal__nashorn__obj__.");
-            scriptBuilder.append(KEY_ERROR);
-            scriptBuilder.append("=__react4xp__internal__nashorn_error__.message;");
-        scriptBuilder.append("}");
-        scriptBuilder.append("__react4xp__internal__nashorn__obj__;");
+    private Map<String, String> runSSR( String entry, String props, List<String> assetsInvolved )
+    {
+        try
+        {
+            final Invocable invocable = (Invocable) engine;
+            final Object propsJson = invocable.invokeMethod( engine.get( "JSON" ), "parse", props );
+            final Map<String, Object> entryObject =
+                (Map<String, Object>) ( (Map<String, Object>) engine.get( config.LIBRARY_NAME ) ).get( entry );
+            final Function<Object, Object[]> defaultFunction = (Function<Object, Object[]>) entryObject.get( "default" );
 
-        String callScript = scriptBuilder.toString();
+            final Object entryWithProps = defaultFunction.apply( new Object[]{propsJson} );
 
-        try {
-            Map __react4xp__internal__nashorn__obj__;
-            final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            Thread.currentThread().setContextClassLoader( engine.getClass().getClassLoader() );
-            try
-            {
-                __react4xp__internal__nashorn__obj__ = (Map) engine.eval( callScript);
-            }
-            finally
-            {
-                Thread.currentThread().setContextClassLoader( classLoader );
-            }
+            final String renderedHtml = (String) invocable.invokeMethod( engine.get( "ReactDOMServer" ), "renderToString", entryWithProps );
 
-            String errorMessage = (String) __react4xp__internal__nashorn__obj__.get(KEY_ERROR);
-
-            if (errorMessage != null && !errorMessage.isBlank()) {
-                String errorStack = (String) __react4xp__internal__nashorn__obj__.get(KEY_STACKTRACE);
-                // LOG.warn(errorStack);
-                // LOG.warn("The above is a nashorn-internal stack trace for the following error:");
-                throw new RenderException(errorMessage, errorStack);
-            }
-
-            return (key != null)
-                    ? (String) __react4xp__internal__nashorn__obj__.get(key)
-                    : null;
-
-        } catch (ScriptException s) {
-            throw new RenderException(s);
+            return Map.of( KEY_HTML, renderedHtml );
         }
-    }
-
-
-    private Map<String, String> runSSR(String entry, String props, List<String> assetsInvolved) {
-
-        String call = "ReactDOMServer.renderToString(" + config.LIBRARY_NAME + "['" + entry + "'].default(" + props  + "));";
-
-        try {
-            String rendered = evalAndGetByKey(engine, call, KEY_HTML);
-
-            return Map.of( KEY_HTML, rendered );
-
-        } catch (RenderException e) {
+        catch ( ScriptException e )
+        {
             ErrorHandler errorHandler = new ErrorHandler();
-            String cleanErrorMessage = errorHandler.getCleanErrorMessage(e);
-            LOG.error(
-                    (e.getStacktraceString() == null ? "" : e.getStacktraceString() + "\n") +
-                            errorHandler.getLoggableStackTrace(e, cleanErrorMessage) + "\n\n" +
-                            e.getClass().getSimpleName() + ": " + cleanErrorMessage + "\n" +
-                            "in " + ServerSideRenderer.class.getName() + ".runSSR\n" +
-                            "Entry: '" + entry + "'\n" +
-                            "Assets involved:\n\t" + String.join("\n\t", assetsInvolved) + "\n" +
-                            "Failing call: '" + call + "'\n" +
-                            errorHandler.getSolutionTips());
+            String cleanErrorMessage = errorHandler.getCleanErrorMessage( e );
+            String call = config.LIBRARY_NAME + "['" + entry + "'].default(" + props + ")";
+            LOG.error( ( e.getMessage() + "\n" ) + errorHandler.getLoggableStackTrace( e, cleanErrorMessage ) + "\n\n" +
+                           e.getClass().getSimpleName() + ": " + cleanErrorMessage + "\n" + "in " + ServerSideRenderer.class.getName() +
+                           ".runSSR\n" + "Entry: '" + entry + "'\n" + "Assets involved:\n\t" + String.join( "\n\t", assetsInvolved ) +
+                           "\n" + "Failing call: '" + call + "'\n" + errorHandler.getSolutionTips() );
 
             return Map.of( KEY_ERROR, cleanErrorMessage );
+        }
+        catch ( NoSuchMethodException e )
+        {
+            throw new RuntimeException( e );
         }
     }
 
@@ -172,17 +103,16 @@ public class Renderer {
      * Renders an entry to an HTML string.
      * @param entryName name of a transpiled JSX component, i.e. jsxPath: the filextension-less path to the compiled entry asset under assets/react4xp/, e.g: "site/parts/simple-reactive/simple-reactive"
      * @param props valid stringified JSON object: the entry's react props, e.g. '{"insertedMessage": "this is a prop!"}'
-     * @param dependencyNames valid stringified JSON array: a set of file names to load into the engine (if not already done during initialization), needed by the entry before running it
+     * @param dependencyNames valid array: a set of file names to load into the engine (if not already done during initialization), needed by the entry before running it
      * @return {Map} Under the key 'html' (KEY_HTML), naked rendered HTML if successful. Under the key 'error' (KEY_ERROR), error message if failed.
      */
-    public Map<String, String> render(String entryName, String props, String dependencyNames) {
+    public Map<String, String> render(String entryName, String props, String[] dependencyNames) {
         try {
-
-            List<String> runnableAssetNames = getRunnableAssetNames(entryName, dependencyNames);
-			LOG.debug(this + ": runnableAssetNames '" + runnableAssetNames + "'");
+            List<String> runnableAssetNames = Arrays.asList( dependencyNames );
+            LOG.debug("{}: runnableAssetNames '{}'", this, runnableAssetNames);
 
             assetLoader.loadAssetsIntoEngine(runnableAssetNames);
-			return runSSR( entryName, props, runnableAssetNames);
+            return runSSR( entryName, props, runnableAssetNames);
 
         } catch (RenderException r) {
             ErrorHandler errorHandler = new ErrorHandler();

@@ -37,9 +37,7 @@ public class ResourceReaderImpl
     public String readResource( String resourcePath )
         throws IOException
     {
-        // if (!IS_PRODMODE) {
-        LOG.debug( this + ": reading resource '" + resourcePath + "'" );
-        // }
+        LOG.debug( "{}: reading resource '{}'", this, resourcePath );
 
         String url = null;
         try

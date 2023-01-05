@@ -33,7 +33,7 @@ export function doRenderSSR<
 				this.jsxPath,
 				//this.assetPath.slice(0, -3), // Remove .js
 				JSON.stringify(overrideProps || this.props),
-				JSON.stringify(getComponentChunkNames(this.jsxPath))
+				getComponentChunkNames(this.jsxPath)
 			)
 		);
 		//log.debug('doRenderSSR result1:%s', toStr(result)); // undefined

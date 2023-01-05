@@ -64,7 +64,8 @@ public class ServerSideRenderer implements ScriptBean {
                         ? Runtime.getRuntime().availableProcessors()
                         : ssrMaxThreads;
 
-                LOG.debug("Setting up " + (lazyload ? "lazy-loading " : "") + "SSR with " + poolSize + " engine" + (poolSize == 1 ? "" : "s") + "...");
+                LOG.debug( "Setting up {} SSR with {} engine {}...", lazyload ? "lazy-loading " : "", poolSize,
+                           ( poolSize == 1 ? "" : "s" ) );
 
 				final Config config = new Config(appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksExternalsJsonFilename, statsComponentsFilename, lazyload);
 
@@ -116,7 +117,7 @@ public class ServerSideRenderer implements ScriptBean {
 
     ////////////////////////////////////////////////////////////////////////// RENDER
 
-    public Map<String, String> render(String entryName, String props, String dependencyNames) {
+    public Map<String, String> render(String entryName, String props, String[] dependencyNames) {
         Renderer renderer = null;
         Map<String, String> result;
 

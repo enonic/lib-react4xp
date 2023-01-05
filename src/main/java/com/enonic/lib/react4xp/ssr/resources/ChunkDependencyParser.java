@@ -17,28 +17,17 @@ import com.enonic.lib.react4xp.ssr.Config;
 public class ChunkDependencyParser {
     private final static Logger LOG = LoggerFactory.getLogger( ChunkDependencyParser.class );
 
-    private final long id;
     private final ResourceReader resourceReader;
 
-    public ChunkDependencyParser( ResourceReader resourceReader, long id) {
-        this.id = id;
+    public ChunkDependencyParser( ResourceReader resourceReader )
+    {
         this.resourceReader = resourceReader;
-    }
-
-    private JSONArray getJSONArray(String fileName) throws IOException {
-        String json =  resourceReader.readResource(fileName);
-        return new JSONArray(json);
-    }
-
-    private JSONObject getJSONObject(String fileName) throws IOException {
-        String json =  resourceReader.readResource(fileName);
-        return new JSONObject(json);
     }
 
     private List<String> getDependencyNamesFromChunkFile(String externalsChunkFile) throws IOException {
         List<String> accumulator = new ArrayList<>();
 
-        JSONObject fileContentData = getJSONObject(externalsChunkFile);
+        JSONObject fileContentData = new JSONObject( resourceReader.readResource( externalsChunkFile ) );
 
         Iterator<String> keys = fileContentData.keys();
         while(keys.hasNext()) {
@@ -51,7 +40,7 @@ public class ChunkDependencyParser {
             try {
                 fetchedChunk = chunk.get("js");
                 fileName = (String)fetchedChunk;
-            } catch (Exception e1) {
+            } catch (Exception e) {
 
                 try {
                     JSONArray arr = (JSONArray)fetchedChunk;
@@ -72,13 +61,10 @@ public class ChunkDependencyParser {
         return accumulator;
     }
 
-    private List<String> getDependencyNamesFromStatsFile(String statsFile, List<String> entries, boolean doLazyLoad) throws IOException {
+    private List<String> getDependencyNamesFromStatsFile(String statsFile, List<String> entries) throws IOException {
         List<String> accumulator = new ArrayList<>();
-        if (doLazyLoad) {
-            return accumulator;
-        }
 
-        JSONObject fileContentData = getJSONObject(statsFile);
+        JSONObject fileContentData = new JSONObject( resourceReader.readResource( statsFile ) );
         Object entryObj = fileContentData.get("entrypoints");
         if (entryObj == null) {
             return accumulator;
@@ -91,18 +77,27 @@ public class ChunkDependencyParser {
             JSONObject entryData = (JSONObject)entrypoints.get(entryName);
             JSONArray assets = (JSONArray)entryData.get("assets");
             for (Object obj : assets) {
-                String fileName = null;
-                try {
-                    fileName = (String)((JSONObject)obj).get("name");
-                } catch (Exception e) {
-                    try {
-                        fileName = (String)obj;
-                    } catch (Exception e2) {
-                        throw new RuntimeException("Couldn't parse dependency file name from stats file - asset obj seems to be neither a JSONObject with a .name attribute, nor a string. Asset obj = " + obj.toString());
+                final String fileName;
+                if ( obj instanceof String )
+                {
+                    fileName = (String) obj;
+                }
+                else
+                {
+                    try
+                    {
+                        fileName = (String) ( (JSONObject) obj ).get( "name" );
+                    }
+                    catch ( Exception e )
+                    {
+                        throw new RuntimeException(
+                            "Couldn't parse dependency file name from stats file - asset obj seems to be neither a JSONObject with a .name attribute, nor a string. Asset obj = " +
+                                obj );
                     }
                 }
-                if (!accumulator.contains(fileName) && !entries.contains(fileName) && fileName.endsWith(".js")) {
-                    accumulator.add(fileName);
+                if ( fileName.endsWith( ".js" ) && !accumulator.contains( fileName ) && !entries.contains( fileName ) )
+                {
+                    accumulator.add( fileName );
                 }
             }
         }
@@ -116,41 +111,48 @@ public class ChunkDependencyParser {
             return entries;
         }
 
-        JSONArray fileContentData = getJSONArray(entryFile);
-		for ( final Object fileContentDatum : fileContentData )
-		{
-			entries.add( (String) fileContentDatum );
-		}
+        JSONArray fileContentData = new JSONArray( resourceReader.readResource( entryFile ) );
+        for ( final Object fileContentDatum : fileContentData )
+        {
+            entries.add( (String) fileContentDatum );
+        }
 
         return entries;
     }
 
-    public List<String> getScriptDependencyNames(Config config) throws IOException {
-        List<String> dependencies = new ArrayList<>();
+    public List<String> getScriptDependencyNames( Config config )
+        throws IOException
+    {
+        final List<String> dependencies = new ArrayList<>();
 
-        String externalsChunkFile = config.CHUNKFILES_HOME + config.CHUNKSEXTERNALS_JSON_FILENAME;
-        List<String> externalsDependencies = getDependencyNamesFromChunkFile(externalsChunkFile);
-        for (String dependency : externalsDependencies) {
-            if (!dependencies.contains(dependency)) {
-                dependencies.add(dependency);
+        final String externalsChunkFile = config.CHUNKFILES_HOME + config.CHUNKSEXTERNALS_JSON_FILENAME;
+        final List<String> externalsDependencies = getDependencyNamesFromChunkFile( externalsChunkFile );
+        for ( String dependency : externalsDependencies )
+        {
+            if ( !dependencies.contains( dependency ) )
+            {
+                dependencies.add( dependency );
             }
         }
 
-        String entryFile = config.CHUNKFILES_HOME + config.ENTRIES_JSON_FILENAME;
-        List<String> entries = getEntriesList(entryFile);
+        if ( config.LAZYLOAD )
+        {
+            return dependencies;
+        }
+        final String entryFile = config.CHUNKFILES_HOME + config.ENTRIES_JSON_FILENAME;
 
-        String statsFile = config.CHUNKFILES_HOME + config.STATS_COMPONENTS_FILENAME;
-        List<String> statsDependencies = getDependencyNamesFromStatsFile(statsFile, entries, config.LAZYLOAD);
-        for (String dependencyName : statsDependencies) {
-            if (!dependencies.contains(dependencyName)) {
-                dependencies.add(dependencyName);
+        final List<String> entries = getEntriesList( entryFile );
+
+        final String statsFile = config.CHUNKFILES_HOME + config.STATS_COMPONENTS_FILENAME;
+
+        final List<String> statsDependencies = getDependencyNamesFromStatsFile( statsFile, entries );
+        for ( String dependencyName : statsDependencies )
+        {
+            if ( !dependencies.contains( dependencyName ) )
+            {
+                dependencies.add( dependencyName );
             }
         }
         return dependencies;
-    }
-
-
-    public String toString() {
-        return ChunkDependencyParser.class.getSimpleName() + "#" + id;
     }
 }
