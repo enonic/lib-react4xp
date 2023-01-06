@@ -1,92 +1,99 @@
 package com.enonic.lib.react4xp.ssr.resources;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.script.Bindings;
+import javax.script.Invocable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 
 import com.enonic.lib.react4xp.ssr.Config;
 
-/** Reads and parses file names from webpack-generated JSON files that list up contenthashed bundle chunk names. */
+/** Reads and parses file names from webpack-generated JSON files that list up content-hashed bundle chunk names. */
 public class ChunkDependencyParser {
-    private final static Logger LOG = LoggerFactory.getLogger( ChunkDependencyParser.class );
+
+    private final ScriptEngine engine;
 
     private final ResourceReader resourceReader;
 
-    public ChunkDependencyParser( ResourceReader resourceReader )
+    public ChunkDependencyParser( final ScriptEngine engine, final ResourceReader resourceReader )
     {
+        this.engine = engine;
         this.resourceReader = resourceReader;
     }
 
-    private List<String> getDependencyNamesFromChunkFile(String externalsChunkFile) throws IOException {
-        List<String> accumulator = new ArrayList<>();
+    public List<String> getScriptDependencyNames( Config config )
+        throws IOException
+    {
+        final String externalsChunkFile = config.CHUNKFILES_HOME + config.CHUNKSEXTERNALS_JSON_FILENAME;
+        final List<String> externalsDependencies = getDependencyNamesFromChunkFile( resourceReader.readResource( externalsChunkFile ) );
 
-        JSONObject fileContentData = new JSONObject( resourceReader.readResource( externalsChunkFile ) );
-
-        Iterator<String> keys = fileContentData.keys();
-        while(keys.hasNext()) {
-            String chunkName = keys.next();
-
-            JSONObject chunk = (JSONObject)fileContentData.get(chunkName);
-
-            Object fetchedChunk = null;
-            String fileName;
-            try {
-                fetchedChunk = chunk.get("js");
-                fileName = (String)fetchedChunk;
-            } catch (Exception e) {
-
-                try {
-                    JSONArray arr = (JSONArray)fetchedChunk;
-                    if (arr.length() != 1) {
-                        throw new JSONException("Unexpected JSON chunk format, expected exactly 1 item in array.");
-                    }
-                    fileName = (String) arr.get(0);
-
-                } catch (Exception e2) {
-                    LOG.error("File: " + externalsChunkFile);
-                    LOG.error("Chunk (" + chunk.getClass().getSimpleName() + "): " + chunk);
-                    throw e2;
-                }
-            }
-            accumulator.add(fileName);
+        if ( config.LAZYLOAD )
+        {
+            return externalsDependencies.stream().distinct().collect( Collectors.toList() );
         }
 
-        return accumulator;
+        final String statsFile = config.CHUNKFILES_HOME + config.STATS_COMPONENTS_FILENAME;
+
+        final List<String> statsDependencies =
+            getDependencyNamesFromStatsFile( resourceReader.readResource( statsFile ) );
+
+        return Stream.concat( externalsDependencies.stream(), statsDependencies.stream() ).distinct().collect( Collectors.toList() );
     }
 
-    private List<String> getDependencyNamesFromStatsFile(String statsFile, List<String> entries) throws IOException {
-        List<String> accumulator = new ArrayList<>();
+    private List<String> getDependencyNamesFromChunkFile( String source )
+    {
+        final Map<String, Object> chunksData = (Map<String, Object>) parseJson( source );
 
-        JSONObject fileContentData = new JSONObject( resourceReader.readResource( statsFile ) );
-        Object entryObj = fileContentData.get("entrypoints");
-        if (entryObj == null) {
-            return accumulator;
+        return chunksData.values().stream().map( value -> {
+            final Map<String, Object> chunk = (Map<String, Object>) value;
+            final Object fetchedChunk = chunk.get( "js" );
+
+            if ( fetchedChunk instanceof String )
+            {
+                return (String) fetchedChunk;
+            }
+            else
+            {
+                final List<String> arr = adaptList( fetchedChunk );
+                if ( arr.size() != 1 )
+                {
+                    throw new IllegalStateException( "Unexpected JSON chunk format, expected exactly 1 item in array. Chunk: " + chunk );
+                }
+                return arr.get( 0 );
+            }
+
+        } ).collect( Collectors.toList() );
+    }
+
+    private List<String> getDependencyNamesFromStatsFile( String statsSource )
+    {
+        final Map<String, Object> statsData = (Map<String, Object>) parseJson( statsSource );
+        final Map<String, Object> entrypoints = (Map<String, Object>) statsData.get( "entrypoints" );
+
+        if ( entrypoints == null )
+        {
+            return List.of();
         }
 
-        JSONObject entrypoints = (JSONObject)entryObj;
-        Iterator<String> entryKeys = entrypoints.keys();
-        while(entryKeys.hasNext()) {
-            String entryName = entryKeys.next();
-            JSONObject entryData = (JSONObject)entrypoints.get(entryName);
-            JSONArray assets = (JSONArray)entryData.get("assets");
-            for (Object obj : assets) {
-                final String fileName;
+        return entrypoints.values()
+            .stream()
+            .flatMap( value -> adaptList( ( (Map<String, Object>) value ).get( "assets" ) ).stream() )
+            .map( obj -> {
                 if ( obj instanceof String )
                 {
-                    fileName = (String) obj;
+                    return (String) obj;
                 }
                 else
                 {
                     try
                     {
-                        fileName = (String) ( (JSONObject) obj ).get( "name" );
+                        return (String) ( (Map<String, Object>) obj ).get( "name" );
                     }
                     catch ( Exception e )
                     {
@@ -95,64 +102,37 @@ public class ChunkDependencyParser {
                                 obj );
                     }
                 }
-                if ( fileName.endsWith( ".js" ) && !accumulator.contains( fileName ) && !entries.contains( fileName ) )
-                {
-                    accumulator.add( fileName );
-                }
-            }
-        }
-
-        return accumulator;
+            } )
+            .filter( fileName -> fileName.endsWith( ".js" ) )
+            .collect( Collectors.toList() );
     }
 
-    private List<String> getEntriesList(String entryFile) throws IOException {
-        List<String> entries = new ArrayList<>();
-        if (entryFile == null || entryFile.trim().isEmpty()) {
-            return entries;
-        }
-
-        JSONArray fileContentData = new JSONArray( resourceReader.readResource( entryFile ) );
-        for ( final Object fileContentDatum : fileContentData )
-        {
-            entries.add( (String) fileContentDatum );
-        }
-
-        return entries;
-    }
-
-    public List<String> getScriptDependencyNames( Config config )
-        throws IOException
+    private Object parseJson( String json )
     {
-        final List<String> dependencies = new ArrayList<>();
-
-        final String externalsChunkFile = config.CHUNKFILES_HOME + config.CHUNKSEXTERNALS_JSON_FILENAME;
-        final List<String> externalsDependencies = getDependencyNamesFromChunkFile( externalsChunkFile );
-        for ( String dependency : externalsDependencies )
+        final Invocable invocable = (Invocable) engine;
+        try
         {
-            if ( !dependencies.contains( dependency ) )
-            {
-                dependencies.add( dependency );
-            }
+            return invocable.invokeMethod( engine.get( "JSON" ), "parse", json );
         }
-
-        if ( config.LAZYLOAD )
+        catch ( ScriptException | NoSuchMethodException e )
         {
-            return dependencies;
+            throw new RuntimeException( e );
         }
-        final String entryFile = config.CHUNKFILES_HOME + config.ENTRIES_JSON_FILENAME;
+    }
 
-        final List<String> entries = getEntriesList( entryFile );
-
-        final String statsFile = config.CHUNKFILES_HOME + config.STATS_COMPONENTS_FILENAME;
-
-        final List<String> statsDependencies = getDependencyNamesFromStatsFile( statsFile, entries );
-        for ( String dependencyName : statsDependencies )
+    private static <T> List<T> adaptList( final Object object )
+    {
+        if ( object instanceof List )
         {
-            if ( !dependencies.contains( dependencyName ) )
-            {
-                dependencies.add( dependencyName );
-            }
+            return (List<T>) object;
         }
-        return dependencies;
+        else if ( object instanceof Bindings ) // Nashorn case
+        {
+            return List.copyOf( (Collection<T>) ( (Bindings) object ).values() );
+        }
+        else
+        {
+            throw new IllegalArgumentException( "object is not a list" );
+        }
     }
 }
