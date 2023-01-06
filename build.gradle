@@ -1,6 +1,3 @@
-// Build library: gradlew build
-// Install library locally for development with: gradlew install
-
 plugins {
     id 'java'
     id 'maven-publish'
@@ -25,12 +22,12 @@ dependencies {
     implementation 'com.enonic.lib:lib-cache:2.1.1'
     implementation 'com.enonic.lib:lib-static:1.0.2'
 
-    implementation 'org.jdom:jdom2:2.0.6.1'
-    implementation group: 'jaxen', name: 'jaxen', version: '2.0.0'
-
+    implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'org.apache.commons:commons-pool2:2.11.1'
 
     testImplementation "com.enonic.xp:testing:${xpVersion}"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.9.0"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.9.0"
 }
 
 node {
@@ -81,5 +78,7 @@ else
     rollup.dependsOn( npmInstall )
 }
 
-//def ROOT = project.projectDir.toString()
-//jar.outputs.dir('build/libs')
+test {
+    useJUnitPlatform {
+    }
+}
