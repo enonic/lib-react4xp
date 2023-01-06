@@ -73,9 +73,19 @@ public class Renderer {
             final Object propsJson = invocable.invokeMethod( engine.get( "JSON" ), "parse", props );
             final Map<String, Object> entryObject =
                 (Map<String, Object>) ( (Map<String, Object>) engine.get( config.LIBRARY_NAME ) ).get( entry );
-            final Function<Object, Object[]> defaultFunction = (Function<Object, Object[]>) entryObject.get( "default" );
 
-            final Object entryWithProps = defaultFunction.apply( new Object[]{propsJson} );
+            final Object entryWithProps;
+            if ( entryObject.get( "default" ) instanceof Function )
+            {
+                // Graal.js fails to find "default" method when invokeMethod is used. Call directly
+                // Hopefully will be fixed in future versions of Graal.js
+                final Function<Object, Object[]> defaultFunction = (Function<Object, Object[]>) entryObject.get( "default" );
+                entryWithProps = defaultFunction.apply( new Object[]{propsJson} );
+            }
+            else
+            {
+                entryWithProps = invocable.invokeMethod( entryObject, "default", propsJson );
+            }
 
             final String renderedHtml = (String) invocable.invokeMethod( engine.get( "ReactDOMServer" ), "renderToString", entryWithProps );
 
