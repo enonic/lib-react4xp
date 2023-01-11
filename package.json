@@ -41,14 +41,12 @@
     "mocha": "^10.2.0",
     "npm-run-all": "^4.1.5",
     "react-dom": "*",
-    "rollup": "^2.79.1",
+    "rollup": "^3.9.1",
     "rollup-plugin-output-manifest": "^2.0.0",
     "rollup-plugin-polyfill": "^4.0.0",
     "text-encoding": "^0.7.0",
     "tslib": "^2.4.1",
-    "typescript": "^4.9.4",
-    "webpack": "^5.75.0",
-    "webpack-cli": "^4.10.0"
+    "typescript": "^4.9.4"
   },
   "main": "src/main/resources/lib/enonic/react4xp/index.es6",
   "name": "lib-react4xp",
@@ -69,11 +67,11 @@
     "install:nsi": "nsi",
     "reinstall": "npm run clean && npm run local",
     "rollup": "npm-run-all --parallel rollup:client rollup:executor rollup:nashornPolyfills rollup:nodePolyfills rollup:server",
-    "rollup:client": "npx rollup --config rollup.config.client.js",
-    "rollup:executor": "npx rollup --config rollup.config.executor.js",
-    "rollup:nashornPolyfills": "npx rollup --config rollup.config.nashornPolyfills.js",
-    "rollup:nodePolyfills": "npx rollup --config rollup.config.nodePolyfills.js",
-    "rollup:server": "npx rollup --config rollup.config.server.js src/main/resources/lib/enonic/react4xp/index.ts src/main/resources/services/react4xp/react4xp.ts src/main/resources/services/react4xp-dependencies/react4xp-dependencies.ts",
+    "rollup:client": "npx rollup --config rollup.config.client.mjs",
+    "rollup:executor": "npx rollup --config rollup.config.executor.mjs",
+    "rollup:nashornPolyfills": "npx rollup --config rollup.config.nashornPolyfills.mjs",
+    "rollup:nodePolyfills": "npx rollup --config rollup.config.nodePolyfills.mjs",
+    "rollup:server": "npx rollup --config rollup.config.server.mjs src/main/resources/lib/enonic/react4xp/index.ts src/main/resources/services/react4xp/react4xp.ts src/main/resources/services/react4xp-dependencies/react4xp-dependencies.ts",
     "test": "NODE_PATH=./ node_modules/mocha/bin/mocha --compilers js:@babel/register --require babel-polyfill --require src/test/test_helper.js \"src/test/**/*@(.js)\"",
     "tsc": "npx tsc"
   }

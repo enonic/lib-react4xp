@@ -53,7 +53,9 @@ export default {
         format: 'cjs',
         freeze: false,
 
-        interop: false,
+        // https://rollupjs.org/guide/en/#outputinterop
+        interop: 'auto',
+
         preserveModules: true, // Copy modules into build/resources/main/node_modules instead of bundling them
         preserveModulesRoot: DIR_IN_REL,
         sourcemap: false

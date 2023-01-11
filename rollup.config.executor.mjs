@@ -1,6 +1,10 @@
-//import commonjs from '@rollup/plugin-commonjs';
-//import hash from 'rollup-plugin-hash';
-import outputManifest from 'rollup-plugin-output-manifest'
+// import commonjs from '@rollup/plugin-commonjs';
+// import hash from 'rollup-plugin-hash';
+
+// See https://github.com/shuizhongyueming/rollup-plugin-output-manifest/issues/21
+import pluginManifest from 'rollup-plugin-output-manifest';
+const { default: outputManifest } = pluginManifest;
+
 import typescript from '@rollup/plugin-typescript';
 
 
