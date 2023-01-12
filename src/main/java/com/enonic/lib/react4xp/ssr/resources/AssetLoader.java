@@ -60,7 +60,7 @@ public class AssetLoader
 
     private boolean shouldLoadAsset( String assetName )
     {
-        return ( !IS_PRODMODE || ! assetLoadedMarkers.contains( assetName ) );
+        return !( IS_PRODMODE && assetLoadedMarkers.contains( assetName ) );
     }
 
     private void markAssetLoaded( String assetName )
@@ -70,7 +70,6 @@ public class AssetLoader
             assetLoadedMarkers.add( assetName );
         }
     }
-
 
     public void loadAssetIntoEngine( final String asset, final boolean failOnNotFound )
     {
@@ -82,8 +81,10 @@ public class AssetLoader
             assetContent = resourceReader.readResource( asset );
             eval( engine, assetContent );
 
-            LOG.debug( "#{}: ...'{}' ok.", id, asset );
-        } catch ( IOException e) {
+            LOG.debug( "#{}: ...'{}' loaded", id, asset );
+        }
+        catch ( IOException e )
+        {
             throw new RenderException( e );
         }
         catch ( ResourceNotFoundException r )
