@@ -2,8 +2,10 @@ package com.enonic.lib.react4xp.ssr;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import org.apache.commons.pool2.impl.GenericObjectPool;
@@ -22,86 +24,81 @@ import com.enonic.xp.script.bean.BeanContext;
 import com.enonic.xp.script.bean.ScriptBean;
 
 
-public class ServerSideRenderer implements ScriptBean {
+public class ServerSideRenderer
+    implements ScriptBean
+{
     private static final Logger LOG = LoggerFactory.getLogger( ServerSideRenderer.class );
 
-    private final GenericObjectPoolConfig<Renderer> poolConfig = new GenericObjectPoolConfig<>();
-    private GenericObjectPool<Renderer> rendererPool;
-    private boolean isInitialized = false;
+    private final AtomicBoolean isInitialized = new AtomicBoolean();
 
-	private final ExecutorService asyncInitializer = Executors.newCachedThreadPool();
+    private final CountDownLatch latch = new CountDownLatch( 1 );
+
+    private volatile GenericObjectPool<Renderer> rendererPool;
+
     private Supplier<ResourceService> resourceServiceSupplier;
 
-    ////////////////////////////////////////////////////////////////////////// Bean init
-
     @Override
-    public void initialize(BeanContext context) {
-        this.resourceServiceSupplier = context.getService(ResourceService.class);
+    public void initialize( BeanContext context )
+    {
+        this.resourceServiceSupplier = context.getService( ResourceService.class );
     }
 
+    public void setup( String appName, String scriptsHome, String libraryName, String chunkfilesHome, String entriesJsonFilename,
+                       String chunksExternalsJsonFilename, String statsComponentsFilename, boolean lazyload, Integer ssrMaxThreads,
+                       String engineName, String[] scriptEngineSettings )
+    {
+        synchronized ( isInitialized )
+        {
+            if ( !isInitialized.get() )
+            {
+                int poolSize = ( ssrMaxThreads == null || ssrMaxThreads < 1 ) ? Runtime.getRuntime().availableProcessors() : ssrMaxThreads;
 
-
-
-    ////////////////////////////////////////////////////////////////////////// INIT
-
-    public void setup(
-            String appName,
-            String scriptsHome,
-            String libraryName,
-            String chunkfilesHome,
-            String entriesJsonFilename,
-            String chunksExternalsJsonFilename,
-            String statsComponentsFilename,
-            boolean lazyload,
-            Integer ssrMaxThreads,
-            String engineName,
-            String[] scriptEngineSettings
-    ) {
-        // There can be only one poolConfig, so this will only happen once.
-        synchronized (poolConfig) {
-            if (!isInitialized) {
-                int poolSize = (ssrMaxThreads == null || ssrMaxThreads < 1)
-                        ? Runtime.getRuntime().availableProcessors()
-                        : ssrMaxThreads;
-
-                LOG.debug( "Setting up {} SSR with {} engine {}...", lazyload ? "lazy-loading " : "", poolSize,
+                LOG.debug( "Setting up{} SSR with {} engine{}...", lazyload ? " lazy-loading " : "", poolSize,
                            ( poolSize == 1 ? "" : "s" ) );
 
-				final Config config = new Config(appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksExternalsJsonFilename, statsComponentsFilename, lazyload);
+                final Config config =
+                    new Config( appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksExternalsJsonFilename,
+                                statsComponentsFilename, lazyload );
 
-                ResourceReader resourceReader = new ResourceReaderImpl( resourceServiceSupplier, config, 0);
-                EngineFactory engineFactory = new EngineFactory(engineName, scriptEngineSettings, resourceReader);
-                RendererFactory rendererFactory = new RendererFactory(engineFactory, resourceReader, config);
+                final ResourceReader resourceReader = new ResourceReaderImpl( resourceServiceSupplier, config );
+                final EngineFactory engineFactory = new EngineFactory( engineName, scriptEngineSettings, resourceReader );
+                final RendererFactory rendererFactory = new RendererFactory( engineFactory, resourceReader, config );
 
-                configPool( poolSize );
+                rendererPool = new GenericObjectPool<>( rendererFactory, createPoolConfig( poolSize ) );
 
-                rendererPool = new GenericObjectPool<>(rendererFactory, poolConfig);
-
-                // When eager-loading, init all the renderers. All ready to go!
-                if (!lazyload) {
+                if ( !lazyload )
+                {
                     asyncInitRenderers();
                 }
+                else
+                {
+                    latch.countDown();
+                }
 
-                isInitialized = true;
+                isInitialized.set( true );
             }
         }
     }
 
-
-    private void configPool( int poolSize) {
-        poolConfig.setLifo(false);
-		poolConfig.setMaxWait( Duration.ofMillis( 200000 ) );
-        poolConfig.setTestOnReturn(true);
-        poolConfig.setMaxIdle(poolSize);
-        poolConfig.setMaxTotal(poolSize);
-        poolConfig.setMinIdle(poolSize);
+    private static <T> GenericObjectPoolConfig<T> createPoolConfig( int poolSize )
+    {
+        final GenericObjectPoolConfig<T> poolConfig = new GenericObjectPoolConfig<>();
+        poolConfig.setMaxWait( Duration.ofMillis( 200000 ) );
+        poolConfig.setMaxIdle( poolSize );
+        poolConfig.setMinIdle( poolSize );
+        poolConfig.setMaxTotal( poolSize );
+        return poolConfig;
     }
 
     // Start initialization of N renderers in the pool, asynchronously
     private void asyncInitRenderers()
     {
-        for ( int i = 0; i < rendererPool.getMinIdle(); i++ )
+        final ExecutorService asyncInitializer = Executors.newSingleThreadExecutor();
+
+        try
         {
+            // First Renderer is expensive to make. Don't allow to first Renderer to be created in parallel with others.
+            // The following ones may reuse precompiled scripts, so they are not that expensive to create even in parallel.
             asyncInitializer.submit( () -> {
                 try
                 {
@@ -109,29 +106,55 @@ public class ServerSideRenderer implements ScriptBean {
                 }
                 catch ( Exception e )
                 {
-                    LOG.error( "Error during async init", e );
+                    LOG.error( "Error during async init first Renderer", e );
+                }
+                finally
+                {
+                    latch.countDown();
                 }
             } );
+            asyncInitializer.submit( () -> {
+                try
+                {
+                    rendererPool.preparePool();
+                }
+                catch ( final Exception e )
+                {
+                    LOG.error( "Error during async init Renderers", e );
+                }
+            } );
+
+        }
+        finally
+        {
+            asyncInitializer.shutdown();
         }
     }
 
     ////////////////////////////////////////////////////////////////////////// RENDER
 
-    public Map<String, String> render(String entryName, String props, String[] dependencyNames) {
+    public Map<String, String> render( String entryName, String props, String[] dependencyNames )
+    {
         Renderer renderer = null;
         Map<String, String> result;
 
-		try {
-			renderer = rendererPool.borrowObject();
-			result = renderer.render(entryName, props, dependencyNames);
+        try
+        {
+            latch.await();
+            renderer = rendererPool.borrowObject();
+            result = renderer.render( entryName, props, dependencyNames );
 
-        } catch (Exception e1) {
-            LOG.error(new ErrorHandler().getLoggableStackTrace(e1, null));
-            result = Map.of(ErrorHandler.KEY_ERROR, e1.getMessage());
-
-        } finally {
-            if (renderer != null) {
-                rendererPool.returnObject(renderer);
+        }
+        catch ( Exception e1 )
+        {
+            LOG.error( new ErrorHandler().getLoggableStackTrace( e1, null ) );
+            result = Map.of( ErrorHandler.KEY_ERROR, e1.getMessage() );
+        }
+        finally
+        {
+            if ( renderer != null )
+            {
+                rendererPool.returnObject( renderer );
             }
         }
 

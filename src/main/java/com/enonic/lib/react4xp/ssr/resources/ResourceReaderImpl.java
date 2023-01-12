@@ -21,15 +21,12 @@ public class ResourceReaderImpl
 
     // public static final boolean IS_PRODMODE = (RunMode.get() == RunMode.PROD);
 
-    private final long id;
-
     private final Supplier<ResourceService> resourceServiceSupplier;
 
     private final Config config;
 
-    public ResourceReaderImpl( Supplier<ResourceService> resourceServiceSupplier, Config config, long id )
+    public ResourceReaderImpl( Supplier<ResourceService> resourceServiceSupplier, Config config )
     {
-        this.id = id;
         this.resourceServiceSupplier = resourceServiceSupplier;
         this.config = config;
     }
@@ -37,7 +34,7 @@ public class ResourceReaderImpl
     public String readResource( String resourcePath )
         throws IOException
     {
-        LOG.debug( "{}: reading resource '{}'", this, resourcePath );
+        LOG.debug( "reading resource '{}'", resourcePath );
 
         String url = null;
         try
@@ -45,7 +42,9 @@ public class ResourceReaderImpl
             url = config.APP_NAME + ":" + resourcePath;
             ResourceKey resourceKey = ResourceKey.from( url );
             Resource resource = resourceServiceSupplier.get().getResource( resourceKey );
-            return resource.getBytes().asCharSource( StandardCharsets.UTF_8 ).read();
+            final String read = resource.getBytes().asCharSource( StandardCharsets.UTF_8 ).read();
+            LOG.debug( "read resource '{}' length {}", resourcePath, read.length() );
+            return read;
 
         }
         catch ( IOException e )
@@ -57,10 +56,5 @@ public class ResourceReaderImpl
 
             throw e;
         }
-    }
-
-    public String toString()
-    {
-        return ResourceReaderImpl.class.getSimpleName() + "#" + id;
     }
 }
