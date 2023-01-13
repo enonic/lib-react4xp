@@ -61,7 +61,6 @@ const context = (1, eval)('this'); // https://stackoverflow.com/questions/910724
 	if (typeof context.Map === 'undefined') context.Map = Map; // eslint-disable-line no-param-reassign
 	if (typeof context.Set === 'undefined') context.Set = Set; // eslint-disable-line no-param-reassign
 	if (typeof context.Symbol === 'undefined') context.Symbol = Symbol;
-
 })(context);
 
 
@@ -80,115 +79,6 @@ interface TimerInstance {
 		millis :number
 	)=>void
 }
-
-// polyfills setTimeout() and related
-// Based on:
-// https://gist.github.com/josmardias/20493bd205e24e31c0a406472330515a
-//
-// NOTE:
-// "At least one timeout needs to be set, larger then your code bootstrap or Nashorn will run forever.
-// Preferably, put a timeout 0 after your code bootstrap."
-(function (context) {
-	'use strict';
-
-	const Timer = Java.type('java.util.Timer') as unknown as TimerConstructor;
-	const Phaser = Java.type('java.util.concurrent.Phaser') as unknown as PhaserConstructor;
-
-	const timer = new Timer('jsEventLoop', false) as TimerInstance;
-	const phaser = new Phaser() as PhaserInstance;
-
-	let timeoutStack = 0;
-
-	function pushTimeout() {
-		timeoutStack++;
-	}
-
-	function popTimeout() {
-		timeoutStack--;
-		if (timeoutStack > 0) {
-			return;
-		}
-		timer.cancel();
-		phaser.forceTermination();
-	}
-
-	const onTaskFinished = function () {
-		phaser.arriveAndDeregister();
-	};
-
-
-	if (typeof context.setTimeout === 'undefined') {
-		//@ts-ignore TS2741: Property '__promisify__' is missing in type '(fn: any, millis: any) => () => void' but required in type 'typeof setTimeout'.
-		context.setTimeout = function (fn, millis /* [, args...] */) {
-			const args = [].slice.call(arguments, 2, arguments.length);
-
-			// const phase =
-			phaser.register();
-			let canceled = false;
-			timer.schedule(function () {
-				if (canceled) {
-					return;
-				}
-
-				try {
-					fn.apply(context, args);
-				} catch (e) {
-					console.error(e);
-					/* eslint-disable no-restricted-globals */
-					//print(e); // eslint-disable-line no-undef
-					/* eslint-enable no-restricted-globals */
-				} finally {
-					onTaskFinished();
-					popTimeout();
-				}
-			}, millis);
-
-			pushTimeout();
-
-			return function () {
-				onTaskFinished();
-				canceled = true;
-				popTimeout();
-			};
-		};
-	}
-
-
-	if (typeof context.clearTimeout === 'undefined') {
-		context.clearTimeout = function (cancel) {
-			cancel();
-		};
-	}
-
-
-	if (typeof context.setInterval === 'undefined') {
-		//@ts-ignore TS2741: Property '__promisify__' is missing in type '(fn: any, delay: any) => () => void' but required in type 'typeof setInterval'.
-		context.setInterval = function (fn, delay /* [, args...] */) {
-			const args = [].slice.call(arguments, 2, arguments.length);
-
-			let cancel = null;
-
-			const loop = function () {
-				cancel = context.setTimeout(loop, delay);
-				fn.apply(context, args);
-			};
-
-			cancel = context.setTimeout(loop, delay);
-			return function () {
-				cancel();
-			};
-		};
-	}
-
-
-	if (typeof context.clearInterval === 'undefined') {
-		context.clearInterval = function (cancel) {
-			cancel();
-		};
-	}
-
-})(global);
-
 
 // Object.assign
 // Polyfill from: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#polyfill
@@ -237,9 +127,3 @@ Number.isInteger = Number.isInteger || function(value) {
 	isFinite(value) &&
 	Math.floor(value) === value;
 };*/
-
-// KEEP THIS LAST:
-// NOTE from https://gist.github.com/josmardias/20493bd205e24e31c0a406472330515a:
-// At least one timeout needs to be set, larger then your code bootstrap or Nashorn will run forever.
-// Preferably, put a timeout 0 after your code bootstrap.
-context.setTimeout(function () {}, 1);
