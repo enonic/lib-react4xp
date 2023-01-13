@@ -1,5 +1,4 @@
 // COMPILE AND RUN IN NASHORN
-import type {ContextWithTimers} from './timers';
 
 //──────────────────────────────────────────────────────────────────────────────
 // core-js Only required features (global namespace pollution)
@@ -45,7 +44,7 @@ import Symbol from 'core-js-pure/actual/symbol';
 //import Symbol from 'es6-symbol/polyfill'; // Since I have a undefined check below: Import the Polyfill rather than the Ponyfill.
 
 
-const context = (1, eval)('this') as Partial<ContextWithTimers>; // https://stackoverflow.com/questions/9107240/1-evalthis-vs-evalthis-in-javascript;
+const context = (1, eval)('this'); // https://stackoverflow.com/questions/9107240/1-evalthis-vs-evalthis-in-javascript;
 
 
 // Polyfills Set, Map and empty event listener (since nashorn is only used for SSR, where event listener is irrelevant):
