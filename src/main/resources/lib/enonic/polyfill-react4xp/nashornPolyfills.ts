@@ -61,9 +61,6 @@ const context = (1, eval)('this'); // https://stackoverflow.com/questions/910724
 	if (typeof context.Map === 'undefined') context.Map = Map; // eslint-disable-line no-param-reassign
 	if (typeof context.Set === 'undefined') context.Set = Set; // eslint-disable-line no-param-reassign
 	if (typeof context.Symbol === 'undefined') context.Symbol = Symbol;
-	//──────────────────────────────────────────────────────────────────────────
-	// Timers: When doing SSR it makes no sense to do anything asyncronously.
-	//──────────────────────────────────────────────────────────────────────────
 })(context);
 
 
