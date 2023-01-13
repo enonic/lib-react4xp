@@ -14,7 +14,6 @@ import type {ContextWithTimers} from './timers';
 import Map from 'core-js-pure/actual/map';
 import Set from 'core-js-pure/actual/set';
 import Symbol from 'core-js-pure/actual/symbol';
-import {polyfillTimers} from './timers';
 
 //──────────────────────────────────────────────────────────────────────────────
 // @mrhenry/core-web
@@ -67,7 +66,6 @@ const context = (1, eval)('this') as Partial<ContextWithTimers>; // https://stac
 	// Timers: When doing SSR it makes no sense to do anything asyncronously.
 	//──────────────────────────────────────────────────────────────────────────
 })(context);
-polyfillTimers(context);
 
 
 type PhaserConstructor = ()=>void;
