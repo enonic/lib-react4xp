@@ -22,7 +22,7 @@ dependencies {
     implementation 'com.enonic.lib:lib-cache:2.1.1'
     implementation 'com.enonic.lib:lib-static:1.0.2'
 
-    implementation 'org.jsoup:jsoup:1.15.3'
+    implementation 'org.attoparser:attoparser:2.0.6.RELEASE'
     implementation 'org.apache.commons:commons-pool2:2.11.1'
 
     testImplementation "com.enonic.xp:testing:${xpVersion}"
