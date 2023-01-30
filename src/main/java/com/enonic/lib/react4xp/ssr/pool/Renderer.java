@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -118,7 +119,8 @@ public class Renderer {
      */
     public Map<String, String> render(String entryName, String props, String[] dependencyNames) {
         try {
-            List<String> runnableAssetNames = Arrays.asList( dependencyNames );
+            List<String> runnableAssetNames =
+                Arrays.stream( dependencyNames ).filter( fileName -> fileName.endsWith( ".js" ) ).collect( Collectors.toList() );
             LOG.debug("{}: runnableAssetNames '{}'", this, runnableAssetNames);
 
             assetLoader.loadAssetsIntoEngine(runnableAssetNames);
