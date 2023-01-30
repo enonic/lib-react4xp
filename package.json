@@ -45,7 +45,7 @@
     "rollup-plugin-output-manifest": "^2.0.0",
     "rollup-plugin-polyfill": "^4.0.0",
     "text-encoding": "^0.7.0",
-    "tslib": "^2.4.1",
+    "tslib": "^2.5.0",
     "typescript": "^4.9.4"
   },
   "main": "src/main/resources/lib/enonic/react4xp/index.es6",
