@@ -12,22 +12,20 @@ export function jsxToAssetPath(jsxPath :string) {
 		}
 
 		const chunks = componentStats.entrypoints[entryName].chunks;
-		/*
-		let indexOfEntry = -1;
-		chunksLoop: for (let j = 0; j < chunks.length; j++) {
-		    const chunkName = chunks[j]; // NOTE: It used to be a string, but I must have changed something in the build system so now it's just an integer :(
-			if (chunkName === entryName) {
-				indexOfEntry = j;
-				break chunksLoop;
-			}
-		} // chunksLoop
-		if (indexOfEntry === -1) {
-			throw new Error(`Unable to find entry:${entryName} in chunks:${toStr(chunks)}`);
-		}*/
+		// log.debug('jsxToAssetPath chunks:%s', toStr(chunks));
 
 		const assets = componentStats.entrypoints[entryName].assets;
-		//return assets[indexOfEntry].name; // See NOTE above, assuming last index for now
-		return assets[chunks.length-1].name; // Assuming last index for now
+		// log.debug('jsxToAssetPath assets:%s', toStr(assets));
+
+		assetsLoops: for (let k = 0; k < assets.length; k++) {
+			const {name} = assets[k];
+			if (!(name.startsWith(jsxPath) && name.endsWith('.js'))) {
+				continue assetsLoops;
+			}
+			return name;
+		} // assetsLoops
+		throw new Error(`Unable to find entry:${entryName} in assets:${toStr(assets)}`);
+
 	} // entryLoop
 	throw new Error(`Unable to find assetPath for jsxPath:${jsxPath} in componentStats:${toStr(componentStats)}`);
 }

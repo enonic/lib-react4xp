@@ -88,8 +88,11 @@ export function constructor<
 	};
 
 	if (isString(entry)) {
+		// log.debug('React4xp.constructor() entry:%s', entry);
+
 		// Use jsxPath, regular flow
 		obj.jsxPath = entry.trim();
+		// log.debug('React4xp.constructor() obj.jsxPath:%s', obj.jsxPath);
 
 		//obj.component = getComponent();
 
@@ -133,6 +136,8 @@ export function constructor<
 
 		const compName = buildingBlockData.descriptor.split(":")[1];
 		obj.jsxPath = `site/${buildingBlockData.type}/${compName}/${compName}`;
+		// log.debug('React4xp.constructor() obj.jsxPath2:%s', obj.jsxPath);
+
 		obj.react4xpId = `${buildingBlockData.type}_${compName}_${buildingBlockData.path}`.replace(/\//g, "_");
 
 
@@ -152,7 +157,7 @@ export function constructor<
 	}
 
 	obj.assetPath = jsxToAssetPath(obj.jsxPath);
-	//log.debug('React4xp.constructor() assetPath:%s', obj.assetPath);
+	// log.debug('React4xp.constructor() obj.assetPath:%s', obj.assetPath);
 
 	return obj;
 } // constructor
