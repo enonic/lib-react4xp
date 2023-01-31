@@ -11,11 +11,7 @@ export function jsxToAssetPath(jsxPath :string) {
 			continue entryLoop;
 		}
 
-		const chunks = componentStats.entrypoints[entryName].chunks;
-		// log.debug('jsxToAssetPath chunks:%s', toStr(chunks));
-
 		const assets = componentStats.entrypoints[entryName].assets;
-		// log.debug('jsxToAssetPath assets:%s', toStr(assets));
 
 		assetsLoops: for (let k = 0; k < assets.length; k++) {
 			const {name} = assets[k];

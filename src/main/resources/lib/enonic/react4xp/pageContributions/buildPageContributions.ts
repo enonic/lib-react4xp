@@ -26,7 +26,6 @@ export function buildPageContributions({
 	suppressJS :boolean,
 	serveExternals? :boolean
 }) {
-	//log.debug('buildPageContributions() entries:%s', toStr(entries));
 
 	const pageContributions :PageContributions = {
 		headEnd: [] // Lighthouse recommends meta charset in first 1024 bytes, thus we use headEnd not headBegin
@@ -37,7 +36,6 @@ export function buildPageContributions({
 	// * If the script relies upon or is relied upon by another script then use defer.
 
 	if (serveExternals) {
-		// pageContributions.headEnd.push(`<!-- externals -->\n`);
 		pageContributions.headEnd.push(`<script defer src="${getExternalsUrls()}"></script>\n`);
 	}
 
@@ -47,16 +45,13 @@ export function buildPageContributions({
 		if (componentChunkUrl.endsWith('.css')) {
 			pageContributions.headEnd.push(`<link href="${componentChunkUrl}" rel="stylesheet" type="text/css" />\n`);
 		} else if(!suppressJS) { // Treat other dependencies as JS and add them in a script tag. Unless suppressJS, in which case: skip them.
-			// pageContributions.headEnd.push(`<!-- componentChunk -->\n`);
 			pageContributions.headEnd.push(`<script defer src="${componentChunkUrl}"></script>\n`);
 		}
 	}
 
 	if (!suppressJS) {
-		// pageContributions.headEnd.push(`<!-- client -->\n`);
 		pageContributions.headEnd.push(`<script defer src="${getClientUrl()}"></script>\n`);
 	}
 
-	//log.debug('buildPageContributions() pageContributions:%s', toStr(pageContributions));
 	return pageContributions;
 } // buildPageContributions

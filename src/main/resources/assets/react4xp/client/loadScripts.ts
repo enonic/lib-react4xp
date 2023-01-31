@@ -48,7 +48,6 @@ export function loadScripts(
 
   try {
     urls.forEach((url) => {
-      // console.debug('url', url);
       if (url.toLowerCase().endsWith(".css")) {
         const styles = document.createElement("link") as Partial<StyleElement>;
         styles.rel = "stylesheet";

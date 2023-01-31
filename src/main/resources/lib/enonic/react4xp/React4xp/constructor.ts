@@ -3,7 +3,6 @@ import type {React4xp as React4xpNamespace} from '../../../..';
 
 import {isObject} from 'JS_UTILS_ALIAS/value/isObject';
 import {isString} from 'JS_UTILS_ALIAS/value/isString';
-//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 
 
 import {
@@ -88,13 +87,8 @@ export function constructor<
 	};
 
 	if (isString(entry)) {
-		// log.debug('React4xp.constructor() entry:%s', entry);
-
 		// Use jsxPath, regular flow
 		obj.jsxPath = entry.trim();
-		// log.debug('React4xp.constructor() obj.jsxPath:%s', obj.jsxPath);
-
-		//obj.component = getComponent();
 
 		if (obj.jsxPath === "") {
 			throw new Error(`Can't initialize React4xp component with initParam = ${JSON.stringify(entry)}. XP component object or jsxPath string only, please.`);
@@ -136,7 +130,6 @@ export function constructor<
 
 		const compName = buildingBlockData.descriptor.split(":")[1];
 		obj.jsxPath = `site/${buildingBlockData.type}/${compName}/${compName}`;
-		// log.debug('React4xp.constructor() obj.jsxPath2:%s', obj.jsxPath);
 
 		obj.react4xpId = `${buildingBlockData.type}_${compName}_${buildingBlockData.path}`.replace(/\//g, "_");
 
@@ -157,7 +150,6 @@ export function constructor<
 	}
 
 	obj.assetPath = jsxToAssetPath(obj.jsxPath);
-	// log.debug('React4xp.constructor() obj.assetPath:%s', obj.assetPath);
 
 	return obj;
 } // constructor
