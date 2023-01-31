@@ -55,6 +55,7 @@ export function renderPageContributions({
 		const headEnd = (!suppressJS)
 			? [
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
+				// '<!-- asset -->',
 				`<script defer src="${getAssetRoot()}${this.assetPath}"></script>\n`,
 
 				`<script data-react4xp-ref="${this.react4xpId}" type="application/json">${JSON.stringify({
