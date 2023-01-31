@@ -15,9 +15,12 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 10
     assignees:
-      - "espen42"
+      - "ComLock"
     reviewers:
-      - "espen42"
+      - "ComLock"
+    ignore:
+      - dependency-name: "@rollup/plugin-typescript"
+        versions: ["^11.0.0"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
