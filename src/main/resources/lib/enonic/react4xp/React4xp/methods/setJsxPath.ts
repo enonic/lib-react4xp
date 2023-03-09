@@ -1,3 +1,7 @@
+import endsWith from 'JS_UTILS_ALIAS/string/endsWith';
+import {startsWith} from 'JS_UTILS_ALIAS/string/startsWith';
+
+
 /** When you want to use a particular JSX file (other than the default, a JSX file in the same folder as the XP component,
  * with the same name as the folder).
  *
@@ -13,27 +17,27 @@ export function setJsxPath(jsxPath :string) {
 	this.checkIdLock()
 	if (
 		(jsxPath || '').trim() === '' ||
-		jsxPath.startsWith('.') ||
-		jsxPath.startsWith('/') ||
+		startsWith(jsxPath, '.') ||
+		startsWith(jsxPath, '/') ||
 		jsxPath.indexOf('..') !== -1 ||
 		jsxPath.indexOf('/./') !== -1 ||
 		jsxPath.indexOf('//') !== -1 ||
 		jsxPath.indexOf('\\.\\') !== -1 ||
 		jsxPath.indexOf('\\\\') !== -1 ||
-		jsxPath.startsWith("\\")
+		startsWith(jsxPath, "\\")
 	) {
 		throw new Error(`React4xp.setJsxFileName: invalid jsxPath (${JSON.stringify(jsxPath)}). This is a NAME, not a relative path, so it can't be missing/empty, or contain '..', '//', '/./' or start with '.' or '/'.${this.component ? ` Component: ${JSON.stringify(this.component)}` : ''}`);
 	}
 
 	// TODO: Get this from entryExtensions instead of hardcoded
 	// Strip away trailing file extensions
-	jsxPath = (jsxPath.endsWith('.jsx') || jsxPath.endsWith('.es6')) ?
+	jsxPath = (endsWith(jsxPath, '.jsx') || endsWith(jsxPath, '.es6')) ?
 		jsxPath.slice(0, -4) :
-		(jsxPath.endsWith('.js')) ?
+		(endsWith(jsxPath, '.js')) ?
 			jsxPath.slice(0, -3) :
 			jsxPath;
 
-	while (jsxPath.startsWith('/')) {
+	while (startsWith(jsxPath, '/')) {
 		jsxPath = jsxPath.substring(1);
 	}
 

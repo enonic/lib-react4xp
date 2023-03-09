@@ -1,8 +1,8 @@
+import type {Cache} from './Cache';
 import type {ComponentGeneric} from './Component';
 import type {PageContributions} from './PageContributions';
 import type {Request} from './Request';
 import type {Response} from './Response';
-//import type {Cache} from './Cache';
 
 
 type OneOrMore<T> = T | T[]

@@ -1,3 +1,7 @@
+import endsWith from 'JS_UTILS_ALIAS/string/endsWith';
+import {startsWith} from 'JS_UTILS_ALIAS/string/startsWith';
+
+
 interface InsideQuoteState {
 	"'" :boolean
 	'"' :boolean
@@ -13,7 +17,7 @@ function singleQuoteCounter(item :string) {
 
 
 function replaceSurroundingSingleQuotes(item :string) {
-	return (item.startsWith("'"))
+	return (startsWith(item, "'"))
 		? item.replace(/^'/, "").replace(/'$/, "").trim()
 		: item.trim();
 }
@@ -25,7 +29,7 @@ function doubleQuoteCounter(item :string) {
 
 
 function replaceSurroundingDoubleQuotes(item :string) {
-	return (item.startsWith('"'))
+	return (startsWith(item, '"'))
     	? item.replace(/^"/, "").replace(/"$/, "").trim()
     	: item.trim();
 }
@@ -84,10 +88,10 @@ export function normalizeSSREngineSettings(
 
     let ssrEngineSettings = ssrEngineSettingsString?.trim() || "";
 
-    if (ssrEngineSettings.endsWith("'") && singleQuoteCounter(ssrEngineSettings) === 2) {
+    if (endsWith(ssrEngineSettings, "'") && singleQuoteCounter(ssrEngineSettings) === 2) {
         ssrEngineSettings = replaceSurroundingSingleQuotes(ssrEngineSettings);
     }
-    if (ssrEngineSettings.endsWith('"') && doubleQuoteCounter(ssrEngineSettings) === 2) {
+    if (endsWith(ssrEngineSettings, '"') && doubleQuoteCounter(ssrEngineSettings) === 2) {
         ssrEngineSettings = replaceSurroundingDoubleQuotes(ssrEngineSettings);
     }
 

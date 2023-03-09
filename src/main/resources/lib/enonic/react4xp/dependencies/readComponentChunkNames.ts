@@ -4,6 +4,7 @@ import type {
 } from '../../../../index.d';
 
 
+import endsWith from 'JS_UTILS_ALIAS/string/endsWith';
 //import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 import {COMPONENT_STATS_FILENAME} from '@enonic/react4xp';
 import {getComponentStats} from '/lib/enonic/react4xp/asset/getComponentStats';
@@ -69,7 +70,7 @@ export function readComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.
 
                     throw new Error(`Unexpected 'assets' structure in ${COMPONENT_STATS_FILENAME}: ${JSON.stringify(data.assets)}`);
                 })
-                .filter((asset :string) => !asset.endsWith(".map") && asset !== myself)
+                .filter((asset :string) => !endsWith(asset, ".map") && asset !== myself)
                 .forEach((asset :string) => {
                     if (output.indexOf(asset) === -1) {
                         output.push(asset);

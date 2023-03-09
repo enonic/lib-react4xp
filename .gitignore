@@ -93,6 +93,7 @@ crashlytics-build.properties
 
 # Node modules
 node_modules/
+*.tgz
 
 # Visual studio code project files
 bin/
