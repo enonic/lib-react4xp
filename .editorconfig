@@ -11,6 +11,9 @@ trim_trailing_whitespace = true
 [*.ts]
 indent_style = tab
 
+[tsconfig.json]
+indent_style = tab
+
 [package.json]
 charset = utf-8
 indent_style = space

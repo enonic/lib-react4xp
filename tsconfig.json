@@ -1,17 +1,28 @@
-{
+{ // https://www.typescriptlang.org/tsconfig
 	// This file is mainly for letting your code editor use typings.
 	// It's also used when doing a simple yarn tsc, to check all files.
 	// Rollup overrides some of these options when doing the actual build.
 	"compilerOptions": {
-		"allowJs": true,
+		//──────────────────────────────────────────────────────────────────────
+		// Type Checking
+		//──────────────────────────────────────────────────────────────────────
+		"noImplicitAny": false,
+
+		// When strictNullChecks is false, null and undefined are effectively
+		// ignored by the language. This can lead to unexpected errors at
+		// runtime.
+		// When strictNullChecks is true, null and undefined have their own
+		// distinct types and you’ll get a type error if you try to use them
+		// where a concrete value is expected.
+		// NOTE: Setting it to true gives errors which are NOT really errors in lib/xp/node.ts
+		"strictNullChecks": false,
+
+		//──────────────────────────────────────────────────────────────────────
+		// Modules
+		//──────────────────────────────────────────────────────────────────────
 		"baseUrl": "./",
-		"inlineSourceMap": false,
-		"inlineSources": false,
-		"listEmittedFiles": false,
-		"listFiles": false,
 		"module": "esnext", // What rollup wants
 		"moduleResolution": "node",
-		"noImplicitAny": false,
 		"paths": {
 			// A series of entries which re-map imports to lookup locations relative to the baseUrl.
 			// In order to get all of the correct typing in your favourite editor.
@@ -21,23 +32,70 @@
 			"JS_UTILS_ALIAS": ["./node_modules/@enonic/js-utils/src"],
 			"JS_UTILS_ALIAS/*": ["./node_modules/@enonic/js-utils/src/*"],
 			"/lib/enonic/react4xp/*": ["./src/main/resources/lib/enonic/react4xp/*"],
+			"/lib/xp/*": ["node_modules/@enonic-types/lib-*"],
+			// Development (should be commented out when commiting)
+			// "/lib/xp/node": ["../../enonic/xp/modules/lib/lib-node/src/main/resources/lib/xp/node.ts"],
 		},
-		"removeComments": true,
 		"rootDir": "./",
 		"rootDirs": [
 			"src/main/resources",
 			"node_modules"
 		],
-		"sourceMap": false,
+		// "typeRoots": [
+		// 	"node_modules/@types",
+		// 	"node_modules/@enonic-types"
+		// ],
+		"types": [
+			//"@enonic-types/env-nashorn",
+			"@enonic-types/global",
+		],
+
+		//──────────────────────────────────────────────────────────────────────
+		// Emit
+		//──────────────────────────────────────────────────────────────────────
+		"declaration": false,
+		"inlineSourceMap": false,
+		"inlineSources": false,
 		"outDir": "build/tsc", // This is just for a simple yarn tsc command, rollup overrides this to build/resources/main
-		"target": "es3" // esnext gives runtime ERROR ES6 destructuring is not yet implemented
+		"removeComments": true,
+		"sourceMap": false,
+
+		//──────────────────────────────────────────────────────────────────────
+		// JavaScript Support
+		//──────────────────────────────────────────────────────────────────────
+		"allowJs": true,
+
+		//──────────────────────────────────────────────────────────────────────
+		// Language and Environment
+		//──────────────────────────────────────────────────────────────────────
+		"target": "ES3",
+
+		//──────────────────────────────────────────────────────────────────────
+		// Compiler Diagnostics
+		//──────────────────────────────────────────────────────────────────────
+		"listEmittedFiles": false,
+		"listFiles": false,
+
+		//──────────────────────────────────────────────────────────────────────
+		// Completeness
+		//──────────────────────────────────────────────────────────────────────
+		// Even though the setting disables type checking for d.ts files,
+		// TypeScript still type checks the code you specifically
+		// refer to in your application's source code.
+		"skipLibCheck": true, // Disable type checking for node_modules
 	},
 	"exclude": [
-		"**/*.d.ts"
+		// This will exclude src/main/resources/index.d.ts which we might want!
+		// "**/*.d.ts",
+		"src/main/resources/assets/**/*.*",
 	],
 	"include": [
+		// Make sure default types matches Nashorn
+		"node_modules/typescript/lib/lib.es5.d.ts",
+
+		"src/main/resources/index.d.ts",
 		"src/main/resources/**/*.ts",
-		"node_modules/@enonic/react4xp/**/*.ts",
-		"node_modules/@enonic/js-utils/**/*.ts"
+	// 	"node_modules/@enonic/react4xp/**/*.ts",
+	// 	"node_modules/@enonic/js-utils/**/*.ts"
 	]
 }

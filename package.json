@@ -10,7 +10,7 @@
     ]
   },
   "contributors": [
-    "Christian Westgaard <cwe@enonic.com>"
+    "Christian Andreas Westgaard <cwe@enonic.com>"
   ],
   "dependencies": {
     "@enonic/js-utils": "^0.46.0",
@@ -25,12 +25,15 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.20.7",
     "@babel/preset-env": "^7.20.2",
     "@babel/register": "^7.21.0",
+    "@enonic-types/global": "^7.12.0-RC4",
+    "@enonic-types/lib-node": "^7.12.0-RC4",
     "@enonic/react4xp": "^3.1.2",
     "@mrhenry/core-web": "^1.1.0",
     "@rollup/plugin-alias": "^4.0.3",
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
     "@rollup/plugin-typescript": "10.0.1",
+    "@types/core-js": "^2.5.5",
     "@types/react": "^18.0.28",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^9.1.2",
@@ -73,6 +76,8 @@
     "rollup:nodePolyfills": "npx rollup --config rollup.config.nodePolyfills.mjs",
     "rollup:server": "npx rollup --config rollup.config.server.mjs src/main/resources/lib/enonic/react4xp/index.ts src/main/resources/services/react4xp/react4xp.ts src/main/resources/services/react4xp-dependencies/react4xp-dependencies.ts",
     "test": "NODE_PATH=./ node_modules/mocha/bin/mocha --compilers js:@babel/register --require babel-polyfill --require src/test/test_helper.js \"src/test/**/*@(.js)\"",
-    "tsc": "npx tsc"
+    "tsc": "npm-run-all --parallel tsc:*",
+    "tsc:assets": "npx tsc -p src/main/resources/assets/tsconfig.json --noEmit",
+    "tsc:resources": "npx tsc --noEmit"
   }
 }

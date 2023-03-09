@@ -1,0 +1,39 @@
+{ // https://www.typescriptlang.org/tsconfig
+	// This file is for building the @enonic-types/lib-reacvt4xp package
+	"compilerOptions": {
+		//──────────────────────────────────────────────────────────────────────
+		// Modules
+		//──────────────────────────────────────────────────────────────────────
+		"baseUrl": ".",
+		"paths": {
+			"JS_UTILS_ALIAS": ["../../../node_modules/@enonic/js-utils/src"],
+			"JS_UTILS_ALIAS/*": ["../../../node_modules/@enonic/js-utils/src/*"],
+			"/lib/enonic/react4xp/*": ["../../../src/main/resources/lib/enonic/react4xp/*"],
+		},
+		"typeRoots": [
+			"../../../node_modules/@types",
+			"../../../node_modules/@enonic-types"
+		],
+		"types": [
+			"@enonic-types/global",
+		],
+
+		//──────────────────────────────────────────────────────────────────────
+		// Emit
+		//──────────────────────────────────────────────────────────────────────
+		"declaration": true,
+		"declarationDir": ".",
+		"emitDeclarationOnly": true,
+
+		//──────────────────────────────────────────────────────────────────────
+		// Language and Environment
+		//──────────────────────────────────────────────────────────────────────
+		"target": "es3",
+	},
+	"include": [
+		// Make sure default types matches Nashorn
+		"node_modules/typescript/lib/lib.es5.d.ts",
+
+		"../../../src/main/resources/lib/enonic/react4xp/index.ts",
+	]
+}

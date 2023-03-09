@@ -1,3 +1,4 @@
+import {startsWith} from 'JS_UTILS_ALIAS/string/startsWith';
 import {R4X_TARGETSUBDIR} from '@enonic/react4xp';
 
 import {getResource} from '/lib/enonic/react4xp/resource/getResource';
@@ -30,7 +31,7 @@ export function getNamesFromChunkfile(chunkFile :string) {
             chunk = chunk[0];
         }
 
-        if (chunk.startsWith("/")) {
+        if (startsWith(chunk, "/")) {
             chunk = chunk.substring(1);
         }
 

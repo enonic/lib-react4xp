@@ -82,6 +82,7 @@ interface TimerInstance {
 
 // Object.assign
 // Polyfill from: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#polyfill
+//@ts-expect-error TS2550: Property 'assign' does not exist on type 'ObjectConstructor'.
 if (typeof Object.assign !== 'function') {
 	Object.defineProperty(Object, "assign", {
 		value: function assign(target, varArgs) {

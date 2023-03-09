@@ -5,6 +5,7 @@ import type {
 
 
 //import {includes} from 'JS_UTILS_ALIAS/array/includes';
+import {startsWith} from 'JS_UTILS_ALIAS/string/startsWith';
 import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 
 //import {eTagGetter} from './eTagGetter';
@@ -36,7 +37,7 @@ export function handleAssetRequest(request :Request<{ETag? :string}>) :Response 
 		rawPath
 	} = request;
 	let cleanPath = rawPath.substring(contextPath.length);
-	if (cleanPath.startsWith('/')) {
+	if (startsWith(cleanPath, '/')) {
 		cleanPath = cleanPath.substring(1);
 	}
 	//log.debug('handleAssetRequest() cleanPath:%s', toStr(cleanPath));

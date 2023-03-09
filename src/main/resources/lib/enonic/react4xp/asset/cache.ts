@@ -6,6 +6,7 @@ import type {
 
 import {includes} from 'JS_UTILS_ALIAS/array/includes';
 import {cleanAnyDoubleQuoteWrap} from 'JS_UTILS_ALIAS/string/cleanAnyDoubleQuoteWrap';
+import {startsWith} from 'JS_UTILS_ALIAS/string/startsWith';
 //import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
 //@ts-ignore
 import {newCache} from '/lib/cache';
@@ -99,7 +100,7 @@ export function getCachedAssetResponse(request :Request<{ETag? :string}>) {
 	//log.debug('getCachedAssetResponse() cleanIfNoneMatch:%s', toStr(cleanIfNoneMatch));
 
 	let cleanPath = rawPath.substring(contextPath.length);
-	if (cleanPath.startsWith('/')) {
+	if (startsWith(cleanPath, '/')) {
 		cleanPath = cleanPath.substring(1);
 	}
 

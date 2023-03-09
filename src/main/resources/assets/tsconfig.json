@@ -1,0 +1,48 @@
+{ // https://www.typescriptlang.org/tsconfig
+	"extends": "../../../../tsconfig",
+	"exclude": [],
+	"include": [
+		"./index.d.ts",
+		"./**/*.ts"
+	],
+	"compilerOptions": {
+		//──────────────────────────────────────────────────────────────────────
+		// Modules
+		//──────────────────────────────────────────────────────────────────────
+		"baseUrl": ".",
+		"rootDir": ".",
+
+		// Needed to avoid inheriting @enonic-types/env-nashorn
+		"types": [],
+
+		//──────────────────────────────────────────────────────────────────────
+		// Emit
+		//──────────────────────────────────────────────────────────────────────
+		// "declaration": true,
+
+		//──────────────────────────────────────────────────────────────────────
+		// Language and Environment
+		//──────────────────────────────────────────────────────────────────────
+		"jsx": "react",
+		"lib": [
+			// console, document, fetch, HTMLElement, window
+			"dom",
+
+			// "es3",
+			"es5",
+
+			// Modern browsers
+			// Map, Set
+			// "es6", // alias for es2015
+			// "es2015",
+
+			// "es7", // alias for es2016
+
+			// Number.isInteger
+			// string.endsWith
+			// string.startsWith
+			"ES2015.Core",
+		],
+		"target": "es5", // Maybe this should be es2015 aka modern browsers
+	}
+}
