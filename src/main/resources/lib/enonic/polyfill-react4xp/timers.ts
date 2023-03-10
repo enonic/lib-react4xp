@@ -23,30 +23,36 @@ export interface ContextWithTimers {
     [key: string]: unknown
 }
 
-
+//@ts-expect-error TS6133: 'handle' is declared but its value is never read.
 export function clearInterval(handle: TimerHandle) {
     return undefined;
 }
 
+//@ts-expect-error TS6133: 'handle' is declared but its value is never read.
 export function clearTimeout(handle: TimerHandle) {
     return undefined
 }
 
 export function queueMicrotask(
+	//@ts-expect-error TS6133: 'callback' is declared but its value is never read.
     callback: () => void
 ) {
     return undefined as void;
 }
 
 export function setInterval(
+	//@ts-expect-error TS6133: 'callback' is declared but its value is never read.
     callback: (args: void) => void,
+	//@ts-expect-error TS6133: 'delay' is declared but its value is never read.
     delay?: number
 ) {
     return 0 as TimerHandle;
 }
 
 export function setTimeout(
+	//@ts-expect-error TS6133: 'callback' is declared but its value is never read.
     callback: (args: void) => void,
+	//@ts-expect-error TS6133: 'delay' is declared but its value is never read.
     delay?: number
 ) {
     return 0 as TimerHandle;
