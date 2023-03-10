@@ -1,9 +1,9 @@
 export namespace Application {
-	interface Config {
+	export interface Config {
 		readonly [key :string] : string | undefined
 	}
-	type Key = string
-	type Version = string
+	export type Key = string
+	export type Version = string
 }
 
 export interface App {

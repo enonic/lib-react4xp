@@ -11,7 +11,7 @@ trim_trailing_whitespace = true
 [*.ts]
 indent_style = tab
 
-[tsconfig.json]
+[{.eslintrc.js,tsconfig.json}]
 indent_style = tab
 
 [package.json]
