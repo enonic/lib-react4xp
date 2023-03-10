@@ -1,5 +1,7 @@
 import commonjs from '@rollup/plugin-commonjs';
-import typescript from '@rollup/plugin-typescript';
+// import typescript from '@rollup/plugin-typescript';
+// import ts from 'rollup-plugin-ts';
+import sucrase from '@rollup/plugin-sucrase';
 
 const DIR_IN_REL = 'src/main/resources';
 const DIR_OUT_REL = 'build/resources/main';
@@ -62,12 +64,27 @@ export default {
     },
     makeAbsoluteExternalsRelative: false,
     plugins: [
-        typescript({
-            compilerOptions: {
-                outDir: DIR_OUT_REL,
-                target: 'es5'
-            }
+        // typescript({
+        //     compilerOptions: {
+        //         outDir: DIR_OUT_REL,
+        //         target: 'es5'
+        //     }
+        // }),
+        // ts({
+        //     tsconfig: {
+        //         outDir: DIR_OUT_REL,
+        //         target: 'es5'
+        //     }
+        // }),
+
+        // ES6 destructuring is not yet implemented
+        sucrase({
+            enableLegacyBabel5ModuleInterop: true,
+            enableLegacyTypeScriptModuleInterop: true,
+            exclude: ['node_modules/**'],
+            transforms: ['typescript']
         }),
+
         commonjs(),
     ]
 };
