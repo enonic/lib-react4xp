@@ -85,6 +85,7 @@ interface TimerInstance {
 //@ts-expect-error TS2550: Property 'assign' does not exist on type 'ObjectConstructor'.
 if (typeof Object.assign !== 'function') {
 	Object.defineProperty(Object, "assign", {
+		//@ts-expect-error TS6133: 'varArgs' is declared but its value is never read.
 		value: function assign(target, varArgs) {
 			'use strict';
 

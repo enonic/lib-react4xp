@@ -12,7 +12,7 @@ import {polyfillTimers} from './timers';
 	//──────────────────────────────────────────────────────────────────────────
 	// text-encoding
 	//──────────────────────────────────────────────────────────────────────────
-	if (typeof context.TextEncoder === 'undefined') {
-		context.TextEncoder = TextEncoder;
+	if (typeof context['TextEncoder'] === 'undefined') {
+		context['TextEncoder'] = TextEncoder;
 	}
 })((1, eval)('this') as Partial<ContextWithTimers>);

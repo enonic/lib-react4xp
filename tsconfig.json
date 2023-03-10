@@ -7,6 +7,10 @@
 		// Type Checking
 		//──────────────────────────────────────────────────────────────────────
 		"noImplicitAny": false,
+		"noPropertyAccessFromIndexSignature": true,
+		"noUncheckedIndexedAccess": true,
+		"noUnusedLocals": false,
+		"noUnusedParameters": true,
 
 		// When strictNullChecks is false, null and undefined are effectively
 		// ignored by the language. This can lead to unexpected errors at
@@ -20,8 +24,20 @@
 		//──────────────────────────────────────────────────────────────────────
 		// Modules
 		//──────────────────────────────────────────────────────────────────────
+		// When set to true, allowUmdGlobalAccess lets you access UMD exports as
+		// globals from inside module files. A module file is a file that has
+		// imports and/or exports. Without this flag, using an export from a UMD
+		// module requires an import declaration.
+		// An example use case for this flag would be a web project where you
+		// know the particular library (like jQuery or Lodash) will always be
+		// available at runtime, but you can’t access it with an import.
+		"allowUmdGlobalAccess": true,
+
 		"baseUrl": "./",
+
 		"module": "esnext", // What rollup wants
+		// "module": "CommonJS", // When no longer using rollup, just tsup?
+
 		"moduleResolution": "node",
 		"paths": {
 			// A series of entries which re-map imports to lookup locations relative to the baseUrl.
@@ -36,6 +52,7 @@
 			// Development (should be commented out when commiting)
 			// "/lib/xp/node": ["../../enonic/xp/modules/lib/lib-node/src/main/resources/lib/xp/node.ts"],
 		},
+		"resolveJsonModule": true,
 		"rootDir": "./",
 		"rootDirs": [
 			"src/main/resources",
@@ -54,6 +71,9 @@
 		// Emit
 		//──────────────────────────────────────────────────────────────────────
 		"declaration": false,
+		"downlevelIteration": true,
+		"importHelpers": true,
+		"importsNotUsedAsValues": "remove",
 		"inlineSourceMap": false,
 		"inlineSources": false,
 		"outDir": "build/tsc", // This is just for a simple yarn tsc command, rollup overrides this to build/resources/main
@@ -66,9 +86,21 @@
 		"allowJs": true,
 
 		//──────────────────────────────────────────────────────────────────────
+		// Interop Constraints
+		//──────────────────────────────────────────────────────────────────────
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+
+		//──────────────────────────────────────────────────────────────────────
 		// Language and Environment
 		//──────────────────────────────────────────────────────────────────────
-		"target": "ES3",
+		"experimentalDecorators": true,
+		// tsup Warning Unrecognized target environment "ES3"
+		// tsup CJS Build failed Error: Invalid target "es3" in "--target=es3"
+		// "target": "ES3",
+		// tsup ERROR Transforming const to the configured target environment ("ES5") is not supported yet
+		// "target": "ES5",
+		// NOTE: target is set in tsup.config.ts instead
 
 		//──────────────────────────────────────────────────────────────────────
 		// Compiler Diagnostics

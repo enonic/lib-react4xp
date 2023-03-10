@@ -1,15 +1,26 @@
+import type { BooleanProp } from "../";
+
+interface Data {
+	command: 'hydrate'|'render'
+	devMode: BooleanProp
+	hasRegions: BooleanProp
+	isPage: BooleanProp
+	jsxPath: string
+	props: object
+}
+
 const inlineJsonElements = Array.from(document.querySelectorAll('script[data-react4xp-ref][type="application/json"]'));
 //console.debug('inlineJsonElements', inlineJsonElements);
 for (let index = 0; index < inlineJsonElements.length; index++) {
 	const inlineJsonElement = inlineJsonElements[index];
 	if (inlineJsonElement instanceof HTMLElement) {
-		const id = inlineJsonElement.dataset.react4xpRef;
+		const id = inlineJsonElement.dataset['react4xpRef'];
 		//console.debug('id', id);
 
 		const json = inlineJsonElement.textContent;
 		//console.debug('json', json);
 
-		let data = {};
+		let data = {} as Data;
 		try {
 			data = JSON.parse(json);
 		} catch (e) {
@@ -24,14 +35,7 @@ for (let index = 0; index < inlineJsonElements.length; index++) {
 			isPage,
 			jsxPath,
 			props
-		} = data as {
-			command :'hydrate'|'render'
-			devMode :'1'|'0'|1|0|boolean
-			hasRegions :'1'|'0'|1|0|boolean
-			isPage :'1'|'0'|1|0|boolean
-			jsxPath :string
-			props :object
-		};
+		} = data;
 		/*console.debug('command', command);
 		console.debug('devMode', devMode);
 		console.debug('hasRegions', hasRegions);
