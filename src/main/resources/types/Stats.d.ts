@@ -16,8 +16,8 @@ export interface Stats {
 			}>
 			filteredAuxiliaryAssets :number
 			auxiliaryAssetsSize :number|null
-			children :{}
-			childAssets :{}
+			children: object
+			childAssets: object
 		}
 	}
 	errors :Array<unknown>

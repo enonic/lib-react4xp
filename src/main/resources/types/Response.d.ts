@@ -2,7 +2,7 @@ import type {PageContributions} from './PageContributions';
 
 
 export interface Response<
-	Body extends unknown = string
+	Body = string
 > {
 	body? :Body
 	contentType? :string
