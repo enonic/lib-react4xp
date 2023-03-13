@@ -47,14 +47,14 @@
 			"@enonic/react4xp": ["./node_modules/@enonic/react4xp/src"],
 			"@enonic/react4xp/*": ["./node_modules/@enonic/react4xp/src/*"],
 			"JS_UTILS_ALIAS": [
-				"./node_modules/@enonic/js-utils/dist/cjs/index.js"
-				// This causes rollup to fail
-				// "./node_modules/@enonic/js-utils/src"
+				// "./node_modules/@enonic/js-utils/dist/cjs/index.js"
+				// This causes rollup to fail, unless @rollup/plugin-alias
+				"./node_modules/@enonic/js-utils/src"
 			],
 			"JS_UTILS_ALIAS/*": [
-				"./node_modules/@enonic/js-utils/dist/cjs/*"
-				// This causes rollup to fail
-				// "./node_modules/@enonic/js-utils/src/*"
+				// "./node_modules/@enonic/js-utils/dist/cjs/*"
+				// This causes rollup to fail, unless @rollup/plugin-alias
+				"./node_modules/@enonic/js-utils/src/*"
 			],
 
 			"/lib/enonic/react4xp/*": ["./src/main/resources/lib/enonic/react4xp/*"],

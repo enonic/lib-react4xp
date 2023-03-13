@@ -1,3 +1,4 @@
+import alias from '@rollup/plugin-alias';
 import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
 
@@ -13,6 +14,11 @@ export default {
         preserveModules: false, // We want to bundle everything into one bundle, so this should be false!
     },
     plugins: [
+		alias({
+			entries: [
+				{ find: 'text-encoding', replacement: './node_modules/text-encoding/index.js' },
+			]
+		}),
         typescript({
             compilerOptions: {
                 outDir,
