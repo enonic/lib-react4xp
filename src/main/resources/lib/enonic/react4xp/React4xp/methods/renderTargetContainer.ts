@@ -1,3 +1,6 @@
+import type {React4xp} from '../../React4xp';
+
+
 import {buildContainer} from '/lib/enonic/react4xp/html/buildContainer';
 import {hasElementWithId} from '/lib/enonic/react4xp/html/hasElementWithId';
 import {
@@ -29,7 +32,7 @@ interface RenderTargetContainerParams {
  *
  * @returns adjusted or generated HTML body with rendered react component.
  */
-export function renderTargetContainer(params :RenderTargetContainerParams) :string {
+export function renderTargetContainer(this: React4xp, params: RenderTargetContainerParams): string {
 	const {
 		appendErrorContainer = false,
 		body = '', // '' is Falsy

@@ -2,6 +2,7 @@ import type {
 	PageContributions,
 	Request
 } from '../../../../..';
+import type {React4xp} from '../../React4xp';
 
 
 //import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
@@ -27,7 +28,7 @@ import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/runMode';
  *          in order to keep the error placeholder element visible
  *      TODO: Add option for more graceful failure? Render if error is true, instead of suppressing the trigger and displaying the error placeholder?
  */
-export function renderPageContributions({
+export function renderPageContributions(this: React4xp, {
 	pageContributions = {},
 	clientRender,
 	request,
