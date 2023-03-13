@@ -8,10 +8,7 @@ indent_style = space
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.ts]
-indent_style = tab
-
-[{.eslintrc.js,tsconfig.json}]
+[{.eslintrc.js,tsconfig.json,*.mjs,*.ts}]
 indent_style = tab
 
 [package.json]
