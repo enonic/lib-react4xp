@@ -2,7 +2,7 @@ import type {React4xp as React4xpNamespace} from '../../../../../index.d';
 
 
 import {isString} from 'JS_UTILS_ALIAS/value/isString';
-import {constructor} from '../constructor'; // circular dependency?
+import {React4xp} from '../../React4xp'; // circular dependency?
 
 
 /** Inner initializer: returns a React4xp component instance initialized from a single set of parameters instead of
@@ -16,21 +16,20 @@ import {constructor} from '../constructor'; // circular dependency?
  */
 export function buildFromParams<
 	Props extends {
-		react4xpId? :React4xpNamespace.Id
-	} = {}
+		react4xpId?: React4xpNamespace.Id
+	} = object
 >({
 	entry,
 	id,
 	uniqueId,
 	props
 } :{
-	entry? :React4xpNamespace.Entry,
-	id? :React4xpNamespace.Id,
-	uniqueId? :boolean|string,
-	props? :Props
+	entry?: React4xpNamespace.Entry,
+	id?: React4xpNamespace.Id,
+	uniqueId?: boolean | string,
+	props?: Props
 } = {}) {
-	//const react4xp = new React4xp(entry);
-	const react4xp = constructor(entry);
+	const react4xp = new React4xp(entry);
 
 	if (props) {
 		// TODO: Too much data in props. Consider stripping out unnecessary fields. Remember that props are exposed to client in pageContribution. Stop this?
