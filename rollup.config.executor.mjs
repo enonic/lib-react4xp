@@ -44,7 +44,8 @@ export default {
 				outDir,
 				//module: 'es6',
 				target: 'es5'
-			}
+			},
+			tsconfig: 'src/main/resources/assets/tsconfig.json'
 		}),
 		/*hash({
 			//algorithm: 'sha1' // md5, sha1 (default), sha256, sha512
