@@ -1,7 +1,8 @@
 //import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
+import type {React4xp} from '../../React4xp';
 
 
-export function ensureAndLockBeforeRendering() {
+export function ensureAndLockBeforeRendering(this: React4xp) {
 	this.ensureAndLockId();
 
 	//log.debug('ensureAndLockBeforeRendering() this.jsxPath:%s', toStr(this.jsxPath));

@@ -1,4 +1,6 @@
 import type {Request} from '../../../../..';
+import type {React4xp} from '../../React4xp';
+
 
 import {buildErrorContainer} from '../../htmlHandling';
 
@@ -8,7 +10,7 @@ import {buildErrorContainer} from '../../htmlHandling';
  * @param body {string} Existing HTML body, for example rendered from thymeleaf.
  * @returns {string} adjusted or generated HTML body with rendered react component.
  */
-export function renderSSRIntoContainer({
+export function renderSSRIntoContainer(this: React4xp, {
 	body,
 	request
 } : {

@@ -1,3 +1,6 @@
+import type {React4xp} from '../../React4xp';
+
+
 import endsWith from 'JS_UTILS_ALIAS/string/endsWith';
 import {startsWith} from 'JS_UTILS_ALIAS/string/startsWith';
 
@@ -12,7 +15,7 @@ import {startsWith} from 'JS_UTILS_ALIAS/string/startsWith';
  *
  * @returns The React4xp object itself, for builder-like pattern.
  */
-export function setJsxPath(jsxPath :string) {
+export function setJsxPath(this: React4xp, jsxPath :string) {
 	// Enforce a clean jsxPath - it's not just a file reference, but a react4xp component name!
 	this.checkIdLock()
 	if (

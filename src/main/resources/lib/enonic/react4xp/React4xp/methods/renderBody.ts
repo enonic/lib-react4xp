@@ -1,7 +1,8 @@
 import type {Request} from '../../../../..';
+import type {React4xp} from '../../React4xp';
 
 
-export function renderBody({
+export function renderBody(this: React4xp, {
 	body,
 	clientRender,
 	request

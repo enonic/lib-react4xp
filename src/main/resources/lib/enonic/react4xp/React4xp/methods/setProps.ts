@@ -1,4 +1,5 @@
 import type {React4xp as React4xpNamespace} from '../../../../../index.d';
+import type {React4xp} from '../../React4xp';
 
 
 import {isObject} from 'JS_UTILS_ALIAS/value/isObject';
@@ -10,9 +11,9 @@ import {isObject} from 'JS_UTILS_ALIAS/value/isObject';
  */
 export function setProps<
 	Props extends {
-		react4xpId? :React4xpNamespace.Id
-	} = {}
->(props :Props) {
+		react4xpId?: React4xpNamespace.Id
+	} = object
+>(this: React4xp, props: Props) {
 	if (!props || !isObject(props)) {
 		throw new Error("Top-level props must be a string-serializeable object.");
 	}

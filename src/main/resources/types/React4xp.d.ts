@@ -16,7 +16,7 @@ export namespace React4xp {
 	type Id = string
 
 	export interface Props {
-		react4xpId: Id
+		react4xpId?: Id
 	}
 
 	interface Instance<
@@ -68,7 +68,7 @@ export namespace React4xp {
 		setHasRegions: (hasRegions: boolean) => Instance
 		setId: (react4xpId: Id) => Instance
 		setIsPage: (isPage: boolean) => Instance
-		setJsxPath: (jsxPath: string)  => Instance
+		setJsxPath: (jsxPath: string) => Instance
 		setProps: (props: Props) => Instance
 		uniqueId: () => Instance
 	} // interface Instance

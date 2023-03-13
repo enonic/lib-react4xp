@@ -1,10 +1,11 @@
 //import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
+import type {React4xp} from '../../React4xp';
 
 
 // For now, it seems like a good idea to ensure two things when starting the client side rendering:
 // 1, there is a target ID set.
 // 2, it can't be changed once the rendering has started, i.e. between render body and render pagecontributions
-export function ensureAndLockId() {
+export function ensureAndLockId(this: React4xp) {
 	//log.debug('ensureAndLockId() this.react4xpId:%s', toStr(this.react4xpId));
 	if (!this.react4xpId) {
 		this.uniqueId();
