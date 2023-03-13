@@ -1,4 +1,9 @@
-import type {React4xp as React4xpNamespace} from '../../..';
+import type {
+	PageContributions,
+	React4xp as React4xpNamespace,
+	Request,
+	Response
+} from '../../../index.d';
 import type {ComponentGeneric} from '../../../types/Component.d';
 
 import {isObject} from 'JS_UTILS_ALIAS/value/isObject';
@@ -28,10 +33,11 @@ import {setProps} from './React4xp/methods/setProps';
 import {uniqueId} from './React4xp/methods/uniqueId';
 
 
-import {makeErrorMessage} from './htmlHandling';
+import {
+	buildErrorContainer,
+	makeErrorMessage
+} from './htmlHandling';
 import {setup as setupSSRJava} from './ssr'
-import {buildFromParams} from './React4xp/static/buildFromParams';
-import {render} from './React4xp/static/render';
 import {templateDescriptorCache} from './React4xp/templateDescriptorCache';
 import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
 import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
@@ -48,16 +54,150 @@ enum BASE_PATHS {
 setupSSRJava();
 
 
-export class React4xp {
-	static _buildFromParams = buildFromParams
+export class React4xp<
+	Props extends {
+		react4xpId?: React4xpNamespace.Id
+	} = React4xpNamespace.Props
+> {
 	static getClientUrl = getClientUrl
 	static getComponentChunkUrls = getComponentChunkUrls
 	static getExecutorUrl = getExecutorUrl
-	static render = render
+
+	static _buildFromParams<
+		Props extends {
+			react4xpId?: React4xpNamespace.Id
+		} = object
+	>({
+		entry,
+		id,
+		uniqueId,
+		props
+	}: {
+		entry?: React4xpNamespace.Entry,
+		id?: React4xpNamespace.Id,
+		uniqueId?: boolean | string,
+		props?: Props
+	} = {}) {
+		const react4xp = new React4xp(entry);
+
+		if (props) {
+			// TODO: Too much data in props. Consider stripping out unnecessary fields. Remember that props are exposed to client in pageContribution. Stop this?
+			/* if (hasRegions && props && !props.component) {
+				props.component = component;
+			} */
+			react4xp.setProps(props);
+		}
+
+		if (id) {
+			react4xp.setId(id);
+		}
+
+		if (uniqueId) {
+			if (isString(uniqueId)) {
+				react4xp.setId(uniqueId);
+			} else {
+				react4xp.uniqueId();
+			}
+		}
+
+		return react4xp;
+	}
 
 	static _clearCache() {
 		templateDescriptorCache.clear();
 	}
+
+	static render<
+		Props extends object = object
+	>(
+		entry: React4xpNamespace.Entry,
+		props?: Props,
+		request: Request = null,
+		options: {
+			body?: string
+			clientRender?: boolean
+			//id?: string // TODO renamed?
+			pageContributions?: PageContributions
+			react4xpId?: React4xpNamespace.Id
+			serveExternals?: boolean
+			uniqueId?: boolean|string
+		} = {}
+	): Response {
+		//log.debug('render entry:%s', toStr(entry));
+		let react4xp: React4xpNamespace.Instance = null;
+		try {
+			const dereffedOptions = JSON.parse(JSON.stringify(options)) as {
+				body?: string
+				entry: React4xpNamespace.Entry,
+				clientRender?: boolean
+				//id?: string // TODO renamed?
+				pageContributions?: PageContributions
+				props: Props
+				react4xpId?: React4xpNamespace.Id
+				serveExternals?: boolean
+				uniqueId?: boolean|string
+			};
+			dereffedOptions.entry = entry; // TODO modifying an incoming object!!!
+			if (props && isObject(props) && !Array.isArray(props)) {
+				dereffedOptions.props = props;
+			} else if (props) {
+				throw new Error("React4xp props must be falsy or a regular JS object, not this: " + JSON.stringify(props));
+			}
+
+			react4xp = React4xp._buildFromParams<Props>(dereffedOptions);
+
+			const {
+				body,
+				clientRender,
+				pageContributions, // TODO deref?
+				serveExternals = true
+			} = options || {};
+
+			return {
+				...dereffedOptions,
+
+				// .render without a request object will enforce SSR
+				body: react4xp.renderBody({
+					body,
+					clientRender: request
+						? clientRender
+						: false,
+					request
+				}),
+
+				// .render without a request object will enforce JS-suppressed renderPageContributions
+				pageContributions: react4xp.renderPageContributions({
+					pageContributions,
+					clientRender,
+					request: request
+						? request
+						: { mode: 'inline' },
+					serveExternals
+				})
+			}
+
+		} catch (e) {
+			log.error('Stacktrace', e);
+			log.error("entry (" + typeof entry + "): " + JSON.stringify(entry));
+			log.error("props (" + typeof props + "): " + JSON.stringify(props));
+			log.error("request (" + typeof request + "): " + JSON.stringify(request));
+			log.error("params (" + typeof options + "): " + JSON.stringify(options));
+			const errObj = react4xp || {
+				react4xpId: (options || {}).react4xpId,
+				jsxPath: entry
+			};
+
+			return {
+				body: buildErrorContainer(
+					"React4xp error during rendering",
+					e.message,
+					request,
+					errObj
+				)
+			};
+		} // try/catch
+	}
+
 
 	// Public fields/properties
 	component: ComponentGeneric// = null
@@ -65,7 +205,7 @@ export class React4xp {
 	isPage: 0|1 = 0            // boolean using 0 for false and 1 for true, for the sake of more compact client-side .render and .hydrate calls.
 	jsxPath: string// = null
 	assetPath: string// = null
-	props: React4xpNamespace.Props// = null
+	props: Props// = null
 	react4xpId: string// = null
 	react4xpIdIsLocked/*: boolean*/ = false
 
@@ -157,5 +297,6 @@ export {
 	getClientUrl,
 	getComponentChunkUrls,
 	getExecutorUrl,
-	render
 }
+
+export const render = React4xp.render;
