@@ -14,6 +14,7 @@ export function render(
 	component: Component,
 	targetId: string,
 	props: Props,
+	//@ts-expect-error TS6133: 'isPage' is declared but its value is never read.
 	isPage: number, //boolean, // 0 means false
 	hasRegions: number, //boolean, // 0 means false
 	isDevMode: number //boolean // 0 means false

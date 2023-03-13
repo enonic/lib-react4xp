@@ -1,51 +1,51 @@
 export interface Props {
-	regionsData :{
-		[regionName :string] :{
-			components :Array<{
-				descriptor :string
-				path :string
+	regionsData: {
+		[regionName: string]: {
+			components: Array<{
+				descriptor: string
+				path: string
 			}>
 		}
 	}
 }
-export type ComponentFunction = (props :Props) => void;
+export type ComponentFunction = (props: Props) => void;
 export interface ComponentObject {
-	default :ComponentFunction|unknown
+	default: ComponentFunction|unknown
 }
 export type Component = ComponentFunction|ComponentObject|unknown;
 
 
 export interface Entry {
-	props :Props
-	targetId :string
+	props: Props
+	targetId: string
 }
 export interface Entries {
-	[entryName :string] :Entry
+	[entryName: string]: Entry
 }
 
 export interface Region {
-	innerHTML :string
+	innerHTML: string
 }
 export interface RegionsBuffer {
-	[regionName :string] :string
+	[regionName: string]: string
 }
 export interface RegionsRemaining {
-	[regionName :string] :number
+	[regionName: string]: number
 }
 
 export interface ScriptElement extends HTMLScriptElement {
-	onload :()=>void
-	onreadystatechange :()=>void
-	readyState :'complete'|'loaded'
-	src :string
-	type :'text/javascript'
+	onload: ()=>void
+	onreadystatechange: ()=>void
+	readyState: 'complete'|'loaded'
+	src: string
+	type: 'text/javascript'
 }
 
 export interface StyleElement extends HTMLLinkElement {
-	href :string
-	onload :()=>void
-	onreadystatechange :()=>void
-	readyState :'complete'|'loaded'
-	rel :'stylesheet'
-	type :'text/css'
+	href: string
+	onload: ()=>void
+	onreadystatechange: ()=>void
+	readyState: 'complete'|'loaded'
+	rel: 'stylesheet'
+	type: 'text/css'
 }
