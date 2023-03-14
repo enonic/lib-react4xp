@@ -1,4 +1,5 @@
-//import commonjs from '@rollup/plugin-commonjs';
+import alias from '@rollup/plugin-alias';
+import commonjs from '@rollup/plugin-commonjs';
 //import hash from 'rollup-plugin-hash';
 
 // See https://github.com/shuizhongyueming/rollup-plugin-output-manifest/issues/21
@@ -39,6 +40,11 @@ export default {
 		preserveModules: false, // We want to bundle everything into one bundle, so this should be false!
 	},
 	plugins: [
+		alias({
+			entries: [
+				{ find: /^JS_UTILS_ALIAS\/(.*)/, replacement: './node_modules/@enonic/js-utils/dist/cjs/$1.js' },
+			]
+		}),
 		typescript({
 			compilerOptions: {
 				outDir,
@@ -59,7 +65,11 @@ export default {
 			manifest: 'build/resources/main/assets/react4xp/client.manifest.json',
 			replace: true // false is default
 		}),*/
-		//commonjs(),
+
+		// Support importing from common-js files
+		// Note: Which index of the plugins array it has, doesn't seem to matter.
+		commonjs(),
+
 		outputManifest({
 			//basePath: '', // default is '' // A path prefix for all keys. Useful for including your output path in the manifest.
 
