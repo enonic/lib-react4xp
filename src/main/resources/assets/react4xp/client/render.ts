@@ -4,6 +4,7 @@ import type {
 } from './index.d';
 
 
+import {isFunction} from 'JS_UTILS_ALIAS/value/isFunction';
 import ReactDOM from 'react-dom';
 import {getContainer} from './getContainer';
 import {getRenderable} from './getRenderable';
@@ -21,7 +22,11 @@ export function render(
 ) {
 	const container = getContainer(targetId);
 	const renderable = getRenderable(component, props);
-	ReactDOM.render(renderable, container);
+	if (isFunction(ReactDOM.createRoot)) {
+		ReactDOM.createRoot(container).render(renderable); // React 18
+	} else {
+		ReactDOM.render(renderable, container); // React 17
+	}
 
 	if (hasRegions) {
 		postFillRegions(props, isDevMode);
