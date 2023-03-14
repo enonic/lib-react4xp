@@ -10,6 +10,16 @@
 		// Modules
 		//──────────────────────────────────────────────────────────────────────
 		"baseUrl": ".",
+		"paths": {
+			"JS_UTILS_ALIAS": [
+				// This causes rollup to fail, unless @rollup/plugin-alias
+				"../../../../node_modules/@enonic/js-utils/src"
+			],
+			"JS_UTILS_ALIAS/*": [
+				// This causes rollup to fail, unless @rollup/plugin-alias
+				"../../../../node_modules/@enonic/js-utils/src/*"
+			],
+		},
 		"rootDir": ".",
 
 		// Needed to avoid inheriting @enonic-types/env-nashorn
@@ -21,15 +31,25 @@
 		// "declaration": true,
 
 		//──────────────────────────────────────────────────────────────────────
+		// JavaScript Support
+		//──────────────────────────────────────────────────────────────────────
+		"allowJs": true,
+
+		//──────────────────────────────────────────────────────────────────────
+		// Interop Constraints
+		//──────────────────────────────────────────────────────────────────────
+		// "allowSyntheticDefaultImports": true,
+		// "esModuleInterop": true,
+
+		//──────────────────────────────────────────────────────────────────────
 		// Language and Environment
 		//──────────────────────────────────────────────────────────────────────
 		"jsx": "react",
 		"lib": [
 			// console, document, fetch, HTMLElement, window
-			"dom",
+			"DOM",
 
-			// "es3",
-			"es5",
+			"ES5",
 
 			// Modern browsers
 			// Map, Set
@@ -42,6 +62,7 @@
 			// string.endsWith
 			// string.startsWith
 			"ES2015.Core",
+			// "ES2015.Promise",
 		],
 		"target": "es5", // Maybe this should be es2015 aka modern browsers
 	}

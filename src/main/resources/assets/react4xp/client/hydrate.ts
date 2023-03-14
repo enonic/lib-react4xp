@@ -4,6 +4,7 @@ import type {
 } from './index.d';
 
 
+import {isFunction} from 'JS_UTILS_ALIAS/value/isFunction';
 import ReactDOM from 'react-dom';
 import {getContainer} from './getContainer';
 import {getRenderable} from './getRenderable';
@@ -18,5 +19,9 @@ export function hydrate(
 ) {
 	const container = getContainer(targetId);
 	const renderable = getRenderable(component, props);
-	ReactDOM.hydrate(renderable, container);
+	if (isFunction(ReactDOM.hydrateRoot)) {
+		ReactDOM.hydrateRoot(container, renderable); // React 18
+	} else {
+		ReactDOM.hydrate(renderable, container);  // React 17
+	}
 }
