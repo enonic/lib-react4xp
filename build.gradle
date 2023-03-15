@@ -14,6 +14,7 @@ repositories {
 
 dependencies {
     compileOnly "com.enonic.xp:core-api:${xpVersion}"
+    compileOnly "com.enonic.xp:script-api:${xpVersion}"
 
     implementation "com.enonic.xp:lib-io:${xpVersion}"
     implementation "com.enonic.xp:lib-portal:${xpVersion}"
