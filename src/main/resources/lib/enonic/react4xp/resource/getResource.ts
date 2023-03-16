@@ -1,10 +1,6 @@
-import type {Resource} from '../../../..';
+import {getResource as javaGetResource, type Resource} from '/lib/xp/io';
 
 
-//@ts-ignore
-import {getResource as javaGetResource} from '/lib/xp/io';
-
-
-export function getResource(key :string) :Resource {
+export function getResource(key: string) :Resource {
 	return javaGetResource(key);
 }

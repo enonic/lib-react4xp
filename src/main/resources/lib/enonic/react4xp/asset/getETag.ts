@@ -1,5 +1,5 @@
-import {cleanAnyDoubleQuoteWrap} from 'JS_UTILS_ALIAS/string/cleanAnyDoubleQuoteWrap';
-//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
+import {cleanAnyDoubleQuoteWrap} from '@enonic/js-utils/string/cleanAnyDoubleQuoteWrap';
+//import {toStr} from '@enonic/js-utils/value/toStr';
 import {eTagGetter} from './eTagGetter';
 
 

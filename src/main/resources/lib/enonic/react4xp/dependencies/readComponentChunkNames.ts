@@ -4,8 +4,8 @@ import type {
 } from '../../../../index.d';
 
 
-import endsWith from 'JS_UTILS_ALIAS/string/endsWith';
-//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
+import endsWith from '@enonic/js-utils/string/endsWith';
+//import {toStr} from '@enonic/js-utils/value/toStr';
 import {COMPONENT_STATS_FILENAME} from '@enonic/react4xp';
 import {getComponentStats} from '/lib/enonic/react4xp/asset/getComponentStats';
 

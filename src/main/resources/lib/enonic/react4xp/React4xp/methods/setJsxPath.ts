@@ -1,8 +1,8 @@
 import type {React4xp} from '../../React4xp';
 
 
-import endsWith from 'JS_UTILS_ALIAS/string/endsWith';
-import {startsWith} from 'JS_UTILS_ALIAS/string/startsWith';
+import endsWith from '@enonic/js-utils/string/endsWith';
+import {startsWith} from '@enonic/js-utils/string/startsWith';
 
 
 /** When you want to use a particular JSX file (other than the default, a JSX file in the same folder as the XP component,

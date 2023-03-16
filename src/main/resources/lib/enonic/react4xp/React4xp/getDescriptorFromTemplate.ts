@@ -1,15 +1,14 @@
 import type {ComponentType} from '../../../..';
 
 
-//@ts-ignore
 import {get as getContentByKey} from '/lib/xp/content';
 
 import {templateDescriptorCache} from './templateDescriptorCache';
 
 
 export function getDescriptorFromTemplate(
-	componentType :ComponentType,
-	templateId :string
+	componentType: ComponentType,
+	templateId: string
 ) {
 	return templateDescriptorCache.get(templateId, () => {
 		if (!templateId) {

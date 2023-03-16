@@ -1,5 +1,5 @@
-import endsWith from 'JS_UTILS_ALIAS/string/endsWith';
-import {startsWith} from 'JS_UTILS_ALIAS/string/startsWith';
+import endsWith from '@enonic/js-utils/string/endsWith';
+import {startsWith} from '@enonic/js-utils/string/startsWith';
 
 
 interface InsideQuoteState {

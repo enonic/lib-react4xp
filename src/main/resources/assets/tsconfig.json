@@ -10,16 +10,7 @@
 		// Modules
 		//──────────────────────────────────────────────────────────────────────
 		"baseUrl": ".",
-		"paths": {
-			"JS_UTILS_ALIAS": [
-				// This causes rollup to fail, unless @rollup/plugin-alias
-				"../../../../node_modules/@enonic/js-utils/src"
-			],
-			"JS_UTILS_ALIAS/*": [
-				// This causes rollup to fail, unless @rollup/plugin-alias
-				"../../../../node_modules/@enonic/js-utils/src/*"
-			],
-		},
+		"paths": {},
 		"rootDir": ".",
 
 		// Needed to avoid inheriting @enonic-types/env-nashorn

@@ -1,4 +1,4 @@
-import {forceArray} from 'JS_UTILS_ALIAS/array/forceArray';
+import {forceArray} from '@enonic/js-utils/array/forceArray';
 
 
 export function getUniqueEntries(

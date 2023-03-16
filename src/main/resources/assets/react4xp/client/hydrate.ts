@@ -4,7 +4,7 @@ import type {
 } from './index.d';
 
 
-import {isFunction} from 'JS_UTILS_ALIAS/value/isFunction';
+import {isFunction} from '@enonic/js-utils/value/isFunction';
 import ReactDOM from 'react-dom';
 import {getContainer} from './getContainer';
 import {getRenderable} from './getRenderable';

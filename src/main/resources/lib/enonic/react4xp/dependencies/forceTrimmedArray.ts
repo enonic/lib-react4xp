@@ -4,7 +4,7 @@ import type {
 } from '../../../../index.d';
 
 
-import {isString} from 'JS_UTILS_ALIAS/value/isString';
+import {isString} from '@enonic/js-utils/value/isString';
 
 
 export function forceTrimmedArray(entryNames :OneOrMore<React4xpNamespace.EntryName> = []) :Array<React4xpNamespace.EntryName> {

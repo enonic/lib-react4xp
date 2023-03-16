@@ -5,8 +5,8 @@ import {
 	LIBRARY_NAME,
 	R4X_TARGETSUBDIR
 } from '@enonic/react4xp';
-import {isSet} from 'JS_UTILS_ALIAS/value/isSet';
-//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
+import {isSet} from '@enonic/js-utils/value/isSet';
+//import {toStr} from '@enonic/js-utils/value/toStr';
 import {normalizeSSREngineSettings}  from '/lib/enonic/react4xp/ssr/normalizeSSREngineSettings';
 import {normalizeSSRMaxThreads} from '/lib/enonic/react4xp/ssr/normalizeSSRMaxThreads';
 //import {getResource} from '/lib/enonic/react4xp/resource/getResource';

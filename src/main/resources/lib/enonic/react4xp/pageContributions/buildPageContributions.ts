@@ -5,6 +5,7 @@ import type {
 } from '../../../../index.d';
 
 
+import endsWith from '@enonic/js-utils/string/endsWith';
 import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
 import {getExternalsUrls} from '/lib/enonic/react4xp/asset/externals/getExternalsUrls';
 import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
@@ -42,7 +43,7 @@ export function buildPageContributions({
 	const componentChunkUrls = getComponentChunkUrls(entries);
 	for (let i = 0; i < componentChunkUrls.length; i++) {
 		const componentChunkUrl = componentChunkUrls[i];
-		if (componentChunkUrl.endsWith('.css')) {
+		if (endsWith(componentChunkUrl, '.css')) {
 			pageContributions.headEnd.push(`<link href="${componentChunkUrl}" rel="stylesheet" type="text/css" />\n`);
 		} else if(!suppressJS) { // Treat other dependencies as JS and add them in a script tag. Unless suppressJS, in which case: skip them.
 			pageContributions.headEnd.push(`<script defer src="${componentChunkUrl}"></script>\n`);

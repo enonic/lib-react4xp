@@ -6,14 +6,13 @@ import type {
 } from '../../../index.d';
 import type {ComponentGeneric} from '../../../types/Component.d';
 
-import {isObject} from 'JS_UTILS_ALIAS/value/isObject';
-import {isString} from 'JS_UTILS_ALIAS/value/isString';
+import {isObject} from '@enonic/js-utils/value/isObject';
+import {isString} from '@enonic/js-utils/value/isString';
 import {jsxToAssetPath} from '/lib/enonic/react4xp/asset/jsxToAssetPath';
 import {
 	getContent,
 	getComponent
-	//@ts-ignore
-}  from '/lib/xp/portal';
+} from '/lib/xp/portal';
 import {getDescriptorFromTemplate} from './React4xp/getDescriptorFromTemplate';
 
 // Import public methods

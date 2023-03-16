@@ -42,7 +42,7 @@ export default {
 	plugins: [
 		alias({
 			entries: [
-				{ find: /^JS_UTILS_ALIAS\/(.*)/, replacement: './node_modules/@enonic/js-utils/dist/cjs/$1.js' },
+				{ find: /^@enonic\/js-utils\/(.*)/, replacement: './node_modules/@enonic/js-utils/dist/cjs/$1.cjs' },
 			]
 		}),
 		typescript({

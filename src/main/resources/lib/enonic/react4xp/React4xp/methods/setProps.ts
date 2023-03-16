@@ -2,7 +2,7 @@ import type {React4xp as React4xpNamespace} from '../../../../../index.d';
 import type {React4xp} from '../../React4xp';
 
 
-import {isObject} from 'JS_UTILS_ALIAS/value/isObject';
+import {isObject} from '@enonic/js-utils/value/isObject';
 
 
 /** Sets the react4xp component's top-level props.

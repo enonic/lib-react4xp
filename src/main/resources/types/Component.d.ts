@@ -1,3 +1,8 @@
+import type {
+	Component as ComponentFromPortal,
+	Region
+} from "@enonic-types/lib-portal";
+
 export type ComponentType = 'fragment'|'layout'|'page'|'part'|'text'; // image? region?
 
 
@@ -6,7 +11,7 @@ export interface PageComponent<PageConfig extends object = object> {
 	descriptor: string
 	path: string
 	regions: Record<string,Region>
-	template: string
+	template: string // TODO: Missing from lib-portal
 	type: 'page'
 }
 
@@ -25,12 +30,15 @@ export interface TextComponent {
 	type: 'text'
 }
 
-export type ComponentGeneric = PageComponent & PartComponent// & TextComponent;
+//export type ComponentGeneric = PageComponent & PartComponent// & TextComponent;
+export interface ComponentGeneric extends ComponentFromPortal {
+	template?: string // TODO: Missing from lib-portal
+}
 
 export type Component = PageComponent | PartComponent// | TextComponent;
 
-
-interface Region<Name extends string = ''> {
-	components: Array<PartComponent | TextComponent>
-	name: Name
-}
+// This is stricter than lib-portal
+// interface Region<Name extends string = ''> {
+// 	components: Array<PartComponent | TextComponent>
+// 	name: Name
+// }

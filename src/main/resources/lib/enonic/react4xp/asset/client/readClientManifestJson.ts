@@ -1,7 +1,6 @@
-//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
+//import {toStr} from '@enonic/js-utils/value/toStr';
 import {RESOURCE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON} from '/lib/enonic/react4xp/constants';
 import {getResource} from '/lib/enonic/react4xp/resource/getResource';
-//@ts-ignore
 import {readText} from '/lib/xp/io';
 
 
@@ -15,7 +14,7 @@ export function readClientManifestJson() :string {
 		);
 	}
 
-	let content :string;
+	let content: string;
     try {
         content = readText(resource.getStream());
     } catch (e) {

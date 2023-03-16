@@ -43,23 +43,10 @@
 			// A series of entries which re-map imports to lookup locations relative to the baseUrl.
 			// In order to get all of the correct typing in your favourite editor.
 			// yarn tsc doesn't change the import/require paths based on this
-			// "@enonic/js-utils/*": ["./node_modules/@enonic/react4xp/src/*"],
 			"@enonic/react4xp": ["./node_modules/@enonic/react4xp/src"],
 			"@enonic/react4xp/*": ["./node_modules/@enonic/react4xp/src/*"],
-			"JS_UTILS_ALIAS": [
-				// "./node_modules/@enonic/js-utils/dist/cjs/index.js"
-				// This causes rollup to fail, unless @rollup/plugin-alias
-				"./node_modules/@enonic/js-utils/src"
-			],
-			"JS_UTILS_ALIAS/*": [
-				// "./node_modules/@enonic/js-utils/dist/cjs/*"
-				// This causes rollup to fail, unless @rollup/plugin-alias
-				"./node_modules/@enonic/js-utils/src/*"
-			],
 
 			"/lib/enonic/react4xp/*": ["./src/main/resources/lib/enonic/react4xp/*"],
-			// "LIB_REACT4XP_ALIAS": ["./src/main/resources/lib/enonic/react4xp"],
-			// "LIB_REACT4XP_ALIAS/*": ["./src/main/resources/lib/enonic/react4xp/*"],
 			"/lib/xp/*": ["node_modules/@enonic-types/lib-*"],
 			// Development (should be commented out when commiting)
 			// "/lib/xp/node": ["../../enonic/xp/modules/lib/lib-node/src/main/resources/lib/xp/node.ts"],
