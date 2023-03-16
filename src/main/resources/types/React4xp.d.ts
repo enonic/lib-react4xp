@@ -1,3 +1,4 @@
+import type {Component} from '@enonic-types/lib-portal';
 import type {Cache} from './Cache';
 import type {ComponentGeneric} from './Component';
 import type {PageContributions} from './PageContributions';
@@ -10,7 +11,7 @@ type OneOrMore<T> = T | T[]
 
 export namespace React4xp {
 
-	type Entry = string|object
+	type Entry = string|Component
 	type EntryName = string
 	//type EntryNames = Array<string>
 	type Id = string

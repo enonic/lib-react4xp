@@ -4,9 +4,9 @@ import type {
 } from '../../../..';
 
 
-//import {includes} from 'JS_UTILS_ALIAS/array/includes';
-import {startsWith} from 'JS_UTILS_ALIAS/string/startsWith';
-import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
+//import {includes} from '@enonic/js-utils/array/includes';
+import {startsWith} from '@enonic/js-utils/string/startsWith';
+import {toStr} from '@enonic/js-utils/value/toStr';
 
 //import {eTagGetter} from './eTagGetter';
 import {getImmuteables} from './getImmuteables';

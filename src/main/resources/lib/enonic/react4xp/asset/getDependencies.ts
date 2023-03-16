@@ -1,4 +1,4 @@
-import {includes} from 'JS_UTILS_ALIAS/array/includes';
+import {includes} from '@enonic/js-utils/array/includes';
 import {getComponentStats} from './getComponentStats';
 
 

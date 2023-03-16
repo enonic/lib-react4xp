@@ -1,4 +1,4 @@
-//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
+//import {toStr} from '@enonic/js-utils/value/toStr';
 import {RESOURCE_PATH_ABSOLUTE_EXECUTOR_MANIFEST_JSON} from '/lib/enonic/react4xp/constants';
 import {getResource} from '/lib/enonic/react4xp/resource/getResource';
 //@ts-ignore

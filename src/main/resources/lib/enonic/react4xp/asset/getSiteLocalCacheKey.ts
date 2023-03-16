@@ -1,4 +1,3 @@
-//@ts-ignore
 import {getSite} from '/lib/xp/portal';
 
 

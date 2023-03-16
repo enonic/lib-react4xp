@@ -13,7 +13,7 @@
     "Christian Andreas Westgaard <cwe@enonic.com>"
   ],
   "dependencies": {
-    "@enonic/js-utils": "^0.46.0",
+    "@enonic/js-utils": "^1",
     "node-fetch": "^3.3.1",
     "xxhashjs": "^0.2.2"
   },
@@ -26,7 +26,10 @@
     "@babel/preset-env": "^7.20.2",
     "@babel/register": "^7.21.0",
     "@enonic-types/global": "^7.12.0",
+    "@enonic-types/lib-content": "^7.12.0",
+    "@enonic-types/lib-io": "^7.12.0",
     "@enonic-types/lib-node": "^7.12.0",
+    "@enonic-types/lib-portal": "^7.12.0",
     "@enonic/react4xp": "^3.1.2",
     "@mrhenry/core-web": "^1.1.0",
     "@rollup/plugin-alias": "^4.0.3",
@@ -87,7 +90,7 @@
     "rollup:executor": "npx rollup --config rollup.config.executor.mjs",
     "rollup:nashornPolyfills": "npx rollup --config rollup.config.nashornPolyfills.mjs",
     "rollup:nodePolyfills": "npx rollup --config rollup.config.nodePolyfills.mjs",
-    "rollup:server": "npx rollup --config rollup.config.server.mjs src/main/resources/lib/enonic/react4xp/index.ts src/main/resources/services/react4xp/react4xp.ts src/main/resources/services/react4xp-dependencies/react4xp-dependencies.ts",
+    "rollup:server": "npx rollup --config rollup.config.server.mjs",
     "test": "NODE_PATH=./ node_modules/mocha/bin/mocha --compilers js:@babel/register --require babel-polyfill --require src/test/test_helper.js \"src/test/**/*@(.js)\"",
     "tsc": "npm-run-all --parallel tsc:*",
     "tsc:assets": "npx tsc -p src/main/resources/assets/tsconfig.json --noEmit",
@@ -95,6 +98,9 @@
     "tsup": "npm-run-all --parallel tsup:*",
     "tsup:client": "npx tsup --entry.client src/main/resources/assets/react4xp/client.ts",
     "tsup:executor": "npx tsup --entry.executor src/main/resources/assets/react4xp/executor.ts",
-    "tsup:server": "npx tsup -d build/resources/main"
+    "tsup:server": "npx tsup -d build/resources/main",
+    "verify:types": "npm-run-all --parallel verify:types:*",
+    "verify:types:assets": "npx tsc -p src/main/resources/assets/tsconfig.json --noEmit",
+    "verify:types:resources": "npx tsc --noEmit"
   }
 }

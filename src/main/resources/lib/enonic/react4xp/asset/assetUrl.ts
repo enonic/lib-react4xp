@@ -1,17 +1,13 @@
-//import {toStr} from 'JS_UTILS_ALIAS/value/toStr';
+//import {toStr} from '@enonic/js-utils/value/toStr';
 import {
 	//getSite,
 	//pageUrl,
-	serviceUrl as getServiceUrl
-	//@ts-ignore
+	serviceUrl as getServiceUrl,
+	type ServiceUrlParams
 } from '/lib/xp/portal';
 
-type UrlTypeServer = 'server'
-type UrlTypeRelative = 'relative'
-type UrlType = UrlTypeServer | UrlTypeRelative;
 
-
-const URL_TYPE_SERVER :UrlTypeServer = 'server';
+const URL_TYPE_SERVER: ServiceUrlParams['type'] = 'server';
 
 
 // http://localhost:8080/admin/site/inline/default/draft/react4xp-site/_/service/com.enonic.app.react4xp/react4xp/site/parts/color/color.js
@@ -25,20 +21,20 @@ const URL_TYPE_SERVER :UrlTypeServer = 'server';
 //              /
 //   assetPath: site/parts/color/color.js
 export function assetUrl<
-	Params extends object = {}
->(functionParams :{
-	assetPath :string
+	Params extends object = object
+>(functionParams: {
+	assetPath: string
 	// Optional
-	application? :string
-	serviceName? :string
-	serviceUrl? :string
+	application?: string
+	serviceName?: string
+	serviceUrl?: string
 	/*site? :{
 		_id: string
 	}
 	siteId? :string
 	siteUrl? :string*/
-	type? :UrlType
-	urlParams? :Params
+	type?: ServiceUrlParams['type']
+	urlParams?: Params
 }) {
 	const {
 		assetPath,

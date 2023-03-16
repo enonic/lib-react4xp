@@ -1,16 +1,14 @@
 import type {
 	Response,
-	Resource
 } from '../../..';
 
 
-import {forceArray} from 'JS_UTILS_ALIAS/array/forceArray';
-//@ts-ignore
-import {readLines} from '/lib/xp/io';
+import {forceArray} from '@enonic/js-utils/array/forceArray';
+import {readLines, type Resource} from '/lib/xp/io';
 
 
 // Adjusted from https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
-export function hash(string :string) {
+export function hash(string: string) {
 	let hash = 0; // TODO Should it be string '0', rather than number 0
 	if (string.length === 0) return hash;
 	for (let i = 0; i < string.length; i++) {
@@ -22,12 +20,12 @@ export function hash(string :string) {
 };
 
 
-export function getResourceAsString(resource :Resource) {
+export function getResourceAsString(resource: Resource) {
 	return forceArray(readLines(resource.getStream())).join('\n');
 }
 
 
-export function getReact4xpEntry(resource :Resource) :Response {
+export function getReact4xpEntry(resource: Resource): Response {
   //const then = new Date().getTime();
   const fileContent = getResourceAsString(resource);
   const ETag = hash(fileContent);
@@ -45,8 +43,8 @@ export function getReact4xpEntry(resource :Resource) :Response {
 
 
 export function getReact4xpHashedChunk(
-	resource :Resource,
-	isCss :boolean
+	resource: Resource,
+	isCss: boolean
 ) :Response {
   const fileContent = getResourceAsString(resource);
   return {

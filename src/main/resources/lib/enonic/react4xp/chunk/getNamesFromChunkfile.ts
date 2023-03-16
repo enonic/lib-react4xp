@@ -1,4 +1,4 @@
-import {startsWith} from 'JS_UTILS_ALIAS/string/startsWith';
+import {startsWith} from '@enonic/js-utils/string/startsWith';
 import {R4X_TARGETSUBDIR} from '@enonic/react4xp';
 
 import {getResource} from '/lib/enonic/react4xp/resource/getResource';

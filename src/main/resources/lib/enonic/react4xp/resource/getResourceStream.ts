@@ -1,9 +1,9 @@
-import type {Stream} from '../../../..';
+import type {ByteSource} from '/lib/xp/io';
 
 
 import {getResource} from './getResource';
 
 
-export function getResourceStream(key :string) :Stream {
+export function getResourceStream(key: string): ByteSource {
 	return getResource(key).getStream();
 }
