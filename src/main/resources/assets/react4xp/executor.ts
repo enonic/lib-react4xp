@@ -1,5 +1,8 @@
 import type { BooleanProp } from "../";
 
+import {camelize} from '@enonic/js-utils/string/camelize';
+import {ucFirst} from '@enonic/js-utils/string/ucFirst';
+
 interface Data {
 	command: 'hydrate'|'render'
 	devMode: BooleanProp
@@ -16,6 +19,9 @@ for (let index = 0; index < inlineJsonElements.length; index++) {
 	if (inlineJsonElement instanceof HTMLElement) {
 		const id = inlineJsonElement.dataset['react4xpRef'];
 		//console.debug('id', id);
+
+		const appName = inlineJsonElement.dataset['react4xpAppName'];
+		const prefix = appName ? ucFirst(camelize(appName,/\./g)) : '';
 
 		const json = inlineJsonElement.textContent;
 		//console.debug('json', json);
@@ -43,7 +49,7 @@ for (let index = 0; index < inlineJsonElements.length; index++) {
 		console.debug('jsxPath', jsxPath);
 		console.debug('props', props);*/
 		React4xp.CLIENT[command](
-			React4xp[jsxPath], id, props, isPage, hasRegions, devMode
+			window[`${prefix}React4xp`][jsxPath], id, props, isPage, hasRegions, devMode
 		);
 	}
 } // for
