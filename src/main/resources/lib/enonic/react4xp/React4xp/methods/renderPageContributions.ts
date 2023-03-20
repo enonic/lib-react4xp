@@ -59,7 +59,7 @@ export function renderPageContributions(this: React4xp, {
 				// '<!-- asset -->',
 				`<script defer src="${getAssetRoot()}${this.assetPath}"></script>\n`,
 
-				`<script data-react4xp-ref="${this.react4xpId}" type="application/json">${JSON.stringify({
+				`<script data-react4xp-app-name="${app.name}" data-react4xp-ref="${this.react4xpId}" type="application/json">${JSON.stringify({
 					command: clientRender ? 'render' : 'hydrate',
 					devMode: IS_DEV_MODE,
 					hasRegions: this.hasRegions,
