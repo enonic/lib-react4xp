@@ -29,10 +29,10 @@
   },
   "scripts": {
     "build": "npx tsc",
-    "clean": "npx rimraf React4xp ssr *.d.ts",
+    "clean": "npx rimraf React4xp ssr *.d.ts *.tgz",
     "prebuild": "yarn clean",
     "prepack": "yarn build"
   },
   "types": "index.d.ts",
-  "version": "3.4.3-B1"
+  "version": "4.0.0-B1"
 }

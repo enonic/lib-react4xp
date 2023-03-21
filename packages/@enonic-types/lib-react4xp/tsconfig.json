@@ -6,9 +6,8 @@
 		//──────────────────────────────────────────────────────────────────────
 		"baseUrl": ".",
 		"paths": {
-			"JS_UTILS_ALIAS": ["../../../node_modules/@enonic/js-utils/src"],
-			"JS_UTILS_ALIAS/*": ["../../../node_modules/@enonic/js-utils/src/*"],
 			"/lib/enonic/react4xp/*": ["../../../src/main/resources/lib/enonic/react4xp/*"],
+			"/lib/xp/*": ["../../../node_modules/@enonic-types/lib-*"],
 		},
 		"typeRoots": [
 			"../../../node_modules/@types",
@@ -28,7 +27,12 @@
 		//──────────────────────────────────────────────────────────────────────
 		// Language and Environment
 		//──────────────────────────────────────────────────────────────────────
-		"target": "es3",
+		"target": "es5",
+
+		//──────────────────────────────────────────────────────────────────────
+		// Completeness
+		//──────────────────────────────────────────────────────────────────────
+		"skipLibCheck": true,
 	},
 	"include": [
 		// Make sure default types matches Nashorn
