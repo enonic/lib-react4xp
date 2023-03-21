@@ -68,6 +68,7 @@ export default {
 		alias({
 			entries: [
 				{ find: /^@enonic\/js-utils\/(.*)/, replacement: './node_modules/@enonic/js-utils/dist/esm/$1.mjs' },
+				{ find: /^@enonic\/react4xp$/, replacement: './node_modules/@enonic/react4xp/dist/index.js' }, // Instead of node resolver
 			]
 		}),
 		typescript({
