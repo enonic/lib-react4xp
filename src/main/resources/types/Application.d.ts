@@ -1,13 +1,7 @@
-export namespace Application {
-	export interface Config {
-		readonly [key :string] : string | undefined
-	}
-	export type Key = string
-	export type Version = string
-}
-
-export interface App {
-	readonly config :Application.Config
-	readonly name :Application.Key
-	readonly version :Application.Version
+export interface AppConfig {
+	'react4xp.ssr.lazyLoad'?: 'true'|'false'
+	'react4xp.ssr.maxThreads'?: number|string|unknown
+	'react4xp.ssr.settings'?: string
+	'react4xp.ssr.engineName'?: 'Graal.js'|'Nashorn'
+	'react4xp.clientRender'?: 'true'|'false'
 }

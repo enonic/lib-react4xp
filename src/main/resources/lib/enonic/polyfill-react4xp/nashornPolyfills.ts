@@ -43,7 +43,7 @@ import Symbol from 'core-js-pure/actual/symbol';
 
 //import Symbol from 'es6-symbol/polyfill'; // Since I have a undefined check below: Import the Polyfill rather than the Ponyfill.
 
-
+//@ts-expect-error TS2695: Left side of comma operator is unused and has no side effects.
 const context = (1, eval)('this'); // https://stackoverflow.com/questions/9107240/1-evalthis-vs-evalthis-in-javascript;
 
 

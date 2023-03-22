@@ -11,6 +11,7 @@ import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
 import {getAndMerge as getAndMergePageContributions} from '/lib/enonic/react4xp/pageContributions/getAndMerge';
 import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/runMode';
+import shouldRenderClientSide from '/lib/enonic/react4xp/React4xp/shouldRenderClientSide';
 
 
 /** Generates or modifies existing enonic XP pageContributions. Adds client-side dependency chunks (core React4xp frontend,
@@ -34,10 +35,10 @@ export function renderPageContributions(this: React4xp, {
 	request,
 	serveExternals = true
 } :{
-	pageContributions? :PageContributions,
-	clientRender? :boolean,
-	request? :Request,
-	serveExternals? :boolean
+	pageContributions?: PageContributions,
+	clientRender?: boolean,
+	request?: Request,
+	serveExternals?: boolean
 } = {}) {
 	//log.debug('renderPageContributions() pageContributions:%s', toStr(pageContributions));
 	//log.debug('renderPageContributions() clientRender:%s', toStr(clientRender));
@@ -45,9 +46,11 @@ export function renderPageContributions(this: React4xp, {
 
 	let output = null;
 	try {
-
 		// If request.mode reveals rendering in Content studio: SSR without trigger call or JS sources.
-		const suppressJS = (request && (request.mode === "edit" || request.mode === "inline"));
+		const suppressJS = !shouldRenderClientSide({
+			clientRender,
+			request
+		});
 		//log.debug('renderPageContributions() suppressJS:%s', toStr(suppressJS));
 
 		this.ensureAndLockBeforeRendering();

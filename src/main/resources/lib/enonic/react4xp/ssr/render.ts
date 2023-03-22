@@ -21,9 +21,9 @@ export const SSRreact4xp = __.newBean<{
 
 
 export function render(
-	entryName :string,
-	props :string, // JSONstring object
-	dependencyNames :string[]
+	entryName: string,
+	props: string, // JSONstring object
+	dependencyNames: string[]
 ) {
 	//log.debug('render entryName:%s', toStr(entryName));
 	//log.debug('render props:%s', toStr(props));

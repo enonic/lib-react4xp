@@ -1,6 +1,7 @@
+import type { AppConfig } from '/types/Application.d';
 import {
 	COMPONENT_STATS_FILENAME,
-    ENTRIES_FILENAME,
+	ENTRIES_FILENAME,
 	EXTERNALS_CHUNKS_FILENAME,
 	LIBRARY_NAME,
 	R4X_TARGETSUBDIR
@@ -18,8 +19,7 @@ import {SSRreact4xp} from './render';
 
 //const FULL_EXTERNALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}`;
 
-
-const appConfig = app.config;
+const appConfig = app.config as AppConfig;
 //log.debug(`appConfig:%s`, appConfig);
 
 const SSR_LAZYLOAD = appConfig['react4xp.ssr.lazyLoad'] === 'true';

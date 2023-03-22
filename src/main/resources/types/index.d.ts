@@ -1,7 +1,3 @@
-export {
-	App,
-	Application
-} from './Application.d';
 export {Cache} from './Cache.d';
 export {
 	Component,

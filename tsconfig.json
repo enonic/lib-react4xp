@@ -48,6 +48,7 @@
 
 			"/lib/enonic/react4xp/*": ["./src/main/resources/lib/enonic/react4xp/*"],
 			"/lib/xp/*": ["node_modules/@enonic-types/lib-*"],
+			"/*": ["./src/main/resources/*"],
 			// Development (should be commented out when commiting)
 			// "/lib/xp/node": ["../../enonic/xp/modules/lib/lib-node/src/main/resources/lib/xp/node.ts"],
 		},
