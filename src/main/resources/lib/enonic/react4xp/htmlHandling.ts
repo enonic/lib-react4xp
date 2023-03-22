@@ -6,14 +6,14 @@ import type {
 
 
 export function buildErrorContainer(
-	heading :string,
-	message :string,
-	request :Request,
-	react4xpObj :React4xp.Instance | {
-		jsxPath :string|object
-		react4xpId :React4xp.Id
+	heading: string,
+	message: string,
+	request: Request,
+	react4xpObj: React4xp.Instance | {
+		jsxPath: string|object
+		react4xpId: React4xp.Id
 	},
-	hasOuterBorder :boolean = false
+	hasOuterBorder = false
 ) {
     const {jsxPath, react4xpId} = react4xpObj || {};
     /*if (message) {
@@ -74,7 +74,7 @@ export function buildErrorContainer(
 }
 
 
-export function makeErrorMessage(attribute :string, component) {
+export function makeErrorMessage(attribute: string, component) {
 	return `Couldn't construct React4xp data: missing or invalid ${attribute}. ${
 		this.isPage
 		? "Trying to handle a page controller template without a jsxPath string 'entry' parameter in the constructor - but that's usually okay. However, an in-construtor call to portal.getContent() returned data without a content.page." + attribute + " attribute, so no jsxPath can be derived. Content"

@@ -8,6 +8,7 @@ import type {ComponentGeneric} from '../../../types/Component.d';
 
 import {isObject} from '@enonic/js-utils/value/isObject';
 import {isString} from '@enonic/js-utils/value/isString';
+// import {toStr} from '@enonic/js-utils/value/toStr';
 import {jsxToAssetPath} from '/lib/enonic/react4xp/asset/jsxToAssetPath';
 import {
 	getContent,
@@ -122,7 +123,7 @@ export class React4xp<
 			uniqueId?: boolean|string
 		} = {}
 	): Response {
-		//log.debug('render entry:%s', toStr(entry));
+		// log.debug('render entry:%s', toStr(entry));
 		let react4xp: React4xpNamespace.Instance = null;
 		try {
 			const dereffedOptions = JSON.parse(JSON.stringify(options)) as {
@@ -136,7 +137,10 @@ export class React4xp<
 				serveExternals?: boolean
 				uniqueId?: boolean|string
 			};
-			dereffedOptions.entry = entry; // TODO modifying an incoming object!!!
+			dereffedOptions.entry = isString(entry) ? entry : JSON.parse(JSON.stringify(entry));
+			if(!isObject(entry) || (entry?.type === 'page' || entry?.type === 'layout')) {
+				dereffedOptions.clientRender = false;
+			}
 			if (props && isObject(props) && !Array.isArray(props)) {
 				dereffedOptions.props = props;
 			} else if (props) {
@@ -150,7 +154,7 @@ export class React4xp<
 				clientRender,
 				pageContributions, // TODO deref?
 				serveExternals = true
-			} = options || {};
+			} = dereffedOptions || {};
 
 			return {
 				...dereffedOptions,
@@ -158,9 +162,7 @@ export class React4xp<
 				// .render without a request object will enforce SSR
 				body: react4xp.renderBody({
 					body,
-					clientRender: request
-						? clientRender
-						: false,
+					clientRender,
 					request
 				}),
 
@@ -168,9 +170,7 @@ export class React4xp<
 				pageContributions: react4xp.renderPageContributions({
 					pageContributions,
 					clientRender,
-					request: request
-						? request
-						: { mode: 'inline' },
+					request,
 					serveExternals
 				})
 			}
@@ -195,7 +195,7 @@ export class React4xp<
 				)
 			};
 		} // try/catch
-	}
+	} // React4xp.render
 
 
 	// Public fields/properties

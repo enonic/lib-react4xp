@@ -13,11 +13,11 @@ import {buildErrorContainer} from '../../htmlHandling';
 export function renderSSRIntoContainer(this: React4xp, {
 	body,
 	request
-} : {
-	body :string
-	clientRender? :boolean
-	request :Request
-}) :string {
+}: {
+	body: string
+	clientRender?: boolean
+	request: Request
+}): string {
 	//log.debug('renderSSRIntoContainer clientRender:%s jsxPath:%s', clientRender, this.jsxPath);
 	const { html, error } = this.doRenderSSR();
 	//log.debug('renderSSRIntoContainer after doRenderSSR jsxPath:%s html:%s ', this.jsxPath, html);

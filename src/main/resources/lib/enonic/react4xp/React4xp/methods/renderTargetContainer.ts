@@ -10,10 +10,10 @@ import {
 
 
 interface RenderTargetContainerParams {
-	appendErrorContainer? :boolean
-	body? :string // '' is Falsy // Html string that usually contains the target container (a DOM node with correct ID).
-	clientRender? :boolean
-	content? :string // '' is Falsy // Html string to insert inside the target container.
+	appendErrorContainer?: boolean
+	body?: string // '' is Falsy // Html string that usually contains the target container (a DOM node with correct ID).
+	clientRender?: boolean
+	content?: string // '' is Falsy // Html string to insert inside the target container.
 }
 
 

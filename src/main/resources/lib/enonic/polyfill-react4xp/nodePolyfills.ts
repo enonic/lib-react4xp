@@ -15,4 +15,5 @@ import {polyfillTimers} from './timers';
 	if (typeof context['TextEncoder'] === 'undefined') {
 		context['TextEncoder'] = TextEncoder;
 	}
+//@ts-expect-error TS2695: Left side of comma operator is unused and has no side effects.
 })((1, eval)('this') as Partial<ContextWithTimers>);

@@ -1,5 +1,6 @@
 import type {Request} from '../../../../..';
 import type {React4xp} from '../../React4xp';
+import shouldRenderClientSide from '/lib/enonic/react4xp/React4xp/shouldRenderClientSide';
 
 
 export function renderBody(this: React4xp, {
@@ -7,25 +8,20 @@ export function renderBody(this: React4xp, {
 	clientRender,
 	request
 } :{
-	body? :string
-	clientRender? :boolean
-	request? :Request
-} = {}) :string {
-	//log.debug('renderBody clientRender:%s jsxPath:%s', clientRender, this.jsxPath);
-	// The rendered body depends on the rendered context:
-	// SSR is default behavior, but can be overriden by clientRender = true
-	// - UNLESS request.mode reveals rendering in Content studio, which will enforce SSR.
-	const viewMode = (request || {}).mode;
-	return (
-		!clientRender
-		||
-		viewMode === 'edit' || viewMode === 'inline'
-	)
-		? this.renderSSRIntoContainer({
+	body?: string
+	clientRender?: boolean
+	request?: Request
+} = {}): string {
+	// log.debug('renderBody clientRender:%s jsxPath:%s', clientRender, this.jsxPath);
+	return shouldRenderClientSide({
+		clientRender,
+		request
+	})
+		? this.renderTargetContainer({
+			body
+		})
+		: this.renderSSRIntoContainer({
 			body,
 			request
-		})
-		: this.renderTargetContainer({
-			body
 		});
 } // renderBody
