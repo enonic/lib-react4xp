@@ -43,8 +43,8 @@ export const eTagGetter = buildGetter({
 	//cacheControl: 'max-age=604800, stale-while-revalidate=86400'
 	etag: true, // default is true in production and false in development
 	getCleanPath: (request :Request) => {
-        const prefix = request.contextPath;
+		const prefix = request.contextPath;
 		return prefix ? request.rawPath.substring(prefix.length) : request.rawPath;
-    },
+	},
 	root: R4X_TARGETSUBDIR // assets/react4xp
 }) as (request: Request) => Response;

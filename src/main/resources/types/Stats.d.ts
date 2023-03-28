@@ -1,27 +1,35 @@
 export interface Stats {
-	outputPath :string
-	entrypoints :{
-		[entry :string] :{
-			name :string
-			chunks :Array<string|number> // I must have changed something in the build system since they went fron strings to integers :(
-			assets :Array<{
-				name :string
-				size? :number
-			}>
-			filteredAssets :number
-			assetsSize :number|null
-			auxiliaryAssets :Array<{
-				name :string
-				size? :number
-			}>
-			filteredAuxiliaryAssets :number
-			auxiliaryAssetsSize :number|null
+	outputPath: string
+	assetsByChunkName: Record<string, string[]>
+	entrypoints: {
+		[entry: string]: {
+			name: string
+
+			// https://webpack.js.org/configuration/optimization/#optimizationchunkids
+			// deterministic: Short numeric ids which will not be changing between compilation. Good for long term caching. Enabled by default for production mode.
+			// named: Readable ids for better debugging.
+			// In Webpack 4 the default was named
+			// In Webpack 5 the default is deterministic
+			chunks: (number|string)[]
+
+			assets: {
+				name: string
+				size?: number
+			}[]
+			filteredAssets: number
+			assetsSize: number|null
+			auxiliaryAssets: {
+				name: string
+				size?: number
+			}[]
+			filteredAuxiliaryAssets: number
+			auxiliaryAssetsSize: number|null
 			children: object
 			childAssets: object
 		}
 	}
-	errors :Array<unknown>
-	errorsCount :number
-	warnings :Array<unknown>
-	warningsCount :number
+	errors: unknown[]
+	errorsCount: number
+	warnings: unknown[]
+	warningsCount: number
 }
