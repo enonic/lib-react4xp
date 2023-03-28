@@ -64,14 +64,23 @@ export function buildErrorContainer(
               '</p>'
             : ''
         }
-        <script>console.error("${heading}${msg ? `:\\n${msg}` : ''}${
-            react4xpObj
-                ? '\\n\\nJsxPath: ' + jsxPath + "\\nID: " + react4xpId
-                : ''
-        }\\n\\n${protip}");</script>
+
     </div>
 `;
 }
+// The code below was removed due to:
+//
+// Refused to execute inline script because it violates the following
+// Content Security Policy directive: "script-src 'self'".
+// Either the 'unsafe-inline' keyword,
+// a hash ('sha256-1bp2x20QuWwY4nr/H7kToNvRaAdW2Dfg3fghhc9NzBk='),
+// or a nonce ('nonce-...') is required to enable inline execution.
+//
+// <script>console.error("${heading}${msg ? `:\\n${msg}` : ''}${
+// 	react4xpObj
+// 		? '\\n\\nJsxPath: ' + jsxPath + "\\nID: " + react4xpId
+// 		: ''
+// }\\n\\n${protip}");</script>
 
 
 export function makeErrorMessage(attribute: string, component) {
