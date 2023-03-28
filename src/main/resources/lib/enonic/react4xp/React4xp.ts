@@ -111,7 +111,7 @@ export class React4xp<
 		Props extends object = object
 	>(
 		entry: React4xpNamespace.Entry,
-		props?: Props,
+		props?: Props, // Question: Optional positional parameter, before required ones, seems invalid to me?
 		request: Request = null,
 		options: {
 			body?: string
@@ -123,7 +123,7 @@ export class React4xp<
 			uniqueId?: boolean|string
 		} = {}
 	): Response {
-		// log.debug('render entry:%s', toStr(entry));
+		// log.debug('render entry:%s options:%s', toStr(entry), toStr(options));
 		let react4xp: React4xpNamespace.Instance = null;
 		try {
 			const dereffedOptions = JSON.parse(JSON.stringify(options)) as {
