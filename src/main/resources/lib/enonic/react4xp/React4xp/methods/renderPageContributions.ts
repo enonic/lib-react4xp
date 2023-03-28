@@ -11,7 +11,7 @@ import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
 import {getAndMerge as getAndMergePageContributions} from '/lib/enonic/react4xp/pageContributions/getAndMerge';
 import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/runMode';
-
+import shouldRenderClientSide from '/lib/enonic/react4xp/React4xp/shouldRenderClientSide';
 
 /** Generates or modifies existing enonic XP pageContributions. Adds client-side dependency chunks (core React4xp frontend,
  * shared libs and components etc, as well as the entry component scripts.
@@ -62,7 +62,10 @@ export function renderPageContributions(this: React4xp, {
 				`<script defer src="${getAssetRoot()}${this.assetPath}"></script>\n`,
 
 				`<script data-react4xp-app-name="${app.name}" data-react4xp-ref="${this.react4xpId}" type="application/json">${JSON.stringify({
-					command: clientRender ? 'render' : 'hydrate',
+					command: shouldRenderClientSide({
+						clientRender,
+						request
+					}) ? 'render' : 'hydrate',
 					devMode: IS_DEV_MODE,
 					hasRegions: this.hasRegions,
 					isPage: this.isPage,
