@@ -12,7 +12,6 @@ import {
 interface RenderTargetContainerParams {
 	appendErrorContainer?: boolean
 	body?: string // '' is Falsy // Html string that usually contains the target container (a DOM node with correct ID).
-	clientRender?: boolean
 	content?: string // '' is Falsy // Html string to insert inside the target container.
 }
 
@@ -38,7 +37,7 @@ export function renderTargetContainer(this: React4xp, params: RenderTargetContai
 		body = '', // '' is Falsy
 		content = '' // '' is Falsy
 	} = params;
-	//log.debug('renderTargetContainer clientRender:%s jsxPath:%s', clientRender, this.jsxPath);
+	//log.debug('renderTargetContainer jsxPath:%s', this.jsxPath);
 	this.ensureAndLockId();
 
 	const hasBody = ((body) + "").replace(/(^\s+)|(\s+$)/g, "") !== "";

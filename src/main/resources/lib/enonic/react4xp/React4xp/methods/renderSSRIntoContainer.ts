@@ -15,10 +15,9 @@ export function renderSSRIntoContainer(this: React4xp, {
 	request
 }: {
 	body: string
-	clientRender?: boolean
 	request: Request
 }): string {
-	//log.debug('renderSSRIntoContainer clientRender:%s jsxPath:%s', clientRender, this.jsxPath);
+	//log.debug('renderSSRIntoContainer jsxPath:%s', this.jsxPath);
 	const { html, error } = this.doRenderSSR();
 	//log.debug('renderSSRIntoContainer after doRenderSSR jsxPath:%s html:%s ', this.jsxPath, html);
 	return error
