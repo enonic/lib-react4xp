@@ -11,7 +11,6 @@ import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
 import {getAndMerge as getAndMergePageContributions} from '/lib/enonic/react4xp/pageContributions/getAndMerge';
 import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/runMode';
-import shouldRenderClientSide from '/lib/enonic/react4xp/React4xp/shouldRenderClientSide';
 
 
 /** Generates or modifies existing enonic XP pageContributions. Adds client-side dependency chunks (core React4xp frontend,
@@ -47,11 +46,11 @@ export function renderPageContributions(this: React4xp, {
 	let output = null;
 	try {
 		// If request.mode reveals rendering in Content studio: SSR without trigger call or JS sources.
-		const suppressJS = !shouldRenderClientSide({
-			clientRender,
-			request
-		});
-		//log.debug('renderPageContributions() suppressJS:%s', toStr(suppressJS));
+		// We now believe that client-side render/hydration should work for request.mode:'inline',
+		// but is still a bad idea for 'edit' mode as it can interfere with Content Studio UI.
+		// When the request.mode is unavailable SSR without Hydration is enforced.
+		const suppressJS = !request || !request.mode || request.mode === 'edit';
+		// log.debug('renderPageContributions() suppressJS:%s', suppressJS);
 
 		this.ensureAndLockBeforeRendering();
 
