@@ -5,11 +5,11 @@ import {
 	getCachedETag
 } from './cache';
 import {getEntries} from './getEntries';
-//import {getImmuteables} from './getImmuteables';
+//import {getImmutables} from './getImmutables';
 
 
 const ENTRIES = getEntries();
-//const IMMUTEABLES = getImmuteables(ENTRIES);
+//const IMMUTABLES = getImmutables(ENTRIES);
 
 
 export function cacheKnownAssets() {
