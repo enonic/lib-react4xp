@@ -11,15 +11,15 @@ import {startsWith} from '@enonic/js-utils/string/startsWith';
 //@ts-ignore
 import {newCache} from '/lib/cache';
 import {eTagGetter} from './eTagGetter';
-import {getImmuteables} from './getImmuteables';
+import {getImmutables} from './getImmutables';
 import {getEntries} from './getEntries';
-import {immuteableGetter} from './immuteableGetter';
+import {immutableGetter} from './immutableGetter';
 
 
 const ENTRIES = getEntries();
 //log.debug('handleAssetRequest ENTRIES:%s', toStr(ENTRIES));
-const IMMUTEABLES = getImmuteables(ENTRIES);
-//log.debug('handleAssetRequest IMMUTEABLES:%s', toStr(IMMUTEABLES));
+const IMMUTABLES = getImmutables(ENTRIES);
+//log.debug('handleAssetRequest IMMUTABLES:%s', toStr(IMMUTABLES));
 
 
 const assetResponseCache = newCache({
@@ -108,17 +108,17 @@ export function getCachedAssetResponse(request :Request<{ETag? :string}>) {
 		const cacheKey = `${cleanPath}?ETag=${ETag}`;
 		const cachedResponse = assetResponseCache.get(cacheKey, () => {
 			//log.debug('getCachedAssetResponse() caching cacheKey:%s to response', cacheKey);
-			return immuteableGetter(request);
+			return immutableGetter(request);
 		}) as Response;
 		return cachedResponse;
 	}
 
-	if (IMMUTEABLES[cleanPath]) {
-		return immuteableGetter(request);
+	if (IMMUTABLES[cleanPath]) {
+		return immutableGetter(request);
 	}
 
 	if (!includes(ENTRIES, cleanPath)) {
-		log.debug('handleAssetRequest() unable to determine whether immuteable falling back to eTagGetter cleanPath:%s', cleanPath);
+		log.debug('handleAssetRequest() unable to determine whether immutable falling back to eTagGetter cleanPath:%s', cleanPath);
 	}
 
 	return eTagGetter(request); // Handles ifNoneMatch requests?

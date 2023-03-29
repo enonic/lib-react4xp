@@ -5,42 +5,42 @@ import { startsWith } from '@enonic/js-utils/string/startsWith';
 import {getComponentStats} from './getComponentStats';
 
 
-export function getImmuteableDependencies(entries: string[]) {
-	// log.debug('getImmuteableDependencies entries:%s', toStr(entries));
+export function getImmutableDependencies(entries: string[]) {
+	// log.debug('getImmutableDependencies entries:%s', toStr(entries));
 
 	const componentStats = getComponentStats();
-	// log.debug('getImmuteableDependencies componentStats:%s', toStr(componentStats));
+	// log.debug('getImmutableDependencies componentStats:%s', toStr(componentStats));
 
-	const immuteables: Record<string, boolean> = {};
+	const immutables: Record<string, boolean> = {};
 	const chunkNames = Object.keys(componentStats.assetsByChunkName);
-	// log.debug('getImmuteableDependencies chunkNames:%s', toStr(chunkNames));
+	// log.debug('getImmutableDependencies chunkNames:%s', toStr(chunkNames));
 
 	for (let i = 0; i < chunkNames.length; i++) {
 		const chunkName = chunkNames[i];
-		// log.debug('getImmuteableDependencies chunkName:%s', chunkName);
+		// log.debug('getImmutableDependencies chunkName:%s', chunkName);
 
 		const assets = componentStats.assetsByChunkName[chunkName];
-		// log.debug('getImmuteableDependencies assets:%s', toStr(assets));
+		// log.debug('getImmutableDependencies assets:%s', toStr(assets));
 
 		for (let j = 0; j < assets.length; j++) {
 			const asset = assets[j];
-			// log.debug('getImmuteableDependencies asset:%s', asset);
+			// log.debug('getImmutableDependencies asset:%s', asset);
 			if (
 				endsWith(asset, '.js')
 				&& startsWith(asset, chunkName)
 				&& asset.substring(0, asset.length - 3) !== chunkName
 			) {
-				immuteables[asset] = true;
+				immutables[asset] = true;
 			}
 		} // for assetsByChunkName[chunkName].assets
 
 	} // for chunkNames
-	// log.debug('getImmuteableDependencies immuteables:%s', toStr(immuteables));
+	// log.debug('getImmutableDependencies immutables:%s', toStr(immutables));
 
 	// I think these will always be the same as the entries function param,
 	// but I guess it's "safer" to use the object one is iterating.
 	const entryNames = Object.keys(componentStats.entrypoints);
-	// log.debug('getImmuteableDependencies entryNames:%s', toStr(entryNames));
+	// log.debug('getImmutableDependencies entryNames:%s', toStr(entryNames));
 
 	const dependencies: string[] = [];
 
@@ -58,7 +58,7 @@ export function getImmuteableDependencies(entries: string[]) {
 			//log.debug('handleAssetRequest assetName:%s', toStr(assetName));
 			if (
 				!includes(entries, assetName)
-				&& immuteables[assetName]
+				&& immutables[assetName]
 				&& !includes(dependencies, assetName) // avoid duplicates
 			) {
 				dependencies.push(assetName);
@@ -68,4 +68,4 @@ export function getImmuteableDependencies(entries: string[]) {
 	} // for entryNames
 
 	return dependencies;
-} // getImmuteableDependencies
+} // getImmutableDependencies
