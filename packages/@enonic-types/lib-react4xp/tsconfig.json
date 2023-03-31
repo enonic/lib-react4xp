@@ -8,6 +8,7 @@
 		"paths": {
 			"/lib/enonic/react4xp/*": ["../../../src/main/resources/lib/enonic/react4xp/*"],
 			"/lib/xp/*": ["../../../node_modules/@enonic-types/lib-*"],
+			"/*": ["../../../src/main/resources/*"],
 		},
 		"typeRoots": [
 			"../../../node_modules/@types",
