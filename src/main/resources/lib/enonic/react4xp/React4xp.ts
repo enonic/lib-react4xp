@@ -138,7 +138,7 @@ export class React4xp<
 				uniqueId?: boolean|string
 			};
 			dereffedOptions.entry = isString(entry) ? entry : JSON.parse(JSON.stringify(entry));
-			if(!isObject(entry) || (entry?.type === 'page' || entry?.type === 'layout')) {
+			if(isObject(entry) && (entry?.type === 'page' || entry?.type === 'layout')) {
 				dereffedOptions.clientRender = false;
 			}
 			if (props && isObject(props) && !Array.isArray(props)) {
