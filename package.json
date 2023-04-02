@@ -90,12 +90,12 @@
     "rollup:server": "npx rollup --config rollup.config.server.mjs",
     "test": "NODE_PATH=./ node_modules/mocha/bin/mocha --compilers js:@babel/register --require babel-polyfill --require src/test/test_helper.js \"src/test/**/*@(.js)\"",
     "tsc": "npm-run-all --parallel tsc:*",
-    "tsc:assets": "npx tsc -p src/main/resources/assets/tsconfig.json --noEmit",
+    "tsc:assets": "npx tsc -p tsconfig.assets.json --noEmit",
     "tsc:resources": "npx tsc --noEmit",
     "tsup": "npm-run-all --parallel tsup:*",
     "tsup:server": "npx tsup -d build/resources/main",
     "verify:types": "npm-run-all --parallel verify:types:*",
-    "verify:types:assets": "npx tsc -p src/main/resources/assets/tsconfig.json --noEmit",
+    "verify:types:assets": "npx tsc -p tsconfig.assets.json --noEmit",
     "verify:types:resources": "npx tsc --noEmit"
   }
 }

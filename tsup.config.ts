@@ -99,7 +99,7 @@ export default defineConfig((options) => {
 			platform: 'browser',
 			sourcemap: minify,
 			splitting: false,
-			tsconfig: 'src/main/resources/assets/tsconfig.json'
+			tsconfig: 'tsconfig.assets.json'
 		}
 	} // client
 	if (options?.entry?.['executor']) {
@@ -157,7 +157,7 @@ export default defineConfig((options) => {
 			splitting: false,
 
 			// target: 'es5',
-			tsconfig: 'src/main/resources/assets/tsconfig.json'
+			tsconfig: 'tsconfig.assets.json'
 		}
 	} // executor
 });
