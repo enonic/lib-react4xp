@@ -56,6 +56,9 @@ public class EngineFactory
      * Scripts found in chunks.json depend on the previous and must be the last!
      * nashornPolyfills.js script is the basic dependency, and will be added at the very beginning
      * outside of this list.
+     *
+     * @param id identifier of an engine
+     * @return newly built ScriptEngine
      */
     public ScriptEngine buildEngine( long id )
         throws RenderException
