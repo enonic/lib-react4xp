@@ -1,7 +1,5 @@
-import type {React4xp as React4xpNamespace} from '../../../../../index.d';
+import type { Id } from '/types';
 import type {React4xp} from '../../React4xp';
-
-
 import {isObject} from '@enonic/js-utils/value/isObject';
 
 
@@ -11,7 +9,7 @@ import {isObject} from '@enonic/js-utils/value/isObject';
  */
 export function setProps<
 	Props extends {
-		react4xpId?: React4xpNamespace.Id
+		react4xpId?: Id
 	} = object
 >(this: React4xp, props: Props) {
 	if (!props || !isObject(props)) {

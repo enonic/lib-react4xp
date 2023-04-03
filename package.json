@@ -30,7 +30,7 @@
     "@enonic-types/lib-io": "^7.12.1",
     "@enonic-types/lib-node": "^7.12.1",
     "@enonic-types/lib-portal": "^7.12.1",
-    "@enonic/react4xp": "^4.0.0-B1",
+    "@enonic/react4xp": "^4.0.0-B3",
     "@mrhenry/core-web": "^1.1.0",
     "@rollup/plugin-alias": "^4.0.3",
     "@rollup/plugin-commonjs": "^24.0.1",
@@ -89,13 +89,9 @@
     "rollup:nodePolyfills": "npx rollup --config rollup.config.nodePolyfills.mjs",
     "rollup:server": "npx rollup --config rollup.config.server.mjs",
     "test": "NODE_PATH=./ node_modules/mocha/bin/mocha --compilers js:@babel/register --require babel-polyfill --require src/test/test_helper.js \"src/test/**/*@(.js)\"",
-    "tsc": "npm-run-all --parallel tsc:*",
-    "tsc:assets": "npx tsc -p src/main/resources/assets/tsconfig.json --noEmit",
-    "tsc:resources": "npx tsc --noEmit",
+    "tsc": "npx tsc --noEmit",
     "tsup": "npm-run-all --parallel tsup:*",
     "tsup:server": "npx tsup -d build/resources/main",
-    "verify:types": "npm-run-all --parallel verify:types:*",
-    "verify:types:assets": "npx tsc -p src/main/resources/assets/tsconfig.json --noEmit",
-    "verify:types:resources": "npx tsc --noEmit"
+    "verify:types": "npx tsc --noEmit"
   }
 }

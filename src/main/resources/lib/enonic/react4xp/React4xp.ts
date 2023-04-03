@@ -1,13 +1,17 @@
 import type {
+	ComponentGeneric,
+	Entry,
+	Id,
+	Instance,
 	PageContributions,
-	React4xp as React4xpNamespace,
+	Props as R4XProps,
+	// React4xp as React4xpNamespace,
 	Request,
 	Response
-} from '../../../index.d';
-import type {ComponentGeneric} from '../../../types/Component.d';
-
+} from '/types';
 import {isObject} from '@enonic/js-utils/value/isObject';
 import {isString} from '@enonic/js-utils/value/isString';
+import { isNotSet } from '@enonic/js-utils/value/isNotSet';
 // import {toStr} from '@enonic/js-utils/value/toStr';
 import {jsxToAssetPath} from '/lib/enonic/react4xp/asset/jsxToAssetPath';
 import {
@@ -44,6 +48,18 @@ import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl
 import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
 
 
+interface RenderOptions {
+	body?: string
+	hydrate?: boolean
+	//id?: string // TODO renamed?
+	pageContributions?: PageContributions
+	react4xpId?: Id
+	serveExternals?: boolean
+	ssr?: boolean
+	uniqueId?: boolean|string
+}
+
+
 enum BASE_PATHS {
 	part = "parts",
 	page = "pages",
@@ -56,8 +72,8 @@ setupSSRJava();
 
 export class React4xp<
 	Props extends {
-		react4xpId?: React4xpNamespace.Id
-	} = React4xpNamespace.Props
+		react4xpId?: Id
+	} = R4XProps
 > {
 	static getClientUrl = getClientUrl
 	static getComponentChunkUrls = getComponentChunkUrls
@@ -65,7 +81,7 @@ export class React4xp<
 
 	static _buildFromParams<
 		Props extends {
-			react4xpId?: React4xpNamespace.Id
+			react4xpId?: Id
 		} = object
 	>({
 		entry,
@@ -73,8 +89,8 @@ export class React4xp<
 		uniqueId,
 		props
 	}: {
-		entry?: React4xpNamespace.Entry,
-		id?: React4xpNamespace.Id,
+		entry?: Entry,
+		id?: Id,
 		uniqueId?: boolean | string,
 		props?: Props
 	} = {}) {
@@ -110,37 +126,30 @@ export class React4xp<
 	static render<
 		Props extends object = object
 	>(
-		entry: React4xpNamespace.Entry,
+		entry: Entry,
 		props?: Props, // Question: Optional positional parameter, before required ones, seems invalid to me?
 		request: Request = null,
-		options: {
-			body?: string
-			clientRender?: boolean
-			//id?: string // TODO renamed?
-			pageContributions?: PageContributions
-			react4xpId?: React4xpNamespace.Id
-			serveExternals?: boolean
-			uniqueId?: boolean|string
-		} = {}
+		options: RenderOptions = {}
 	): Response {
 		// log.debug('render entry:%s options:%s', toStr(entry), toStr(options));
-		let react4xp: React4xpNamespace.Instance = null;
+		let react4xp: Instance = null;
 		try {
-			const dereffedOptions = JSON.parse(JSON.stringify(options)) as {
-				body?: string
-				entry: React4xpNamespace.Entry,
-				clientRender?: boolean
-				//id?: string // TODO renamed?
-				pageContributions?: PageContributions
+			const dereffedOptions = JSON.parse(JSON.stringify(options)) as typeof options & {
+				entry: Entry,
 				props: Props
-				react4xpId?: React4xpNamespace.Id
-				serveExternals?: boolean
-				uniqueId?: boolean|string
 			};
 			dereffedOptions.entry = isString(entry) ? entry : JSON.parse(JSON.stringify(entry));
-			if(!isObject(entry) || (entry?.type === 'page' || entry?.type === 'layout')) {
-				dereffedOptions.clientRender = false;
+
+			// If ssr is set to false in app.config, it shouldn't apply to page
+			// & layout, because only SSR works well for page and layout.
+			// We've still made it possible to try out client-side rendering for
+			// page & layout by setting it directly in render options.
+			if(isObject(entry) && (entry?.type === 'page' || entry?.type === 'layout')) {
+				if (isNotSet(dereffedOptions.ssr)) {
+					dereffedOptions.ssr = true;
+				}
 			}
+
 			if (props && isObject(props) && !Array.isArray(props)) {
 				dereffedOptions.props = props;
 			} else if (props) {
@@ -151,9 +160,10 @@ export class React4xp<
 
 			const {
 				body,
-				clientRender,
+				hydrate,
 				pageContributions, // TODO deref?
-				serveExternals = true
+				serveExternals = true,
+				ssr
 			} = dereffedOptions || {};
 
 			return {
@@ -162,16 +172,17 @@ export class React4xp<
 				// .render without a request object will enforce SSR
 				body: react4xp.renderBody({
 					body,
-					clientRender,
-					request
+					request,
+					ssr
 				}),
 
 				// .render without a request object will enforce JS-suppressed renderPageContributions
 				pageContributions: react4xp.renderPageContributions({
+					hydrate,
 					pageContributions,
-					clientRender,
 					request,
-					serveExternals
+					serveExternals,
+					ssr,
 				})
 			}
 
@@ -224,7 +235,7 @@ export class React4xp<
 	public setProps = setProps
 	public uniqueId = uniqueId
 
-	constructor(entry: React4xpNamespace.Entry) {
+	constructor(entry: Entry) {
 		if (isString(entry)) {
 			// Use jsxPath, regular flow
 			this.jsxPath = entry.trim();
