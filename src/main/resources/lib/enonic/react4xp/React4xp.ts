@@ -144,7 +144,7 @@ export class React4xp<
 			// & layout, because only SSR works well for page and layout.
 			// We've still made it possible to try out client-side rendering for
 			// page & layout by setting it directly in render options.
-			if(!isObject(entry) || (entry?.type === 'page' || entry?.type === 'layout')) {
+			if(isObject(entry) && (entry?.type === 'page' || entry?.type === 'layout')) {
 				if (isNotSet(dereffedOptions.ssr)) {
 					dereffedOptions.ssr = true;
 				}
