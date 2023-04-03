@@ -1,8 +1,6 @@
-import type {React4xp as React4xpNamespace} from '../../../../../index.d';
+import type { Id } from '/types';
 import type {React4xp} from '../../React4xp';
-
 //import {toStr} from '@enonic/js-utils/value/toStr';
-
 import {getComponentChunkNames}  from '/lib/enonic/react4xp/dependencies/getComponentChunkNames';
 import {render as renderSSRJava} from '/lib/enonic/react4xp/ssr/render';
 
@@ -18,7 +16,7 @@ import {render as renderSSRJava} from '/lib/enonic/react4xp/ssr/render';
  */
 export function doRenderSSR<
 	Props extends {
-		react4xpId? :React4xpNamespace.Id
+		react4xpId?: Id
 	} = object
 >(this: React4xp, overrideProps? :Props) {
 	//log.debug('doRenderSSR overrideProps:%s', toStr(overrideProps));

@@ -1,7 +1,8 @@
 import type {
+	Id,
 	React4xp,
 	Request
-} from '../../../index.d';
+} from '/types';
 //import type {React4xp} from './React4xp';
 
 
@@ -11,7 +12,7 @@ export function buildErrorContainer(
 	request: Request,
 	react4xpObj: React4xp.Instance | {
 		jsxPath: string|object
-		react4xpId: React4xp.Id
+		react4xpId: Id
 	},
 	hasOuterBorder = false
 ) {

@@ -1,27 +1,27 @@
 import type {Request} from '../../../../..';
 import type {React4xp} from '../../React4xp';
-import shouldRenderClientSide from '/lib/enonic/react4xp/React4xp/shouldRenderClientSide';
+import shouldSSR from '/lib/enonic/react4xp/React4xp/shouldSSR';
 
 
 export function renderBody(this: React4xp, {
 	body,
-	clientRender,
-	request
+	request,
+	ssr,
 } :{
 	body?: string
-	clientRender?: boolean
+	ssr?: boolean
 	request?: Request
 } = {}): string {
-	// log.debug('renderBody clientRender:%s jsxPath:%s', clientRender, this.jsxPath);
-	return shouldRenderClientSide({
-		clientRender,
-		request
+	// log.debug('renderBody ssr:%s jsxPath:%s', ssr, this.jsxPath);
+	return shouldSSR({
+		request,
+		ssr
 	})
-		? this.renderTargetContainer({
-			body
-		})
-		: this.renderSSRIntoContainer({
+		? this.renderSSRIntoContainer({
 			body,
 			request
+		})
+		: this.renderTargetContainer({
+			body
 		});
 } // renderBody
