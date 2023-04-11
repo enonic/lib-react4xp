@@ -23,7 +23,6 @@ import com.enonic.lib.react4xp.ssr.resources.ChunkDependencyParser;
 import com.enonic.lib.react4xp.ssr.resources.ResourceReader;
 
 import static com.enonic.lib.react4xp.ssr.errors.ErrorHandler.KEY_ERROR;
-import static com.enonic.lib.react4xp.ssr.errors.ErrorHandler.KEY_STACKTRACE;
 
 
 public class Renderer {
@@ -44,7 +43,7 @@ public class Renderer {
     public Renderer( EngineFactory engineFactory, ResourceReader resourceReader, Config config, long id) {
         this.id = id;
 
-        LOG.debug("{}: starting init {}...", this, (config.LAZYLOAD ? " (lazyloading)" : ""));
+        LOG.debug("{}: starting init ...", this);
 
         this.config = config;
 

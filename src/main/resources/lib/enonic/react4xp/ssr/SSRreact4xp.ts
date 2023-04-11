@@ -12,7 +12,6 @@ const SSRreact4xp = __.newBean<{
 		entriesJsonFilename: string,
 		chunksGlobalsJsonFilename: string,
 		statsComponentsFilename: string,
-		lazyload: boolean,
 		ssrMaxThreads: number,
 		engineName: string,
 		scriptEngineSettings: string[]

@@ -20,9 +20,6 @@ import SSRreact4xp from '/lib/enonic/react4xp/ssr/SSRreact4xp';
 const appConfig = app.config as AppConfig;
 // log.debug(`appConfig:%s`, appConfig);
 
-const SSR_LAZYLOAD = appConfig['react4xp.ssr.lazyLoad'] === 'true';
-// log.debug(`SSR_LAZYLOAD:%s`, SSR_LAZYLOAD);
-
 const SSR_MAX_THREADS = appConfig['react4xp.ssr.maxThreads'];
 // log.debug(`SSR_MAX_THREADS:%s`, SSR_MAX_THREADS);
 
@@ -36,14 +33,11 @@ const SSR_ENGINE_NAME = appConfig['react4xp.ssr.engineName'];
 
 
 export function setup({
-		lazyload,
 		ssrMaxThreads
-} :{
-	lazyload?: boolean,
+}: {
 	scriptEngineSettings?: string[],
 	ssrMaxThreads?: number
 } = {}) {
-	// log.debug('setup lazyload:%s', toStr(lazyload));
 	// log.debug('setup ssrMaxThreads:%s', toStr(ssrMaxThreads));
 
 	return SSRreact4xp.setup(
@@ -57,7 +51,6 @@ export function setup({
 		GLOBALS_FILENAME,
 
 		COMPONENT_STATS_FILENAME,
-		isSet(lazyload) ? lazyload : SSR_LAZYLOAD,
 		normalizeSSRMaxThreads(isSet(ssrMaxThreads)
 			? ssrMaxThreads
 			: SSR_MAX_THREADS
