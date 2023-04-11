@@ -3,8 +3,6 @@ package com.enonic.lib.react4xp.ssr;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -44,7 +42,7 @@ public class ServerSideRenderer
     }
 
     public void setup( String appName, String scriptsHome, String libraryName, String chunkfilesHome, String entriesJsonFilename,
-                       String chunksGlobalsJsonFilename, String statsComponentsFilename, boolean lazyload, Integer ssrMaxThreads,
+                       String chunksGlobalsJsonFilename, String statsComponentsFilename, Integer ssrMaxThreads,
                        String engineName, String[] scriptEngineSettings )
     {
         synchronized ( isInitialized )
@@ -53,12 +51,12 @@ public class ServerSideRenderer
             {
                 int poolSize = ( ssrMaxThreads == null || ssrMaxThreads < 1 ) ? Runtime.getRuntime().availableProcessors() : ssrMaxThreads;
 
-                LOG.debug( "Setting up{} SSR with {} engine{}...", lazyload ? " lazy-loading " : "", poolSize,
+                LOG.debug( "Setting up{} SSR with {} engine{}...", poolSize,
                            ( poolSize == 1 ? "" : "s" ) );
 
                 final Config config =
                     new Config( appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksGlobalsJsonFilename,
-                                statsComponentsFilename, lazyload );
+                                statsComponentsFilename );
 
                 final ResourceReader resourceReader = new ResourceReaderImpl( resourceServiceSupplier, config );
                 final EngineFactory engineFactory = new EngineFactory( engineName, scriptEngineSettings, resourceReader );
@@ -66,14 +64,7 @@ public class ServerSideRenderer
 
                 rendererPool = new GenericObjectPool<>( rendererFactory, createPoolConfig( poolSize ) );
 
-                if ( !lazyload )
-                {
-                    asyncInitRenderers();
-                }
-                else
-                {
-                    latch.countDown();
-                }
+                latch.countDown();
 
                 isInitialized.set( true );
             }
@@ -88,47 +79,6 @@ public class ServerSideRenderer
         poolConfig.setMinIdle( poolSize );
         poolConfig.setMaxTotal( poolSize );
         return poolConfig;
-    }
-
-    // Start initialization of N renderers in the pool, asynchronously
-    private void asyncInitRenderers()
-    {
-        final ExecutorService asyncInitializer = Executors.newSingleThreadExecutor();
-
-        try
-        {
-            // First Renderer is expensive to make. Don't allow to first Renderer to be created in parallel with others.
-            // The following ones may reuse precompiled scripts, so they are not that expensive to create even in parallel.
-            asyncInitializer.submit( () -> {
-                try
-                {
-                    rendererPool.addObject();
-                }
-                catch ( Exception e )
-                {
-                    LOG.error( "Error during async init first Renderer", e );
-                }
-                finally
-                {
-                    latch.countDown();
-                }
-            } );
-            asyncInitializer.submit( () -> {
-                try
-                {
-                    rendererPool.preparePool();
-                }
-                catch ( final Exception e )
-                {
-                    LOG.error( "Error during async init Renderers", e );
-                }
-            } );
-
-        }
-        finally
-        {
-            asyncInitializer.shutdown();
-        }
     }
 
     ////////////////////////////////////////////////////////////////////////// RENDER

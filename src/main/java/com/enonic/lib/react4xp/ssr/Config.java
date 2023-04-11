@@ -11,7 +11,6 @@ public class Config {
     public final String ENTRIES_JSON_FILENAME;
     public final String CHUNKSGLOBALS_JSON_FILENAME;
     public final String STATS_COMPONENTS_FILENAME;
-    public final boolean LAZYLOAD;
 
     public Config(
             String appName,
@@ -20,8 +19,7 @@ public class Config {
             String chunkfilesHome,
             String entriesJsonFilename,
             String chunksGlobalsJsonFilename,
-            String statsComponentsFilename,
-            boolean lazyload) {
+            String statsComponentsFilename) {
         this.APP_NAME = appName;
         this.SCRIPTS_HOME = scriptsHome;                                 // Usually: "/react4xp"
         this.LIBRARY_NAME = libraryName;                                 // "React4xp"
@@ -29,6 +27,5 @@ public class Config {
         this.ENTRIES_JSON_FILENAME = entriesJsonFilename;
         this.CHUNKSGLOBALS_JSON_FILENAME = chunksGlobalsJsonFilename;
         this.STATS_COMPONENTS_FILENAME = statsComponentsFilename;
-        this.LAZYLOAD = lazyload;
     }
 }
