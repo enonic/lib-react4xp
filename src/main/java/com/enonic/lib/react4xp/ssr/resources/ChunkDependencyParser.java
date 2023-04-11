@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.script.Bindings;
 import javax.script.Invocable;
@@ -33,17 +32,7 @@ public class ChunkDependencyParser {
         final String globalsChunkFile = config.CHUNKFILES_HOME + config.CHUNKSGLOBALS_JSON_FILENAME;
         final List<String> globalsDependencies = getDependencyNamesFromChunkFile( resourceReader.readResource( globalsChunkFile ) );
 
-        if ( config.LAZYLOAD )
-        {
-            return globalsDependencies.stream().distinct().collect( Collectors.toList() );
-        }
-
-        final String statsFile = config.CHUNKFILES_HOME + config.STATS_COMPONENTS_FILENAME;
-
-        final List<String> statsDependencies =
-            getDependencyNamesFromStatsFile( resourceReader.readResource( statsFile ) );
-
-        return Stream.concat( globalsDependencies.stream(), statsDependencies.stream() ).distinct().collect( Collectors.toList() );
+        return globalsDependencies.stream().distinct().collect( Collectors.toList() );
     }
 
     private List<String> getDependencyNamesFromChunkFile( String source )
@@ -69,42 +58,6 @@ public class ChunkDependencyParser {
             }
 
         } ).collect( Collectors.toList() );
-    }
-
-    private List<String> getDependencyNamesFromStatsFile( String statsSource )
-    {
-        final Map<String, Object> statsData = (Map<String, Object>) parseJson( statsSource );
-        final Map<String, Object> entrypoints = (Map<String, Object>) statsData.get( "entrypoints" );
-
-        if ( entrypoints == null )
-        {
-            return List.of();
-        }
-
-        return entrypoints.values()
-            .stream()
-            .flatMap( value -> adaptList( ( (Map<String, Object>) value ).get( "assets" ) ).stream() )
-            .map( obj -> {
-                if ( obj instanceof String )
-                {
-                    return (String) obj;
-                }
-                else
-                {
-                    try
-                    {
-                        return (String) ( (Map<String, Object>) obj ).get( "name" );
-                    }
-                    catch ( Exception e )
-                    {
-                        throw new RuntimeException(
-                            "Couldn't parse dependency file name from stats file - asset obj seems to be neither a JSONObject with a .name attribute, nor a string. Asset obj = " +
-                                obj );
-                    }
-                }
-            } )
-            .filter( fileName -> fileName.endsWith( ".js" ) )
-            .collect( Collectors.toList() );
     }
 
     private Object parseJson( String json )
