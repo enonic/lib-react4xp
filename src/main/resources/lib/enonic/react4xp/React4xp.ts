@@ -29,6 +29,7 @@ import {renderBody} from './React4xp/methods/renderBody';
 import {renderPageContributions} from './React4xp/methods/renderPageContributions';
 import {renderSSRIntoContainer} from './React4xp/methods/renderSSRIntoContainer';
 import {renderTargetContainer} from './React4xp/methods/renderTargetContainer';
+import {renderWarningPlaceholder} from './React4xp/methods/renderWarningPlaceholder';
 import {setHasRegions} from './React4xp/methods/setHasRegions';
 import {setId} from './React4xp/methods/setId';
 import {setIsPage} from './React4xp/methods/setIsPage';
@@ -225,6 +226,7 @@ export class React4xp<
 	public renderPageContributions = renderPageContributions
 	public renderSSRIntoContainer = renderSSRIntoContainer
 	public renderTargetContainer = renderTargetContainer
+	public renderWarningPlaceholder = renderWarningPlaceholder
 	public setHasRegions = setHasRegions
 	public setId = setId
 	public setIsPage = setIsPage

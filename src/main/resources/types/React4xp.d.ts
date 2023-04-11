@@ -64,6 +64,7 @@ export interface Instance<
 		body: string
 		content: string
 	}) => string
+	renderWarningPlaceholder: () => string
 	setHasRegions: (hasRegions: boolean) => Instance
 	setId: (react4xpId: Id) => Instance
 	setIsPage: (isPage: boolean) => Instance
