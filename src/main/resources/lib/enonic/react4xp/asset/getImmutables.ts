@@ -1,7 +1,7 @@
 // import {toStr} from '@enonic/js-utils/value/toStr';
 import {getClientChunkFilename} from '/lib/enonic/react4xp/asset/client/getClientChunkFilename';
 import {getExecutorChunkFilename} from '/lib/enonic/react4xp/asset/executor/getExecutorChunkFilename'
-import {getExternals} from './getExternals';
+import {getGlobals} from './getGlobals';
 import {getImmutableDependencies} from './getImmutableDependencies';
 
 
@@ -9,8 +9,8 @@ export function getImmutables(entries: string[]) {
 	const dependencies = getImmutableDependencies(entries);
 	// log.debug('getImmutables dependencies:%s', toStr(dependencies));
 
-	const externals = getExternals();
-	// log.debug('getImmutables externals:%s', toStr(externals));
+	const globals = getGlobals();
+	// log.debug('getImmutables globals:%s', toStr(globals));
 
 	const clientChunkFilename = getClientChunkFilename();
 	// log.debug('getImmutables clientChunkFilename:%s', toStr(clientChunkFilename)); // client-47ERBIZ7.global.js
@@ -30,10 +30,10 @@ export function getImmutables(entries: string[]) {
 		immutables[dependency] = true;
 	}
 
-	for (let i = 0; i < externals.length; i++) {
-		const external = externals[i];
-		if (external !== 'externals.js') {
-			immutables[external] = true; // without hash is not immutable
+	for (let i = 0; i < globals.length; i++) {
+		const global = globals[i];
+		if (global !== 'globals') {
+			immutables['globals'] = true; // without hash is not immutable
 		}
 	}
 

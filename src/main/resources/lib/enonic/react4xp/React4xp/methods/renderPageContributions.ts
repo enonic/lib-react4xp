@@ -32,13 +32,11 @@ export function renderPageContributions(this: React4xp, {
 	hydrate,
 	pageContributions = {},
 	request,
-	serveExternals = true,
 	ssr
 } :{
 	hydrate?: boolean,
 	pageContributions?: PageContributions,
 	request?: Request,
-	serveExternals?: boolean
 	ssr?: boolean,
 } = {}) {
 	//log.debug('renderPageContributions() hydrate:%s', toStr(hydrate));
@@ -98,8 +96,7 @@ export function renderPageContributions(this: React4xp, {
 			newPgContrib: {
 				headEnd
 			},
-			suppressJS,
-			serveExternals
+			suppressJS
 		});
 
 	} catch (e) {

@@ -32,35 +32,32 @@ import {newCache} from '/lib/cache';
  * Also part of the merge: PAGE_CONTRIBUTIONS, the common standard React4xp page contributions
  */
 export function getAndMerge({
-  entryNames,
-  incomingPgContrib,
-  newPgContrib,
-  suppressJS,
-  serveExternals = true
-} :{
-	entryNames :OneOrMore<React4xpNamespace.EntryName>
-    incomingPgContrib :PageContributions
-    newPgContrib :PageContributions
-    suppressJS :boolean
-    serveExternals? :boolean
-}) :PageContributions {
+	entryNames,
+	incomingPgContrib,
+	newPgContrib,
+	suppressJS,
+}: {
+	entryNames: OneOrMore<React4xpNamespace.EntryName>
+	incomingPgContrib: PageContributions
+	newPgContrib: PageContributions
+	suppressJS: boolean
+}): PageContributions {
 	//log.debug('getAndMerge() entryNames:%s', toStr(entryNames));
 	//log.debug('getAndMerge() incomingPgContrib:%s', toStr(incomingPgContrib));
 	//log.debug('getAndMerge() newPgContrib:%s', toStr(newPgContrib));
 	//log.debug('getAndMerge() suppressJS:%s', toStr(suppressJS));
 
-  	entryNames = normalizeEntryNames(entryNames);
-  	//log.debug('getAndMerge() normalized entryNames:%s', toStr(entryNames));
+	entryNames = normalizeEntryNames(entryNames);
+	//log.debug('getAndMerge() normalized entryNames:%s', toStr(entryNames));
 
-    /*const cacheKey = getSiteLocalCacheKey(entryNames.join("*")+"_"+suppressJS);
-	log.debug('getAndMerge() cacheKey:%s', cacheKey);*/
+	// const cacheKey = getSiteLocalCacheKey(entryNames.join("*")+"_"+suppressJS);
+	// log.debug('getAndMerge() cacheKey:%s', cacheKey);
 
 	// WARNING: Do not cache anything that contains assetRoot, it changes per context!!!
-    const entriesPgContrib :PageContributions = /*pageContributionsCache.get(
-        cacheKey, () =>*/ buildPageContributions({
+	const entriesPgContrib :PageContributions = /*pageContributionsCache.get(
+		cacheKey, () =>*/ buildPageContributions({
 			entries: entryNames,
-			suppressJS,
-			serveExternals
+			suppressJS
 		})
 	/*)*/;
 	//log.debug('getAndMerge() entriesPgContrib:%s', toStr(entriesPgContrib));

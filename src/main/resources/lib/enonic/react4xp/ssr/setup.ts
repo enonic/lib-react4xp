@@ -2,36 +2,37 @@ import type { AppConfig } from '/types/Application.d';
 import {
 	COMPONENT_STATS_FILENAME,
 	ENTRIES_FILENAME,
-	EXTERNALS_CHUNKS_FILENAME,
+	GLOBALS_FILENAME,
 	LIBRARY_NAME,
 	R4X_TARGETSUBDIR
 } from '@enonic/react4xp';
 import {camelize} from '@enonic/js-utils/string/camelize';
 import {ucFirst} from '@enonic/js-utils/string/ucFirst';
 import {isSet} from '@enonic/js-utils/value/isSet';
-//import {toStr} from '@enonic/js-utils/value/toStr';
+// import {toStr} from '@enonic/js-utils/value/toStr';
 import {normalizeSSREngineSettings}  from '/lib/enonic/react4xp/ssr/normalizeSSREngineSettings';
 import {normalizeSSRMaxThreads} from '/lib/enonic/react4xp/ssr/normalizeSSRMaxThreads';
-//import {getResource} from '/lib/enonic/react4xp/resource/getResource';
+// import {getResource} from '/lib/enonic/react4xp/resource/getResource';
+import SSRreact4xp from '/lib/enonic/react4xp/ssr/SSRreact4xp';
 
-
-import {SSRreact4xp} from './render';
-
-//const FULL_EXTERNALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${EXTERNALS_CHUNKS_FILENAME}`;
+// const FULL_GLOBALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${GLOBALS_FILENAME}`;
 
 const appConfig = app.config as AppConfig;
-//log.debug(`appConfig:%s`, appConfig);
+// log.debug(`appConfig:%s`, appConfig);
 
 const SSR_LAZYLOAD = appConfig['react4xp.ssr.lazyLoad'] === 'true';
-const SSR_MAX_THREADS = appConfig['react4xp.ssr.maxThreads'];
-const SSR_ENGINE_SETTINGS = appConfig['react4xp.ssr.settings'];
-const SSR_ENGINE_NAME = appConfig['react4xp.ssr.engineName'];
-//log.debug(`SSR_LAZYLOAD:%s`, SSR_LAZYLOAD);
-//log.debug(`SSR_MAX_THREADS:%s`, SSR_MAX_THREADS);
-//log.debug(`SSR_ENGINE_SETTINGS:%s`, SSR_ENGINE_SETTINGS);
+// log.debug(`SSR_LAZYLOAD:%s`, SSR_LAZYLOAD);
 
-//const resourceChunksExternalsJson = getResource(FULL_EXTERNALS_CHUNKS_FILENAME);
-//const booleanChunksExternalsJsonExist = resourceChunksExternalsJson && resourceChunksExternalsJson.exists();
+const SSR_MAX_THREADS = appConfig['react4xp.ssr.maxThreads'];
+// log.debug(`SSR_MAX_THREADS:%s`, SSR_MAX_THREADS);
+
+const SSR_ENGINE_SETTINGS = appConfig['react4xp.ssr.settings'];
+// log.debug(`SSR_ENGINE_SETTINGS:%s`, SSR_ENGINE_SETTINGS);
+
+const SSR_ENGINE_NAME = appConfig['react4xp.ssr.engineName'];
+
+// const resourceChunksGlobalsJson = getResource(FULL_GLOBALS_CHUNKS_FILENAME);
+// const booleanChunksGlobalsJsonExist = resourceChunksGlobalsJson && resourceChunksGlobalsJson.exists();
 
 
 export function setup({
@@ -42,18 +43,18 @@ export function setup({
 	scriptEngineSettings?: string[],
 	ssrMaxThreads?: number
 } = {}) {
-	//log.debug('setup lazyload:%s', toStr(lazyload));
-	//log.debug('setup ssrMaxThreads:%s', toStr(ssrMaxThreads));
+	// log.debug('setup lazyload:%s', toStr(lazyload));
+	// log.debug('setup ssrMaxThreads:%s', toStr(ssrMaxThreads));
 
 	return SSRreact4xp.setup(
 		app.name,
-		`/${R4X_TARGETSUBDIR}`, //scriptsHome,
+		`/${R4X_TARGETSUBDIR}`, // scriptsHome,
 		`${ucFirst(camelize(app.name,/\./g))}${LIBRARY_NAME}`,
-		`/${R4X_TARGETSUBDIR}/`, //chunkfilesHome,
+		`/${R4X_TARGETSUBDIR}/`, // chunkfilesHome,
 		ENTRIES_FILENAME,
 
-		//booleanChunksExternalsJsonExist ? EXTERNALS_CHUNKS_FILENAME : '',
-		EXTERNALS_CHUNKS_FILENAME,
+		// booleanChunksGlobalsJsonExist ? GLOBALS_CHUNKS_FILENAME : '',
+		GLOBALS_FILENAME,
 
 		COMPONENT_STATS_FILENAME,
 		isSet(lazyload) ? lazyload : SSR_LAZYLOAD,

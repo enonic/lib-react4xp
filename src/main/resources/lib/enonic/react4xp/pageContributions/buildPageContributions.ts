@@ -7,13 +7,13 @@ import type {
 
 import endsWith from '@enonic/js-utils/string/endsWith';
 import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
-import {getExternalsUrls} from '/lib/enonic/react4xp/asset/externals/getExternalsUrls';
+import {getGlobalsUrls} from '../asset/globals/getGlobalsUrls';
 import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
 
-/** Use the json files built by webpack in other libraries (react4xp-build-components, react4xp-runtime-externals, react4xp-runtime-client)
+/** Use the json files built by (@enonic/react4xp)
  *  to fetch items of <script src="url" /> for common chunks:
  *   -the dependency chunks of specific entries (array of entry names in the argument, gets all of the dependencies if empty),
- *   -an optional Externals chunk,
+ *   -an optional Globals chunk,
  *   -and an optional frontend-client chunk (which falls back to the built-in client url if missing)?
  * @param entries An array (also accepts string, if only one item) of Entry names for React4xp components, for which we want to build the set
  * of dependencies.
@@ -21,11 +21,9 @@ import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getCompon
 export function buildPageContributions({
 	entries,
 	suppressJS,
-	serveExternals = true
-} :{
-	entries :OneOrMore<React4xpNamespace.EntryName>,
-	suppressJS :boolean,
-	serveExternals? :boolean
+}: {
+	entries: OneOrMore<React4xpNamespace.EntryName>,
+	suppressJS: boolean,
 }) {
 
 	const pageContributions :PageContributions = {
@@ -36,8 +34,8 @@ export function buildPageContributions({
 	// * If the script is modular and does not rely on any scripts then use async.
 	// * If the script relies upon or is relied upon by another script then use defer.
 
-	if (serveExternals) {
-		pageContributions.headEnd.push(`<script defer src="${getExternalsUrls()}"></script>\n`);
+	if (app.config['react4xp.serveGlobals'] !== 'false') {
+		pageContributions.headEnd.push(`<script defer src="${getGlobalsUrls()}"></script>\n`);
 	}
 
 	const componentChunkUrls = getComponentChunkUrls(entries);
