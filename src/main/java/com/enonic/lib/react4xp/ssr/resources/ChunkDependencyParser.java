@@ -30,12 +30,12 @@ public class ChunkDependencyParser {
     public List<String> getScriptDependencyNames( Config config )
         throws IOException
     {
-        final String externalsChunkFile = config.CHUNKFILES_HOME + config.CHUNKSEXTERNALS_JSON_FILENAME;
-        final List<String> externalsDependencies = getDependencyNamesFromChunkFile( resourceReader.readResource( externalsChunkFile ) );
+        final String globalsChunkFile = config.CHUNKFILES_HOME + config.CHUNKSGLOBALS_JSON_FILENAME;
+        final List<String> globalsDependencies = getDependencyNamesFromChunkFile( resourceReader.readResource( globalsChunkFile ) );
 
         if ( config.LAZYLOAD )
         {
-            return externalsDependencies.stream().distinct().collect( Collectors.toList() );
+            return globalsDependencies.stream().distinct().collect( Collectors.toList() );
         }
 
         final String statsFile = config.CHUNKFILES_HOME + config.STATS_COMPONENTS_FILENAME;
@@ -43,7 +43,7 @@ public class ChunkDependencyParser {
         final List<String> statsDependencies =
             getDependencyNamesFromStatsFile( resourceReader.readResource( statsFile ) );
 
-        return Stream.concat( externalsDependencies.stream(), statsDependencies.stream() ).distinct().collect( Collectors.toList() );
+        return Stream.concat( globalsDependencies.stream(), statsDependencies.stream() ).distinct().collect( Collectors.toList() );
     }
 
     private List<String> getDependencyNamesFromChunkFile( String source )

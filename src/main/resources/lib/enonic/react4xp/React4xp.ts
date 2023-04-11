@@ -54,7 +54,6 @@ interface RenderOptions {
 	//id?: string // TODO renamed?
 	pageContributions?: PageContributions
 	react4xpId?: Id
-	serveExternals?: boolean
 	ssr?: boolean
 	uniqueId?: boolean|string
 }
@@ -162,7 +161,6 @@ export class React4xp<
 				body,
 				hydrate,
 				pageContributions, // TODO deref?
-				serveExternals = true,
 				ssr
 			} = dereffedOptions || {};
 
@@ -181,7 +179,6 @@ export class React4xp<
 					hydrate,
 					pageContributions,
 					request,
-					serveExternals,
 					ssr,
 				})
 			}

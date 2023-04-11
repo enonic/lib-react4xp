@@ -44,7 +44,7 @@ public class ServerSideRenderer
     }
 
     public void setup( String appName, String scriptsHome, String libraryName, String chunkfilesHome, String entriesJsonFilename,
-                       String chunksExternalsJsonFilename, String statsComponentsFilename, boolean lazyload, Integer ssrMaxThreads,
+                       String chunksGlobalsJsonFilename, String statsComponentsFilename, boolean lazyload, Integer ssrMaxThreads,
                        String engineName, String[] scriptEngineSettings )
     {
         synchronized ( isInitialized )
@@ -57,7 +57,7 @@ public class ServerSideRenderer
                            ( poolSize == 1 ? "" : "s" ) );
 
                 final Config config =
-                    new Config( appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksExternalsJsonFilename,
+                    new Config( appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksGlobalsJsonFilename,
                                 statsComponentsFilename, lazyload );
 
                 final ResourceReader resourceReader = new ResourceReaderImpl( resourceServiceSupplier, config );

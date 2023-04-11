@@ -9,7 +9,7 @@ public class Config {
     public final String LIBRARY_NAME;
     public final String CHUNKFILES_HOME;
     public final String ENTRIES_JSON_FILENAME;
-    public final String CHUNKSEXTERNALS_JSON_FILENAME;
+    public final String CHUNKSGLOBALS_JSON_FILENAME;
     public final String STATS_COMPONENTS_FILENAME;
     public final boolean LAZYLOAD;
 
@@ -19,7 +19,7 @@ public class Config {
             String libraryName,
             String chunkfilesHome,
             String entriesJsonFilename,
-            String chunksExternalsJsonFilename,
+            String chunksGlobalsJsonFilename,
             String statsComponentsFilename,
             boolean lazyload) {
         this.APP_NAME = appName;
@@ -27,7 +27,7 @@ public class Config {
         this.LIBRARY_NAME = libraryName;                                 // "React4xp"
         this.CHUNKFILES_HOME = chunkfilesHome;                           // "/react4xp/"
         this.ENTRIES_JSON_FILENAME = entriesJsonFilename;
-        this.CHUNKSEXTERNALS_JSON_FILENAME = chunksExternalsJsonFilename;
+        this.CHUNKSGLOBALS_JSON_FILENAME = chunksGlobalsJsonFilename;
         this.STATS_COMPONENTS_FILENAME = statsComponentsFilename;
         this.LAZYLOAD = lazyload;
     }

@@ -13,7 +13,7 @@ export function getClientUrl() {
         return clientUrl;
     } catch (e) {
 		throw new Error(`Unable to find the client chunk file!!!`);
-        //log.debug('Stacktrace', e); // Error: Empty or not found: /assets/react4xp/chunks.client.json
+        //log.debug('Stacktrace', e); // Error: Empty or not found: /r4xAssets/chunks.client.json
         /*log.debug(
             `No optional clientwrapper was found (chunkfile reference: ${RESOURCE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON}). That's okay, there's a fallback one at: ${getClientRoot()}`
         );

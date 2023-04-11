@@ -53,7 +53,6 @@ export interface Instance<
 		hydrate?: boolean
 		pageContributions?: PageContributions
 		request?: Request
-		serveExternals?: boolean
 		ssr?: boolean
 	}) => unknown
 	renderSSRIntoContainer: (params: {

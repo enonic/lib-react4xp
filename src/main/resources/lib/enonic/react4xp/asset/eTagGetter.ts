@@ -46,5 +46,5 @@ export const eTagGetter = buildGetter({
 		const prefix = request.contextPath;
 		return prefix ? request.rawPath.substring(prefix.length) : request.rawPath;
 	},
-	root: R4X_TARGETSUBDIR // assets/react4xp
+	root: R4X_TARGETSUBDIR // r4xAssets
 }) as (request: Request) => Response;
