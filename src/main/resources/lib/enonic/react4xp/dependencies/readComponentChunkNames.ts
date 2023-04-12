@@ -70,7 +70,7 @@ export function readComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.
 
                     throw new Error(`Unexpected 'assets' structure in ${COMPONENT_STATS_FILENAME}: ${JSON.stringify(data.assets)}`);
                 })
-                .filter((asset :string) => !endsWith(asset, ".map") && asset !== myself)
+                .filter((asset :string) => !endsWith(asset, ".map"))
                 .forEach((asset :string) => {
                     if (output.indexOf(asset) === -1) {
                         output.push(asset);
