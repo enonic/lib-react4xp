@@ -1,4 +1,3 @@
-import type { Id } from '/types';
 import type {React4xp} from '../../React4xp';
 //import {toStr} from '@enonic/js-utils/value/toStr';
 import {getComponentChunkNames}  from '/lib/enonic/react4xp/dependencies/getComponentChunkNames';
@@ -15,16 +14,14 @@ import {render as renderSSRJava} from '/lib/enonic/react4xp/ssr/render';
  *  and 'error' an error message string from the Nashorn engine if any error occurred (undefined if successful rendering).
  */
 export function doRenderSSR<
-	Props extends {
-		react4xpId?: Id
-	} = object
->(this: React4xp, overrideProps? :Props) {
+	Props extends object = object
+>(this: React4xp, overrideProps?: Props) {
 	//log.debug('doRenderSSR overrideProps:%s', toStr(overrideProps));
 	//log.debug('doRenderSSR this.jsxPath:%s', toStr(this.jsxPath));
 	//log.debug('doRenderSSR this.props:%s', toStr(this.props));
-	let result :{
-		error? :string
-		html? :string
+	let result: {
+		error?: string
+		html?: string
 	} = {};
 	try {
 		result = __.toNativeObject( // Converts arrays or complex Java objects to JavaScript data types

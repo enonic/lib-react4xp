@@ -12,8 +12,4 @@ export function ensureAndLockId(this: React4xp) {
 	}
 	//log.debug('ensureAndLockId() this.react4xpIdIsLocked:%s', toStr(this.react4xpIdIsLocked));
 	this.react4xpIdIsLocked = true;
-	if (this.react4xpId && this.props) {
-		this.props.react4xpId = this.react4xpId;
-	}
-	//log.debug('ensureAndLockId() this.props:%s', toStr(this.props));
 }

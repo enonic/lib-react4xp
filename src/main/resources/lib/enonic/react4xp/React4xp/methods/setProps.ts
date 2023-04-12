@@ -1,4 +1,3 @@
-import type { Id } from '/types';
 import type {React4xp} from '../../React4xp';
 import {isObject} from '@enonic/js-utils/value/isObject';
 
@@ -8,9 +7,7 @@ import {isObject} from '@enonic/js-utils/value/isObject';
  * @returns The react4xp component itself, for builder-like pattern.
  */
 export function setProps<
-	Props extends {
-		react4xpId?: Id
-	} = object
+	Props extends object = object
 >(this: React4xp, props: Props) {
 	if (!props || !isObject(props)) {
 		throw new Error("Top-level props must be a string-serializeable object.");
