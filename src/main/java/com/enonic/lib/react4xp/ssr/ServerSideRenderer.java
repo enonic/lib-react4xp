@@ -51,8 +51,7 @@ public class ServerSideRenderer
             {
                 int poolSize = ( ssrMaxThreads == null || ssrMaxThreads < 1 ) ? Runtime.getRuntime().availableProcessors() : ssrMaxThreads;
 
-                LOG.debug( "Setting up{} SSR with {} engine{}...", poolSize,
-                           ( poolSize == 1 ? "" : "s" ) );
+                LOG.debug( "Setting up SSR with {} engine{}...", poolSize, ( poolSize == 1 ? "" : "s" ) );
 
                 final Config config =
                     new Config( appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksGlobalsJsonFilename,
