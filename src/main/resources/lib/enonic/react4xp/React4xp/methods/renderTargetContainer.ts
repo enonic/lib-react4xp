@@ -41,13 +41,13 @@ export function renderTargetContainer(this: React4xp, params: RenderTargetContai
 	this.ensureAndLockId();
 
 	const hasBody = ((body) + "").replace(/(^\s+)|(\s+$)/g, "") !== "";
-	//log.debug('renderTargetContainer hasBody:%s jsxPath:%s', hasBody, this.jsxPath);
+	// log.debug('renderTargetContainer hasBody:%s jsxPath:%s', hasBody, this.jsxPath);
 
 	const hasContainerWithId = hasElementWithId({
 		id: this.react4xpId,
 		htmlString: body
 	});
-	//log.debug('renderTargetContainer hasBody:%s hasContainerWithId:%s jsxPath:%s', hasBody, hasContainerWithId, this.jsxPath);
+	// log.debug('renderTargetContainer hasBody:%s hasContainerWithId:%s jsxPath:%s', hasBody, hasContainerWithId, this.jsxPath);
 
 	const container = buildContainer({
 		id: this.react4xpId,
@@ -71,10 +71,19 @@ export function renderTargetContainer(this: React4xp, params: RenderTargetContai
 	// If there is a body but it's missing a target container element:
 	// Make a container and insert it right before the closing tag.
 	if (!hasContainerWithId) {
+		// log.debug(
+		// 	'renderTargetContainer hasBody:%s hasContainerWithId:%s jsxPath:%s id:%s body:%s output:%s',
+		// 	hasBody, hasContainerWithId, this.jsxPath, this.react4xpId, body, output
+		// );
+		// WARNING: This can end up after the body tag, and gives W3C HTML validation error "Stray start tag"
 		return insertAtEndOfRoot(body, output);
 	}
 
 	if (content) {
+		// log.debug(
+		// 	'renderTargetContainer hasBody:%s hasContainerWithId:%s jsxPath:%s id:%s body:%s content:%s',
+		// 	hasBody, hasContainerWithId, this.jsxPath, this.react4xpId, body, content
+		// );
 		return insertInsideContainer(body, content, this.react4xpId, appendErrorContainer);
 	}
 

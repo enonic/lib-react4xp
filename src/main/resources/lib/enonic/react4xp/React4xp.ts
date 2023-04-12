@@ -4,7 +4,6 @@ import type {
 	Id,
 	Instance,
 	PageContributions,
-	Props as R4XProps,
 	// React4xp as React4xpNamespace,
 	Request,
 	Response
@@ -52,9 +51,8 @@ import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getCompon
 interface RenderOptions {
 	body?: string
 	hydrate?: boolean
-	//id?: string // TODO renamed?
+	id?: Id
 	pageContributions?: PageContributions
-	react4xpId?: Id
 	ssr?: boolean
 	uniqueId?: boolean|string
 }
@@ -71,18 +69,14 @@ setupSSRJava();
 
 
 export class React4xp<
-	Props extends {
-		react4xpId?: Id
-	} = R4XProps
+	Props extends object = object
 > {
 	static getClientUrl = getClientUrl
 	static getComponentChunkUrls = getComponentChunkUrls
 	static getExecutorUrl = getExecutorUrl
 
 	static _buildFromParams<
-		Props extends {
-			react4xpId?: Id
-		} = object
+		Props extends object = object
 	>({
 		entry,
 		id,
@@ -191,7 +185,7 @@ export class React4xp<
 			log.error("request (" + typeof request + "): " + JSON.stringify(request));
 			log.error("params (" + typeof options + "): " + JSON.stringify(options));
 			const errObj = react4xp || {
-				react4xpId: (options || {}).react4xpId,
+				react4xpId: (options || {}).id,
 				jsxPath: entry
 			};
 
@@ -214,7 +208,7 @@ export class React4xp<
 	jsxPath: string// = null
 	assetPath: string// = null
 	props: Props// = null
-	react4xpId: string// = null
+	react4xpId: Id// = null
 	react4xpIdIsLocked/*: boolean*/ = false
 
 	// Public methods

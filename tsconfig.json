@@ -95,6 +95,10 @@
 		// Language and Environment
 		//──────────────────────────────────────────────────────────────────────
 		"experimentalDecorators": true,
+		"lib": [
+			"DOM", // HTMLElement
+			"ES2015"
+		],
 		// tsup Warning Unrecognized target environment "ES3"
 		// tsup CJS Build failed Error: Invalid target "es3" in "--target=es3"
 		// "target": "ES3",
@@ -122,9 +126,6 @@
 		"src/main/resources/assets/**/*.*",
 	],
 	"include": [
-		// Make sure default types matches Nashorn
-		"node_modules/typescript/lib/lib.es5.d.ts",
-
 		"src/main/resources/index.d.ts",
 		"src/main/resources/**/*.ts",
 	// 	"node_modules/@enonic/react4xp/**/*.ts",

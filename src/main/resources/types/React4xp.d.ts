@@ -10,18 +10,11 @@ type OneOrMore<T> = T | T[]
 export type Entry = string|Component
 
 export type EntryName = string
-	//type EntryNames = Array<string>
 
-export type Id = string
-
-export interface Props {
-	react4xpId?: Id
-}
+export type Id = HTMLElement['id']
 
 export interface Instance<
-	Props extends {
-		react4xpId?: Id
-	} = object
+	Props extends object = object
 > {
 	// Private fields/properties
 	templateDescriptorCache?: Cache
@@ -66,7 +59,7 @@ export interface Instance<
 	}) => string
 	renderWarningPlaceholder: () => string
 	setHasRegions: (hasRegions: boolean) => Instance
-	setId: (react4xpId: Id) => Instance
+	setId: (id: Id) => Instance
 	setIsPage: (isPage: boolean) => Instance
 	setJsxPath: (jsxPath: string) => Instance
 	setProps: (props: Props) => Instance
