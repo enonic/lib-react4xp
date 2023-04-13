@@ -158,6 +158,9 @@ export class React4xp<
 			} = dereffedOptions || {};
 
 			return {
+				// I think render() should return a Enonic XP response object, that's at least what the typings say.
+				// dereffedOptions contains properties which doesn't belong in an Enonic XP response object
+				// TODO: So this is not "safe":
 				...dereffedOptions,
 
 				// .render without a request object will enforce SSR

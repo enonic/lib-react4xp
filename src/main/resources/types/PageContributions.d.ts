@@ -1,6 +1,6 @@
 export interface PageContributions {
-	headBegin? :Array<string>
-	headEnd? :Array<string>
-	bodyBegin? :Array<string>
-	bodyEnd? :Array<string>
+	headBegin?: string[]
+	headEnd?: string[]
+	bodyBegin?: string[]
+	bodyEnd?: string[]
 }

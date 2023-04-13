@@ -1,4 +1,4 @@
-import type {
+import type {
 	OneOrMore,
 	PageContributions,
 	React4xp as React4xpNamespace
@@ -11,15 +11,6 @@ import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl
 import {normalizeEntryNames} from '/lib/enonic/react4xp/dependencies/normalizeEntryNames';
 import {buildPageContributions} from '/lib/enonic/react4xp/pageContributions/buildPageContributions';
 import {getUniqueEntries} from '/lib/enonic/react4xp/pageContributions/getUniqueEntries';
-
-//@ts-ignore
-import {newCache} from '/lib/cache';
-
-
-/*const pageContributionsCache = newCache({
-  size: 1200,
-  expire: 10800 // 30 hours
-});*/
 
 
 /** Adds page contributions for an (optional) set of entries.  Merges different pageContributions.js objects into one. Prevents duplicates: no single pageContribution entry is
@@ -54,12 +45,10 @@ export function getAndMerge({
 	// log.debug('getAndMerge() cacheKey:%s', cacheKey);
 
 	// WARNING: Do not cache anything that contains assetRoot, it changes per context!!!
-	const entriesPgContrib :PageContributions = /*pageContributionsCache.get(
-		cacheKey, () =>*/ buildPageContributions({
-			entries: entryNames,
-			suppressJS
-		})
-	/*)*/;
+	const entriesPgContrib: PageContributions = buildPageContributions({
+		entries: entryNames,
+		suppressJS
+	});
 	//log.debug('getAndMerge() entriesPgContrib:%s', toStr(entriesPgContrib));
 
 	if (!incomingPgContrib && !newPgContrib) {
@@ -109,4 +98,4 @@ export function getAndMerge({
 			controlSet
 		).concat(suppressJS ? [] : executorEntry) // Manually added last :)
 	};
-};
+}
