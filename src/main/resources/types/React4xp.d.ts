@@ -37,6 +37,7 @@ export interface Instance<
 		error?: string
 		html?: string
 	}
+	makeErrorMessage: (attribute: string) => string
 	renderBody: (params: {
 		body?: string
 		request?: Request
