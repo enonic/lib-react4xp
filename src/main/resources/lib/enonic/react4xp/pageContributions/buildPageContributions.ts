@@ -42,7 +42,9 @@ export function buildPageContributions({
 	for (let i = 0; i < componentChunkUrls.length; i++) {
 		const componentChunkUrl = componentChunkUrls[i];
 		if (endsWith(componentChunkUrl, '.css')) {
-			pageContributions.headEnd.push(`<link href="${componentChunkUrl}" rel="stylesheet" type="text/css">\n`);
+			// Trailing slash on void elements is a warning in HTML5, but an error in XHTML!
+			// Since we don't control DOCTYPE, it's better to keep the validation warning, than breaking a XHTML page.
+			pageContributions.headEnd.push(`<link href="${componentChunkUrl}" rel="stylesheet" type="text/css" />\n`);
 		} else if(!suppressJS) { // Treat other dependencies as JS and add them in a script tag. Unless suppressJS, in which case: skip them.
 			pageContributions.headEnd.push(`<script defer src="${componentChunkUrl}"></script>\n`);
 		}
