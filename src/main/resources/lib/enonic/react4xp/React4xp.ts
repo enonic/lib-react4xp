@@ -24,6 +24,7 @@ import {checkIdLock} from './React4xp/methods/checkIdLock';
 import {ensureAndLockId} from './React4xp/methods/ensureAndLockId';
 import {ensureAndLockBeforeRendering} from './React4xp/methods/ensureAndLockBeforeRendering';
 import {doRenderSSR} from './React4xp/methods/doRenderSSR';
+import makeErrorMessage from "./React4xp/methods/makeErrorMessage";
 import {renderBody} from './React4xp/methods/renderBody';
 import {renderPageContributions} from './React4xp/methods/renderPageContributions';
 import {renderSSRIntoContainer} from './React4xp/methods/renderSSRIntoContainer';
@@ -37,10 +38,7 @@ import {setProps} from './React4xp/methods/setProps';
 import {uniqueId} from './React4xp/methods/uniqueId';
 
 
-import {
-	buildErrorContainer,
-	makeErrorMessage
-} from './htmlHandling';
+import {buildErrorContainer} from './htmlHandling';
 import {setup as setupSSRJava} from './ssr'
 import {templateDescriptorCache} from './React4xp/templateDescriptorCache';
 import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
@@ -216,6 +214,7 @@ export class React4xp<
 	public ensureAndLockId = ensureAndLockId
 	public ensureAndLockBeforeRendering = ensureAndLockBeforeRendering
 	public doRenderSSR = doRenderSSR
+	public makeErrorMessage = makeErrorMessage
 	public renderBody = renderBody
 	public renderPageContributions = renderPageContributions
 	public renderSSRIntoContainer = renderSSRIntoContainer
@@ -229,6 +228,8 @@ export class React4xp<
 	public uniqueId = uniqueId
 
 	constructor(entry: Entry) {
+		// log.debug('React4xp constructor entry:%s', entry);
+
 		if (isString(entry)) {
 			// Use jsxPath, regular flow
 			this.jsxPath = entry.trim();
@@ -239,10 +240,11 @@ export class React4xp<
 
 		} else if (!entry || (isObject(entry) && !Array.isArray(entry))) {
 			const comp = getComponent();
+			// log.debug('React4xp constructor comp:%s', comp);
+
 			if (comp) {
 				// Component. Use entry in component flow. Derive jsxPath and default ID from local part/layout folder, same name.
 				this.component = entry || comp;
-
 			} else {
 				const cont = getContent();
 				if (cont && cont.page) {
@@ -252,29 +254,47 @@ export class React4xp<
 					// Page. Use content.page in page flow. Derive jsxPath and default ID from local page folder, same name.
 					this.isPage = 1;
 					this.component = cont.page;
-
 				} else {
 					// Missing content.page.descriptor as well as component and jsxPath
 					throw new Error("React4xp seems to be called from an invalid context. Looks like you tried to derive jsxPath from a non-jsxPath 'entry' parameter, using either a falsy or component object (portal.getComponent() called from a component controller, i.e. part, layout). But both in-constructor calls portal.getComponent() and portal.getContent() yielded invalid results: no component data and no content.page.  |  entry=" + JSON.stringify(entry) + "  |  portal.getComponent=" + JSON.stringify(comp) + "  |  portal.getContent=" + JSON.stringify(cont));
 				}
 			}
-
+			// log.debug('React4xp constructor this.component:%s', this.component);
 
 			const buildingBlockData = {
 				descriptor: this.component.descriptor || getDescriptorFromTemplate(this.component.type, this.component.template),
 				type: BASE_PATHS[this.component.type],
 				path: this.component.path
 			};
+			// log.debug('React4xp constructor buildingBlockData:%s', buildingBlockData);
+
+			if (!this.component.path) {
+				const maybeFragmentContent = getContent();
+				if (maybeFragmentContent && maybeFragmentContent.fragment) {
+					// #51 Support rendering fragment content
+					// getComponent() inside Fragment Content doesn't contain path
+					// The path is used when creating react4xpId
+					// Since a Fragment Content only has a single component, the path really doesn't matter...
+					buildingBlockData.path = '/main/0';
+				}
+			}
+			// log.debug('React4xp constructor buildingBlockData:%s', buildingBlockData);
+
 			Object.keys(buildingBlockData).forEach(attribute => {
+				// log.debug('React4xp constructor attribute:%s', attribute);
 				if (!buildingBlockData[attribute]) {
-					throw new Error(makeErrorMessage(attribute, this.component));
+					throw new Error(this.makeErrorMessage(attribute));
 				}
 			});
 
 			const compName = buildingBlockData.descriptor.split(":")[1];
+			// log.debug('React4xp constructor compName:%s', compName);
+
 			this.jsxPath = `site/${buildingBlockData.type}/${compName}/${compName}`;
+			// log.debug('React4xp constructor this.jsxPath:%s', this.jsxPath);
 
 			this.react4xpId = `${buildingBlockData.type}_${compName}_${buildingBlockData.path}`.replace(/\//g, "_");
+			// log.debug('React4xp constructor this.react4xpId:%s', this.react4xpId);
 
 
 			// TODO: Move to later in the flow. Where are regions relevant and this.component guaranteed?
@@ -293,6 +313,7 @@ export class React4xp<
 		}
 
 		this.assetPath = jsxToAssetPath(this.jsxPath);
+		// log.debug('React4xp constructor this.assetPath:%s', this.assetPath);
 	} // constructor
 }
 
