@@ -10,7 +10,7 @@ import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
 import {getAndMerge as getAndMergePageContributions} from '/lib/enonic/react4xp/pageContributions/getAndMerge';
 import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/runMode';
-import shouldSSR from '/lib/enonic/react4xp/React4xp/shouldSSR';
+import isAssumedCSEditMode from '../utils/isEditMode';
 
 
 /** Generates or modifies existing enonic XP pageContributions. Adds client-side dependency chunks (core React4xp frontend,
@@ -46,48 +46,55 @@ export function renderPageContributions(this: React4xp, {
 
 	let output = null;
 	try {
-		// We have three "modes"
-		// 1. SSR with Hydration (the default)
-		// 2. SSR without Hydration (no need to pass props nor hydrate aka suppressJS)
-		// 3. Client-side render
-
-		// If request.mode reveals rendering in Content studio: SSR without trigger call or JS sources.
 		// We now believe that client-side render/hydration should work for request.mode:'inline',
 		// but is still a bad idea for 'edit' mode as it can interfere with Content Studio UI.
-		// When the request.mode is unavailable SSR without Hydration is enforced.
+		// When the request.mode is unavailable we assume CS Edit mode.
+		//
+		// In CS Edit mode there are two "outcomes":
+		//  1. Yellow placeholder (Pure client-side component) -> suppressJS
+		//  2. SSR without Hydration -> suppressJS
+		// Outside CS Edit mode there are three "outcomes":
+		//  3. SSR with Hydration -> !suppressJS (and 'hydrate')
+		//  4. SSR without Hydration -> suppressJS
+		//  5. Client-side render -> !suppressJS (and 'render')
+		//
+		// The inputs are request.mode, hydrate (+app.config), ssr (+app.config)
+		const editMode = isAssumedCSEditMode(request);
+
 		const finalHydrate = isSet(hydrate)
 			? hydrate
 			: (app.config as AppConfig)['react4xp.hydrate'] !== 'false'; // default is true
-		// log.debug('renderPageContributions() finalHydrate:%s', finalHydrate);
+		// log.debug('renderPageContributions() jsxPath:%s react4xpId:%s editMode:%s finalHydrate:%s', this.jsxPath, this.react4xpId, editMode, finalHydrate);
 
-		const finalSSR = shouldSSR({
-			request,
-			ssr
-		}); // default is true
-		// log.debug('renderPageContributions() finalSSR:%s', finalSSR);
+		const finalSSR = isSet(ssr)
+			? ssr
+			: (app.config as AppConfig)['react4xp.ssr'] !== 'false'; // default is true
+		// log.debug('renderPageContributions() jsxPath:%s react4xpId:%s editMode:%s finalSSR:%s', this.jsxPath, this.react4xpId, editMode, finalSSR);
 
-		const suppressJS = finalSSR && !finalHydrate;
-		// log.debug('renderPageContributions() suppressJS:%s', suppressJS);
+		const suppressJS = editMode // 1 or 2
+			|| (finalSSR && !finalHydrate); // 4
+		// 3 or 5
+		// log.debug('renderPageContributions() jsxPath:%s react4xpId:%s editMode:%s finalSSR:%s finalHydrate:%s suppressJS:%s', this.jsxPath, this.react4xpId, editMode, finalSSR, finalHydrate, suppressJS);
 
 		this.ensureAndLockBeforeRendering();
 
 		// TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
-		const headEnd = (!suppressJS)
-			? [
+		const headEnd = suppressJS
+			? [] : [
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
 				// '<!-- asset -->',
 				`<script defer src="${getAssetRoot()}${this.assetPath}"></script>\n`,
 
+				// What separates outcome 3 and 5? simply ssr
 				`<script data-react4xp-app-name="${app.name}" data-react4xp-ref="${this.react4xpId}" type="application/json">${JSON.stringify({
-					command: finalSSR && finalHydrate ? 'hydrate' : 'render',
+					command: finalSSR ? 'hydrate' : 'render',
 					devMode: IS_DEV_MODE,
 					hasRegions: this.hasRegions,
 					isPage: this.isPage,
 					jsxPath: this.jsxPath,
 					props: this.props || {}
 				}).replace(/<(\/?script|!--)/gi, "\\u003C$1")}</script>`,
-			]
-			: [];
+			];
 		//log.debug('renderPageContributions() headEnd:%s', toStr(headEnd));
 
 		output = getAndMergePageContributions({
