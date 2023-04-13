@@ -1,6 +1,6 @@
 import type {ContextWithTimers} from './timers';
 
-import {TextEncoder} from 'text-encoding';
+import {TextEncoder} from '@sinonjs/text-encoding';
 import {polyfillTimers} from './timers';
 
 (function (context) {
