@@ -30,7 +30,7 @@
     "@enonic-types/lib-io": "^7.12.1",
     "@enonic-types/lib-node": "^7.12.1",
     "@enonic-types/lib-portal": "^7.12.1",
-    "@enonic/react4xp": "^4.0.0-RC1",
+    "@enonic/react4xp": "^4.0.0-RC2",
     "@mrhenry/core-web": "^1.1.0",
     "@rollup/plugin-alias": "^5.0.0",
     "@rollup/plugin-commonjs": "^24.0.1",
