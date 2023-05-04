@@ -50,9 +50,9 @@ export function get(req :Request) :Response<string> | Response<Array<string>> {
             body: getComponentChunkUrls(entryNames),
             contentType: 'application/json',
             // FIXME: ETAG not working, using standard client cache instead, limited to 1 hour since it's not hashed
-            headers: {
-                'Content-Type': 'application/javascript;charset=utf-8',
-                'Cache-Control': 'public, max-age=3600'
+            headers: { // HTTP/2 uses lowercase header keys
+                'content-type': 'application/javascript;charset=utf-8',
+                'cache-control': 'public, max-age=3600'
             }
         } as Response<Array<string>>;
 

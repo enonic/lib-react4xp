@@ -4,10 +4,10 @@ export interface Request<
 > {
 	body?: string
 	contextPath?: string
-	headers?: {
-		Accept?: string
-		Authorization?: string
-		'If-None-Match' ?: string
+	headers?: { // HTTP/2 uses lowercase header keys
+		accept?: string
+		authorization?: string
+		'if-none-match'?: string
 	}
 	host?: string
 	method?: string

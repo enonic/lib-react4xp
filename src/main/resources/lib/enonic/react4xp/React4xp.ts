@@ -1,5 +1,6 @@
+// import type {Component} from '/lib/xp/portal';
 import type {
-	ComponentGeneric,
+	ComponentExtended,
 	Entry,
 	Id,
 	Instance,
@@ -136,7 +137,7 @@ export class React4xp<
 			// & layout, because only SSR works well for page and layout.
 			// We've still made it possible to try out client-side rendering for
 			// page & layout by setting it directly in render options.
-			if(isObject(entry) && (entry?.type === 'page' || entry?.type === 'layout')) {
+			if(isObject(entry) && ((entry as ComponentExtended).type === 'page' || (entry as ComponentExtended).type === 'layout')) {
 				if (isNotSet(dereffedOptions.ssr)) {
 					dereffedOptions.ssr = true;
 				}
@@ -203,7 +204,7 @@ export class React4xp<
 
 
 	// Public fields/properties
-	component: ComponentGeneric// = null
+	component: ComponentExtended// = null
 	hasRegions: 0|1 = 0        // boolean using 0 for false and 1 for true, for the sake of more compact client-side .render and .hydrate calls.
 	isPage: 0|1 = 0            // boolean using 0 for false and 1 for true, for the sake of more compact client-side .render and .hydrate calls.
 	jsxPath: string// = null
@@ -265,7 +266,12 @@ export class React4xp<
 			// log.debug('React4xp constructor this.component:%s', this.component);
 
 			const buildingBlockData = {
-				descriptor: this.component.descriptor || getDescriptorFromTemplate(this.component.type, this.component.template),
+				descriptor:
+					// this.component.type !== 'fragment'
+					// && this.component.type !== 'text'
+					// &&
+					this.component.descriptor
+					|| getDescriptorFromTemplate(this.component.type, this.component.template),
 				type: BASE_PATHS[this.component.type],
 				path: this.component.path
 			};
@@ -275,7 +281,7 @@ export class React4xp<
 				const maybeFragmentContent = getContent();
 				// log.debug('React4xp constructor maybeFragmentContent:%s', toStr(maybeFragmentContent));
 				// The actual node stores components on a flattened array, while getContent has a nested structure under fragment.
-				//@ts-expect-error TS2339: Property 'fragment' does not exist on type
+				// // @ts-expect-error TS2339: Property 'fragment' does not exist on type
 				if (maybeFragmentContent && maybeFragmentContent.fragment) {
 					// #51 Support rendering fragment content
 					// getComponent() inside Fragment Content doesn't contain path
@@ -305,7 +311,14 @@ export class React4xp<
 
 			// TODO: Move to later in the flow. Where are regions relevant and this.component guaranteed?
 			// ------------------------------------------------------------------------------------------
-			if (this.component.regions && Object.keys(this.component.regions).length) {
+			if (
+				// this.component.type !== 'fragment'
+				// && this.component.type !== 'part'
+				// && this.component.type !== 'text'
+				// &&
+				this.component.regions
+				&& Object.keys(this.component.regions).length
+			) {
 				this.hasRegions = 1;
 			} else if (this.isPage) {
 				log.debug("React4xp appears to be asked to render a page. No regions are found.  |  entry=" + JSON.stringify(entry) + "  |  portal.getComponent=" + JSON.stringify(getComponent()) + "  |  portal.getContent=" + JSON.stringify(getContent));

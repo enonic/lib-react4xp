@@ -15,10 +15,10 @@ export interface ComplexCookie {
 
 export interface Response<
 	Body = string,
-	Headers extends Record<string,string> = {
-		'Content-Type'?: string
-		'Cache-Control'?: string
-		ETag?: string|number
+	Headers extends Record<string,string> = { // HTTP/2 uses lowercase header keys
+		'content-type'?: string
+		'cache-control'?: string
+		etag?: string|number
 	}
 > {
 	applyFilters?: boolean

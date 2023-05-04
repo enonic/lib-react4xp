@@ -1,13 +1,13 @@
-import type {Component} from '@enonic-types/lib-portal';
+// import type {Component} from '@enonic-types/lib-portal';
 import type {Cache} from './Cache';
-import type {ComponentGeneric} from './Component';
+import type {ComponentExtended} from './Component';
 import type {PageContributions} from './PageContributions';
 import type {Request} from './Request';
 
 
 type OneOrMore<T> = T | T[]
 
-export type Entry = string|Component
+export type Entry = string|ComponentExtended
 
 export type EntryName = string
 
@@ -21,7 +21,7 @@ export interface Instance<
 
 	// Public fields/properties
 	assetPath: string; // 'path/filename.hash.js'
-	component: ComponentGeneric;
+	component: ComponentExtended;
 	hasRegions: 0|1;
 	jsxPath: string; // 'path/filename' without '.hash.js'
 	isPage: 0|1;

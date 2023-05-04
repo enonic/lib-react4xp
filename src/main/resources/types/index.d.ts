@@ -1,7 +1,7 @@
 export {Cache} from './Cache.d';
 export {
 	Component,
-	ComponentGeneric,
+	ComponentExtended,
 	ComponentType
 } from './Component.d';
 export {DoubleUnderscore} from './DoubleUnderscore.d';
