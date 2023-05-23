@@ -43,7 +43,7 @@ public class ServerSideRenderer
 
     public void setup( String appName, String scriptsHome, String libraryName, String chunkfilesHome, String entriesJsonFilename,
                        String chunksGlobalsJsonFilename, String statsComponentsFilename, Integer ssrMaxThreads,
-                       String engineName, String[] scriptEngineSettings )
+                       String engineName )
     {
         synchronized ( isInitialized )
         {
@@ -58,7 +58,7 @@ public class ServerSideRenderer
                                 statsComponentsFilename );
 
                 final ResourceReader resourceReader = new ResourceReaderImpl( resourceServiceSupplier, config );
-                final EngineFactory engineFactory = new EngineFactory( engineName, scriptEngineSettings, resourceReader );
+                final EngineFactory engineFactory = new EngineFactory( engineName, resourceReader );
                 final RendererFactory rendererFactory = new RendererFactory( engineFactory, resourceReader, config );
 
                 rendererPool = new GenericObjectPool<>( rendererFactory, createPoolConfig( poolSize ) );

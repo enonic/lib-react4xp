@@ -52,11 +52,6 @@ public class EngineBuilderPlatform
             .anyMatch( name -> name.contains( engineName ) );
     }
 
-    public static String preferredEngineName()
-    {
-        return PREFERRED_ENGINE;
-    }
-
     public ScriptEngine buildEngine()
     {
         final String resolvedEngineName = Objects.requireNonNullElse( engineName, PREFERRED_ENGINE );
