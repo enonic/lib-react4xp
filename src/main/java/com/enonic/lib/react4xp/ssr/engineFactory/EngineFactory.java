@@ -27,22 +27,15 @@ public class EngineFactory
 
     /////////////////////////////////////////////////////////// INIT
 
-    public EngineFactory( String engineName, String[] scriptEngineSettings, ResourceReader resourceReader )
+    public EngineFactory( String engineName, ResourceReader resourceReader )
     {
-        engineBuilder = getEngineBuilder( engineName, scriptEngineSettings );
+        engineBuilder = getEngineBuilder( engineName );
         this.resourceReader = resourceReader;
     }
 
-    private EngineBuilder getEngineBuilder( String engineName, String[] scriptEngineSettings )
+    private EngineBuilder getEngineBuilder( String engineName )
     {
-        if ( "Nashorn".equalsIgnoreCase( engineName ) || ( engineName == null && EngineBuilderPlatform.preferredEngineName().equals( "Nashorn" ) ) )
-        {
-            return new EngineBuilderNashorn( scriptEngineSettings );
-        }
-        else
-        {
-            return new EngineBuilderPlatform( engineName );
-        }
+        return new EngineBuilderPlatform( engineName );
     }
 
     ////////////////////////////////////////////////////////////////////////////////////// ENTRY

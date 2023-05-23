@@ -11,7 +11,7 @@ import {render as renderSSRJava} from '/lib/enonic/react4xp/ssr/render';
  *  Returns an object: { html?: string, error?: string }
  *      (The keys 'html' and 'error' are as returned from ServerSideRenderer.java - so beware if ever refactoring them!)
  *  ...where 'html' is a rendered HTML string if successful component rendering (undefined on error),
- *  and 'error' an error message string from the Nashorn engine if any error occurred (undefined if successful rendering).
+ *  and 'error' an error message string from the JavaScript engine if any error occurred (undefined if successful rendering).
  */
 export function doRenderSSR<
 	Props extends object = object

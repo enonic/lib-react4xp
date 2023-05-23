@@ -10,7 +10,6 @@ import {camelize} from '@enonic/js-utils/string/camelize';
 import {ucFirst} from '@enonic/js-utils/string/ucFirst';
 import {isSet} from '@enonic/js-utils/value/isSet';
 // import {toStr} from '@enonic/js-utils/value/toStr';
-import {normalizeSSREngineSettings}  from '/lib/enonic/react4xp/ssr/normalizeSSREngineSettings';
 import {normalizeSSRMaxThreads} from '/lib/enonic/react4xp/ssr/normalizeSSRMaxThreads';
 // import {getResource} from '/lib/enonic/react4xp/resource/getResource';
 import SSRreact4xp from '/lib/enonic/react4xp/ssr/SSRreact4xp';
@@ -55,7 +54,6 @@ export function setup({
 			? ssrMaxThreads
 			: SSR_MAX_THREADS
 		),
-		__.nullOrValue(SSR_ENGINE_NAME),
-		normalizeSSREngineSettings(SSR_ENGINE_SETTINGS)
+		__.nullOrValue(SSR_ENGINE_NAME)
 	);
 }
