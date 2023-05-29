@@ -31,7 +31,7 @@
     "@enonic-types/lib-node": "^7.12.1",
     "@enonic-types/lib-portal": "^7.12.1",
     "@enonic/react4xp": "^4.0.0",
-    "@mrhenry/core-web": "^1.1.1",
+    "@mrhenry/core-web": "^1.1.2",
     "@rollup/plugin-alias": "^5.0.0",
     "@rollup/plugin-commonjs": "^25.0.0",
     "@rollup/plugin-node-resolve": "^15.0.2",
