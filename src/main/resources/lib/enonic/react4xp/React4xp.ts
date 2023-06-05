@@ -275,8 +275,12 @@ export class React4xp<
 				const maybeFragmentContent = getContent();
 				// log.debug('React4xp constructor maybeFragmentContent:%s', toStr(maybeFragmentContent));
 				// The actual node stores components on a flattened array, while getContent has a nested structure under fragment.
-				//@ts-expect-error TS2339: Property 'fragment' does not exist on type
-				if (maybeFragmentContent && maybeFragmentContent.fragment) {
+				// // @ts-expect-error TS2339: Property 'fragment' does not exist on type
+				if (
+					maybeFragmentContent
+					&& maybeFragmentContent.type === 'portal:fragment'
+					&& maybeFragmentContent.fragment
+				) {
 					// #51 Support rendering fragment content
 					// getComponent() inside Fragment Content doesn't contain path
 					// The path is used when creating react4xpId

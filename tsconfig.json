@@ -40,6 +40,18 @@
 
 		"moduleResolution": "node",
 		"paths": {
+			// Development (should be commented out when commiting)
+			// "@enonic-types/core": ["../../enonic/xp/modules/core/index.ts"],
+			// "@enonic-types/lib-content": ["../../enonic/xp/modules/lib/lib-content/src/main/resources/lib/xp/content.ts"],
+			// "@enonic-types/lib-io": ["../../enonic/xp/modules/lib/lib-io/src/main/resources/lib/xp/io.ts"],
+			// "@enonic-types/lib-node": ["../../enonic/xp/modules/lib/lib-node/src/main/resources/lib/xp/node.ts"],
+			// "@enonic-types/lib-portal": ["../../enonic/xp/modules/lib/lib-portal/src/main/resources/lib/xp/portal.ts"],
+			// // "node_modules/@enonic-types/core/index.d.ts": ["../../enonic/xp/modules/core/index.ts"],
+			// "/lib/xp/content": ["../../enonic/xp/modules/lib/lib-content/src/main/resources/lib/xp/content.ts"],
+			// "/lib/xp/io": ["../../enonic/xp/modules/lib/lib-io/src/main/resources/lib/xp/io.ts"],
+			// "/lib/xp/node": ["../../enonic/xp/modules/lib/lib-node/src/main/resources/lib/xp/node.ts"],
+			// "/lib/xp/portal": ["../../enonic/xp/modules/lib/lib-portal/src/main/resources/lib/xp/portal.ts"],
+
 			// A series of entries which re-map imports to lookup locations relative to the baseUrl.
 			// In order to get all of the correct typing in your favourite editor.
 			// yarn tsc doesn't change the import/require paths based on this
@@ -49,14 +61,13 @@
 			"/lib/enonic/react4xp/*": ["./src/main/resources/lib/enonic/react4xp/*"],
 			"/lib/xp/*": ["node_modules/@enonic-types/lib-*"],
 			"/*": ["./src/main/resources/*"],
-			// Development (should be commented out when commiting)
-			// "/lib/xp/node": ["../../enonic/xp/modules/lib/lib-node/src/main/resources/lib/xp/node.ts"],
 		},
 		"resolveJsonModule": true,
 		"rootDir": "./",
+		// "rootDir": "../..",
 		"rootDirs": [
-			"src/main/resources",
-			"node_modules"
+			"./src/main/resources",
+			"./node_modules"
 		],
 		// "typeRoots": [
 		// 	"node_modules/@types",
