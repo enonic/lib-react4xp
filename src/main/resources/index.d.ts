@@ -1,3 +1,4 @@
+import type {ResourceKey} from '/lib/xp/io';
 export {
 	Cache,
 	Component,
@@ -12,9 +13,10 @@ export {
 } from './types/index.d';
 
 declare global {
-	const Java :{
-		type :(string :string) => ({
-			get :() => void
+	const Java: {
+		type: (string: string) => ({
+			get: () => void,
+			from: (resourcePath: string) => ResourceKey
 		})
 	}
 }

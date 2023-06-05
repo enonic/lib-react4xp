@@ -7,7 +7,7 @@ export interface Request<
 	headers?: {
 		Accept?: string
 		Authorization?: string
-		'If-None-Match' ?: string
+		'If-None-Match'?: string
 	}
 	host?: string
 	method?: string

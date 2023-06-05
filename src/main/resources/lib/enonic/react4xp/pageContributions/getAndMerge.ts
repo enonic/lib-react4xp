@@ -1,8 +1,8 @@
 import type {
 	OneOrMore,
 	PageContributions,
-	React4xp as React4xpNamespace
-} from '../../../../index.d';
+	React4xp as React4xpNamespace,
+} from '/types';
 
 
 //import {toStr} from '@enonic/js-utils/value/toStr';
