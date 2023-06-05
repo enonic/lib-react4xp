@@ -58,7 +58,7 @@
     "rollup-plugin-output-manifest": "^2.0.0",
     "rollup-plugin-swc3": "^0.8.1",
     "ts-node": "^10.9.1",
-    "tslib": "^2.5.2",
+    "tslib": "^2.5.3",
     "tsup": "^6.7.0",
     "typescript": "^5.1.3"
   },
