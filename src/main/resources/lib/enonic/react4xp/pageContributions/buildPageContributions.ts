@@ -19,6 +19,12 @@ import {
 import {getContent} from '/lib/xp/portal';
 
 
+// declare global {
+// 	interface XpPageMap {
+
+// 	}
+// }
+
 const RESOURCE_KEY = Java.type('com.enonic.xp.resource.ResourceKey');
 
 
@@ -99,55 +105,70 @@ function thisEntryBelongsToTheFirstReact4xpAppOnThePage({
 			const {
 				components: pageComponents
 			} = pageRegions[regionName];
-			pageComponents.forEach((layoutOrPartOrFragmentComponent) => {
+			pageComponents.forEach((fragmentOrLayoutOrPartOrTextComponent) => {
 				const {
-					descriptor: layoutOrPartOrFragmentDescriptor,
-					regions: layoutRegions,
 					type,
-				} = layoutOrPartOrFragmentComponent;
-				const [layoutOrPartOrFragmentApplicationKey] = layoutOrPartOrFragmentDescriptor.split(':');
-				if (anEntryFoundInAReact4xpApplication({
-					applicationKey: layoutOrPartOrFragmentApplicationKey,
-					appNameToEntries,
-					entries
-				})) {
-					if (layoutOrPartOrFragmentApplicationKey === app.name) {
-						// The application of the layoutOrPartOrFragment is a React4xp app.
-						// This entry is in that App's entries.json
-						log.debug('React4xp buildPageContributions: This layoutOrPartOrFragment: %s is in this app:%s', layoutOrPartOrFragmentDescriptor, layoutOrPartOrFragmentApplicationKey);
-						return true;
+				} = fragmentOrLayoutOrPartOrTextComponent;
+				if (type === 'fragment') {
+					log.error('React4xp buildPageContributions: Fragments are not supported. (%s)', fragmentOrLayoutOrPartOrTextComponent);
+				} else if (type === 'layout' || type === 'part') {
+					const {
+						descriptor: layoutOrPartDescriptor,
+					} = fragmentOrLayoutOrPartOrTextComponent;
+					const [layoutOrPartApplicationKey] = layoutOrPartDescriptor.split(':');
+					if (anEntryFoundInAReact4xpApplication({
+						applicationKey: layoutOrPartApplicationKey,
+						appNameToEntries,
+						entries
+					})) {
+						if (layoutOrPartApplicationKey === app.name) {
+							// The application of the layoutOrPartOrFragment is a React4xp app.
+							// This entry is in that App's entries.json
+							log.debug('React4xp buildPageContributions: This layoutOrPart: %s is in this app:%s', layoutOrPartDescriptor, layoutOrPartApplicationKey);
+							return true;
+						}
+						// But this app is not the same as the app of the layoutOrPartOrFragment.
+						return false;
 					}
-					// But this app is not the same as the app of the layoutOrPartOrFragment.
-					return false;
-				}
 
-				if (type === 'layout') {
-					Object.keys(layoutRegions).forEach((layoutRegionName) => {
+					if (type === 'layout') {
 						const {
-							components: layoutComponents
-						} = layoutRegions[layoutRegionName];
-						layoutComponents.forEach((partOrFragmentComponent) => {
+							regions: layoutRegions,
+						} = fragmentOrLayoutOrPartOrTextComponent;
+						Object.keys(layoutRegions).forEach((layoutRegionName) => {
 							const {
-								descriptor: partOrFragmentDescriptor,
-							} = partOrFragmentComponent;
-							const [partOrFragmentApplicationKey] = partOrFragmentDescriptor.split(':');
-							if (anEntryFoundInAReact4xpApplication({
-								applicationKey: partOrFragmentApplicationKey,
-								appNameToEntries,
-								entries
-							})) {
-								if (partOrFragmentApplicationKey === app.name) {
-									// The application of the partOrFragment is a React4xp app.
-									// This entry is in that App's entries.json
-									log.debug('React4xp buildPageContributions: This partOrFragment: %s is in this app:%s', partOrFragmentDescriptor, partOrFragmentApplicationKey);
-									return true;
+								components: layoutComponents
+							} = layoutRegions[layoutRegionName];
+							layoutComponents.forEach((fragmentOrPartOrTextComponent) => {
+								const {
+									type: fragmentOrPartOrTextType,
+								} = fragmentOrPartOrTextComponent;
+								if (fragmentOrPartOrTextType === 'fragment') {
+									log.error('React4xp buildPageContributions: Fragments are not supported. (%s)', fragmentOrLayoutOrPartOrTextComponent);
+								} else if (fragmentOrPartOrTextType === 'part') {
+									const {
+										descriptor: partDescriptor,
+									} = fragmentOrPartOrTextComponent;
+									const [partOrFragmentApplicationKey] = partDescriptor.split(':');
+									if (anEntryFoundInAReact4xpApplication({
+										applicationKey: partOrFragmentApplicationKey,
+										appNameToEntries,
+										entries
+									})) {
+										if (partOrFragmentApplicationKey === app.name) {
+											// The application of the partOrFragment is a React4xp app.
+											// This entry is in that App's entries.json
+											log.debug('React4xp buildPageContributions: This partOrFragment: %s is in this app:%s', partDescriptor, partOrFragmentApplicationKey);
+											return true;
+										}
+										// But this app is not the same as the app of the partOrFragment.
+										return false;
+									}
 								}
-								// But this app is not the same as the app of the partOrFragment.
-								return false;
-							}
+							});
 						});
-					});
-				} // layout
+					} // layout
+				}
 			}); // pageComponents
 		}); // pageRegions
 		return false;
