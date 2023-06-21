@@ -5,13 +5,13 @@ public class RenderException extends RuntimeException {
     private final String stacktraceString;
 
     public RenderException(String message, String stacktraceString) {
-        super(new RuntimeException(message));
+        super(message);
         this.message = message;
         this.stacktraceString = stacktraceString;
     }
 
     public RenderException(String message) {
-        super(new RuntimeException(message));
+        super(message);
         this.message = message;
         this.stacktraceString = null;
     }
