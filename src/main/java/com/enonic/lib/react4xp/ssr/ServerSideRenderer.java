@@ -11,12 +11,13 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.enonic.lib.react4xp.ssr.engineFactory.EngineFactory;
+import com.enonic.lib.react4xp.ssr.engine.EngineFactory;
 import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
-import com.enonic.lib.react4xp.ssr.pool.Renderer;
-import com.enonic.lib.react4xp.ssr.pool.RendererFactory;
+import com.enonic.lib.react4xp.ssr.renderer.Renderer;
+import com.enonic.lib.react4xp.ssr.renderer.RendererFactory;
 import com.enonic.lib.react4xp.ssr.resources.ResourceReader;
 import com.enonic.lib.react4xp.ssr.resources.ResourceReaderImpl;
+import com.enonic.xp.app.ApplicationKey;
 import com.enonic.xp.resource.ResourceService;
 import com.enonic.xp.script.bean.BeanContext;
 import com.enonic.xp.script.bean.ScriptBean;
@@ -31,7 +32,7 @@ public class ServerSideRenderer
 
     private final CountDownLatch latch = new CountDownLatch( 1 );
 
-    private volatile GenericObjectPool<Renderer> rendererPool;
+    private GenericObjectPool<Renderer> rendererPool;
 
     private Supplier<ResourceService> resourceServiceSupplier;
 
@@ -45,9 +46,9 @@ public class ServerSideRenderer
                        String chunksGlobalsJsonFilename, String statsComponentsFilename, Integer ssrMaxThreads,
                        String engineName )
     {
-        synchronized ( isInitialized )
+        if ( isInitialized.compareAndSet( false, true ) )
         {
-            if ( !isInitialized.get() )
+            try
             {
                 int poolSize = ( ssrMaxThreads == null || ssrMaxThreads < 1 ) ? Runtime.getRuntime().availableProcessors() : ssrMaxThreads;
 
@@ -57,15 +58,16 @@ public class ServerSideRenderer
                     new Config( appName, scriptsHome, libraryName, chunkfilesHome, entriesJsonFilename, chunksGlobalsJsonFilename,
                                 statsComponentsFilename );
 
-                final ResourceReader resourceReader = new ResourceReaderImpl( resourceServiceSupplier, config );
-                final EngineFactory engineFactory = new EngineFactory( engineName, resourceReader );
+                final ResourceReader resourceReader = new ResourceReaderImpl( resourceServiceSupplier, ApplicationKey.from( config.APP_NAME ) );
+                final EngineFactory engineFactory = new EngineFactory( engineName );
                 final RendererFactory rendererFactory = new RendererFactory( engineFactory, resourceReader, config );
 
                 rendererPool = new GenericObjectPool<>( rendererFactory, createPoolConfig( poolSize ) );
-
+            }
+            finally
+            {
+                LOG.debug( "SSR is ready." );
                 latch.countDown();
-
-                isInitialized.set( true );
             }
         }
     }
@@ -80,8 +82,6 @@ public class ServerSideRenderer
         return poolConfig;
     }
 
-    ////////////////////////////////////////////////////////////////////////// RENDER
-
     public Map<String, String> render( String entryName, String props, String[] dependencyNames )
     {
         Renderer renderer = null;
@@ -89,15 +89,22 @@ public class ServerSideRenderer
 
         try
         {
+            if ( LOG.isDebugEnabled() )
+            {
+                if ( latch.getCount() != 0 )
+                {
+                    LOG.debug( "Waiting for SSR to be ready..." );
+                }
+            }
             latch.await();
             renderer = rendererPool.borrowObject();
             result = renderer.render( entryName, props, dependencyNames );
 
         }
-        catch ( Exception e1 )
+        catch ( Exception e )
         {
-            LOG.error( new ErrorHandler().getLoggableStackTrace( e1, null ) );
-            result = Map.of( ErrorHandler.KEY_ERROR, e1.getMessage() );
+            LOG.error( new ErrorHandler().getLoggableStackTrace( e, null ) );
+            result = Map.of( ErrorHandler.KEY_ERROR, e.getMessage() );
         }
         finally
         {

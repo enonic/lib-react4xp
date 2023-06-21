@@ -1,4 +1,4 @@
-package com.enonic.lib.react4xp.ssr.engineFactory;
+package com.enonic.lib.react4xp.ssr.engine;
 
 import java.util.Objects;
 
@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
  * Created on 10/05/2021 as part of
  */
 public class EngineBuilderPlatform
-    implements EngineBuilder
 {
     private final static Logger LOG = LoggerFactory.getLogger( EngineBuilderPlatform.class );
 
@@ -56,7 +55,7 @@ public class EngineBuilderPlatform
     {
         final String resolvedEngineName = Objects.requireNonNullElse( engineName, PREFERRED_ENGINE );
 
-        LOG.debug( "Init SSR engine: platform {}", resolvedEngineName );
+        LOG.debug( "Init script engine: platform {}", resolvedEngineName );
         final ScriptEngine engineByName;
 
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();

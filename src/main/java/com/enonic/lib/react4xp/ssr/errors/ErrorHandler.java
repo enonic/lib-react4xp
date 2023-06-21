@@ -10,7 +10,6 @@ import java.io.StringWriter;
  * Created on 10/05/2021 as part of
  */
 public class ErrorHandler {
-    private final static Logger LOG = LoggerFactory.getLogger( ErrorHandler.class );
 
     public static final String KEY_ERROR = "error";
     public static final String KEY_STACKTRACE = "stack";
