@@ -59,7 +59,7 @@
     "rollup-plugin-swc3": "^0.9.1",
     "ts-node": "^10.9.1",
     "tslib": "^2.6.0",
-    "tsup": "^7.1.0",
+    "tsup": "^7.2.0",
     "typescript": "^5.1.6"
   },
   "main": "src/main/resources/lib/enonic/react4xp/index.es6",
