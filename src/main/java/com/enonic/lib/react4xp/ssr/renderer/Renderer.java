@@ -96,7 +96,7 @@ public class Renderer {
             this.assetLoader.loadAssetsIntoEngine( jsDependencies );
 
             final Invocable invocable = (Invocable) this.engine;
-            final Map<String, Object> libObject = (Map<String, Object>) this.engine.get( libraryName );
+            final var libObject = (Map<String, Object>) this.engine.get( libraryName );
             if ( libObject == null )
             {
                 throw new IllegalStateException( libraryName + " is not found in engine" );
@@ -106,7 +106,7 @@ public class Renderer {
                 LOG.debug( "#{}:{} available entries {}", this.id, this.libraryName, libObject.keySet() );
             }
 
-            final Map<String, Object> entryObject = (Map<String, Object>) libObject.get( entryName );
+            final var entryObject = (Map<String, Object>) libObject.get( entryName );
             if ( entryObject == null )
             {
                 throw new IllegalStateException( entryName + " is not found in " + libraryName );
@@ -118,7 +118,7 @@ public class Renderer {
             {
                 // Graal.js fails to find "default" method when invokeMethod is used. Call directly
                 // Hopefully will be fixed in future versions of Graal.js
-                final Function<Object, Object[]> defaultFunction = (Function<Object, Object[]>) entryObject.get( "default" );
+                final var defaultFunction = (Function<Object, Object[]>) entryObject.get( "default" );
                 entryWithProps = defaultFunction.apply( new Object[]{propsJson} );
             }
             else

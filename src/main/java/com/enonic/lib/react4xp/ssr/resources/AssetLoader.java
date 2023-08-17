@@ -2,7 +2,6 @@ package com.enonic.lib.react4xp.ssr.resources;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.script.ScriptEngine;
@@ -15,10 +14,6 @@ import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
 import com.enonic.lib.react4xp.ssr.errors.RenderException;
 import com.enonic.xp.resource.ResourceNotFoundException;
 import com.enonic.xp.server.RunMode;
-
-import static com.enonic.lib.react4xp.ssr.errors.ErrorHandler.KEY_ERROR;
-import static com.enonic.lib.react4xp.ssr.errors.ErrorHandler.KEY_STACKTRACE;
-
 
 public class AssetLoader
 {
@@ -100,38 +95,23 @@ public class AssetLoader
         LOG.debug( "#{}: ...'{}' loaded", id, asset );
     }
 
-    private static void eval( final ScriptEngine engine, final String runnableCode )
+    private static void eval( final ScriptEngine engine, final String callScript )
         throws RenderException
     {
-        String callScript = "var __react4xp__internal__obj__ = {}; try {\n " + runnableCode + "\n}" +
-            "catch (error) { __react4xp__internal__obj__ = { stack: ''+error.stack, error: error.message }; }; " +
-            "__react4xp__internal__obj__;";
+        final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader( engine.getClass().getClassLoader() );
         try
         {
-            Map<String, String> result;
-            final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            Thread.currentThread().setContextClassLoader( engine.getClass().getClassLoader() );
-            try
-            {
-                result = (Map<String, String>) engine.eval( callScript );
-            }
-            finally
-            {
-                Thread.currentThread().setContextClassLoader( classLoader );
-            }
-
-            String errorMessage = result.get( KEY_ERROR );
-
-            if ( errorMessage != null && !errorMessage.isBlank() )
-            {
-                String errorStack = result.get( KEY_STACKTRACE );
-                throw new RenderException( errorMessage, errorStack );
-            }
-
+            engine.eval( callScript );
         }
-        catch ( ScriptException s )
+        catch ( ScriptException e )
         {
-            throw new RenderException( s );
+            throw new RenderException( e );
+        }
+        finally
+        {
+            Thread.currentThread().setContextClassLoader( classLoader );
         }
     }
+
 }
