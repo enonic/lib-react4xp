@@ -29,7 +29,7 @@
     "@enonic-types/lib-content": "^7.13.2",
     "@enonic-types/lib-io": "^7.13.2",
     "@enonic-types/lib-node": "^7.13.2",
-    "@enonic-types/lib-portal": "^7.13.1",
+    "@enonic-types/lib-portal": "^7.13.2",
     "@enonic/react4xp": "^4.1.0",
     "@mrhenry/core-web": "^1.2.0",
     "@rollup/plugin-alias": "^5.0.0",
