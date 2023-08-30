@@ -35,7 +35,7 @@ export function buildPageContributions({
 	// * If the script relies upon or is relied upon by another script then use defer.
 
 	if (app.config['react4xp.serveGlobals'] !== 'false') {
-		pageContributions.headEnd.push(`<script defer src="${getGlobalsUrls()}"></script>\n`);
+		pageContributions.headEnd.push(`<script src="${getGlobalsUrls()}"></script>\n`);
 	}
 
 	const componentChunkUrls = getComponentChunkUrls(entries);
@@ -46,12 +46,12 @@ export function buildPageContributions({
 			// Since we don't control DOCTYPE, it's better to keep the validation warning, than breaking a XHTML page.
 			pageContributions.headEnd.push(`<link href="${componentChunkUrl}" rel="stylesheet" type="text/css" />\n`);
 		} else if(!suppressJS) { // Treat other dependencies as JS and add them in a script tag. Unless suppressJS, in which case: skip them.
-			pageContributions.headEnd.push(`<script defer src="${componentChunkUrl}"></script>\n`);
+			pageContributions.headEnd.push(`<script src="${componentChunkUrl}"></script>\n`);
 		}
 	}
 
 	if (!suppressJS) {
-		pageContributions.headEnd.push(`<script defer src="${getClientUrl()}"></script>\n`);
+		pageContributions.headEnd.push(`<script src="${getClientUrl()}"></script>\n`);
 	}
 
 	return pageContributions;

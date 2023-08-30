@@ -4,12 +4,22 @@ import type {
 	Request
 } from '../../../../..';
 import type { React4xp } from '../../React4xp';
+
+import { LIBRARY_NAME } from '@enonic/react4xp';
+import { camelize } from '@enonic/js-utils/string/camelize';
+import { ucFirst } from '@enonic/js-utils/string/ucFirst';
 import { isSet } from '@enonic/js-utils/value/isSet';
 //import {toStr} from '@enonic/js-utils/value/toStr';
+import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
 import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
 import {getAndMerge as getAndMergePageContributions} from '/lib/enonic/react4xp/pageContributions/getAndMerge';
 import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/runMode';
+import {
+	base64Encode,
+	sha256AsStream,
+	// @ts-ignore
+} from '/lib/text-encoding';
 import isAssumedCSEditMode from '../utils/isEditMode';
 
 
@@ -38,7 +48,7 @@ export function renderPageContributions(this: React4xp, {
 	pageContributions?: PageContributions,
 	request?: Request,
 	ssr?: boolean,
-} = {}) {
+}) {
 	//log.debug('renderPageContributions() hydrate:%s', toStr(hydrate));
 	//log.debug('renderPageContributions() pageContributions:%s', toStr(pageContributions));
 	//log.debug('renderPageContributions() request:%s', toStr(request));
@@ -79,29 +89,49 @@ export function renderPageContributions(this: React4xp, {
 		this.ensureAndLockBeforeRendering();
 
 		// TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
+		const command = finalSSR ? 'hydrate' : 'render';
 		const headEnd = suppressJS
 			? [] : [
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
 				// '<!-- asset -->',
-				`<script defer src="${getAssetRoot()}${this.assetPath}"></script>\n`,
+				`<script src="${getAssetRoot()}${this.assetPath}"></script>\n`,
 
 				// What separates outcome 3 and 5? simply ssr
-				`<script data-react4xp-app-name="${app.name}" data-react4xp-ref="${this.react4xpId}" type="application/json">${JSON.stringify({
-					command: finalSSR ? 'hydrate' : 'render',
-					devMode: IS_DEV_MODE,
-					hasRegions: this.hasRegions,
-					isPage: this.isPage,
-					jsxPath: this.jsxPath,
-					props: this.props || {}
-				}).replace(/<(\/?script|!--)/gi, "\\u003C$1")}</script>`,
+				// `<script data-react4xp-app-name="${app.name}" data-react4xp-ref="${this.react4xpId}" type="application/json">${JSON.stringify({
+				// 	command,
+				// 	devMode: IS_DEV_MODE,
+				// 	hasRegions: this.hasRegions,
+				// 	isPage: this.isPage,
+				// 	jsxPath: this.jsxPath,
+				// 	props: this.props || {}
+				// }).replace(/<(\/?script|!--)/gi, "\\u003C$1")}</script>`,
 			];
 		//log.debug('renderPageContributions() headEnd:%s', toStr(headEnd));
+
+		const R4X_LIBRARY_NAME = `${ucFirst(camelize(app.name,/\./g))}${LIBRARY_NAME}`;
+		const R4X_CLIENT_NAME = `${R4X_LIBRARY_NAME}Client`;
+
+		// WARNING: Do not add newlines, or sha256 sum won't match!
+		// import * as client from '${getClientUrl()}';
+		// console.log(client);
+		// client.${command}(globalThis['${R4X_LIBRARY_NAME}']['${this.jsxPath}'], '${this.react4xpId}', ${JSON.stringify(this.props || {})}, ${this.isPage}, ${this.hasRegions}, ${IS_DEV_MODE})
+
+		const inlineScript = `globalThis['${R4X_CLIENT_NAME}']['${command}'](globalThis['${R4X_LIBRARY_NAME}']['${this.jsxPath}'], '${this.react4xpId}', ${JSON.stringify(this.props || {})}, ${this.isPage}, ${this.hasRegions}, ${IS_DEV_MODE})`;
+		log.info('inlineScript:%s', inlineScript);
+		const base64 = base64Encode(sha256AsStream(inlineScript));
+		log.info('inlineScript in base64:%s', base64);
+		if (!suppressJS) {
+			this.scriptSrcArray.push(`sha256-${base64}`);
+		}
 
 		output = getAndMergePageContributions({
 			entryNames: this.jsxPath,
 			incomingPgContrib: pageContributions,
 			newPgContrib: {
-				headEnd
+				headEnd,
+				bodyEnd: suppressJS ? [] : [
+					`<script>${inlineScript}</script>`
+				]
 			},
 			suppressJS
 		});

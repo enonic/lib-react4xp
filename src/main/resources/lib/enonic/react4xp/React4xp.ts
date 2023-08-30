@@ -1,5 +1,6 @@
 import type {
 	ComponentGeneric,
+	ContentSecurityPolicy,
 	Entry,
 	Id,
 	Instance,
@@ -12,6 +13,8 @@ import {isObject} from '@enonic/js-utils/value/isObject';
 import {isString} from '@enonic/js-utils/value/isString';
 import { isNotSet } from '@enonic/js-utils/value/isNotSet';
 // import {toStr} from '@enonic/js-utils/value/toStr';
+//@ts-ignore
+import {newCache} from '/lib/cache';
 import {jsxToAssetPath} from '/lib/enonic/react4xp/asset/jsxToAssetPath';
 import {
 	getContent,
@@ -45,6 +48,9 @@ import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
 import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
 import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
 
+import { IS_DEV_MODE, IS_PROD_MODE } from '/lib/enonic/react4xp/xp/runMode';
+import contentSecurityPolicy from '/lib/enonic/react4xp/xp/contentSecurityPolicy';
+
 
 interface RenderOptions {
 	body?: string
@@ -62,6 +68,20 @@ enum BASE_PATHS {
 	layout = "layouts",
 }
 
+
+const scriptSrcArrayCache = newCache({
+	size: 1,
+	expire: 60 // 1 minute
+});
+
+
+function concatCachedScriptSrcArray(concatArray: string[]) {
+	const cacheKey = 'cacheKey';
+	const currentArray = scriptSrcArrayCache.get(cacheKey, () => []) as string[];
+	const newArray = currentArray.concat(concatArray);
+	scriptSrcArrayCache.put(cacheKey, newArray);
+	return newArray;
+}
 
 setupSSRJava();
 
@@ -153,9 +173,28 @@ export class React4xp<
 			const {
 				body,
 				hydrate,
-				pageContributions, // TODO deref?
+				pageContributions: incomingPgContrib, // TODO deref?
 				ssr
 			} = dereffedOptions || {};
+
+			// .render without a request object will enforce JS-suppressed renderPageContributions
+			const pageContributions = react4xp.renderPageContributions({
+				hydrate,
+				pageContributions: incomingPgContrib,
+				request,
+				ssr,
+			});
+
+			const csp: ContentSecurityPolicy = {
+				'default-src': 'none',
+				'connect-src': 'self',
+				'img-src': 'self',
+				'script-src': concatCachedScriptSrcArray(react4xp.scriptSrcArray),
+				'style-src': [
+					'self',
+					'unsafe-inline'
+				],
+			};
 
 			return {
 				// I think render() should return a Enonic XP response object, that's at least what the typings say.
@@ -170,13 +209,10 @@ export class React4xp<
 					ssr
 				}),
 
-				// .render without a request object will enforce JS-suppressed renderPageContributions
-				pageContributions: react4xp.renderPageContributions({
-					hydrate,
-					pageContributions,
-					request,
-					ssr,
-				})
+				headers: {
+					'content-security-policy': contentSecurityPolicy(csp)
+				},
+				pageContributions,
 			}
 
 		} catch (e) {
@@ -211,6 +247,7 @@ export class React4xp<
 	props: Props// = null
 	react4xpId: Id// = null
 	react4xpIdIsLocked/*: boolean*/ = false
+	scriptSrcArray: string[]
 
 	// Public methods
 	public checkIdLock = checkIdLock
@@ -232,6 +269,10 @@ export class React4xp<
 
 	constructor(entry: Entry) {
 		// log.debug('React4xp constructor entry:%s', entry);
+
+		this.scriptSrcArray = IS_PROD_MODE
+			? ['self']
+			: ['self', 'unsafe-inline']; // So tools like browserSync can work
 
 		if (isString(entry)) {
 			// Use jsxPath, regular flow

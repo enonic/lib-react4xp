@@ -28,6 +28,7 @@ export interface Instance<
 	props: Props;
 	react4xpId: Id;
 	react4xpIdIsLocked: boolean;
+	scriptSrcArray: string[];
 
 	// Public methods
 	checkIdLock: () => void

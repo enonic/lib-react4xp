@@ -22,6 +22,7 @@ dependencies {
 
     implementation 'com.enonic.lib:lib-cache:2.2.0'
     implementation 'com.enonic.lib:lib-static:1.0.3'
+    implementation 'com.enonic.lib:lib-text-encoding:2.1.1'
 
     implementation 'org.attoparser:attoparser:2.0.7.RELEASE'
     implementation 'org.apache.commons:commons-pool2:2.11.1'
