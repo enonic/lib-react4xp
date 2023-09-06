@@ -33,7 +33,7 @@ dependencies {
 
 node {
     download = true
-    version = '18.15.0'
+    version = '18.17.1'
 }
 
 processResources {
