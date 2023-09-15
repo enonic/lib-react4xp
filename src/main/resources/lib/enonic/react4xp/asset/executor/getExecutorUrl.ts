@@ -5,9 +5,9 @@ import { getExecutorChunkFilename } from '/lib/enonic/react4xp/asset/executor/ge
 
 // WARNING: Do not cache anything that contains assetRoot, it changes per context!
 export function getExecutorUrl({
-	type = 'server'
+	urlType // default is app.config['react4xp.urlType'] || 'server'
 }: {
-	type?: 'server' | 'absolute'
+	urlType?: 'server' | 'absolute'
 } = {}) {
-	return `${getAssetRoot({ type })}${getExecutorChunkFilename()}`;
+	return `${getAssetRoot({ urlType })}${getExecutorChunkFilename()}`;
 }

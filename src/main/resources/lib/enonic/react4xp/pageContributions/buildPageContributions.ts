@@ -21,11 +21,11 @@ import { getComponentChunkUrls } from '/lib/enonic/react4xp/dependencies/getComp
 export function buildPageContributions({
 	entries,
 	suppressJS,
-	type = 'server'
+	urlType // default is app.config['react4xp.urlType'] || 'server'
 }: {
 	entries: OneOrMore<React4xpNamespace.EntryName>
 	suppressJS: boolean
-	type?: 'server' | 'absolute'
+	urlType?: 'server' | 'absolute'
 }) {
 
 	const pageContributions: PageContributions = {
@@ -37,10 +37,10 @@ export function buildPageContributions({
 	// * If the script relies upon or is relied upon by another script then use defer.
 
 	if (app.config['react4xp.serveGlobals'] !== 'false') {
-		pageContributions.headEnd.push(`<script defer src="${getGlobalsUrls({ type })}"></script>\n`);
+		pageContributions.headEnd.push(`<script defer src="${getGlobalsUrls({ urlType })}"></script>\n`);
 	}
 
-	const componentChunkUrls = getComponentChunkUrls(entries, { type });
+	const componentChunkUrls = getComponentChunkUrls(entries, { urlType });
 	for (let i = 0; i < componentChunkUrls.length; i++) {
 		const componentChunkUrl = componentChunkUrls[i];
 		if (endsWith(componentChunkUrl, '.css')) {
@@ -53,7 +53,7 @@ export function buildPageContributions({
 	}
 
 	if (!suppressJS) {
-		pageContributions.headEnd.push(`<script defer src="${getClientUrl({ type })}"></script>\n`);
+		pageContributions.headEnd.push(`<script defer src="${getClientUrl({ urlType })}"></script>\n`);
 	}
 
 	return pageContributions;

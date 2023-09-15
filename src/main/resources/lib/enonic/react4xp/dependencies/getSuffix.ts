@@ -17,17 +17,17 @@ let LOGGEDWARNING = false;
 export function getSuffix({
 	path,
 	serviceName,
-	type = 'server'
+	urlType // default is app.config['react4xp.urlType'] || 'server'
 }: {
 	path: string,
 	serviceName: string
-	type?: 'server' | 'absolute'
+	urlType?: 'server' | 'absolute'
 }) {
 	//log.debug('getSuffix(%s, %s)', path, serviceName);
 
 	const standardRoot = initServiceUrlRoot({
 		serviceName,
-		type
+		urlType
 	}).replace(/\/$/, '');
 	//log.debug('getSuffix(%s, %s) standardRoot:%s', path, serviceName, standardRoot);
 

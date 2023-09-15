@@ -27,13 +27,13 @@ export function getAndMerge({
 	incomingPgContrib,
 	newPgContrib,
 	suppressJS,
-	type = 'server'
+	urlType // default is app.config['react4xp.urlType'] || 'server'
 }: {
 	entryNames: OneOrMore<React4xpNamespace.EntryName>
 	incomingPgContrib: PageContributions
 	newPgContrib: PageContributions
 	suppressJS: boolean
-	type?: 'server' | 'absolute'
+	urlType?: 'server' | 'absolute'
 }): PageContributions {
 	//log.debug('getAndMerge() entryNames:%s', toStr(entryNames));
 	//log.debug('getAndMerge() incomingPgContrib:%s', toStr(incomingPgContrib));
@@ -50,7 +50,7 @@ export function getAndMerge({
 	const entriesPgContrib: PageContributions = buildPageContributions({
 		entries: entryNames,
 		suppressJS,
-		type
+		urlType
 	});
 	//log.debug('getAndMerge() entriesPgContrib:%s', toStr(entriesPgContrib));
 
@@ -60,7 +60,7 @@ export function getAndMerge({
 	incomingPgContrib = incomingPgContrib || {};
 	newPgContrib = newPgContrib || {};
 
-	const executorEntry = `<script defer src="${getExecutorUrl({ type })}"></script>\n`;
+	const executorEntry = `<script defer src="${getExecutorUrl({ urlType })}"></script>\n`;
 
 	// Keeps track of already-added entries across headBegin, headEnd, bodyBegin and bodyEnd
 	const controlSet = [

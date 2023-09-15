@@ -48,7 +48,7 @@ export interface Instance<
 		pageContributions?: PageContributions
 		request?: Request
 		ssr?: boolean
-		type?: 'server' | 'absolute'
+		urlType?: 'server' | 'absolute'
 	}) => unknown
 	renderSSRIntoContainer: (params: {
 		body: string

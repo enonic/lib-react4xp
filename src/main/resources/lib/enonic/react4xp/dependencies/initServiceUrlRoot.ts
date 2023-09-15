@@ -1,4 +1,5 @@
 import { assetUrl as getAssetUrl } from '/lib/xp/portal';
+import { getUrlType } from '/lib/enonic/react4xp/React4xp/utils/getUrlType';
 
 /*
 * Asseturl should work in any context.
@@ -6,14 +7,14 @@ import { assetUrl as getAssetUrl } from '/lib/xp/portal';
 */
 export function initServiceUrlRoot({
 	serviceName = '',
-	type = 'server'
+	urlType // default is app.config['react4xp.urlType'] || 'server'
 }: {
 	serviceName?: string,
-	type?: 'server' | 'absolute'
+	urlType?: 'server' | 'absolute'
 } = {}) {
 	const assetUrl = getAssetUrl({
 		path:'/',
-		type
+		type: getUrlType(urlType)
 	});
 	// log.debug('initServiceUrlRoot(%s) assetUrl:%s', serviceName, assetUrl);
 	const serviceUrlRoot = assetUrl

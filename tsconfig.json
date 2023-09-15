@@ -137,8 +137,7 @@
 		"src/main/resources/assets/**/*.*",
 	],
 	"include": [
-		"src/main/resources/index.d.ts",
-		"src/main/resources/**/*.ts",
+		"src/main/resources/**/*.ts", // This includes *.d.ts files.
 	// 	"node_modules/@enonic/react4xp/**/*.ts",
 	// 	"node_modules/@enonic/js-utils/**/*.ts"
 	]

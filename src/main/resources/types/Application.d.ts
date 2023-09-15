@@ -4,4 +4,5 @@ export interface AppConfig {
 	'react4xp.ssr.maxThreads'?: number|string|unknown
 	'react4xp.ssr.settings'?: string
 	'react4xp.ssr.engineName'?: 'Graal.js'|'Nashorn'
+	'react4xp.urlType'?: 'server' | 'absolute'
 }
