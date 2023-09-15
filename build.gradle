@@ -46,6 +46,18 @@ tasks.withType( Copy ) {
     includeEmptyDirs = false
 }
 
+tasks.register('npmCheck', NpmTask) {
+	dependsOn npmInstall
+	args = [
+		'run',
+		'check:types'
+	]
+	environment = [
+		'FORCE_COLOR': 'true',
+	]
+}
+// check.dependsOn npmCheck
+
 def BUILD_ENV = "production"
 if ( project.hasProperty( "dev" ) || project.hasProperty( "development" ) )
 {

@@ -77,6 +77,7 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
+    "check:types": "npx tsc --noEmit",
     "clean": "rimraf build",
     "cleanAll": "rimraf build node_modules && ./gradlew clean --refresh-dependencies --info",
     "dev": "npm run clean && npm run local:watch",
@@ -92,7 +93,6 @@
     "test": "jest --no-cache --coverage",
     "tsc": "npx tsc --noEmit",
     "tsup": "npm-run-all --parallel tsup:*",
-    "tsup:server": "npx tsup -d build/resources/main",
-    "verify:types": "npx tsc --noEmit"
+    "tsup:server": "npx tsup -d build/resources/main"
   }
 }

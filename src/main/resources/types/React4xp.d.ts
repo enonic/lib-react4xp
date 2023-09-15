@@ -1,8 +1,8 @@
-import type {Component} from '@enonic-types/lib-portal';
-import type {Cache} from './Cache';
-import type {ComponentGeneric} from './Component';
-import type {PageContributions} from './PageContributions';
-import type {Request} from './Request';
+import type { Component } from '@enonic-types/lib-portal';
+import type { Cache } from './Cache';
+import type { ComponentGeneric } from './Component';
+import type { PageContributions } from './PageContributions';
+import type { Request } from './Request';
 
 
 type OneOrMore<T> = T | T[]
@@ -48,6 +48,7 @@ export interface Instance<
 		pageContributions?: PageContributions
 		request?: Request
 		ssr?: boolean
+		type?: 'server' | 'absolute'
 	}) => unknown
 	renderSSRIntoContainer: (params: {
 		body: string

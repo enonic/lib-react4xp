@@ -8,42 +8,42 @@ import type {
 	Request,
 	Response
 } from '/types';
-import {isObject} from '@enonic/js-utils/value/isObject';
-import {isString} from '@enonic/js-utils/value/isString';
+import { isObject } from '@enonic/js-utils/value/isObject';
+import { isString } from '@enonic/js-utils/value/isString';
 import { isNotSet } from '@enonic/js-utils/value/isNotSet';
-// import {toStr} from '@enonic/js-utils/value/toStr';
-import {jsxToAssetPath} from '/lib/enonic/react4xp/asset/jsxToAssetPath';
+// import { toStr } from '@enonic/js-utils/value/toStr';
+import { jsxToAssetPath } from '/lib/enonic/react4xp/asset/jsxToAssetPath';
 import {
 	getContent,
 	getComponent
 } from '/lib/xp/portal';
-import {getDescriptorFromTemplate} from './React4xp/getDescriptorFromTemplate';
+import { getDescriptorFromTemplate } from './React4xp/getDescriptorFromTemplate';
 
 // Import public methods
-import {checkIdLock} from './React4xp/methods/checkIdLock';
-import {ensureAndLockId} from './React4xp/methods/ensureAndLockId';
-import {ensureAndLockBeforeRendering} from './React4xp/methods/ensureAndLockBeforeRendering';
-import {doRenderSSR} from './React4xp/methods/doRenderSSR';
+import { checkIdLock } from './React4xp/methods/checkIdLock';
+import { ensureAndLockId } from './React4xp/methods/ensureAndLockId';
+import { ensureAndLockBeforeRendering } from './React4xp/methods/ensureAndLockBeforeRendering';
+import { doRenderSSR } from './React4xp/methods/doRenderSSR';
 import makeErrorMessage from "./React4xp/methods/makeErrorMessage";
-import {renderBody} from './React4xp/methods/renderBody';
-import {renderPageContributions} from './React4xp/methods/renderPageContributions';
-import {renderSSRIntoContainer} from './React4xp/methods/renderSSRIntoContainer';
-import {renderTargetContainer} from './React4xp/methods/renderTargetContainer';
-import {renderWarningPlaceholder} from './React4xp/methods/renderWarningPlaceholder';
-import {setHasRegions} from './React4xp/methods/setHasRegions';
-import {setId} from './React4xp/methods/setId';
-import {setIsPage} from './React4xp/methods/setIsPage';
-import {setJsxPath} from './React4xp/methods/setJsxPath';
-import {setProps} from './React4xp/methods/setProps';
-import {uniqueId} from './React4xp/methods/uniqueId';
+import { renderBody } from './React4xp/methods/renderBody';
+import { renderPageContributions } from './React4xp/methods/renderPageContributions';
+import { renderSSRIntoContainer } from './React4xp/methods/renderSSRIntoContainer';
+import { renderTargetContainer } from './React4xp/methods/renderTargetContainer';
+import { renderWarningPlaceholder } from './React4xp/methods/renderWarningPlaceholder';
+import { setHasRegions } from './React4xp/methods/setHasRegions';
+import { setId } from './React4xp/methods/setId';
+import { setIsPage } from './React4xp/methods/setIsPage';
+import { setJsxPath } from './React4xp/methods/setJsxPath';
+import { setProps } from './React4xp/methods/setProps';
+import { uniqueId } from './React4xp/methods/uniqueId';
 
 
-import {buildErrorContainer} from './htmlHandling';
-import {setup as setupSSRJava} from './ssr'
-import {templateDescriptorCache} from './React4xp/templateDescriptorCache';
-import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
-import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
-import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
+import { buildErrorContainer } from './htmlHandling';
+import { setup as setupSSRJava } from './ssr'
+import { templateDescriptorCache } from './React4xp/templateDescriptorCache';
+import { getClientUrl } from '/lib/enonic/react4xp/asset/client/getClientUrl';
+import { getExecutorUrl } from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
+import { getComponentChunkUrls } from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
 
 
 interface RenderOptions {
@@ -52,6 +52,7 @@ interface RenderOptions {
 	id?: Id
 	pageContributions?: PageContributions
 	ssr?: boolean
+	type?: 'server' | 'absolute'
 	uniqueId?: boolean|string
 }
 
@@ -154,7 +155,8 @@ export class React4xp<
 				body,
 				hydrate,
 				pageContributions, // TODO deref?
-				ssr
+				ssr,
+				type = 'server'
 			} = dereffedOptions || {};
 
 			return {
@@ -176,6 +178,7 @@ export class React4xp<
 					pageContributions,
 					request,
 					ssr,
+					type,
 				})
 			}
 

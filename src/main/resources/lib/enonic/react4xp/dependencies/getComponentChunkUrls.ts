@@ -4,10 +4,16 @@ import type {
 } from '../../../../index.d';
 
 
-import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
-import {getComponentChunkNames} from './getComponentChunkNames';
+import { getAssetRoot } from '/lib/enonic/react4xp/dependencies/getAssetRoot';
+import { getComponentChunkNames } from './getComponentChunkNames';
 
 
-export function getComponentChunkUrls(entries :OneOrMore<React4xpNamespace.EntryName>) {
-    return getComponentChunkNames(entries).map(name => getAssetRoot() + name);
+// NOTE: This function is exported in ..React4xp.ts, so a major release is needed to change it's signature.
+// TODO: Change to single param with two properties.
+export function getComponentChunkUrls(entries: OneOrMore<React4xpNamespace.EntryName>, {
+	type = 'server'
+}: {
+	type?: 'server' | 'absolute'
+} = {}) {
+	return getComponentChunkNames(entries).map(name => getAssetRoot({ type }) + name);
 }
