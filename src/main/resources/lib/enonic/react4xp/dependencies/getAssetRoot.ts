@@ -1,7 +1,14 @@
-import {initServiceUrlRoot} from '/lib/enonic/react4xp/dependencies/initServiceUrlRoot';
+import { initServiceUrlRoot } from '/lib/enonic/react4xp/dependencies/initServiceUrlRoot';
 
 
-export function getAssetRoot() {
-	//log.debug('getAssetRoot()');
-    return initServiceUrlRoot('react4xp');
+export function getAssetRoot({
+	type = 'server'
+}: {
+	type?: 'server' | 'absolute'
+} = {}) {
+	// log.debug('getAssetRoot({ type: %s })', type);
+	return initServiceUrlRoot({
+		serviceName: 'react4xp',
+		type
+	});
 };

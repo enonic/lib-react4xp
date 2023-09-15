@@ -6,10 +6,10 @@ import type {
 import type { React4xp } from '../../React4xp';
 import { isSet } from '@enonic/js-utils/value/isSet';
 //import {toStr} from '@enonic/js-utils/value/toStr';
-import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
-import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
-import {getAndMerge as getAndMergePageContributions} from '/lib/enonic/react4xp/pageContributions/getAndMerge';
-import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/runMode';
+import { getAssetRoot } from '/lib/enonic/react4xp/dependencies/getAssetRoot';
+import { buildErrorContainer } from '/lib/enonic/react4xp/htmlHandling';
+import { getAndMerge as getAndMergePageContributions } from '/lib/enonic/react4xp/pageContributions/getAndMerge';
+import { IS_DEV_MODE } from '/lib/enonic/react4xp/xp/runMode';
 import isAssumedCSEditMode from '../utils/isEditMode';
 
 
@@ -32,17 +32,19 @@ export function renderPageContributions(this: React4xp, {
 	hydrate,
 	pageContributions = {},
 	request,
-	ssr
+	ssr,
+	type = 'server'
 } :{
 	hydrate?: boolean,
 	pageContributions?: PageContributions,
 	request?: Request,
 	ssr?: boolean,
+	type?: 'server' | 'absolute'
 } = {}) {
-	//log.debug('renderPageContributions() hydrate:%s', toStr(hydrate));
-	//log.debug('renderPageContributions() pageContributions:%s', toStr(pageContributions));
-	//log.debug('renderPageContributions() request:%s', toStr(request));
-	//log.debug('renderPageContributions() ssr:%s', toStr(ssr));
+	// log.debug('renderPageContributions() hydrate:%s', toStr(hydrate));
+	// log.debug('renderPageContributions() pageContributions:%s', toStr(pageContributions));
+	// log.debug('renderPageContributions() request:%s', toStr(request));
+	// log.debug('renderPageContributions() ssr:%s', toStr(ssr));
 
 	let output = null;
 	try {
@@ -83,7 +85,9 @@ export function renderPageContributions(this: React4xp, {
 			? [] : [
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
 				// '<!-- asset -->',
-				`<script defer src="${getAssetRoot()}${this.assetPath}"></script>\n`,
+				`<script defer src="${getAssetRoot({
+					type
+				})}${this.assetPath}"></script>\n`,
 
 				// What separates outcome 3 and 5? simply ssr
 				`<script data-react4xp-app-name="${app.name}" data-react4xp-ref="${this.react4xpId}" type="application/json">${JSON.stringify({
@@ -95,7 +99,7 @@ export function renderPageContributions(this: React4xp, {
 					props: this.props || {}
 				}).replace(/<(\/?script|!--)/gi, "\\u003C$1")}</script>`,
 			];
-		//log.debug('renderPageContributions() headEnd:%s', toStr(headEnd));
+		// log.debug('renderPageContributions() headEnd:%s', toStr(headEnd));
 
 		output = getAndMergePageContributions({
 			entryNames: this.jsxPath,
@@ -103,7 +107,8 @@ export function renderPageContributions(this: React4xp, {
 			newPgContrib: {
 				headEnd
 			},
-			suppressJS
+			suppressJS,
+			type
 		});
 
 	} catch (e) {
@@ -124,6 +129,6 @@ export function renderPageContributions(this: React4xp, {
 			],
 		};
 	}
-	//log.debug('renderPageContributions() output:%s', toStr(output));
+	// log.debug('renderPageContributions() output:%s', toStr(output));
 	return output;
 } // renderPageContributions

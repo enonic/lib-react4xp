@@ -5,12 +5,12 @@ import type {
 } from '../../../../index.d';
 
 
-//import {toStr} from '@enonic/js-utils/value/toStr';
-import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
-//import {getSiteLocalCacheKey} from '/lib/enonic/react4xp/asset/getSiteLocalCacheKey';
-import {normalizeEntryNames} from '/lib/enonic/react4xp/dependencies/normalizeEntryNames';
-import {buildPageContributions} from '/lib/enonic/react4xp/pageContributions/buildPageContributions';
-import {getUniqueEntries} from '/lib/enonic/react4xp/pageContributions/getUniqueEntries';
+//import { toStr } from '@enonic/js-utils/value/toStr';
+import { getExecutorUrl } from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
+//import { getSiteLocalCacheKey } from '/lib/enonic/react4xp/asset/getSiteLocalCacheKey';
+import { normalizeEntryNames } from '/lib/enonic/react4xp/dependencies/normalizeEntryNames';
+import { buildPageContributions } from '/lib/enonic/react4xp/pageContributions/buildPageContributions';
+import { getUniqueEntries } from '/lib/enonic/react4xp/pageContributions/getUniqueEntries';
 
 
 /** Adds page contributions for an (optional) set of entries.  Merges different pageContributions.js objects into one. Prevents duplicates: no single pageContribution entry is
@@ -27,11 +27,13 @@ export function getAndMerge({
 	incomingPgContrib,
 	newPgContrib,
 	suppressJS,
+	type = 'server'
 }: {
 	entryNames: OneOrMore<React4xpNamespace.EntryName>
 	incomingPgContrib: PageContributions
 	newPgContrib: PageContributions
 	suppressJS: boolean
+	type?: 'server' | 'absolute'
 }): PageContributions {
 	//log.debug('getAndMerge() entryNames:%s', toStr(entryNames));
 	//log.debug('getAndMerge() incomingPgContrib:%s', toStr(incomingPgContrib));
@@ -47,7 +49,8 @@ export function getAndMerge({
 	// WARNING: Do not cache anything that contains assetRoot, it changes per context!!!
 	const entriesPgContrib: PageContributions = buildPageContributions({
 		entries: entryNames,
-		suppressJS
+		suppressJS,
+		type
 	});
 	//log.debug('getAndMerge() entriesPgContrib:%s', toStr(entriesPgContrib));
 
@@ -57,7 +60,7 @@ export function getAndMerge({
 	incomingPgContrib = incomingPgContrib || {};
 	newPgContrib = newPgContrib || {};
 
-	const executorEntry = `<script defer src="${getExecutorUrl()}"></script>\n`;
+	const executorEntry = `<script defer src="${getExecutorUrl({ type })}"></script>\n`;
 
 	// Keeps track of already-added entries across headBegin, headEnd, bodyBegin and bodyEnd
 	const controlSet = [

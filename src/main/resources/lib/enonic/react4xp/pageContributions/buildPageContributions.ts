@@ -6,9 +6,9 @@ import type {
 
 
 import endsWith from '@enonic/js-utils/string/endsWith';
-import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
-import {getGlobalsUrls} from '../asset/globals/getGlobalsUrls';
-import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
+import { getClientUrl } from '/lib/enonic/react4xp/asset/client/getClientUrl';
+import { getGlobalsUrls } from '../asset/globals/getGlobalsUrls';
+import { getComponentChunkUrls } from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
 
 /** Use the json files built by (@enonic/react4xp)
  *  to fetch items of <script src="url" /> for common chunks:
@@ -21,12 +21,14 @@ import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getCompon
 export function buildPageContributions({
 	entries,
 	suppressJS,
+	type = 'server'
 }: {
-	entries: OneOrMore<React4xpNamespace.EntryName>,
-	suppressJS: boolean,
+	entries: OneOrMore<React4xpNamespace.EntryName>
+	suppressJS: boolean
+	type?: 'server' | 'absolute'
 }) {
 
-	const pageContributions :PageContributions = {
+	const pageContributions: PageContributions = {
 		headEnd: [] // Lighthouse recommends meta charset in first 1024 bytes, thus we use headEnd not headBegin
 	};
 
@@ -35,10 +37,10 @@ export function buildPageContributions({
 	// * If the script relies upon or is relied upon by another script then use defer.
 
 	if (app.config['react4xp.serveGlobals'] !== 'false') {
-		pageContributions.headEnd.push(`<script defer src="${getGlobalsUrls()}"></script>\n`);
+		pageContributions.headEnd.push(`<script defer src="${getGlobalsUrls({ type })}"></script>\n`);
 	}
 
-	const componentChunkUrls = getComponentChunkUrls(entries);
+	const componentChunkUrls = getComponentChunkUrls(entries, { type });
 	for (let i = 0; i < componentChunkUrls.length; i++) {
 		const componentChunkUrl = componentChunkUrls[i];
 		if (endsWith(componentChunkUrl, '.css')) {
@@ -51,7 +53,7 @@ export function buildPageContributions({
 	}
 
 	if (!suppressJS) {
-		pageContributions.headEnd.push(`<script defer src="${getClientUrl()}"></script>\n`);
+		pageContributions.headEnd.push(`<script defer src="${getClientUrl({ type })}"></script>\n`);
 	}
 
 	return pageContributions;

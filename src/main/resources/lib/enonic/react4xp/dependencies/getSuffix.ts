@@ -1,5 +1,5 @@
-import {initServiceUrlRoot} from '/lib/enonic/react4xp/dependencies/initServiceUrlRoot';
-import {stripSlashes} from '/lib/enonic/react4xp/dependencies/stripSlashes';
+import { initServiceUrlRoot } from '/lib/enonic/react4xp/dependencies/initServiceUrlRoot';
+import { stripSlashes } from '/lib/enonic/react4xp/dependencies/stripSlashes';
 
 
 let LOGGEDWARNING = false;
@@ -14,29 +14,37 @@ let LOGGEDWARNING = false;
 // Returns empty string if there is no suffix. Strips slashes from both ends.
 // Throws an error if the path doesn't match any known variation of the service path.
 // Logs a warning when the fallback is used.
-export function getSuffix(
-	path :string,
-	serviceName :string
-) {
+export function getSuffix({
+	path,
+	serviceName,
+	type = 'server'
+}: {
+	path: string,
+	serviceName: string
+	type?: 'server' | 'absolute'
+}) {
 	//log.debug('getSuffix(%s, %s)', path, serviceName);
 
-    const standardRoot = initServiceUrlRoot(serviceName).replace(/\/$/, '');
+	const standardRoot = initServiceUrlRoot({
+		serviceName,
+		type
+	}).replace(/\/$/, '');
 	//log.debug('getSuffix(%s, %s) standardRoot:%s', path, serviceName, standardRoot);
 
-    let location = path.indexOf(standardRoot);
-    if (location !== -1) {
-        return stripSlashes(path.substring(location + standardRoot.length));
-    }
+	let location = path.indexOf(standardRoot);
+	if (location !== -1) {
+		return stripSlashes(path.substring(location + standardRoot.length));
+	}
 
-    const fallbackRoot = `/_/service/${app.name}/${serviceName}`;
-    location = path.indexOf(fallbackRoot);
-    if (location !== -1) {
-        if (!LOGGEDWARNING) {
-            log.warning(`Fallback: matched path '${path}' with service name '${serviceName}', returning suffix after service name. This will not be logged again.`);
-            LOGGEDWARNING = true;
-        }
-        return stripSlashes(path.substring(location + fallbackRoot.length));
-    }
+	const fallbackRoot = `/_/service/${app.name}/${serviceName}`;
+	location = path.indexOf(fallbackRoot);
+	if (location !== -1) {
+		if (!LOGGEDWARNING) {
+			log.warning(`Fallback: matched path '${path}' with service name '${serviceName}', returning suffix after service name. This will not be logged again.`);
+			LOGGEDWARNING = true;
+		}
+		return stripSlashes(path.substring(location + fallbackRoot.length));
+	}
 
-    throw new Error(`Unexpected service suffix lookup: requested path ('${path}') doesn't seem to belong to the service '${serviceName}'.`);
+	throw new Error(`Unexpected service suffix lookup: requested path ('${path}') doesn't seem to belong to the service '${serviceName}'.`);
 };

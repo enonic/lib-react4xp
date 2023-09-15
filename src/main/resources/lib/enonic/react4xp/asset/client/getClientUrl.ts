@@ -1,24 +1,28 @@
-import {readClientManifestJson} from '/lib/enonic/react4xp/asset/client/readClientManifestJson';
-import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
+import { readClientManifestJson } from '/lib/enonic/react4xp/asset/client/readClientManifestJson';
+import { getAssetRoot } from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 
 
 // WARNING: Do not cache anything that contains assetRoot, it changes per context!
-export function getClientUrl() {
-	//log.debug('getClientUrl()');
-    // Special case: if there is a chunkfile for a client wrapper, use that. If not, fall back to
-    // a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
-    try {
-		const clientUrl = getAssetRoot() + readClientManifestJson()['client.js'];
-		//log.debug('getClientUrl() -> %s', clientUrl);
-        return clientUrl;
-    } catch (e) {
+export function getClientUrl({
+	type = 'server'
+}: {
+	type?: 'server' | 'absolute'
+} = {}) {
+	// log.debug('getClientUrl()');
+	// Special case: if there is a chunkfile for a client wrapper, use that. If not, fall back to
+	// a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
+	try {
+		const clientUrl = getAssetRoot({ type }) + readClientManifestJson()['client.js'];
+		// log.debug('getClientUrl() -> %s', clientUrl);
+		return clientUrl;
+	} catch (e) {
 		throw new Error(`Unable to find the client chunk file!!!`);
-        //log.debug('Stacktrace', e); // Error: Empty or not found: /r4xAssets/chunks.client.json
-        /*log.debug(
-            `No optional clientwrapper was found (chunkfile reference: ${RESOURCE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON}). That's okay, there's a fallback one at: ${getClientRoot()}`
-        );
-		const clientRoot = getClientRoot();
-		//log.debug('getClientUrl() clientRoot:%s', toStr(clientRoot));
-        return clientRoot;*/
-    }
+		// log.debug('Stacktrace', e); // Error: Empty or not found: /r4xAssets/chunks.client.json
+		// log.debug(
+		// 	`No optional clientwrapper was found (chunkfile reference: ${RESOURCE_PATH_ABSOLUTE_CLIENT_MANIFEST_JSON}). That's okay, there's a fallback one at: ${getClientRoot()}`
+		// );
+		// const clientRoot = getClientRoot();
+		// log.debug('getClientUrl() clientRoot:%s', toStr(clientRoot));
+		// return clientRoot;
+	}
 }
