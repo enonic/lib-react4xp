@@ -2,13 +2,13 @@ import { initServiceUrlRoot } from '/lib/enonic/react4xp/dependencies/initServic
 
 
 export function getAssetRoot({
-	type = 'server'
+	urlType // default is app.config['react4xp.urlType'] || 'server'
 }: {
-	type?: 'server' | 'absolute'
+	urlType?: 'server' | 'absolute'
 } = {}) {
 	// log.debug('getAssetRoot({ type: %s })', type);
 	return initServiceUrlRoot({
 		serviceName: 'react4xp',
-		type
+		urlType
 	});
 };

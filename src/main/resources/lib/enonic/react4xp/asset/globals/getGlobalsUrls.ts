@@ -12,14 +12,14 @@ const FULL_GLOBALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${GLOBALS_FILENAME}`;
 // WARNING: Do not cache anything that contains assetRoot, it changes per context!
 /** Returns the asset-via-service URL for the globals chunk */
 export function getGlobalsUrls({
-	type = 'server'
+	urlType // default is app.config['react4xp.urlType'] || 'server'
 }: {
-	type?: 'server' | 'absolute'
+	urlType?: 'server' | 'absolute'
 } = {}) {
 	// This should not break if there are no added globals. GLOBALS should be optional.
 	try {
 		return getNamesFromChunkfile(FULL_GLOBALS_CHUNKS_FILENAME).map(
-			name => getAssetRoot({ type }) + name
+			name => getAssetRoot({ urlType }) + name
 		);
 	} catch (e) {
 		log.warning(e);

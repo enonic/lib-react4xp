@@ -33,13 +33,13 @@ export function renderPageContributions(this: React4xp, {
 	pageContributions = {},
 	request,
 	ssr,
-	type = 'server'
+	urlType // default is app.config['react4xp.urlType'] || 'server'
 } :{
 	hydrate?: boolean,
 	pageContributions?: PageContributions,
 	request?: Request,
 	ssr?: boolean,
-	type?: 'server' | 'absolute'
+	urlType?: 'server' | 'absolute'
 } = {}) {
 	// log.debug('renderPageContributions() hydrate:%s', toStr(hydrate));
 	// log.debug('renderPageContributions() pageContributions:%s', toStr(pageContributions));
@@ -86,7 +86,7 @@ export function renderPageContributions(this: React4xp, {
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
 				// '<!-- asset -->',
 				`<script defer src="${getAssetRoot({
-					type
+					urlType
 				})}${this.assetPath}"></script>\n`,
 
 				// What separates outcome 3 and 5? simply ssr
@@ -108,7 +108,7 @@ export function renderPageContributions(this: React4xp, {
 				headEnd
 			},
 			suppressJS,
-			type
+			urlType
 		});
 
 	} catch (e) {

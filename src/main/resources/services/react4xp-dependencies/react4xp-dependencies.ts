@@ -21,6 +21,7 @@ export function get(req: Request): Response<string> | Response<string[]> {
 		relativePath = getSuffix({
 			path: (req.path || "").trim(),
 			serviceName: SERVICE_NAME
+			// urlType // NOTE: No way to select urlType in this service, will use app.config['react4xp.urlType'] || 'server'.
 		});
 		log.info(`relativePath:%s`, relativePath);
 	} catch (e) {
@@ -50,7 +51,10 @@ export function get(req: Request): Response<string> | Response<string[]> {
 
 	try {
 		return {
-			body: getComponentChunkUrls(entryNames, { type: 'server' }), // NOTE: This is the only place type server is hardcoded
+			body: getComponentChunkUrls(
+				entryNames // ,
+				// { urlType } // NOTE: No way to select urlType in this service, will use app.config['react4xp.urlType'] || 'server'.
+			),
 			contentType: 'application/json',
 			// FIXME: ETAG not working, using standard client cache instead, limited to 1 hour since it's not hashed
 			headers: {

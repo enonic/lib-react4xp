@@ -4,15 +4,15 @@ import { getAssetRoot } from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 
 // WARNING: Do not cache anything that contains assetRoot, it changes per context!
 export function getClientUrl({
-	type = 'server'
+	urlType // default is app.config['react4xp.urlType'] || 'server'
 }: {
-	type?: 'server' | 'absolute'
+	urlType?: 'server' | 'absolute'
 } = {}) {
 	// log.debug('getClientUrl()');
 	// Special case: if there is a chunkfile for a client wrapper, use that. If not, fall back to
 	// a reference to the built-in client wrapper service: _/services/{app.name}/react4xp-client
 	try {
-		const clientUrl = getAssetRoot({ type }) + readClientManifestJson()['client.js'];
+		const clientUrl = getAssetRoot({ urlType }) + readClientManifestJson()['client.js'];
 		// log.debug('getClientUrl() -> %s', clientUrl);
 		return clientUrl;
 	} catch (e) {

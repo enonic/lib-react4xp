@@ -52,7 +52,7 @@ interface RenderOptions {
 	id?: Id
 	pageContributions?: PageContributions
 	ssr?: boolean
-	type?: 'server' | 'absolute'
+	urlType?: 'server' | 'absolute'
 	uniqueId?: boolean|string
 }
 
@@ -156,7 +156,7 @@ export class React4xp<
 				hydrate,
 				pageContributions, // TODO deref?
 				ssr,
-				type = 'server'
+				urlType // default is app.config['react4xp.urlType'] || 'server'
 			} = dereffedOptions || {};
 
 			return {
@@ -178,7 +178,7 @@ export class React4xp<
 					pageContributions,
 					request,
 					ssr,
-					type,
+					urlType,
 				})
 			}
 
