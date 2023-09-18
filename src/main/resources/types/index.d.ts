@@ -12,7 +12,8 @@ export {
 	Id,
 	Instance,
 	Props,
-	React4xp
+	React4xp,
+	UrlType
 } from './React4xp.d';
 export {Request} from './Request.d'
 export {Response} from './Response.d';

@@ -1,3 +1,6 @@
+import type { UrlType } from '/types';
+
+
 import { initServiceUrlRoot } from '/lib/enonic/react4xp/dependencies/initServiceUrlRoot';
 import { stripSlashes } from '/lib/enonic/react4xp/dependencies/stripSlashes';
 
@@ -21,7 +24,7 @@ export function getSuffix({
 }: {
 	path: string,
 	serviceName: string
-	urlType?: 'server' | 'absolute'
+	urlType?: UrlType
 }) {
 	//log.debug('getSuffix(%s, %s)', path, serviceName);
 

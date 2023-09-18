@@ -1,3 +1,4 @@
+import type { UrlType } from '/types';
 import type {
 	OneOrMore,
 	React4xp as React4xpNamespace
@@ -13,7 +14,7 @@ import { getComponentChunkNames } from './getComponentChunkNames';
 export function getComponentChunkUrls(entries: OneOrMore<React4xpNamespace.EntryName>, {
 	urlType // default is app.config['react4xp.urlType'] || 'server'
 }: {
-	urlType?: 'server' | 'absolute'
+	urlType?: UrlType
 } = {}) {
 	return getComponentChunkNames(entries).map(name => getAssetRoot({ urlType }) + name);
 }

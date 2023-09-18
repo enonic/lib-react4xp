@@ -1,4 +1,7 @@
-import type { Component } from '@enonic-types/lib-portal';
+import type {
+	AssetUrlParams,
+	Component
+} from '@enonic-types/lib-portal';
 import type { Cache } from './Cache';
 import type { ComponentGeneric } from './Component';
 import type { PageContributions } from './PageContributions';
@@ -12,6 +15,8 @@ export type Entry = string|Component
 export type EntryName = string
 
 export type Id = HTMLElement['id']
+
+export type UrlType = AssetUrlParams['type'];
 
 export interface Instance<
 	Props extends object = object
@@ -48,7 +53,7 @@ export interface Instance<
 		pageContributions?: PageContributions
 		request?: Request
 		ssr?: boolean
-		urlType?: 'server' | 'absolute'
+		urlType?: UrlType
 	}) => unknown
 	renderSSRIntoContainer: (params: {
 		body: string

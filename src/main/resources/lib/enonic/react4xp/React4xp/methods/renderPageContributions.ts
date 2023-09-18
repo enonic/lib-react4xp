@@ -1,3 +1,4 @@
+import type { UrlType } from '/types';
 import type { AppConfig } from '/types/Application.d';
 import type {
 	PageContributions,
@@ -39,7 +40,7 @@ export function renderPageContributions(this: React4xp, {
 	pageContributions?: PageContributions,
 	request?: Request,
 	ssr?: boolean,
-	urlType?: 'server' | 'absolute'
+	urlType?: UrlType
 } = {}) {
 	// log.debug('renderPageContributions() hydrate:%s', toStr(hydrate));
 	// log.debug('renderPageContributions() pageContributions:%s', toStr(pageContributions));

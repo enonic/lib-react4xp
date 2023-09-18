@@ -1,3 +1,6 @@
+import type { UrlType } from '/types';
+
+
 import { readClientManifestJson } from '/lib/enonic/react4xp/asset/client/readClientManifestJson';
 import { getAssetRoot } from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 
@@ -6,7 +9,7 @@ import { getAssetRoot } from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 export function getClientUrl({
 	urlType // default is app.config['react4xp.urlType'] || 'server'
 }: {
-	urlType?: 'server' | 'absolute'
+	urlType?: UrlType
 } = {}) {
 	// log.debug('getClientUrl()');
 	// Special case: if there is a chunkfile for a client wrapper, use that. If not, fall back to
