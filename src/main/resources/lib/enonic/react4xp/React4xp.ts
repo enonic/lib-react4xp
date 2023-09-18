@@ -6,7 +6,8 @@ import type {
 	PageContributions,
 	// React4xp as React4xpNamespace,
 	Request,
-	Response
+	Response,
+	UrlType
 } from '/types';
 import { isObject } from '@enonic/js-utils/value/isObject';
 import { isString } from '@enonic/js-utils/value/isString';
@@ -52,7 +53,7 @@ interface RenderOptions {
 	id?: Id
 	pageContributions?: PageContributions
 	ssr?: boolean
-	urlType?: 'server' | 'absolute'
+	urlType?: UrlType
 	uniqueId?: boolean|string
 }
 

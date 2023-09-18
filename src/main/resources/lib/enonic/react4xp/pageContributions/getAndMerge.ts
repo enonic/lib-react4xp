@@ -1,3 +1,4 @@
+import type { UrlType } from '/types';
 import type {
 	OneOrMore,
 	PageContributions,
@@ -33,7 +34,7 @@ export function getAndMerge({
 	incomingPgContrib: PageContributions
 	newPgContrib: PageContributions
 	suppressJS: boolean
-	urlType?: 'server' | 'absolute'
+	urlType?: UrlType
 }): PageContributions {
 	//log.debug('getAndMerge() entryNames:%s', toStr(entryNames));
 	//log.debug('getAndMerge() incomingPgContrib:%s', toStr(incomingPgContrib));

@@ -1,8 +1,11 @@
+import type { UrlType } from '/types';
 import type { AppConfig } from '/types/Application.d';
+
+
 import { isSet } from '@enonic/js-utils/value/isSet';
 
 
-export function getUrlType(urlType?: 'server' | 'absolute') {
+export function getUrlType(urlType?: UrlType) {
 	// log.debug("app.config['react4xp.urlType']: %s", (app.config as AppConfig)['react4xp.urlType']);
 	const finalUrlType = (
 		isSet(urlType)

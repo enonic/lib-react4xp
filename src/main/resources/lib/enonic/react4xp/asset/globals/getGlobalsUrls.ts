@@ -1,3 +1,6 @@
+import type { UrlType } from '/types';
+
+
 import {
 	GLOBALS_FILENAME,
 	R4X_TARGETSUBDIR
@@ -14,7 +17,7 @@ const FULL_GLOBALS_CHUNKS_FILENAME = `/${R4X_TARGETSUBDIR}/${GLOBALS_FILENAME}`;
 export function getGlobalsUrls({
 	urlType // default is app.config['react4xp.urlType'] || 'server'
 }: {
-	urlType?: 'server' | 'absolute'
+	urlType?: UrlType
 } = {}) {
 	// This should not break if there are no added globals. GLOBALS should be optional.
 	try {

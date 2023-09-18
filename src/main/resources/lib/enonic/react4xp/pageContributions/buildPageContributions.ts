@@ -1,3 +1,4 @@
+import type { UrlType } from '/types';
 import type {
 	OneOrMore,
 	PageContributions,
@@ -25,7 +26,7 @@ export function buildPageContributions({
 }: {
 	entries: OneOrMore<React4xpNamespace.EntryName>
 	suppressJS: boolean
-	urlType?: 'server' | 'absolute'
+	urlType?: UrlType
 }) {
 
 	const pageContributions: PageContributions = {
