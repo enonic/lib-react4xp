@@ -24,7 +24,7 @@ dependencies {
     implementation 'com.enonic.lib:lib-static:1.0.3'
 
     implementation 'org.attoparser:attoparser:2.0.7.RELEASE'
-    implementation 'org.apache.commons:commons-pool2:2.11.1'
+    implementation 'org.apache.commons:commons-pool2:2.12.0'
 
     testImplementation "com.enonic.xp:testing:${xpVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.10.0"
