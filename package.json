@@ -34,7 +34,7 @@
     "@enonic/react4xp": "^5.0.1",
     "@jest/globals": "^29.7.0",
     "@mrhenry/core-web": "^1.2.0",
-    "@rollup/plugin-alias": "^5.0.0",
+    "@rollup/plugin-alias": "^5.0.1",
     "@rollup/plugin-commonjs": "^25.0.5",
     "@rollup/plugin-node-resolve": "^15.2.1",
     "@rollup/plugin-sucrase": "^5.0.1",
