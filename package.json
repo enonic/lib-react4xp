@@ -36,7 +36,7 @@
     "@mrhenry/core-web": "^1.2.0",
     "@rollup/plugin-alias": "^5.0.1",
     "@rollup/plugin-commonjs": "^25.0.5",
-    "@rollup/plugin-node-resolve": "^15.2.1",
+    "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-sucrase": "^5.0.1",
     "@rollup/plugin-typescript": "^11.1.0",
     "@sinonjs/text-encoding": "^0.7.2",
