@@ -64,7 +64,7 @@
     "ts-node": "^10.9.2",
     "tslib": "^2.6.2",
     "tsup": "^8.0.2",
-    "typescript": "^5.4.4"
+    "typescript": "^5.4.5"
   },
   "main": "src/main/resources/lib/enonic/react4xp/index.es6",
   "name": "lib-react4xp",
