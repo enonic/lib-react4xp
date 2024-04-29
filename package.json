@@ -31,7 +31,7 @@
     "@enonic-types/lib-node": "^7.14.1",
     "@enonic-types/lib-portal": "^7.14.1",
     "@enonic/mock-xp": "^1.0.0",
-    "@enonic/react4xp": "^5.0.2",
+    "@enonic/react4xp": "^5.0.3",
     "@jest/globals": "^29.7.0",
     "@mrhenry/core-web": "^1.2.2",
     "@rollup/plugin-alias": "^5.1.0",
