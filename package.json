@@ -31,7 +31,7 @@
     "@enonic-types/lib-node": "^7.14.2",
     "@enonic-types/lib-portal": "^7.14.2",
     "@enonic/mock-xp": "^1.0.0",
-    "@enonic/react4xp": "^5.0.3",
+    "@enonic/react4xp": "^5.0.4",
     "@jest/globals": "^29.7.0",
     "@mrhenry/core-web": "^1.2.3",
     "@rollup/plugin-alias": "^5.1.0",
@@ -94,5 +94,9 @@
     "tsc": "npx tsc --noEmit",
     "tsup": "npm-run-all --parallel tsup:*",
     "tsup:server": "npx tsup -d build/resources/main"
+  },
+  "engines": {
+    "node": ">= 20.13.1",
+    "npm": ">= 10.5.2"
   }
 }
