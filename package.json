@@ -62,7 +62,7 @@
     "rollup-plugin-swc3": "^0.11.2",
     "ts-jest": "^29.1.4",
     "ts-node": "^10.9.2",
-    "tslib": "^2.6.2",
+    "tslib": "^2.6.3",
     "tsup": "^8.1.0",
     "typescript": "^5.4.5"
   },
