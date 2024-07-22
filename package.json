@@ -63,7 +63,7 @@
     "ts-jest": "^29.2.2",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.3",
-    "tsup": "^8.1.0",
+    "tsup": "^8.2.2",
     "typescript": "^5.5.3"
   },
   "main": "src/main/resources/lib/enonic/react4xp/index.es6",
