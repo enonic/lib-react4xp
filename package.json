@@ -60,7 +60,7 @@
     "rollup-plugin-esbuild": "^6.1.1",
     "rollup-plugin-output-manifest": "^2.0.0",
     "rollup-plugin-swc3": "^0.11.2",
-    "ts-jest": "^29.2.2",
+    "ts-jest": "^29.2.3",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.3",
     "tsup": "^8.2.2",
