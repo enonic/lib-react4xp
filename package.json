@@ -25,7 +25,7 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.20.7",
     "@babel/preset-env": "^7.25.3",
     "@babel/register": "^7.24.6",
-    "@enonic-types/global": "^7.14.3",
+    "@enonic-types/global": "^7.14.4",
     "@enonic-types/lib-content": "^7.14.3",
     "@enonic-types/lib-io": "^7.14.4",
     "@enonic-types/lib-node": "^7.14.4",
