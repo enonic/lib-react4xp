@@ -39,7 +39,7 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-sucrase": "^5.0.2",
     "@rollup/plugin-typescript": "^11.1.0",
-    "@sinonjs/text-encoding": "^0.7.2",
+    "@sinonjs/text-encoding": "^0.7.3",
     "@swc/core": "^1.7.12",
     "@swc/helpers": "^0.5.12",
     "@types/core-js": "^2.5.8",
