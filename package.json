@@ -41,7 +41,7 @@
     "@rollup/plugin-typescript": "^11.1.0",
     "@sinonjs/text-encoding": "^0.7.3",
     "@swc/core": "^1.7.24",
-    "@swc/helpers": "^0.5.12",
+    "@swc/helpers": "^0.5.13",
     "@types/core-js": "^2.5.8",
     "@types/react": "^18",
     "@typescript-eslint/eslint-plugin": "^8.3.0",
