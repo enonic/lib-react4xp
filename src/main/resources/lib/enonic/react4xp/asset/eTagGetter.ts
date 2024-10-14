@@ -4,8 +4,8 @@ import type {
 } from '../../../..';
 
 import {R4X_TARGETSUBDIR} from '@enonic/react4xp';
-//@ts-ignore
-import {buildGetter} from '/lib/enonic/static';
+// @ts-ignore
+import {requestHandler} from '/lib/enonic/static';
 
 
 // https://simonhearne.com/2022/caching-header-best-practices
@@ -37,14 +37,14 @@ import {buildGetter} from '/lib/enonic/static';
 // it would just show the cached content, which would be probably preferred by
 // the user (better to have something stale than nothing at all).
 // This is why must-revalidate is intended for critical transactions only.
-export const eTagGetter = buildGetter({
-	cacheControl: 'no-cache', // implies must-revalidate after 0 seconds
+export const eTagGetter = (request: Request): Response => requestHandler(request, {
+	cacheControl: () => 'no-cache', // implies must-revalidate after 0 seconds
 	//cacheControl: 'max-age=0, must-revalidate'
 	//cacheControl: 'max-age=604800, stale-while-revalidate=86400'
 	etag: true, // default is true in production and false in development
-	getCleanPath: (request :Request) => {
+	relativePath: (request :Request) => {
 		const prefix = request.contextPath;
 		return prefix ? request.rawPath.substring(prefix.length) : request.rawPath;
 	},
 	root: R4X_TARGETSUBDIR // r4xAssets
-}) as (request: Request) => Response;
+});
