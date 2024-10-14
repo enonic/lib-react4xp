@@ -1,10 +1,4 @@
-import type {
-	Request,
-	Response
-} from '../../../..';
-
 import {R4X_TARGETSUBDIR} from '@enonic/react4xp';
-// @ts-ignore
 import {requestHandler} from '/lib/enonic/static';
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
@@ -32,7 +26,7 @@ import {requestHandler} from '/lib/enonic/static';
 //  stored in caches and can be reused while fresh. If the response becomes
 //  stale, it must be validated with the origin server before reuse.
 
-export const noStoreGetter = (request: Request): Response => requestHandler(request, {
+export const noStoreGetter = (request) => requestHandler(request, {
 	cacheControl: () => 'no-store, no-cache, max-age=0',
 	etag: false,
 	relativePath: (request) => {
