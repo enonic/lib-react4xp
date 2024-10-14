@@ -4,8 +4,8 @@ import type {
 } from '../../../..';
 
 import {R4X_TARGETSUBDIR} from '@enonic/react4xp';
-//@ts-ignore
-import {buildGetter} from '/lib/enonic/static';
+// @ts-ignore
+import {requestHandler} from '/lib/enonic/static';
 
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
 //
@@ -32,13 +32,12 @@ import {buildGetter} from '/lib/enonic/static';
 //  stored in caches and can be reused while fresh. If the response becomes
 //  stale, it must be validated with the origin server before reuse.
 
-export const noStoreGetter = buildGetter({
-	//cacheControl: 'no-store, no-cache, max-age=0, must-revalidate',
-	cacheControl: 'no-store, no-cache, max-age=0',
-	etag: false, // default is true in production and false in development
-	getCleanPath: (request :Request) => {
-        const prefix = request.contextPath;
+export const noStoreGetter = (request: Request): Response => requestHandler(request, {
+	cacheControl: () => 'no-store, no-cache, max-age=0',
+	etag: false,
+	relativePath: (request) => {
+		const prefix = request.contextPath;
 		return prefix ? request.rawPath.substring(prefix.length) : request.rawPath;
-    },
+	},
 	root: R4X_TARGETSUBDIR // r4xAssets
-}) as (request: Request) => Response;
+});
