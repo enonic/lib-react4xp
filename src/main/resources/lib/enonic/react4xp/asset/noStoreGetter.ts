@@ -27,7 +27,7 @@ import {requestHandler} from '/lib/enonic/static';
 //  stale, it must be validated with the origin server before reuse.
 
 export const noStoreGetter = (request) => requestHandler(request, {
-	cacheControl: () => 'no-store, no-cache, max-age=0',
+	cacheControl: () => 'private, no-store, no-cache, max-age=0',
 	etag: false,
 	relativePath: (request) => {
 		const prefix = request.contextPath;
