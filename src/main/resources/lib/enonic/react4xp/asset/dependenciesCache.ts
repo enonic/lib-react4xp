@@ -1,6 +1,6 @@
 //@ts-ignore
 import {newCache} from '/lib/cache';
-import {IS_PROD_MODE} from '/lib/enonic/react4xp/xp/runMode';
+import {IS_PROD_MODE} from '/lib/enonic/react4xp/xp/appHelper';
 
 
 export const dependenciesCache = IS_PROD_MODE

@@ -5,7 +5,7 @@ import { startsWith } from '@enonic/js-utils/string/startsWith';
 import {getComponentStats} from './getComponentStats';
 
 
-export function getImmutableDependencies(entries: string[]) {
+export function getImmutableDependencies(entries: string[]): string[] {
 	// log.debug('getImmutableDependencies entries:%s', toStr(entries));
 
 	const componentStats = getComponentStats();
@@ -28,6 +28,7 @@ export function getImmutableDependencies(entries: string[]) {
 			if (
 				endsWith(asset, '.js')
 				&& startsWith(asset, chunkName)
+				// Remove '.js' from asset name and compare with NOT chunkName.
 				&& asset.substring(0, asset.length - 3) !== chunkName
 			) {
 				immutables[asset] = true;
@@ -55,7 +56,7 @@ export function getImmutableDependencies(entries: string[]) {
 			const asset = assets[j];
 			//log.debug('handleAssetRequest asset:%s', toStr(asset));
 			const {name: assetName} = asset;
-			//log.debug('handleAssetRequest assetName:%s', toStr(assetName));
+			// log.debug('handleAssetRequest assetName:%s', toStr(assetName));
 			if (
 				!includes(entries, assetName)
 				&& immutables[assetName]
@@ -67,5 +68,6 @@ export function getImmutableDependencies(entries: string[]) {
 
 	} // for entryNames
 
+	// log.debug('getImmutableDependencies entries:%s -> dependencies:%s', toStr(entries), toStr(dependencies));
 	return dependencies;
 } // getImmutableDependencies

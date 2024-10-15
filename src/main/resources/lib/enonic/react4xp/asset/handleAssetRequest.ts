@@ -9,7 +9,7 @@ import {getImmutables} from './getImmutables';
 import {getEntries} from './getEntries';
 import {immutableGetter} from './immutableGetter';
 //import {noStoreGetter} from './noStoreGetter';
-//import {IS_DEV_MODE} from '/lib/enonic/xp/runMode';
+//import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/appHelper';
 
 
 const ENTRIES = getEntries(); // Never contains contenthash
