@@ -10,7 +10,7 @@ import { isSet } from '@enonic/js-utils/value/isSet';
 import { getAssetRoot } from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 import { buildErrorContainer } from '/lib/enonic/react4xp/htmlHandling';
 import { getAndMerge as getAndMergePageContributions } from '/lib/enonic/react4xp/pageContributions/getAndMerge';
-import { IS_DEV_MODE } from '/lib/enonic/react4xp/xp/runMode';
+import { IS_DEV_MODE } from '/lib/enonic/react4xp/xp/appHelper';
 import isAssumedCSEditMode from '../utils/isEditMode';
 
 

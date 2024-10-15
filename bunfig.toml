@@ -1,0 +1,6 @@
+[test]
+coverage = true # always enable coverage
+#coverageReporter  = ["text", "lcov"]
+coverageSkipTestFiles = true # default false
+preload = ["./src/bun/setup.ts"]
+root = "./src/bun/" # where the tests are located

@@ -3,7 +3,7 @@ import {readText} from '/lib/xp/io';
 
 
 export function readResourceAsJson(fileName: string): unknown {
-	//log.debug("Reading resource: " + JSON.stringify(fileName, null, 2));
+	// log.debug('readResourceAsJson() Reading resource: %s', fileName);
     const resource = getResource(fileName);
     if (!resource || !resource.exists()) {
         throw new Error("Empty or not found: " + fileName);
@@ -12,13 +12,16 @@ export function readResourceAsJson(fileName: string): unknown {
     let content: string;
     try {
         content = readText(resource.getStream());
+		// log.debug('readResourceAsJson() content: %s', content);
     } catch (e) {
         log.error(e.message);
         throw new Error("dependencies.es6 # readResourceAsJson: couldn't read resource '" + fileName + "'");
     }
 
     try {
-        return JSON.parse(content);
+		const obj = JSON.parse(content);
+		// log.debug('readResourceAsJson() obj: %s', JSON.stringify(obj, null, 4));
+        return obj;
 
     } catch (e) {
         log.error(e.message);
