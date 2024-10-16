@@ -3,7 +3,7 @@ import {
   expect,
   it,
 } from 'bun:test';
-import {getImmutableDependencies} from '../../../../../main/resources/lib/enonic/react4xp/asset/getImmutableDependencies';
+import {getImmutableDependencies} from '/lib/enonic/react4xp/asset/getImmutableDependencies';
 
 describe('getImmutableDependencies', () => {
 	it('should work', () => {

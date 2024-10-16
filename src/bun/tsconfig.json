@@ -2,6 +2,9 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "Bundler",
+	"paths": {
+		"/lib/enonic/react4xp/*": ["../main/resources/lib/enonic/react4xp/*"]
+	},
     "target": "ESNext",
     "types": ["bun"]
   },
