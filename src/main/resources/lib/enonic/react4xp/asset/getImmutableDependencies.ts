@@ -5,6 +5,18 @@ import { startsWith } from '@enonic/js-utils/string/startsWith';
 import {getComponentStats} from './getComponentStats';
 
 
+const hasContentHash = ({
+	assetName,
+	extension,
+	chunkName
+}: {
+	assetName: string
+	extension: string
+	chunkName: string
+}): boolean => endsWith(assetName, extension)
+	&& startsWith(assetName, chunkName)
+	&& assetName.substring(0, assetName.length - extension.length) !== chunkName;
+
 export function getImmutableDependencies(entries: string[]): string[] {
 	// log.debug('getImmutableDependencies entries:%s', toStr(entries));
 
@@ -26,10 +38,8 @@ export function getImmutableDependencies(entries: string[]): string[] {
 			const asset = assets[j];
 			// log.debug('getImmutableDependencies asset:%s', asset);
 			if (
-				endsWith(asset, '.js')
-				&& startsWith(asset, chunkName)
-				// Remove '.js' from asset name and compare with NOT chunkName.
-				&& asset.substring(0, asset.length - 3) !== chunkName
+				hasContentHash({assetName: asset, extension: '.js', chunkName})
+				|| hasContentHash({assetName: asset, extension: '.css', chunkName})
 			) {
 				immutables[asset] = true;
 			}
