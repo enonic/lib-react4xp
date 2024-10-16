@@ -25,11 +25,16 @@ const isObject = (value: unknown): value is Record<string, unknown> => {
 }
 
 const statsComponent = {
-	outputPath: "/Users/fullname/code/github/enonic/starter-react4xp/build/resources/main/r4xAssets",
+	outputPath:
+		"/Users/fullname/code/github/enonic/starter-react4xp/build/resources/main/r4xAssets",
 	assetsByChunkName: {
+		"site/parts/example/example": [
+			"site/parts/example/example.db34cf922.css",
+			"site/parts/example/example.js",
+		],
 		"site/parts/software-show/software-show": [
-      		"site/parts/software-show/software-show.d6607ab772af6315d3c7.js"
-    	],
+			"site/parts/software-show/software-show.d6607ab772af6315d3c7.js",
+		],
 		// "site/pages/default/default": [
 		// 	"site/pages/default/default.js",
 		// 	// "site/pages/default/default.css" // Not immuteable according to logic in getImmutableDependencies
@@ -47,41 +52,62 @@ const statsComponent = {
 	// 	},
 	// ],
 	entrypoints: {
+		"site/parts/example/example": {
+			name: "site/parts/example/example",
+			chunks: ["runtime", "vendors", "site/parts/example/example"],
+			assets: [
+				{
+					name: "runtime.js",
+				},
+				{
+					name: "vendors.js",
+				},
+				{
+					name: "site/parts/example/example.db34cf922.css",
+				},
+				{
+					name: "site/parts/example/example.js",
+				},
+			],
+			filteredAssets: 0,
+			assetsSize: null,
+			auxiliaryAssets: [],
+			filteredAuxiliaryAssets: 0,
+			auxiliaryAssetsSize: 0,
+			children: {},
+			childAssets: {},
+		},
 		"site/parts/software-show/software-show": {
-			"name": "site/parts/software-show/software-show",
-			"chunks": [
-				121,
-				328,
-				309
+			name: "site/parts/software-show/software-show",
+			chunks: [121, 328, 309],
+			assets: [
+				{
+					name: "runtime.013d7beda9eb41f08f42.js",
+				},
+				{
+					name: "react4xp.a137d3d05ff1b7d18928.js",
+				},
+				{
+					name: "site/parts/software-show/software-show.d6607ab772af6315d3c7.js",
+				},
 			],
-			"assets": [
+			filteredAssets: 0,
+			assetsSize: null,
+			auxiliaryAssets: [
 				{
-				"name": "runtime.013d7beda9eb41f08f42.js"
+					name: "react4xp.a137d3d05ff1b7d18928.js.map",
 				},
 				{
-				"name": "react4xp.a137d3d05ff1b7d18928.js"
+					name: "runtime.013d7beda9eb41f08f42.js.map",
 				},
 				{
-				"name": "site/parts/software-show/software-show.d6607ab772af6315d3c7.js"
-				}
+					name: "site/parts/software-show/software-show.d6607ab772af6315d3c7.js.map",
+				},
 			],
-			"filteredAssets": 0,
-			"assetsSize": null,
-			"auxiliaryAssets": [
-				{
-				"name": "react4xp.a137d3d05ff1b7d18928.js.map"
-				},
-				{
-				"name": "runtime.013d7beda9eb41f08f42.js.map"
-				},
-				{
-				"name": "site/parts/software-show/software-show.d6607ab772af6315d3c7.js.map"
-				}
-			],
-			"filteredAuxiliaryAssets": 0,
-			"auxiliaryAssetsSize": null,
-			"children": {},
-			"childAssets": {}
+			filteredAuxiliaryAssets: 0,
+			auxiliaryAssetsSize: null,
+			children: {},
+			childAssets: {},
 		},
 		// "site/pages/default/default": {
 		// 	name: "site/pages/default/default",
