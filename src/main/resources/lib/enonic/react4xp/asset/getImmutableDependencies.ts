@@ -2,7 +2,7 @@ import {includes} from '@enonic/js-utils/array/includes';
 import endsWith from '@enonic/js-utils/string/endsWith';
 import { startsWith } from '@enonic/js-utils/string/startsWith';
 // import {toStr} from '@enonic/js-utils/value/toStr';
-import {getComponentStats} from './getComponentStats';
+import {getComponentStats} from '/lib/enonic/react4xp/asset/getComponentStats';
 
 
 const hasContentHash = ({
@@ -24,28 +24,48 @@ export function getImmutableDependencies(entries: string[]): string[] {
 	// log.debug('getImmutableDependencies componentStats:%s', toStr(componentStats));
 
 	const immutables: Record<string, boolean> = {};
-	const chunkNames = Object.keys(componentStats.assetsByChunkName);
-	// log.debug('getImmutableDependencies chunkNames:%s', toStr(chunkNames));
 
-	for (let i = 0; i < chunkNames.length; i++) {
-		const chunkName = chunkNames[i];
-		// log.debug('getImmutableDependencies chunkName:%s', chunkName);
-
-		const assets = componentStats.assetsByChunkName[chunkName];
-		// log.debug('getImmutableDependencies assets:%s', toStr(assets));
-
-		for (let j = 0; j < assets.length; j++) {
-			const asset = assets[j];
-			// log.debug('getImmutableDependencies asset:%s', asset);
-			if (
-				hasContentHash({assetName: asset, extension: '.js', chunkName})
-				|| hasContentHash({assetName: asset, extension: '.css', chunkName})
-			) {
-				immutables[asset] = true;
+	if (
+		componentStats.assets
+		&& componentStats.assets.length
+		&& componentStats.assets[0].info
+		&& componentStats.assets[0].name
+	) {
+		for (let i = 0; i < componentStats.assets.length; i++) {
+			const {
+				info: {
+					immutable = false
+				} = {},
+				name
+			} = componentStats.assets[i];
+			if (immutable) {
+				immutables[name] = true;
 			}
-		} // for assetsByChunkName[chunkName].assets
+		}
+	} else { // Fall back to old way
+		const chunkNames = Object.keys(componentStats.assetsByChunkName);
+		// log.debug('getImmutableDependencies chunkNames:%s', toStr(chunkNames));
 
-	} // for chunkNames
+		for (let i = 0; i < chunkNames.length; i++) {
+			const chunkName = chunkNames[i];
+			// log.debug('getImmutableDependencies chunkName:%s', chunkName);
+
+			const assets = componentStats.assetsByChunkName[chunkName];
+			// log.debug('getImmutableDependencies assets:%s', toStr(assets));
+
+			for (let j = 0; j < assets.length; j++) {
+				const asset = assets[j];
+				// log.debug('getImmutableDependencies asset:%s', asset);
+				if (
+					hasContentHash({assetName: asset, extension: '.js', chunkName})
+					|| hasContentHash({assetName: asset, extension: '.css', chunkName})
+				) {
+					immutables[asset] = true;
+				}
+			} // for assetsByChunkName[chunkName].assets
+
+		} // for chunkNames
+	}
 	// log.debug('getImmutableDependencies immutables:%s', toStr(immutables));
 
 	// I think these will always be the same as the entries function param,
@@ -75,6 +95,22 @@ export function getImmutableDependencies(entries: string[]): string[] {
 				dependencies.push(assetName);
 			}
 		} // for entrypoints.[entryName].assets
+
+		const auxiliaryAssets = componentStats.entrypoints[entryName].auxiliaryAssets;
+
+		for (let i = 0; i < auxiliaryAssets.length; i++) {
+			const asset = auxiliaryAssets[i];
+			// log.debug('handleAssetRequest asset:%s', toStr(asset));
+			const {name: assetName} = asset;
+			// log.debug('handleAssetRequest assetName:%s', toStr(assetName));
+			if (
+				!includes(entries, assetName)
+				&& immutables[assetName]
+				&& !includes(dependencies, assetName) // avoid duplicates
+			) {
+				dependencies.push(assetName);
+			}
+		} // for entrypoints.[entryName].auxiliaryAssets
 
 	} // for entryNames
 

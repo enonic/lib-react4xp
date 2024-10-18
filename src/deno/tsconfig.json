@@ -1,0 +1,25 @@
+{
+	"compilerOptions": {
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		// "lib": [
+		// 	"deno.ns"
+		// ],
+		// "module": "ESNext",
+		// "module": "Preserve",
+		// "moduleResolution": "Bundler",
+		// "moduleResolution": "node",
+		"paths": {
+			// "/lib/enonic/react4xp/*": ["../main/resources/lib/enonic/react4xp/*"],
+			"https://deno.land/*": ["https://deno.land/*"],
+		},
+		"skipLibCheck": true,
+		// "strict": false,
+		"target": "ESNext",
+		"types": [
+			"https://deno.land/x/pkg@1.0.0/types.d.ts"
+			// "deno"
+		]
+	},
+	"include": ["./**/*.ts"],
+}
