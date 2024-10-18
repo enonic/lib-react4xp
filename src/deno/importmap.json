@@ -1,0 +1,12 @@
+{
+    "imports": {
+      "/lib/xp/io": "./mocks/lib/xp/io.ts",
+      "/lib/xp/portal": "./mocks/lib/xp/portal.ts",
+      "/lib/enonic/react4xp/asset/getComponentStats": "../main/resources/lib/enonic/react4xp/asset/getComponentStats.ts",
+      "/lib/enonic/react4xp/asset/readComponentStats": "../main/resources/lib/enonic/react4xp/asset/readComponentStats.ts",
+      "/lib/enonic/react4xp/React4xp/utils/getUrlType": "../main/resources/lib/enonic/react4xp/React4xp/utils/getUrlType.ts",
+      "/lib/enonic/react4xp/resource/getResource": "../main/resources/lib/enonic/react4xp/resource/getResource.ts",
+      "/lib/enonic/react4xp/resource/readResourceAsJson": "../main/resources/lib/enonic/react4xp/resource/readResourceAsJson.ts",
+      "/lib/enonic/react4xp/xp/appHelper": "../main/resources/lib/enonic/react4xp/xp/appHelper.ts"
+    }
+  }
