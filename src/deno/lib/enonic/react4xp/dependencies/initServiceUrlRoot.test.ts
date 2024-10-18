@@ -14,14 +14,14 @@ declare namespace globalThis {
 	// }>
 }
 
-Deno.test("handles mode: inline", () => {
+await Deno.test("handles mode: inline", () => {
 	globalThis._assetUrl = '/admin/site/inline/default/draft/_/asset/com.enonic.app.react4xp:0000018a9816e580';
 	import('../../../../../main/resources/lib/enonic/react4xp/dependencies/initServiceUrlRoot.ts').then(({initServiceUrlRoot}) => {
 		assertEquals(initServiceUrlRoot(), '/admin/site/inline/default/draft/_/service/com.enonic.app.react4xp/');
 	});
 });
 
-Deno.test("handles mode: inline using type: absolute", () => {
+await Deno.test("handles mode: inline using type: absolute", () => {
 	globalThis._assetUrl = '/admin/site/inline/default/draft/_/asset/com.enonic.app.react4xp:0000018a9816e580';
 	import('../../../../../main/resources/lib/enonic/react4xp/dependencies/initServiceUrlRoot.ts').then(({initServiceUrlRoot}) => {
 		assertEquals(initServiceUrlRoot({
@@ -30,14 +30,14 @@ Deno.test("handles mode: inline using type: absolute", () => {
 	});
 });
 
-Deno.test("handles mode: edit", () => {
+await Deno.test("handles mode: edit", () => {
 	globalThis._assetUrl = '/admin/site/edit/default/draft/_/asset/com.enonic.app.react4xp:0000018a9816e580';
 	import('../../../../../main/resources/lib/enonic/react4xp/dependencies/initServiceUrlRoot.ts').then(({initServiceUrlRoot}) => {
 		assertEquals(initServiceUrlRoot(), '/admin/site/preview/default/draft/_/service/com.enonic.app.react4xp/');
 	});
 });
 
-Deno.test("handles mode: edit type: absolute", () => {
+await Deno.test("handles mode: edit type: absolute", () => {
 	globalThis._assetUrl = '/admin/site/edit/default/draft/_/asset/com.enonic.app.react4xp:0000018a9816e580';
 	import('../../../../../main/resources/lib/enonic/react4xp/dependencies/initServiceUrlRoot.ts').then(({initServiceUrlRoot}) => {
 		assertEquals(initServiceUrlRoot({
@@ -46,14 +46,14 @@ Deno.test("handles mode: edit type: absolute", () => {
 	});
 });
 
-Deno.test("handles mode: preview", () => {
+await Deno.test("handles mode: preview", () => {
 	globalThis._assetUrl = '/admin/site/preview/default/draft/_/asset/com.enonic.app.react4xp:0000018a9816e580';
 	import('../../../../../main/resources/lib/enonic/react4xp/dependencies/initServiceUrlRoot.ts').then(({initServiceUrlRoot}) => {
 		assertEquals(initServiceUrlRoot(), '/admin/site/preview/default/draft/_/service/com.enonic.app.react4xp/');
 	});
 });
 
-Deno.test("handles mode: preview type: absolute", () => {
+await Deno.test("handles mode: preview type: absolute", () => {
 	globalThis._assetUrl = '/admin/site/preview/default/draft/_/asset/com.enonic.app.react4xp:0000018a9816e580';
 	import('../../../../../main/resources/lib/enonic/react4xp/dependencies/initServiceUrlRoot.ts').then(({initServiceUrlRoot}) => {
 		assertEquals(initServiceUrlRoot({
@@ -62,14 +62,14 @@ Deno.test("handles mode: preview type: absolute", () => {
 	});
 });
 
-Deno.test("handles mode: live", () => {
+await Deno.test("handles mode: live", () => {
 	globalThis._assetUrl = '/site/default/master/_/asset/com.enonic.app.react4xp:0000018a9816e580';
 	import('../../../../../main/resources/lib/enonic/react4xp/dependencies/initServiceUrlRoot.ts').then(({initServiceUrlRoot}) => {
 		assertEquals(initServiceUrlRoot(), '/site/default/master/_/service/com.enonic.app.react4xp/');
 	});
 });
 
-Deno.test("handles mode: live type: absolute", () => {
+await Deno.test("handles mode: live type: absolute", () => {
 	globalThis._assetUrl = '/site/default/master/_/asset/com.enonic.app.react4xp:0000018a9816e580';
 	import('../../../../../main/resources/lib/enonic/react4xp/dependencies/initServiceUrlRoot.ts').then(({initServiceUrlRoot}) => {
 		assertEquals(initServiceUrlRoot({
