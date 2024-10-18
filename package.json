@@ -96,7 +96,7 @@
     "rollup:nashornPolyfills": "npx rollup --config rollup.config.nashornPolyfills.mjs",
     "rollup:nodePolyfills": "npx rollup --config rollup.config.nodePolyfills.mjs",
     "rollup:server": "npx rollup --config rollup.config.server.mjs",
-    "test": "deno test --coverage=build/deno/coverage --importmap=src/deno/importmap.json --no-check src/deno/**/*.test.ts",
+    "test": "deno test --coverage=build/deno/coverage --env-file=src/deno/.env --importmap=src/deno/importmap.json --no-check src/deno/**/*.test.ts",
     "tsc": "npx tsc --noEmit",
     "tsup": "npm-run-all --parallel tsup:*",
     "tsup:server": "npx tsup -d build/resources/main"
