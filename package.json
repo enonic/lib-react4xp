@@ -33,7 +33,7 @@
     "@enonic/mock-xp": "^1.0.0",
     "@enonic/react4xp": "^5.0.4",
     "@jest/globals": "^29.7.0",
-    "@mrhenry/core-web": "^1.2.3",
+    "@mrhenry/core-web": "^1.2.4",
     "@rollup/plugin-alias": "^5.1.1",
     "@rollup/plugin-commonjs": "^28.0.1",
     "@rollup/plugin-node-resolve": "^15.3.0",
