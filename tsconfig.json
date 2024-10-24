@@ -59,6 +59,7 @@
 			"@enonic/react4xp/*": ["./node_modules/@enonic/react4xp/src/*"],
 
 			"/lib/enonic/react4xp/*": ["./src/main/resources/lib/enonic/react4xp/*"],
+			"/lib/enonic/static": ["./node_modules/@enonic-types/lib-static"],
 			"/lib/xp/*": ["node_modules/@enonic-types/lib-*"],
 			"/*": ["./src/main/resources/*"],
 		},
