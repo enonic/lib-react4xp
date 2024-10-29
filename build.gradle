@@ -21,7 +21,7 @@ dependencies {
     implementation "com.enonic.xp:lib-task:${xpVersion}"
 
     implementation 'com.enonic.lib:lib-cache:2.2.1'
-    implementation 'com.enonic.lib:lib-static:2.0.0-B5'
+    implementation 'com.enonic.lib:lib-static:2.0.0'
 
     implementation 'org.attoparser:attoparser:2.0.7.RELEASE'
     implementation 'org.apache.commons:commons-pool2:2.12.0'
