@@ -30,7 +30,7 @@
     "@enonic-types/lib-io": "^7.14.4",
     "@enonic-types/lib-node": "^7.14.4",
     "@enonic-types/lib-portal": "^7.14.4",
-    "@enonic-types/lib-static": "^2.0.0-B5",
+    "@enonic-types/lib-static": "^2.0.0",
     "@enonic/mock-xp": "^1.0.0",
     "@enonic/react4xp": "^5.0.4",
     "@jest/globals": "^29.7.0",
