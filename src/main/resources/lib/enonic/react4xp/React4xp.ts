@@ -125,7 +125,8 @@ export class React4xp<
 		request: Request = null,
 		options: RenderOptions = {}
 	): Response {
-		// log.debug('render entry:%s options:%s', toStr(entry), toStr(options));
+		// log.debug('render entry:%s props:%s options:%s request:%s', toStr(entry), toStr(props), toStr(options), toStr(request));
+		// log.info('render entry:%s props:%s options:%s', toStr(entry), toStr(props), toStr(options));
 		let react4xp: Instance = null;
 		try {
 			const dereffedOptions = JSON.parse(JSON.stringify(options)) as typeof options & {

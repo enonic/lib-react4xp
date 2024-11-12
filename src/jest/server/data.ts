@@ -56,20 +56,20 @@ export const LAYOUT_FRAGMENT_CONTENT_ID = '8c926279-39bd-4bff-a502-ffe921b95ada'
 export const PART_FRAGMENT_CONTENT_ID = '6a71fd9e-f9fc-4395-8954-1d67a5e35bf3';
 export const TEXT_FRAGMENT_CONTENT_ID = 'a641b21d-1af3-4559-a936-9e1ab71a19c4';
 
-export const PART_FRAGMENT_COMPONENT: FragmentComponent = {
+export const PART_COMPONENT_FRAGMENT: FragmentComponent = {
 	path: "/main/0",
 	type: "fragment",
 	fragment: PART_FRAGMENT_CONTENT_ID,
 };
 
-export const TEXT_FRAGMENT_COMPONENT: FragmentComponent = {
+export const TEXT_COMPONENT_FRAGMENT: FragmentComponent = {
 	path: "/main/1",
 	type: "fragment",
 	fragment: TEXT_FRAGMENT_CONTENT_ID,
 };
 
-export const LAYOUT_FRAGMENT_COMPONENT: FragmentComponent = {
-	path: "/main/0",
+export const LAYOUT_COMPONENT_FRAGMENT: FragmentComponent = {
+	path: "/main/5",
 	type: "fragment",
 	fragment: LAYOUT_FRAGMENT_CONTENT_ID,
 };
@@ -101,19 +101,26 @@ export const LAYOUT_FRAGMENT_CONTENT = {
 		regions: {
 			left: {
 				components: [
-					{
-						path: "/left/0",
-						type: "fragment",
-						fragment: TEXT_FRAGMENT_CONTENT_ID,
-					},
+					{...TEXT_COMPONENT, path: "/left/0"},
 					{
 						path: "/left/1",
 						type: "fragment",
-						fragment: PART_FRAGMENT_CONTENT_ID,
+						fragment: TEXT_FRAGMENT_CONTENT_ID,
 					},
 				],
 				name: "left",
 			},
+			right: {
+				components: [
+					{...PART_COMPONENT, path: "/right/0"},
+					{
+						path: "/right/1",
+						type: "fragment",
+						fragment: PART_FRAGMENT_CONTENT_ID,
+					},
+				],
+				name: "right",
+			}
 		},
 	},
 	attachments: {},
@@ -170,26 +177,23 @@ export const PART_FRAGMENT_CONTENT = {
 };
 
 export const LAYOUT_COMPONENT: LayoutComponent = {
-	path: '/main/0',
+	path: '/main/4',
 	type: 'layout',
 	descriptor: TWO_COLUMNS_LAYOUT_DESCRIPTOR,
 	config: CONFIG,
 	regions: {
 		left: {
 			components: [
-				// TEXT_COMPONENT,
-				// TEXT_FRAGMENT_COMPONENT,
-				{...PART_COMPONENT, path: '/main/0/left/0'},
-				// PART_FRAGMENT_COMPONENT,
+				{...TEXT_COMPONENT, path: '/main/4/left/0'},
+				{...TEXT_COMPONENT_FRAGMENT, path: '/main/4/left/1'},
+
 			],
 			name: "left",
 		},
 		right: {
 			components: [
-				// {
-				// 	...PART_FRAGMENT_COMPONENT,
-				// 	path: "/main/0/right/0",
-				// }
+				{...PART_COMPONENT, path: '/main/4/right/0'},
+				{...PART_COMPONENT_FRAGMENT, path: '/main/4/right/1'},
 			],
 			name: "right",
 		},
@@ -206,15 +210,12 @@ export const PAGE_COMPONENT: PageComponent = {
 	regions: {
 		main: {
 			components: [
-				// TEXT_COMPONENT,
-				// TEXT_FRAGMENT_COMPONENT,
-				// LAYOUT_COMPONENT,
-				{...PART_COMPONENT, path: "/main/0"},
-				// LAYOUT_FRAGMENT_COMPONENT,
-				// {
-				// 	...PART_FRAGMENT_COMPONENT,
-				// 	path: "/main/1",
-				// }
+				{...TEXT_COMPONENT, path: "/main/0"},
+				{...TEXT_COMPONENT_FRAGMENT, path: "/main/1"},
+				{...PART_COMPONENT, path: "/main/2"},
+				{...PART_COMPONENT_FRAGMENT, path: "/main/3"},
+				{...LAYOUT_COMPONENT, path: "/main/4"},
+				{...LAYOUT_COMPONENT_FRAGMENT, path: "/main/5"},
 			],
 			name: "main",
 		},

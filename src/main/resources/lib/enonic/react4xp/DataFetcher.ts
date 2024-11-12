@@ -21,16 +21,17 @@ import type {
 	MixinSchema,
 } from '@enonic-types/lib-schema';
 import type {
-	DecoratedComponent,
-	DecoratedLayoutComponent,
-	DecoratedPageComponent,
-	DecoratedPartComponent,
-	DecoratedTextComponent,
+	RenderableComponent,
+	RenderableLayoutComponent,
+	RenderablePageComponent,
+	RenderablePartComponent,
+	RenderableTextComponent,
 } from '@enonic/react-components';
 
 
 import {getIn} from '@enonic/js-utils/object/getIn';
 import {setIn} from '@enonic/js-utils/object/setIn';
+import {toStr} from '@enonic/js-utils/value/toStr';
 // import {stringify} from 'q-i';
 
 import {get as getContentByKey} from '/lib/xp/content';
@@ -73,7 +74,7 @@ export interface GetComponentReturnType {
 interface LayoutComponentToPropsParams {
 	component: LayoutComponent;
 	content?: PageContent;
-	processedComponent: DecoratedLayoutComponent;
+	processedComponent: ProcessedLayoutComponent;
 	processedConfig: Record<string, unknown>;
 	siteConfig?: Record<string, unknown> | null;
 	request: Request;
@@ -82,10 +83,17 @@ interface LayoutComponentToPropsParams {
 interface PageComponentToPropsParams {
 	component: PageComponent;
 	content?: PageContent;
-	processedComponent: DecoratedPageComponent;
+	processedComponent: ProcessedPageComponent;
 	processedConfig: Record<string, unknown>;
 	siteConfig?: Record<string, unknown> | null;
 	request: Request;
+}
+
+export type ProcessedLayoutComponent = LayoutComponent & {
+	props?: Record<string, unknown>;
+}
+export type ProcessedPageComponent = PageComponent & {
+	props?: Record<string, unknown>;
 }
 
 export type PageContent<
@@ -307,13 +315,23 @@ export class DataFetcher {
 		content?: PageContent;
 		request: Request;
 		siteConfig?: Record<string, unknown> | null;
-	}): DecoratedLayoutComponent {
-		const decoratedComponent: DecoratedLayoutComponent = JSON.parse(JSON.stringify(component));
-		const {descriptor} = component;
+	}): RenderableLayoutComponent {
+		const {
+			descriptor,
+			path,
+			regions
+		} = component;
+		const renderableComponent: RenderableLayoutComponent = {
+			// Do not ass config, it should not be exposed to client-side
+			descriptor,
+			path,
+			regions: JSON.parse(JSON.stringify(regions)),
+			type: 'layout',
+		};
 		const toProps = this.layouts[descriptor];
 		if (!toProps) {
 			log.warning(`processLayout: toProps not found for descriptor: ${descriptor}!`);
-			return decoratedComponent;
+			return renderableComponent;
 		}
 
 		const {form} = getComponentSchema({
@@ -321,24 +339,25 @@ export class DataFetcher {
 			type: 'LAYOUT',
 		}) as GetComponentReturnType;
 
-		const processedComponent = this.processWithRegions({
+		const processedLayoutComponent = this.processWithRegions({
 			component,
 			content,
 			form,
 			request,
-		}) as DecoratedLayoutComponent;
+		}) as ProcessedLayoutComponent;
+		// log.info('DataFetcher processLayout processedLayoutComponent:%s', toStr(processedLayoutComponent))
 
-		decoratedComponent.props = toProps({
+		renderableComponent.props = toProps({
 			component,
 			content,
-			processedComponent: processedComponent,
-			processedConfig: processedComponent.config,
+			processedComponent: processedLayoutComponent,
+			processedConfig: processedLayoutComponent.config,
 			siteConfig, // : this.getCurrentSiteConfig && this.getCurrentSiteConfig() as Record<string, unknown>,
 			request,
 		});
-		// decoratedComponent.processedConfig = processedComponent.config;
-		return decoratedComponent;
-	}
+		// renderableComponent.processedConfig = processedLayoutComponent.config;
+		return renderableComponent;
+	} // processLayout
 
 	private processPage({
 		component,
@@ -350,14 +369,24 @@ export class DataFetcher {
 		content?: PageContent;
 		request: Request;
 		siteConfig?: Record<string, unknown> | null;
-	}): DecoratedPageComponent {
+	}): RenderablePageComponent {
 		// log.debug('processPage component:', component);
-		const decoratedComponent: DecoratedPageComponent = JSON.parse(JSON.stringify(component));
-		const {descriptor} = component;
+		const {
+			descriptor,
+			path,
+			regions
+		} = component;
+		const renderableComponent: RenderablePageComponent = {
+			// Do not ass config, it should not be exposed to client-side
+			descriptor,
+			path,
+			regions: JSON.parse(JSON.stringify(regions)),
+			type: 'page',
+		};
 		const toProps = this.pages[descriptor];
 		if (!toProps) {
 			log.warning(`processPage: toProps not found for descriptor: ${descriptor}!`);
-			return decoratedComponent;
+			return renderableComponent;
 		}
 
 		const {form} = getComponentSchema({
@@ -370,9 +399,9 @@ export class DataFetcher {
 			content,
 			form,
 			request,
-		}) as DecoratedPageComponent;
+		}) as ProcessedPageComponent;
 
-		decoratedComponent.props = toProps({
+		renderableComponent.props = toProps({
 			component,
 			content,
 			processedComponent: processedComponent,
@@ -380,8 +409,8 @@ export class DataFetcher {
 			siteConfig, // : this.getCurrentSiteConfig && this.getCurrentSiteConfig() as Record<string, unknown>,
 			request,
 		});
-		// decoratedComponent.processedConfig = processedComponent.config;
-		return decoratedComponent;
+		// renderableComponent.processedConfig = processedComponent.config;
+		return renderableComponent;
 	}
 
 	private processPart({
@@ -394,14 +423,21 @@ export class DataFetcher {
 		content?: PageContent;
 		request: Request;
 		siteConfig?: Record<string, unknown> | null;
-	}): DecoratedPartComponent {
-		const {descriptor} = component;
+	}): RenderablePartComponent {
+		const {
+			descriptor,
+			path
+		} = component;
 
-		const decoratedComponent: DecoratedPartComponent = JSON.parse(JSON.stringify(component));
+		const renderableComponent: RenderablePartComponent = {
+			descriptor,
+			path,
+			type: 'part',
+		}
 		const toProps = this.parts[descriptor];
 		if (!toProps) {
 			log.warning(`processPart: toProps not found for descriptor: ${descriptor}!`);
-			return decoratedComponent;
+			return renderableComponent;
 		}
 
 		const {form} = getComponentSchema({
@@ -434,15 +470,15 @@ export class DataFetcher {
 			}
 		} // for
 
-		decoratedComponent.props = toProps({
+		renderableComponent.props = toProps({
 			component,
 			content,
 			processedConfig: processedComponent.config,
 			siteConfig,//: this.getCurrentSiteConfig && this.getCurrentSiteConfig() as Record<string, unknown>,
 			request,
 		});
-		// decoratedComponent.processedConfig = processedComponent.config;
-		return decoratedComponent;
+		// renderableComponent.processedConfig = processedComponent.config;
+		return renderableComponent;
 	}
 
 	private processTextComponent({
@@ -451,17 +487,17 @@ export class DataFetcher {
 	}: {
 		component: TextComponent
 		mode: LiteralUnion<RequestMode>
-	}): DecoratedTextComponent {
+	}): RenderableTextComponent {
 		const {text} = component;
 		const processedHtml = processHtml({
 			value: text
 		});
-		const decoratedTextComponent: DecoratedTextComponent = JSON.parse(JSON.stringify(component));
-		decoratedTextComponent.props = {
+		const renderableTextComponent: RenderableTextComponent = JSON.parse(JSON.stringify(component));
+		renderableTextComponent.props = {
 			data: replaceMacroComments(processedHtml),
 			mode
 		};
-		return decoratedTextComponent;
+		return renderableTextComponent;
 	}
 
 	private processWithRegions({
@@ -474,14 +510,14 @@ export class DataFetcher {
 		content?: PageContent;
 		form:  NestedPartial<FormItem>[];
 		request: Request;
-	}): DecoratedLayoutComponent | DecoratedPageComponent {
+	}): ProcessedLayoutComponent | ProcessedPageComponent {
 		const htmlAreas = this.getHtmlAreas({
 			ancestor: 'config',
 			form,
 		});
 		// log.info('processWithRegions htmlAreas:', htmlAreas);
 
-		const decoratedLayoutOrPageComponent: DecoratedLayoutComponent | DecoratedPageComponent = JSON.parse(JSON.stringify(layoutOrPageComponent));
+		const processedLayoutOrPageComponent: ProcessedLayoutComponent | ProcessedPageComponent = JSON.parse(JSON.stringify(layoutOrPageComponent));
 
 		//──────────────────────────────────────────────────────────────────────
 		// This modifies layoutOrPage.config:
@@ -500,10 +536,10 @@ export class DataFetcher {
 					value: html
 				});
 				const data = replaceMacroComments(processedHtml);
-				setIn(decoratedLayoutOrPageComponent, path, data);
+				setIn(processedLayoutOrPageComponent, path, data);
 			}
 		} // for
-		// log.debug('processWithRegions config:', decoratedLayoutOrPageComponent.config);
+		// log.debug('processWithRegions config:', processedLayoutOrPageComponent.config);
 
 		//──────────────────────────────────────────────────────────────────────
 		// This modifies layoutOrPage.regions:
@@ -518,15 +554,15 @@ export class DataFetcher {
 			for (let j = 0; j < components.length; j++) {
 				const component = components[j];
 				// @ts-expect-error Too complex/strict type generics.
-				decoratedLayoutOrPageComponent.regions[regionName].components[j] = this.process({
+				processedLayoutOrPageComponent.regions[regionName].components[j] = this.process({
 					component,
 					content,
 					request,
 				});
 			}
 		}
-		// log.debug('processWithRegions regions:', stringify(decoratedLayoutOrPageComponent.regions, {maxItems: Infinity}));
-		return decoratedLayoutOrPageComponent;
+		// log.debug('processWithRegions regions:', stringify(processedLayoutOrPageComponent.regions, {maxItems: Infinity}));
+		return processedLayoutOrPageComponent;
 	} // processWithRegions
 
 	public addLayout(descriptor: string, {
@@ -564,7 +600,7 @@ export class DataFetcher {
 		component?: Component;
 		content?: PageContent;
 		request: Request;
-	}): DecoratedComponent {
+	}): RenderableComponent {
 		// content = this.getCurrentContent && this.getCurrentContent() as PageContent
 		if (!content) {
 			content = getCurrentContent!() as PageContent;
@@ -625,7 +661,7 @@ export function fetchData({
 	component?: Component;
 	content?: PageContent;
 	request: Request;
-}): DecoratedComponent {
+}): RenderableComponent {
 	const processor = new DataFetcher();
 	return processor.process({
 		component,
