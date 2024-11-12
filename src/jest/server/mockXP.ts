@@ -1,3 +1,6 @@
+// import type {
+// 	Content,
+// } from '@enonic-types/core';
 import type {
 	get as getContentByKeyType,
 } from '@enonic-types/lib-content';
@@ -35,17 +38,18 @@ import {
 	// DEFAULT_PAGE_DESCRIPTOR,
 	// EXAMPLE_PART_DESCRIPTOR,
 	// LAYOUT_COMPONENT,
-	// LAYOUT_FRAGMENT_CONTENT_ID,
-	// LAYOUT_FRAGMENT_CONTENT,
+	LAYOUT_FRAGMENT_CONTENT_ID,
+	LAYOUT_FRAGMENT_CONTENT,
 	// PAGE_COMPONENT,
 	// PAGE_CONTENT,
 	// PART_COMPONENT,
-	// PART_FRAGMENT_CONTENT_ID,
-	// PART_FRAGMENT_CONTENT,
+	PART_FRAGMENT_CONTENT_ID,
+	PART_FRAGMENT_CONTENT,
 	PROCESSED_HTML,
-	// TEXT_FRAGMENT_CONTENT_ID,
-	// TEXT_FRAGMENT_CONTENT,
+	TEXT_FRAGMENT_CONTENT_ID,
+	TEXT_FRAGMENT_CONTENT,
 	// TWO_COLUMNS_LAYOUT_DESCRIPTOR,
+	// UNPROCESSED_HTML,
 } from './data';
 import {
 	LAYOUT_SCHEMA,
@@ -60,7 +64,7 @@ const SITE_NAME = 'mysite';
 
 
 export const server = new Server({
-	loglevel: 'debug'
+	loglevel: 'warn'
 }).createProject({
 	projectName: PROJECT_NAME
 }).setContext({
@@ -93,18 +97,56 @@ const siteContent = libContent.create({
 	parentPath: '/',
 });
 
+// const textComponentFragmentContent = libContent.create({
+// 	// _path: "/mysite/fragment-info-header-header-text-info",
+// 	// attachments: {},
+// 	// createdTime: "2024-11-05T09:13:48.488533Z",
+// 	// creator: "user:system:su",
+// 	// hasChildren: false,
+// 	// modifiedTime: "2024-11-05T09:13:48.568588Z",
+// 	// modifier: "user:system:su",
+// 	// owner: "user:system:su",
+// 	// publish: {},
+// 	// valid: true,
+// 	childOrder: "modifiedtime DESC",
+// 	contentType: 'portal:fragment',
+// 	data: {},
+// 	displayName: '[info header="Header"]Text[/info]',
+// 	// @ts-expect-error TODO Support in @enonic/mock-xp
+// 	fragment: {
+// 		type: 'text',
+// 		text: UNPROCESSED_HTML,
+// 	},
+// 	name: "fragment-info-header-header-text-info",
+// 	parentPath: siteContent._path,
+// 	x: {},
+// });
+// console.error('textComponentFragmentContent', textComponentFragmentContent);
+
 export const libPortal = new LibPortal({
 	app,
 	server
 });
 
+const mode = 'edit';
+// const mode = 'inline';
+// const mode = 'live';
+// const mode = 'preview';
 libPortal.request = new Request({
 	repositoryId: server.context.repository,
-	path: `/admin/site/preview/${PROJECT_NAME}/draft/${SITE_NAME}`
+	mode, // For some reason this makes getSiteConfig fail???
+	path: `/admin/site/${mode}/${PROJECT_NAME}/draft/${SITE_NAME}`
 });
 
 jest.mock('/lib/xp/content', () => ({
-	get: jest.fn<typeof getContentByKeyType>((params) => libContent.get(params)),
+	// @ts-expect-error
+	get: jest.fn<typeof getContentByKeyType>((params) => {
+		const {key} = params;
+		if (key === TEXT_FRAGMENT_CONTENT_ID) return TEXT_FRAGMENT_CONTENT;
+		if (key === PART_FRAGMENT_CONTENT_ID) return PART_FRAGMENT_CONTENT;
+		if (key === LAYOUT_FRAGMENT_CONTENT_ID) return LAYOUT_FRAGMENT_CONTENT;
+		return libContent.get(params);
+	}),
 }), { virtual: true });
 
 jest.mock('/lib/xp/portal', () => ({
