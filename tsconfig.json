@@ -2,6 +2,16 @@
 	// This file is mainly for letting your code editor use typings.
 	// It's also used when doing a simple yarn tsc, to check all files.
 	// Rollup overrides some of these options when doing the actual build.
+	"include": [
+		"./src/main/resources/**/*.ts", // This includes *.d.ts files.
+	// 	"node_modules/@enonic/react4xp/**/*.ts",
+	// 	"node_modules/@enonic/js-utils/**/*.ts"
+	],
+	"exclude": [
+		// This will exclude src/main/resources/index.d.ts which we might want!
+		// "**/*.d.ts",
+		"./src/main/resources/assets/**/*.*",
+	],
 	"compilerOptions": {
 		//──────────────────────────────────────────────────────────────────────
 		// Type Checking
@@ -33,14 +43,13 @@
 		// available at runtime, but you can’t access it with an import.
 		"allowUmdGlobalAccess": true,
 
-		"baseUrl": "./",
-
 		"module": "esnext", // What rollup wants
 		// "module": "CommonJS", // When no longer using rollup, just tsup?
 
 		"moduleResolution": "node",
 		"paths": {
 			// Development (should be commented out when commiting)
+			"@enonic-types/core": ["../xp-comlock-9742/modules/lib/core/index.d.ts"],
 			// "@enonic-types/core": ["../../enonic/xp/modules/core/index.ts"],
 			// "@enonic-types/lib-content": ["../../enonic/xp/modules/lib/lib-content/src/main/resources/lib/xp/content.ts"],
 			// "@enonic-types/lib-io": ["../../enonic/xp/modules/lib/lib-io/src/main/resources/lib/xp/io.ts"],
@@ -52,15 +61,16 @@
 			// "/lib/xp/node": ["../../enonic/xp/modules/lib/lib-node/src/main/resources/lib/xp/node.ts"],
 			// "/lib/xp/portal": ["../../enonic/xp/modules/lib/lib-portal/src/main/resources/lib/xp/portal.ts"],
 
-			// A series of entries which re-map imports to lookup locations relative to the baseUrl.
+			// A series of entries which re-map imports to lookup locations relative to this file.
 			// In order to get all of the correct typing in your favourite editor.
 			// yarn tsc doesn't change the import/require paths based on this
+			"@enonic-types/lib-*": ["./node_modules/@enonic-types/lib-*"],
 			"@enonic/react4xp": ["./node_modules/@enonic/react4xp/src"],
 			"@enonic/react4xp/*": ["./node_modules/@enonic/react4xp/src/*"],
 
 			"/lib/enonic/react4xp/*": ["./src/main/resources/lib/enonic/react4xp/*"],
 			"/lib/enonic/static": ["./node_modules/@enonic-types/lib-static"],
-			"/lib/xp/*": ["node_modules/@enonic-types/lib-*"],
+			"/lib/xp/*": ["./node_modules/@enonic-types/lib-*"],
 			"/*": ["./src/main/resources/*"],
 		},
 		"resolveJsonModule": true,
@@ -132,14 +142,4 @@
 		// refer to in your application's source code.
 		"skipLibCheck": true, // Disable type checking for node_modules
 	},
-	"exclude": [
-		// This will exclude src/main/resources/index.d.ts which we might want!
-		// "**/*.d.ts",
-		"src/main/resources/assets/**/*.*",
-	],
-	"include": [
-		"src/main/resources/**/*.ts", // This includes *.d.ts files.
-	// 	"node_modules/@enonic/react4xp/**/*.ts",
-	// 	"node_modules/@enonic/js-utils/**/*.ts"
-	]
 }
