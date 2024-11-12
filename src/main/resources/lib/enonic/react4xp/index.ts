@@ -5,3 +5,4 @@ export {
 	getExecutorUrl,
 	render,
 } from './React4xp';
+export {DataFetcher} from './DataFetcher';

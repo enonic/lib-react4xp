@@ -19,6 +19,7 @@ dependencies {
 
     implementation "com.enonic.xp:lib-io:${xpVersion}"
     implementation "com.enonic.xp:lib-portal:${xpVersion}"
+    implementation "com.enonic.xp:lib-schema:${xpVersion}"
     implementation "com.enonic.xp:lib-task:${xpVersion}"
 
     implementation 'com.enonic.lib:lib-cache:2.2.1'
