@@ -44,6 +44,7 @@ import {
 	getSiteConfig as getCurrentSiteConfig,
 	processHtml
 } from '/lib/xp/portal';
+import { getDescriptorFromTemplate } from '/lib/enonic/react4xp/React4xp/getDescriptorFromTemplate';
 
 import {replaceMacroComments} from './replaceMacroComments';
 
@@ -371,11 +372,20 @@ export class DataFetcher {
 		siteConfig?: Record<string, unknown> | null;
 	}): RenderablePageComponent {
 		// log.debug('processPage component:', component);
+		let {descriptor} = component;
 		const {
-			descriptor,
 			path,
-			regions
+			regions,
+			// @ts-expect-error TODO PageComponent Type is missing template?: string in lib-portal
+			template,
+			type,
 		} = component;
+		if (!descriptor) {
+			descriptor = getDescriptorFromTemplate(type, template);
+		}
+		if (!descriptor) {
+			throw new Error(`processPage: descriptor not found for component: ${toStr(component)}!`);
+		}
 		const renderableComponent: RenderablePageComponent = {
 			// Do not ass config, it should not be exposed to client-side
 			descriptor,
