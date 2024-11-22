@@ -79,6 +79,7 @@ interface LayoutComponentToPropsParams {
 	processedConfig: Record<string, unknown>;
 	siteConfig?: Record<string, unknown> | null;
 	request: Request;
+	[passAlong: string]: unknown;
 }
 
 interface PageComponentToPropsParams {
@@ -88,6 +89,7 @@ interface PageComponentToPropsParams {
 	processedConfig: Record<string, unknown>;
 	siteConfig?: Record<string, unknown> | null;
 	request: Request;
+	[passAlong: string]: unknown;
 }
 
 export type ProcessedLayoutComponent = LayoutComponent & {
@@ -114,6 +116,7 @@ interface PartComponentToPropsParams {
 	processedConfig: Record<string, unknown>;
 	siteConfig?: Record<string, unknown> | null;
 	request: Request;
+	[passAlong: string]: unknown;
 }
 
 type LayoutComponentToPropsFunction = (params: LayoutComponentToPropsParams) => Record<string, unknown>;
@@ -249,12 +252,14 @@ export class DataFetcher {
 		content,
 		request,
 		siteConfig,
+		...passAlong
 	}: {
 		component: FragmentComponent;
 		content?: PageContent;
 		request: Request;
 		siteConfig?: Record<string, unknown> | null;
 	}) {
+		// log.debug('dataFetcher.processFragment passAlong:%s', toStr(passAlong));
 		const {
 			fragment: key,
 			path
@@ -287,6 +292,7 @@ export class DataFetcher {
 				content,
 				request,
 				siteConfig,
+				...passAlong
 			});
 		}
 		if(type === 'layout') {
@@ -295,6 +301,7 @@ export class DataFetcher {
 				content,
 				request,
 				siteConfig,
+				...passAlong
 			});
 		}
 		if(type === 'text') {
@@ -311,12 +318,14 @@ export class DataFetcher {
 		content,
 		request,
 		siteConfig,
+		...passAlong
 	}: {
 		component: LayoutComponent;
 		content?: PageContent;
 		request: Request;
 		siteConfig?: Record<string, unknown> | null;
 	}): RenderableLayoutComponent {
+		// log.debug('dataFetcher.processLayout passAlong:%s', toStr(passAlong));
 		const {
 			descriptor,
 			path,
@@ -355,6 +364,7 @@ export class DataFetcher {
 			processedConfig: processedLayoutComponent.config,
 			siteConfig, // : this.getCurrentSiteConfig && this.getCurrentSiteConfig() as Record<string, unknown>,
 			request,
+			...passAlong
 		});
 		// renderableComponent.processedConfig = processedLayoutComponent.config;
 		return renderableComponent;
@@ -365,6 +375,7 @@ export class DataFetcher {
 		content,
 		request,
 		siteConfig,
+		...passAlong
 	}: {
 		component: PageComponent;
 		content?: PageContent;
@@ -372,6 +383,7 @@ export class DataFetcher {
 		siteConfig?: Record<string, unknown> | null;
 	}): RenderablePageComponent {
 		// log.debug('processPage component:', component);
+		// log.debug('dataFetcher.processPage passAlong:%s', toStr(passAlong));
 		let {descriptor} = component;
 		const {
 			path,
@@ -418,6 +430,7 @@ export class DataFetcher {
 			processedConfig: processedComponent.config,
 			siteConfig, // : this.getCurrentSiteConfig && this.getCurrentSiteConfig() as Record<string, unknown>,
 			request,
+			...passAlong
 		});
 		// renderableComponent.processedConfig = processedComponent.config;
 		return renderableComponent;
@@ -427,13 +440,15 @@ export class DataFetcher {
 		component,
 		content,
 		request,
-		siteConfig
+		siteConfig,
+		...passAlong
 	}: {
 		component: PartComponent;
 		content?: PageContent;
 		request: Request;
 		siteConfig?: Record<string, unknown> | null;
 	}): RenderablePartComponent {
+		// log.debug('dataFetcher.processPart passAlong:%s', toStr(passAlong));
 		const {
 			descriptor,
 			path
@@ -486,6 +501,7 @@ export class DataFetcher {
 			processedConfig: processedComponent.config,
 			siteConfig,//: this.getCurrentSiteConfig && this.getCurrentSiteConfig() as Record<string, unknown>,
 			request,
+			...passAlong
 		});
 		// renderableComponent.processedConfig = processedComponent.config;
 		return renderableComponent;
@@ -606,11 +622,13 @@ export class DataFetcher {
 		component,
 		content,
 		request,
+		...passAlong
 	}: {
 		component?: Component;
 		content?: PageContent;
 		request: Request;
 	}): RenderableComponent {
+		// log.debug('dataFetcher.process passAlong:%s', toStr(passAlong));
 		// content = this.getCurrentContent && this.getCurrentContent() as PageContent
 		if (!content) {
 			content = getCurrentContent!() as PageContent;
@@ -635,18 +653,21 @@ export class DataFetcher {
 				content,
 				request,
 				siteConfig,
+				...passAlong
 			});
 			case 'layout': return this.processLayout({
 				component: component as LayoutComponent,
 				content,
 				request,
 				siteConfig,
+				...passAlong
 			});
 			case 'page': return this.processPage({
 				component: component as PageComponent,
 				content,
 				request,
 				siteConfig,
+				...passAlong
 			});
 			case 'text': return this.processTextComponent({
 				component: component as TextComponent,
@@ -657,6 +678,7 @@ export class DataFetcher {
 				content,
 				request,
 				siteConfig,
+				...passAlong
 			});
 			default: throw new Error(`processComponents: component type not supported: ${type}!`);
 		}
