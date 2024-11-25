@@ -4,11 +4,15 @@ import type {
 	FragmentComponent,
 	Layout,
 	LayoutComponent,
+	LayoutDescriptor,
 	LiteralUnion,
+	Merge,
 	Page,
 	PageComponent,
+	PageDescriptor,
 	Part,
 	PartComponent,
+	PartDescriptor,
 	Request,
 	RequestMode,
 	TextComponent,
@@ -44,7 +48,8 @@ import {
 	getSiteConfig as getCurrentSiteConfig,
 	processHtml
 } from '/lib/xp/portal';
-import { getDescriptorFromTemplate } from '/lib/enonic/react4xp/React4xp/getDescriptorFromTemplate';
+import { getCachedPageComponentFromContentType } from '/lib/enonic/react4xp/pageTemplate/getCachedPageComponentFromContentType';
+import { getCachedPageComponentFromPageTemplateContentId } from '/lib/enonic/react4xp/pageTemplate/getCachedPageComponentFromPageTemplateContentId';
 
 import {replaceMacroComments} from './replaceMacroComments';
 
@@ -72,25 +77,23 @@ export interface GetComponentReturnType {
 };
 // type GetComponent = (params: GetDynamicComponentParams) => GetComponentReturnType;
 
-interface LayoutComponentToPropsParams {
+export type LayoutComponentToPropsParams<T = Record<string, never>> = Merge<{
 	component: LayoutComponent;
 	content?: PageContent;
 	processedComponent: ProcessedLayoutComponent;
 	processedConfig: Record<string, unknown>;
 	siteConfig?: Record<string, unknown> | null;
 	request: Request;
-	[passAlong: string]: unknown;
-}
+},T>
 
-interface PageComponentToPropsParams {
+export type PageComponentToPropsParams<T = Record<string, never>> = Merge<{
 	component: PageComponent;
 	content?: PageContent;
 	processedComponent: ProcessedPageComponent;
 	processedConfig: Record<string, unknown>;
 	siteConfig?: Record<string, unknown> | null;
 	request: Request;
-	[passAlong: string]: unknown;
-}
+}, T>
 
 export type ProcessedLayoutComponent = LayoutComponent & {
 	props?: Record<string, unknown>;
@@ -110,23 +113,27 @@ export type PageContent<
 	Component
 >
 
-interface PartComponentToPropsParams {
-	component: PartComponent;
+export type PartComponentToPropsParams<
+	PART_DESCRIPTOR extends PartDescriptor = PartDescriptor,
+	OVERRIDE = Record<string, never>
+> = Merge<{
+	component: PartComponent<PART_DESCRIPTOR>;
 	content?: PageContent;
 	processedConfig: Record<string, unknown>;
 	siteConfig?: Record<string, unknown> | null;
 	request: Request;
-	[passAlong: string]: unknown;
-}
+}, OVERRIDE>
 
-type LayoutComponentToPropsFunction = (params: LayoutComponentToPropsParams) => Record<string, unknown>;
-type PageComponentToPropsFunction = (params: PageComponentToPropsParams) => Record<string, unknown>;
-type PartComponentToPropsFunction = (params: PartComponentToPropsParams) => Record<string, unknown>;
+export type LayoutComponentToPropsFunction = (params: LayoutComponentToPropsParams) => Record<string, unknown>;
+export type PageComponentToPropsFunction = (params: PageComponentToPropsParams) => Record<string, unknown>;
+export type PartComponentToPropsFunction<
+	PART_DESCRIPTOR extends PartDescriptor = PartDescriptor
+> = (params: PartComponentToPropsParams<PART_DESCRIPTOR>) => Record<string, unknown>;
 
 export class DataFetcher {
-	private layouts: Record<string,LayoutComponentToPropsFunction> = {};
-	private pages: Record<string,PageComponentToPropsFunction> = {};
-	private parts: Record<string,PartComponentToPropsFunction> = {};
+	private layouts: Record<LayoutDescriptor, LayoutComponentToPropsFunction> = {};
+	private pages: Record<PageDescriptor, PageComponentToPropsFunction> = {};
+	private parts: Record<PartDescriptor, PartComponentToPropsFunction> = {};
 	private mixinSchemas: Record<string, MixinSchema> = {}
 
 	private static getPath(name: string, ancestor?: string) {
@@ -384,17 +391,35 @@ export class DataFetcher {
 	}): RenderablePageComponent {
 		// log.debug('processPage component:', component);
 		// log.debug('dataFetcher.processPage passAlong:%s', toStr(passAlong));
-		let {descriptor} = component;
-		const {
-			path,
-			regions,
-			// @ts-expect-error TODO PageComponent Type is missing template?: string in lib-portal
-			template,
-			type,
-		} = component;
-		if (!descriptor) {
-			descriptor = getDescriptorFromTemplate(type, template);
+
+		if (!component.descriptor) { // No local page component, check page templates:
+			const {
+				// @ts-expect-error TODO PageComponent Type is missing template?: string in lib-portal
+				template: pageTemplateContentId,
+				type: componentType
+			} = component; // This should always be 'page' here.
+			if (!pageTemplateContentId) { // Page Template: Automatic
+				const {type: contentType} = content;
+				if (!contentType) {
+					throw new Error(`processPage: Unable to determine descriptor! Both component.descriptor and content.type are missing!`);
+				}
+				// log.debug('processPage: No component.descriptor. contentType:%s', contentType);
+				component = getCachedPageComponentFromContentType({ contentType });
+				// log.debug('processPage: No component.descriptor. contentType:%s component(from page template):%s', contentType, toStr(component));
+			} else { // Page Template: Specific
+				// log.debug('processPage: No descriptor. componentType:%s pageTemplateContentId:%s', componentType, pageTemplateContentId);
+				component = getCachedPageComponentFromPageTemplateContentId({pageTemplateContentId});
+				// log.debug('processPage: No descriptor. componentType:%s pageTemplateContentId:%s component(from page template):%s', componentType, pageTemplateContentId, toStr(component));
+			}
 		}
+
+		const {
+			descriptor,
+			path, // Should always be '/'
+			regions, // CAUTION: Is undefined when using page templates.
+		} = component;
+		// log.debug('processPage: regions:%s', toStr(regions));
+
 		if (!descriptor) {
 			throw new Error(`processPage: descriptor not found for component: ${toStr(component)}!`);
 		}
@@ -591,31 +616,34 @@ export class DataFetcher {
 		return processedLayoutOrPageComponent;
 	} // processWithRegions
 
-	public addLayout(descriptor: string, {
+	public addLayout<T = Record<string, never>>(descriptor: string, {
 		toProps
 	}: {
-		toProps: (params: LayoutComponentToPropsParams) => Record<string, unknown>;
+		toProps: (params: LayoutComponentToPropsParams<T>) => Record<string, unknown>;
 	}) {
 		// log.debug('addLayout:', descriptor);
-		this.layouts[descriptor] = toProps;
+		this.layouts[descriptor] = toProps as LayoutComponentToPropsFunction;
 	}
 
-	public addPage(descriptor: string, {
+	public addPage<T = Record<string, never>>(descriptor: string, {
 		toProps
 	}: {
-		toProps: (params: PageComponentToPropsParams) => Record<string, unknown>;
+		toProps: (params: PageComponentToPropsParams<T>) => Record<string, unknown>;
 	}) {
 		// log.debug('addPage:', descriptor);
-		this.pages[descriptor] = toProps;
+		this.pages[descriptor] = toProps as PageComponentToPropsFunction;
 	}
 
-	public addPart(descriptor: string, {
+	public addPart<
+		OVERRIDE = Record<string, never>,
+		PART_DESCRIPTOR extends PartDescriptor = PartDescriptor // gotten from the passed descriptor parameter below
+	>(descriptor: PART_DESCRIPTOR, {
 		toProps
 	}: {
-		toProps: (params: PartComponentToPropsParams) => Record<string, unknown>;
+		toProps: (params: PartComponentToPropsParams<PART_DESCRIPTOR, OVERRIDE>) => Record<string, unknown>;
 	}) {
 		// log.debug('addPart:', descriptor);
-		this.parts[descriptor] = toProps;
+		this.parts[descriptor] = toProps as PartComponentToPropsFunction<PART_DESCRIPTOR>;
 	}
 
 	public process({
@@ -627,6 +655,7 @@ export class DataFetcher {
 		component?: Component;
 		content?: PageContent;
 		request: Request;
+		[passAlongKey: string]: unknown;
 	}): RenderableComponent {
 		// log.debug('dataFetcher.process passAlong:%s', toStr(passAlong));
 		// content = this.getCurrentContent && this.getCurrentContent() as PageContent
@@ -646,8 +675,10 @@ export class DataFetcher {
 		if (!siteConfig) {
 			log.warning(`process: getCurrentSiteConfig returned null!`);
 		}
-		const {type} = component;
-		switch (type) {
+		const {
+			type: componentType // CAUTION: Is undefined when using page templates.
+		} = component;
+		switch (componentType) {
 			case 'part': return this.processPart({
 				component,
 				content,
@@ -657,13 +688,6 @@ export class DataFetcher {
 			});
 			case 'layout': return this.processLayout({
 				component: component as LayoutComponent,
-				content,
-				request,
-				siteConfig,
-				...passAlong
-			});
-			case 'page': return this.processPage({
-				component: component as PageComponent,
 				content,
 				request,
 				siteConfig,
@@ -680,7 +704,16 @@ export class DataFetcher {
 				siteConfig,
 				...passAlong
 			});
-			default: throw new Error(`processComponents: component type not supported: ${type}!`);
+			// case 'page':
+			default: // Since componentType is undefined when using page templates, we have to assume it's a page.
+				return this.processPage({
+					component: component as PageComponent,
+					content,
+					request,
+					siteConfig,
+					...passAlong
+				});
+				// throw new Error(`processComponents: component type not supported: ${componentType}!`);
 		}
 	}
 } // class DataFetcher
