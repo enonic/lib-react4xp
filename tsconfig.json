@@ -71,6 +71,8 @@
 			"/lib/enonic/react4xp/*": ["./src/main/resources/lib/enonic/react4xp/*"],
 			"/lib/enonic/static": ["./node_modules/@enonic-types/lib-static"],
 			"/lib/xp/*": ["./node_modules/@enonic-types/lib-*"],
+			"/types": ["./src/main/resources/types/index.d.ts"],
+			"/types/*": ["./src/main/resources/types/*"],
 			"/*": ["./src/main/resources/*"],
 		},
 		"resolveJsonModule": true,
