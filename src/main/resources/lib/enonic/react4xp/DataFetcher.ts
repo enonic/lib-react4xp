@@ -51,7 +51,7 @@ import {
 import { getCachedPageComponentFromContentType } from '/lib/enonic/react4xp/pageTemplate/getCachedPageComponentFromContentType';
 import { getCachedPageComponentFromPageTemplateContentId } from '/lib/enonic/react4xp/pageTemplate/getCachedPageComponentFromPageTemplateContentId';
 
-import {replaceMacroComments} from './replaceMacroComments';
+import { dataFromProcessedHtml } from '/lib/enonic/react4xp/dataFromProcessedHtml';
 
 
 export type FragmentContent<
@@ -515,7 +515,7 @@ export class DataFetcher {
 				const processedHtml = processHtml({
 					value: html
 				});
-				const data = replaceMacroComments(processedHtml);
+				const data = dataFromProcessedHtml(processedHtml);
 				setIn(processedComponent, path, data);
 			}
 		} // for
@@ -545,7 +545,7 @@ export class DataFetcher {
 		});
 		const renderableTextComponent: RenderableTextComponent = JSON.parse(JSON.stringify(component));
 		renderableTextComponent.props = {
-			data: replaceMacroComments(processedHtml),
+			data: dataFromProcessedHtml(processedHtml),
 			mode
 		};
 		return renderableTextComponent;
@@ -586,7 +586,7 @@ export class DataFetcher {
 				const processedHtml = processHtml({
 					value: html
 				});
-				const data = replaceMacroComments(processedHtml);
+				const data = dataFromProcessedHtml(processedHtml);
 				setIn(processedLayoutOrPageComponent, path, data);
 			}
 		} // for
