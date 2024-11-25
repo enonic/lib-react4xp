@@ -41,7 +41,7 @@
     "@rollup/plugin-sucrase": "^5.0.2",
     "@rollup/plugin-typescript": "^12.1.1",
     "@sinonjs/text-encoding": "^0.7.3",
-    "@swc/core": "^1.9.2",
+    "@swc/core": "^1.9.3",
     "@swc/helpers": "^0.5.15",
     "@types/bun": "^1.1.13",
     "@types/core-js": "^2.5.8",
