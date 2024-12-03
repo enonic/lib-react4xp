@@ -1,4 +1,4 @@
-import {R4X_TARGETSUBDIR} from '@enonic/react4xp';
+import {R4X_TARGETSUBDIR} from '@enonic/react4xp/constants.runtime';
 import {requestHandler} from '/lib/enonic/static';
 
 

@@ -3,7 +3,7 @@ import type {ComponentType} from '../../../..';
 
 import {get as getContentByKey} from '/lib/xp/content';
 
-import {templateDescriptorCache} from './templateDescriptorCache';
+import {templateDescriptorCache} from '/lib/enonic/react4xp/React4xp/templateDescriptorCache';
 
 
 export function getDescriptorFromTemplate(
@@ -28,11 +28,11 @@ export function getDescriptorFromTemplate(
 			log.warning(`Content not found or not a template (content.type!=="portal:page-template"). Template ID is '${JSON.stringify(templateId)}', retrieved content: ${JSON.stringify(content)}`);
 			return undefined;
 		}
-		if (!content.page || content.page.type !== "page" || !(((content.page.descriptor || '') + '').trim())) {
+		if (!content.page || content.page.type !== "page" || !(((content.page['descriptor'] || '') + '').trim())) {
 			log.warning(`Template doesn't seem to have a page controller attached. Template ID is '${JSON.stringify(templateId)}', retrieved template content: ${JSON.stringify(content)}`);
 			return undefined;
 		}
 
-		return content.page.descriptor;
+		return content.page['descriptor'];
 	});
 }

@@ -1,5 +1,5 @@
 import type { PageComponent } from '@enonic-types/core';
-import type { PageTemplateContent } from '/types';
+import type { PageTemplateContent } from '@enonic-types/lib-react4xp';
 
 import {get as getContentByKey} from '/lib/xp/content';
 import { pageTemplateContentIdToPageComponentCache } from '/lib/enonic/react4xp/pageTemplate/pageTemplateContentIdToPageComponentCache';

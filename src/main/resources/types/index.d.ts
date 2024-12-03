@@ -1,7 +1,7 @@
+export {AppConfig} from './Application.d';
 export {Cache} from './Cache.d';
 export {
 	Component,
-	ComponentGeneric,
 	ComponentType
 } from './Component.d';
 export type { PageTemplateContent } from './ContentTypes';

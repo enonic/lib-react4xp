@@ -1,4 +1,4 @@
-import type { UrlType } from '/types';
+import type { UrlType } from '@enonic-types/lib-react4xp';
 
 
 import { assetUrl as getAssetUrl } from '/lib/xp/portal';
