@@ -1,7 +1,7 @@
 import {
 	GLOBALS_FILENAME,
 	R4X_TARGETSUBDIR
-} from '@enonic/react4xp';
+} from '@enonic/react4xp/constants.runtime';
 import {getNamesFromChunkfile} from '/lib/enonic/react4xp/chunk/getNamesFromChunkfile';
 
 

@@ -1,14 +1,18 @@
 import type {
-	ComponentGeneric,
+	Component,
+	Request,
+	Response,
+} from '@enonic-types/core';
+import type {
 	Entry,
 	Id,
 	Instance,
 	PageContributions,
 	// React4xp as React4xpNamespace,
-	Request,
-	Response,
 	UrlType
-} from '/types';
+} from '@enonic-types/lib-react4xp';
+
+import { hasOwnProperty } from '@enonic/js-utils/object/hasOwnProperty';
 import { isObject } from '@enonic/js-utils/value/isObject';
 import { isString } from '@enonic/js-utils/value/isString';
 import { isNotSet } from '@enonic/js-utils/value/isNotSet';
@@ -18,30 +22,30 @@ import {
 	getContent,
 	getComponent
 } from '/lib/xp/portal';
-import { getDescriptorFromTemplate } from './React4xp/getDescriptorFromTemplate';
+import { getDescriptorFromTemplate } from '/lib/enonic/react4xp/React4xp/getDescriptorFromTemplate';
 
 // Import public methods
-import { checkIdLock } from './React4xp/methods/checkIdLock';
-import { ensureAndLockId } from './React4xp/methods/ensureAndLockId';
-import { ensureAndLockBeforeRendering } from './React4xp/methods/ensureAndLockBeforeRendering';
-import { doRenderSSR } from './React4xp/methods/doRenderSSR';
-import makeErrorMessage from "./React4xp/methods/makeErrorMessage";
-import { renderBody } from './React4xp/methods/renderBody';
-import { renderPageContributions } from './React4xp/methods/renderPageContributions';
-import { renderSSRIntoContainer } from './React4xp/methods/renderSSRIntoContainer';
-import { renderTargetContainer } from './React4xp/methods/renderTargetContainer';
-import { renderWarningPlaceholder } from './React4xp/methods/renderWarningPlaceholder';
-import { setHasRegions } from './React4xp/methods/setHasRegions';
-import { setId } from './React4xp/methods/setId';
-import { setIsPage } from './React4xp/methods/setIsPage';
-import { setJsxPath } from './React4xp/methods/setJsxPath';
-import { setProps } from './React4xp/methods/setProps';
-import { uniqueId } from './React4xp/methods/uniqueId';
+import { checkIdLock } from '/lib/enonic/react4xp/React4xp/methods/checkIdLock';
+import { ensureAndLockId } from '/lib/enonic/react4xp/React4xp/methods/ensureAndLockId';
+import { ensureAndLockBeforeRendering } from '/lib/enonic/react4xp/React4xp/methods/ensureAndLockBeforeRendering';
+import { doRenderSSR } from '/lib/enonic/react4xp/React4xp/methods/doRenderSSR';
+import makeErrorMessage from "/lib/enonic/react4xp/React4xp/methods/makeErrorMessage";
+import { renderBody } from '/lib/enonic/react4xp/React4xp/methods/renderBody';
+import { renderPageContributions } from '/lib/enonic/react4xp/React4xp/methods/renderPageContributions';
+import { renderSSRIntoContainer } from '/lib/enonic/react4xp/React4xp/methods/renderSSRIntoContainer';
+import { renderTargetContainer } from '/lib/enonic/react4xp/React4xp/methods/renderTargetContainer';
+import { renderWarningPlaceholder } from '/lib/enonic/react4xp/React4xp/methods/renderWarningPlaceholder';
+import { setHasRegions } from '/lib/enonic/react4xp/React4xp/methods/setHasRegions';
+import { setId } from '/lib/enonic/react4xp/React4xp/methods/setId';
+import { setIsPage } from '/lib/enonic/react4xp/React4xp/methods/setIsPage';
+import { setJsxPath } from '/lib/enonic/react4xp/React4xp/methods/setJsxPath';
+import { setProps } from '/lib/enonic/react4xp/React4xp/methods/setProps';
+import { uniqueId } from '/lib/enonic/react4xp/React4xp/methods/uniqueId';
 
 
-import { buildErrorContainer } from './htmlHandling';
-import { setup as setupSSRJava } from './ssr'
-import { templateDescriptorCache } from './React4xp/templateDescriptorCache';
+import { buildErrorContainer } from '/lib/enonic/react4xp/htmlHandling';
+import { setup as setupSSRJava } from '/lib/enonic/react4xp/ssr/index'
+import { templateDescriptorCache } from '/lib/enonic/react4xp/React4xp/templateDescriptorCache';
 import { getClientUrl } from '/lib/enonic/react4xp/asset/client/getClientUrl';
 import { getExecutorUrl } from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
 import { getComponentChunkUrls } from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
@@ -139,7 +143,8 @@ export class React4xp<
 			// & layout, because only SSR works well for page and layout.
 			// We've still made it possible to try out client-side rendering for
 			// page & layout by setting it directly in render options.
-			if(isObject(entry) && (entry?.type === 'page' || entry?.type === 'layout')) {
+			// NOTE: When automatic page template is used the page component is just an empty object, there is no type property.
+			if(isObject(entry) && (entry?.['type'] === 'page' || entry?.['type'] === 'layout' || !hasOwnProperty(entry, 'type'))) {
 				if (isNotSet(dereffedOptions.ssr)) {
 					dereffedOptions.ssr = true;
 				}
@@ -208,7 +213,7 @@ export class React4xp<
 
 
 	// Public fields/properties
-	component: ComponentGeneric// = null
+	component: Component// = null
 	hasRegions: 0|1 = 0        // boolean using 0 for false and 1 for true, for the sake of more compact client-side .render and .hydrate calls.
 	isPage: 0|1 = 0            // boolean using 0 for false and 1 for true, for the sake of more compact client-side .render and .hydrate calls.
 	jsxPath: string// = null
@@ -261,6 +266,7 @@ export class React4xp<
 					//       Make a Content.getPage() call from a bean? And if it fails, this fallback should be skipped since this wasn't called from a page controller.
 					// Page. Use content.page in page flow. Derive jsxPath and default ID from local page folder, same name.
 					this.isPage = 1;
+					// @ts-expect-error TODO
 					this.component = cont.page;
 				} else {
 					// Missing content.page.descriptor as well as component and jsxPath
@@ -270,7 +276,7 @@ export class React4xp<
 			// log.debug('React4xp constructor this.component:%s', this.component);
 
 			const buildingBlockData = {
-				descriptor: this.component.descriptor || getDescriptorFromTemplate(this.component.type, this.component.template),
+				descriptor: this.component['descriptor'] || getDescriptorFromTemplate(this.component.type, this.component['template']),
 				type: BASE_PATHS[this.component.type],
 				path: this.component.path
 			};
@@ -314,7 +320,7 @@ export class React4xp<
 
 			// TODO: Move to later in the flow. Where are regions relevant and this.component guaranteed?
 			// ------------------------------------------------------------------------------------------
-			if (this.component.regions && Object.keys(this.component.regions).length) {
+			if (this.component['regions'] && Object.keys(this.component['regions']).length) {
 				this.hasRegions = 1;
 			} else if (this.isPage) {
 				log.debug("React4xp appears to be asked to render a page. No regions are found.  |  entry=" + JSON.stringify(entry) + "  |  portal.getComponent=" + JSON.stringify(getComponent()) + "  |  portal.getContent=" + JSON.stringify(getContent));

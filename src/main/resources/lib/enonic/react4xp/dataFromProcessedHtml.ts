@@ -3,7 +3,7 @@ import type {
 	ImageData,
 	MacroData,
 	RichTextData
-} from '@enonic/react-components';
+} from '@enonic/react-components/types/RichText';
 import {get as getContentByKey} from '/lib/xp/content';
 
 

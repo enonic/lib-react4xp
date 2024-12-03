@@ -1,4 +1,4 @@
-import type { UrlType } from '/types';
+import type { UrlType } from '@enonic-types/lib-react4xp';
 import type {
 	OneOrMore,
 	PageContributions,
@@ -8,7 +8,7 @@ import type {
 
 import endsWith from '@enonic/js-utils/string/endsWith';
 import { getClientUrl } from '/lib/enonic/react4xp/asset/client/getClientUrl';
-import { getGlobalsUrls } from '../asset/globals/getGlobalsUrls';
+import { getGlobalsUrls } from '/lib/enonic/react4xp/asset/globals/getGlobalsUrls';
 import { getComponentChunkUrls } from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
 
 /** Use the json files built by (@enonic/react4xp)

@@ -4,7 +4,7 @@ import type {Stats} from '../../../..'
 import {
 	COMPONENT_STATS_FILENAME,
 	R4X_TARGETSUBDIR
-} from '@enonic/react4xp';
+} from '@enonic/react4xp/constants.runtime';
 import {readResourceAsJson} from '/lib/enonic/react4xp/resource/readResourceAsJson';
 
 

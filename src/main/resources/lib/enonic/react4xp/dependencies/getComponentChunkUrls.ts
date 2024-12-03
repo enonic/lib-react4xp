@@ -1,4 +1,4 @@
-import type { UrlType } from '/types';
+import type { UrlType } from '@enonic-types/lib-react4xp';
 import type {
 	OneOrMore,
 	React4xp as React4xpNamespace
@@ -6,7 +6,7 @@ import type {
 
 
 import { getAssetRoot } from '/lib/enonic/react4xp/dependencies/getAssetRoot';
-import { getComponentChunkNames } from './getComponentChunkNames';
+import { getComponentChunkNames } from '/lib/enonic/react4xp/dependencies/getComponentChunkNames';
 
 
 // NOTE: This function is exported in ..React4xp.ts, so a major release is needed to change it's signature.
