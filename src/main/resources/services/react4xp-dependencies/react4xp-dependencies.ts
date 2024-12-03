@@ -5,7 +5,7 @@
 import type {
 	Request,
 	Response
-} from '../..';
+} from '@enonic-types/core';
 
 
 import { getComponentChunkUrls } from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
@@ -15,7 +15,7 @@ import { getSuffix } from '/lib/enonic/react4xp/dependencies/getSuffix';
 const SERVICE_NAME = 'react4xp-dependencies';
 
 
-export function get(req: Request): Response<string> | Response<string[]> {
+export function get(req: Request): Response {
 	let relativePath: string;
 	try {
 		relativePath = getSuffix({
@@ -30,7 +30,7 @@ export function get(req: Request): Response<string> | Response<string[]> {
 			status: 400,
 			body: e.message,
 			contentType: 'text/plain'
-		} as Response;
+		};
 	}
 
 	// Gets parameter entryNames. Legal syntaxes: both
@@ -51,17 +51,17 @@ export function get(req: Request): Response<string> | Response<string[]> {
 
 	try {
 		return {
-			body: getComponentChunkUrls(
+			body: JSON.stringify(getComponentChunkUrls(
 				entryNames // ,
 				// { urlType } // NOTE: No way to select urlType in this service, will use app.config['react4xp.urlType'] || 'server'.
-			),
+			)),
 			contentType: 'application/json',
 			// FIXME: ETAG not working, using standard client cache instead, limited to 1 hour since it's not hashed
 			headers: {
 				'Content-Type': 'application/javascript;charset=utf-8',
 				'Cache-Control': 'public, max-age=3600'
 			}
-		} as Response<Array<string>>;
+		};
 
 	} catch (e) {
 		log.warning(`STATUS 404: ${e.message}`);
@@ -69,6 +69,6 @@ export function get(req: Request): Response<string> | Response<string[]> {
 			status: 404,
 			body: e.message,
 			contentType: 'text/plain'
-		} as Response;
+		};
 	}
 }

@@ -1,11 +1,11 @@
-import type { AppConfig } from '/types/Application.d';
+import type { AppConfig } from '@enonic-types/lib-react4xp';
 import {
 	COMPONENT_STATS_FILENAME,
 	ENTRIES_FILENAME,
 	GLOBALS_FILENAME,
 	LIBRARY_NAME,
 	R4X_TARGETSUBDIR
-} from '@enonic/react4xp';
+} from '@enonic/react4xp/constants.runtime';
 import {camelize} from '@enonic/js-utils/string/camelize';
 import {ucFirst} from '@enonic/js-utils/string/ucFirst';
 import {isSet} from '@enonic/js-utils/value/isSet';
@@ -38,11 +38,11 @@ export function setup({
 	ssrMaxThreads?: number
 } = {}) {
 	// log.debug('setup ssrMaxThreads:%s', toStr(ssrMaxThreads));
-
+	const appName = ucFirst(camelize(app.name,/\./g));
 	return SSRreact4xp.setup(
 		app.name,
 		`/${R4X_TARGETSUBDIR}`, // scriptsHome,
-		`${ucFirst(camelize(app.name,/\./g))}${LIBRARY_NAME}`,
+		`${appName}${LIBRARY_NAME}`,
 		`/${R4X_TARGETSUBDIR}/`, // chunkfilesHome,
 		ENTRIES_FILENAME,
 

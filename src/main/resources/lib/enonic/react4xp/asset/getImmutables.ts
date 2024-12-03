@@ -1,8 +1,8 @@
 // import {toStr} from '@enonic/js-utils/value/toStr';
 import {getClientChunkFilename} from '/lib/enonic/react4xp/asset/client/getClientChunkFilename';
 import {getExecutorChunkFilename} from '/lib/enonic/react4xp/asset/executor/getExecutorChunkFilename'
-import {getGlobals} from './getGlobals';
-import {getImmutableDependencies} from './getImmutableDependencies';
+import {getGlobals} from '/lib/enonic/react4xp/asset/getGlobals';
+import {getImmutableDependencies} from '/lib/enonic/react4xp/asset/getImmutableDependencies';
 
 
 export function getImmutables(entries: string[]) {

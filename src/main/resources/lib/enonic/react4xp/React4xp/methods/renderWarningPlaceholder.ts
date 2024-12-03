@@ -1,4 +1,4 @@
-import type { React4xp } from '/types';
+import type { React4xp } from '@enonic-types/lib-react4xp';
 
 
 export function renderWarningPlaceholder(this: React4xp) {

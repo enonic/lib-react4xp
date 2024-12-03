@@ -2,7 +2,7 @@ import type {Request} from '../../../../..';
 import type {React4xp} from '../../React4xp';
 
 
-import {buildErrorContainer} from '../../htmlHandling';
+import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
 
 
 /** Server-side rendering: Renders a static HTML markup and inserts it into an ID-matching target container in an HTML body. This is the same as renderBody({body: body}). If a

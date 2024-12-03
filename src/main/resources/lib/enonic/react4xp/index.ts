@@ -4,5 +4,5 @@ export {
 	getComponentChunkUrls,
 	getExecutorUrl,
 	render,
-} from './React4xp';
-export {DataFetcher} from './DataFetcher';
+} from '/lib/enonic/react4xp/React4xp';
+export {DataFetcher} from '/lib/enonic/react4xp/DataFetcher';

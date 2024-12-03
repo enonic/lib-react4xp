@@ -1,4 +1,4 @@
-import type { Request } from '/types/Request.d';
+import type { Request } from '@enonic-types/lib-react4xp';
 
 
 export default function isEditMode(request?: Request) {

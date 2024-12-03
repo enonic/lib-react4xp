@@ -1,0 +1,22 @@
+{
+    "files": [
+        "./src/main/resources/lib/enonic/polyfill-react4xp/nodePolyfills.ts"
+    ],
+    "compilerOptions": {
+        "declaration": false,
+        "inlineSourceMap": false,
+        "inlineSources": false,
+        "moduleResolution": "node",
+        "noImplicitAny": true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noUncheckedIndexedAccess": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true, // TS6133: 'whatever' is declared but its value is never read.
+        "removeComments": true,
+        "sourceMap": false,
+        "skipLibCheck": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "target": "ES2023" // Graal-JS support ES2024, but rollup doesn't recongize it yet.
+    }
+}
