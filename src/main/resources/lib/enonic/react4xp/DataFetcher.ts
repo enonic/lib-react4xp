@@ -77,17 +77,15 @@ export interface GetComponentReturnType {
 // type GetComponent = (params: GetDynamicComponentParams) => GetComponentReturnType;
 
 export type LayoutComponentToPropsParams<T = Record<string, never>> = Merge<{
-	component: LayoutComponent;
+	component: ProcessedLayoutComponent;
 	content?: PageContent;
-	processedComponent: ProcessedLayoutComponent;
 	siteConfig?: Record<string, unknown> | null; // In passAlong
 	request: Request;
 },T>
 
 export type PageComponentToPropsParams<T = Record<string, never>> = Merge<{
-	component: PageComponent;
+	component: ProcessedPageComponent;
 	content?: PageContent;
-	processedComponent: ProcessedPageComponent;
 	siteConfig?: Record<string, unknown> | null; // In passAlong
 	request: Request;
 }, T>
@@ -348,8 +346,8 @@ export class DataFetcher {
 		// log.info('DataFetcher processLayout processedLayoutComponent:%s', toStr(processedLayoutComponent))
 
 		renderableComponent.props = toProps({
-			component,
-			processedComponent: processedLayoutComponent,
+			component: processedLayoutComponent,
+			content: this.content,
 			request: this.request,
 			...passAlong
 		});
@@ -418,20 +416,19 @@ export class DataFetcher {
 			type: 'PAGE',
 		}) as GetComponentReturnType;
 
-		const processedComponent = this.processWithRegions({
+		const processedPageComponent = this.processWithRegions({
 			component,
 			form,
 		}) as ProcessedPageComponent;
 
 		renderableComponent.props = toProps({
-			component,
+			component: processedPageComponent,
 			content: this.content,
-			processedComponent,
 			request: this.request,
 			...passAlong
 		});
 		return renderableComponent;
-	}
+	} // processPage
 
 	private processPart({
 		component,
@@ -471,7 +468,7 @@ export class DataFetcher {
 		});
 		// log.info('processPart htmlAreas:', htmlAreas);
 
-		const processedComponent = JSON.parse(JSON.stringify(component));
+		const processedPartComponent = JSON.parse(JSON.stringify(component));
 		for (let i = 0; i < htmlAreas.length; i++) {
 			// log.info('component:', component);
 
@@ -486,17 +483,18 @@ export class DataFetcher {
 					value: html
 				});
 				const data = dataFromProcessedHtml(processedHtml);
-				setIn(processedComponent, path, data);
+				setIn(processedPartComponent, path, data);
 			}
 		} // for
 
 		renderableComponent.props = toProps({
 			component,
+			content: this.content,
 			request: this.request,
 			...passAlong
 		});
 		return renderableComponent;
-	}
+	} // processPart
 
 	private processTextComponent({
 		component,
