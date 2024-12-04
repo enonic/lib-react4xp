@@ -488,7 +488,7 @@ export class DataFetcher {
 		} // for
 
 		renderableComponent.props = toProps({
-			component,
+			component: processedPartComponent,
 			content: this.content,
 			request: this.request,
 			...passAlong
@@ -665,20 +665,3 @@ export class DataFetcher {
 		}
 	}
 } // class DataFetcher
-
-// export function fetchData({
-// 	component,
-// 	content,
-// 	request,
-// }: {
-// 	component?: Component;
-// 	content?: PageContent;
-// 	request: Request;
-// }): RenderableComponent {
-// 	const processor = new DataFetcher();
-// 	return processor.process({
-// 		component,
-// 		content,
-// 		request
-// 	});
-// }
