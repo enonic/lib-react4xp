@@ -8,7 +8,6 @@ import type {
 	Merge,
 	// Page,
 	PageComponent,
-	PageComponentWhenCustomized,
 	PageDescriptor,
 	// Part,
 	PartComponent,
@@ -386,7 +385,7 @@ export class DataFetcher {
 			descriptor,
 			path, // Should always be '/'
 			regions, // CAUTION: Is undefined when using page templates.
-		} = component as PageComponentWhenCustomized;
+		} = component as PageComponent;
 		// log.debug('processPage: regions:%s', toStr(regions));
 
 		if (!descriptor) { // This could probably only happen on b0rked template content, or some caching mistake.
@@ -506,9 +505,9 @@ export class DataFetcher {
 			value: text
 		});
 		const renderableTextComponent: RenderableTextComponent = JSON.parse(JSON.stringify(component));
+		renderableTextComponent.mode = this.request.mode;
 		renderableTextComponent.props = {
 			data: dataFromProcessedHtml(processedHtml),
-			mode: this.request.mode,
 		};
 		// log.debug('processTextComponent text renderableTextComponent:%s', toStr(renderableTextComponent));
 		return renderableTextComponent;
