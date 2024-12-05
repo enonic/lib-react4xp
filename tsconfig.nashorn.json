@@ -54,7 +54,7 @@
 
         "paths": {
             // Development: (should be commented on master branch)
-            "@enonic-types/core": ["../xp/modules/lib/core/index.d.ts"],
+            // "@enonic-types/core": ["../xp/modules/lib/core/index.d.ts"],
 
             // "@enonic-types/lib-content": ["../../enonic/xp/modules/lib/lib-content/src/main/resources/lib/xp/content.ts"],
             // "@enonic-types/lib-io": ["../../enonic/xp/modules/lib/lib-io/src/main/resources/lib/xp/io.ts"],

@@ -24,10 +24,12 @@ import type {
 } from '@enonic-types/lib-schema';
 import type {
 	RenderableComponent,
+	RenderableContentType,
 	RenderableLayoutComponent,
 	RenderablePageComponent,
 	RenderablePartComponent,
 	RenderableTextComponent,
+	XpRunMode,
 } from '@enonic/react-components/nashorn';
 
 
@@ -45,6 +47,7 @@ import {
 	getContent as getCurrentContent,
 	processHtml
 } from '/lib/xp/portal';
+import { IS_DEV_MODE } from '/lib/enonic/react4xp/xp/appHelper';
 import { getCachedPageComponentFromContentType } from '/lib/enonic/react4xp/pageTemplate/getCachedPageComponentFromContentType';
 import { getCachedPageComponentFromPageTemplateContentId } from '/lib/enonic/react4xp/pageTemplate/getCachedPageComponentFromPageTemplateContentId';
 
@@ -80,6 +83,7 @@ export type LayoutComponentToPropsParams<T = Record<string, never>> = Merge<{
 	content?: PageContent;
 	siteConfig?: Record<string, unknown> | null; // In passAlong
 	request: Request;
+	runMode: XpRunMode,
 },T>
 
 export type PageComponentToPropsParams<T = Record<string, never>> = Merge<{
@@ -87,6 +91,7 @@ export type PageComponentToPropsParams<T = Record<string, never>> = Merge<{
 	content?: PageContent;
 	siteConfig?: Record<string, unknown> | null; // In passAlong
 	request: Request;
+	runMode: XpRunMode,
 }, T>
 
 export type ProcessedLayoutComponent = LayoutComponent & {
@@ -116,6 +121,7 @@ export type PartComponentToPropsParams<
 	content?: PageContent;
 	siteConfig?: Record<string, unknown> | null; // In passAlong
 	request: Request;
+	runMode: XpRunMode;
 }, OVERRIDE>
 
 export type LayoutComponentToPropsFunction = (params: LayoutComponentToPropsParams) => Record<string, unknown>;
@@ -124,8 +130,11 @@ export type PartComponentToPropsFunction<
 	PART_DESCRIPTOR extends PartDescriptor = PartDescriptor
 > = (params: PartComponentToPropsParams<PART_DESCRIPTOR>) => Record<string, unknown>;
 
+const RUN_MODE = IS_DEV_MODE ? 'development' : 'production';
+
 export class DataFetcher {
 	private content: PageContent;
+	private contentTypes: Record<PageDescriptor, PageComponentToPropsFunction> = {};
 	private layouts: Record<LayoutDescriptor, LayoutComponentToPropsFunction> = {};
 	private mixinSchemas: Record<string, MixinSchema> = {}
 	private pages: Record<PageDescriptor, PageComponentToPropsFunction> = {};
@@ -250,6 +259,30 @@ export class DataFetcher {
 		return htmlAreas;
 	}
 
+	private processContentType({
+		contentType,
+		...passAlong
+	}: {
+		[key: string]: unknown
+		contentType: string
+	}): RenderableContentType {
+		const toProps = this.contentTypes[contentType];
+		const renderableContentType: RenderableContentType = {
+			// WARNING: Do NOT pass config, it should not be exposed to client-side hydration.
+			contentType,
+			mode: this.request.mode,
+			props: toProps({
+				...passAlong,
+				content: this.content,
+				request: this.request,
+				runMode: RUN_MODE,
+			}),
+			runMode: RUN_MODE,
+			type: 'contentType',
+		};
+		return renderableContentType;
+	}
+
 	private processFragment({
 		component,
 		...passAlong
@@ -322,7 +355,8 @@ export class DataFetcher {
 			descriptor,
 			mode: this.request.mode,
 			path,
-			regions: JSON.parse(JSON.stringify(regions)),
+			regions: JSON.parse(JSON.stringify(regions)), // TODO config should be stripped from child components?
+			runMode: RUN_MODE,
 			type: 'layout',
 		};
 		const toProps = this.layouts[descriptor];
@@ -345,10 +379,11 @@ export class DataFetcher {
 		// log.info('DataFetcher processLayout processedLayoutComponent:%s', toStr(processedLayoutComponent))
 
 		renderableComponent.props = toProps({
+			...passAlong,
 			component: processedLayoutComponent,
 			content: this.content,
 			request: this.request,
-			...passAlong
+			runMode: RUN_MODE,
 		});
 		return renderableComponent;
 	} // processLayout
@@ -398,7 +433,8 @@ export class DataFetcher {
 			descriptor,
 			mode: this.request.mode,
 			path,
-			regions: JSON.parse(JSON.stringify(regions)),
+			regions: JSON.parse(JSON.stringify(regions)), // TODO config should be stripped from child components?
+			runMode: RUN_MODE,
 			type: 'page',
 		};
 
@@ -421,10 +457,11 @@ export class DataFetcher {
 		}) as ProcessedPageComponent;
 
 		renderableComponent.props = toProps({
+			...passAlong,
 			component: processedPageComponent,
 			content: this.content,
 			request: this.request,
-			...passAlong
+			runMode: RUN_MODE,
 		});
 		return renderableComponent;
 	} // processPage
@@ -446,6 +483,7 @@ export class DataFetcher {
 			descriptor,
 			mode: this.request.mode,
 			path,
+			runMode: RUN_MODE,
 			type: 'part',
 		}
 		const toProps = this.parts[descriptor];
@@ -487,10 +525,11 @@ export class DataFetcher {
 		} // for
 
 		renderableComponent.props = toProps({
+			...passAlong,
 			component: processedPartComponent,
 			content: this.content,
 			request: this.request,
-			...passAlong
+			runMode: RUN_MODE,
 		});
 		return renderableComponent;
 	} // processPart
@@ -509,6 +548,7 @@ export class DataFetcher {
 		renderableTextComponent.props = {
 			data: dataFromProcessedHtml(processedHtml),
 		};
+		renderableTextComponent.runMode = RUN_MODE;
 		// log.debug('processTextComponent text renderableTextComponent:%s', toStr(renderableTextComponent));
 		return renderableTextComponent;
 	}
@@ -575,6 +615,14 @@ export class DataFetcher {
 		return processedLayoutOrPageComponent;
 	} // processWithRegions
 
+	public addContentType(contentTypeName: string, {
+		toProps
+	}: {
+		toProps: (params: PageComponentToPropsParams) => Record<string, unknown>;
+	}) {
+		this.contentTypes[contentTypeName] = toProps as PageComponentToPropsFunction;
+	}
+
 	public addLayout<T = Record<string, never>>(descriptor: string, {
 		toProps
 	}: {
@@ -605,6 +653,22 @@ export class DataFetcher {
 		this.parts[descriptor] = toProps as PartComponentToPropsFunction<PART_DESCRIPTOR>;
 	}
 
+	public hasContentType(name: string): boolean {
+		return this.contentTypes[name] !== undefined;
+	}
+
+	public hasLayout(name: string): boolean {
+		return this.layouts[name] !== undefined;
+	}
+
+	public hasPage(name: string): boolean {
+		return this.pages[name] !== undefined;
+	}
+
+	public hasPart(name: string): boolean {
+		return this.parts[name] !== undefined;
+	}
+
 	public process({
 		component,
 		content,
@@ -629,6 +693,16 @@ export class DataFetcher {
 			}
 		}
 		this.content = content;
+
+		const {type: contentType} = content;
+
+		if (this.hasContentType(contentType)) {
+			return this.processContentType({
+				...passAlong,
+				contentType,
+			});
+		}
+
 		if (!component) {
 			component = (content.page || content.fragment) as Component;
 			if (!component) {
