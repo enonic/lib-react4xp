@@ -104,7 +104,6 @@ else
     npmInstall.inputs.files( "package.json", "package-lock.json" )
     // npmInstall.outputs.dir("node_modules")
     npmInstall.outputs.file file( "package-lock.json" )
-    // rollup.dependsOn( npmInstall )
     npmBuild.dependsOn( npmInstall )
 }
 
