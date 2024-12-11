@@ -1,5 +1,6 @@
 {
     "imports": {
+      "@enonic/react4xp/constants.runtime": "../../node_modules/@enonic/react4xp/dist/constants.runtime.js",
       "/lib/xp/io": "./mocks/lib/xp/io.ts",
       "/lib/xp/portal": "./mocks/lib/xp/portal.ts",
       "/lib/enonic/react4xp/asset/getComponentStats": "../main/resources/lib/enonic/react4xp/asset/getComponentStats.ts",
