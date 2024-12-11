@@ -1,15 +1,16 @@
 import alias from '@rollup/plugin-alias';
 import commonjs from '@rollup/plugin-commonjs';
 import esbuild from 'rollup-plugin-esbuild'
+import { fileURLToPath } from 'url';
 import {
 	dirname,
 	join
 } from 'path';
 
-const __filename = new URL(import.meta.url).pathname;
+const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-
+console.log('Rollup config for nodePolyfills ' + __dirname);
 const outDir = 'build/resources/main/lib/enonic/polyfill-react4xp';
 
 export default {
