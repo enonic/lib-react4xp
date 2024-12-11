@@ -85,11 +85,6 @@ compileTestJava.dependsOn npmBuild
 jar.dependsOn npmBuild
 javadoc.dependsOn npmBuild
 
-// task rollup( type: NpmTask ) {
-//     mustRunAfter( processResources )
-//     args = ['run', 'rollup']
-// }
-// jar.dependsOn( rollup )
 
 if ( BUILD_ENV == 'development' )
 {
