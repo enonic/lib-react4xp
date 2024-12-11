@@ -4,10 +4,10 @@ import type {
 } from '../../../..';
 import {startsWith} from '@enonic/js-utils/string/startsWith';
 // import {toStr} from '@enonic/js-utils/value/toStr';
-import {eTagGetter} from './eTagGetter';
-import {getImmutables} from './getImmutables';
-import {getEntries} from './getEntries';
-import {immutableGetter} from './immutableGetter';
+import {eTagGetter} from '/lib/enonic/react4xp/asset/eTagGetter';
+import {getImmutables} from '/lib/enonic/react4xp/asset/getImmutables';
+import {getEntries} from '/lib/enonic/react4xp/asset/getEntries';
+import {immutableGetter} from '/lib/enonic/react4xp/asset/immutableGetter';
 //import {noStoreGetter} from './noStoreGetter';
 //import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/appHelper';
 
@@ -19,7 +19,7 @@ const IMMUTABLES = getImmutables(ENTRIES);
 // log.debug('handleAssetRequest IMMUTABLES:%s', toStr(IMMUTABLES));
 
 
-export function handleAssetRequest(request: Request<{ETag?: string}>): Response {
+export function handleAssetRequest(request: Request): Response {
 	//log.debug('handleAssetRequest() request:%s', toStr(request));
 
 	/*if (IS_DEV_MODE) {

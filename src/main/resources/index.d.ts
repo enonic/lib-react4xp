@@ -1,7 +1,6 @@
 export {
 	Cache,
 	Component,
-	ComponentGeneric,
 	ComponentType,
 	OneOrMore,
 	PageContributions,

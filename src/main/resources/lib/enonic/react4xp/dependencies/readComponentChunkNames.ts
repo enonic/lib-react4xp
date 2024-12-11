@@ -6,7 +6,7 @@ import type {
 
 import endsWith from '@enonic/js-utils/string/endsWith';
 //import {toStr} from '@enonic/js-utils/value/toStr';
-import {COMPONENT_STATS_FILENAME} from '@enonic/react4xp';
+import {COMPONENT_STATS_FILENAME} from '@enonic/react4xp/constants.runtime';
 import {getComponentStats} from '/lib/enonic/react4xp/asset/getComponentStats';
 
 

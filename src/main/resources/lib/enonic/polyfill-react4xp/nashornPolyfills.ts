@@ -63,26 +63,26 @@ const context = (1, eval)('this'); // https://stackoverflow.com/questions/910724
 	if (typeof context.Symbol === 'undefined') context.Symbol = Symbol;
 })(context);
 
+// NOTE: These are not used locally in this file, neither exported, no idea why they are even here...
+// type PhaserConstructor = () => void;
+// interface PhaserInstance {
+// 	arriveAndDeregister: () => void
+// 	forceTermination: () => void
+// 	register: () => void
+// }
 
-type PhaserConstructor = ()=>void;
-interface PhaserInstance {
-	arriveAndDeregister :()=>void
-	forceTermination :()=>void
-	register :()=>void
-}
-
-type TimerConstructor = (name :string, isDaemon :boolean)=>void;
-interface TimerInstance {
-	cancel :()=>void
-	schedule :(
-		fn :()=>void,
-		millis :number
-	)=>void
-}
+// type TimerConstructor = (name: string, isDaemon: boolean) => void;
+// interface TimerInstance {
+// 	cancel: () => void
+// 	schedule: (
+// 		fn: () => void,
+// 		millis: number
+// 	) => void
+// }
 
 // Object.assign
 // Polyfill from: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#polyfill
-//@ts-expect-error TS2550: Property 'assign' does not exist on type 'ObjectConstructor'.
+// // @ts-expect-error TS2550: Property 'assign' does not exist on type 'ObjectConstructor'.
 if (typeof Object.assign !== 'function') {
 	Object.defineProperty(Object, "assign", {
 		//@ts-expect-error TS6133: 'varArgs' is declared but its value is never read.

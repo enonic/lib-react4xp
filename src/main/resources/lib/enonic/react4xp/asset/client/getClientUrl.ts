@@ -1,4 +1,4 @@
-import type { UrlType } from '/types';
+import type { UrlType } from '@enonic-types/lib-react4xp';
 
 
 import { readClientManifestJson } from '/lib/enonic/react4xp/asset/client/readClientManifestJson';

@@ -4,7 +4,7 @@ import type {
 } from '../../../../index.d';
 
 
-import {forceTrimmedArray} from './forceTrimmedArray';
+import {forceTrimmedArray} from '/lib/enonic/react4xp/dependencies/forceTrimmedArray';
 
 
 export function normalizeEntryNames(entryNames :OneOrMore<React4xpNamespace.EntryName> = []) :Array<React4xpNamespace.EntryName> {

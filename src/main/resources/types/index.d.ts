@@ -1,9 +1,10 @@
+export {AppConfig} from './Application.d';
 export {Cache} from './Cache.d';
 export {
 	Component,
-	ComponentGeneric,
 	ComponentType
 } from './Component.d';
+export type { PageTemplateContent } from './ContentTypes';
 export {DoubleUnderscore} from './DoubleUnderscore.d';
 export {Log} from './Log.d';
 export {PageContributions} from './PageContributions.d';

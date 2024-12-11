@@ -1,5 +1,7 @@
-import type { UrlType } from '/types';
-import type { AppConfig } from '/types/Application.d';
+import type {
+	AppConfig,
+	UrlType
+} from '@enonic-types/lib-react4xp';
 import type {
 	PageContributions,
 	Request
@@ -11,7 +13,7 @@ import { getAssetRoot } from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 import { buildErrorContainer } from '/lib/enonic/react4xp/htmlHandling';
 import { getAndMerge as getAndMergePageContributions } from '/lib/enonic/react4xp/pageContributions/getAndMerge';
 import { IS_DEV_MODE } from '/lib/enonic/react4xp/xp/appHelper';
-import isAssumedCSEditMode from '../utils/isEditMode';
+import isAssumedCSEditMode from '/lib/enonic/react4xp/React4xp/utils/isEditMode';
 
 
 /** Generates or modifies existing enonic XP pageContributions. Adds client-side dependency chunks (core React4xp frontend,
@@ -81,24 +83,28 @@ export function renderPageContributions(this: React4xp, {
 
 		this.ensureAndLockBeforeRendering();
 
+		// NOTE: rollup + typescript + babel doesn't like backslashed inside expression inside backticks.
+		let jsonString: string = '';
+		if (!suppressJS) {
+			jsonString = JSON.stringify({
+				command: finalSSR ? 'hydrate' : 'render',
+				devMode: IS_DEV_MODE,
+				hasRegions: this.hasRegions,
+				isPage: this.isPage,
+				jsxPath: this.jsxPath,
+				props: this.props || {}
+			}).replace(/<(\/?script|!--)/gi, "\\u003C$1");
+		}
+
 		// TODO: If hasRegions (and isPage?), flag it in props, possibly handle differently?
 		const headEnd = suppressJS
 			? [] : [
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
 				// '<!-- asset -->',
-				`<script defer src="${getAssetRoot({
-					urlType
-				})}${this.assetPath}"></script>\n`,
+				`<script defer src="${getAssetRoot({urlType})}${this.assetPath}"></script>\n`,
 
 				// What separates outcome 3 and 5? simply ssr
-				`<script data-react4xp-app-name="${app.name}" data-react4xp-ref="${this.react4xpId}" type="application/json">${JSON.stringify({
-					command: finalSSR ? 'hydrate' : 'render',
-					devMode: IS_DEV_MODE,
-					hasRegions: this.hasRegions,
-					isPage: this.isPage,
-					jsxPath: this.jsxPath,
-					props: this.props || {}
-				}).replace(/<(\/?script|!--)/gi, "\\u003C$1")}</script>`,
+				`<script data-react4xp-app-name="${app.name}" data-react4xp-ref="${this.react4xpId}" type="application/json">${jsonString}</script>`,
 			];
 		// log.debug('renderPageContributions() headEnd:%s', toStr(headEnd));
 

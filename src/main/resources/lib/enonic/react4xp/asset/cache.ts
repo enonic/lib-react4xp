@@ -5,6 +5,7 @@ import type {
 
 
 import {includes} from '@enonic/js-utils/array/includes';
+import lcKeys from '@enonic/js-utils/object/lcKeys';
 import {cleanAnyDoubleQuoteWrap} from '@enonic/js-utils/string/cleanAnyDoubleQuoteWrap';
 import {startsWith} from '@enonic/js-utils/string/startsWith';
 //import {toStr} from '@enonic/js-utils/value/toStr';
@@ -61,28 +62,24 @@ export function expireAsset({
 
 export function getCachedETag(assetPath :string) {
 	//let fromCache = true;
-	const ETag = eTagCache.get(assetPath, () => {
+	const etag = eTagCache.get(assetPath, () => {
 		//fromCache = false;
-		const response = eTagGetter({
-			rawPath: assetPath
-		});
-		const {
-			headers: {
-				ETag // Starts and ends with double quotes
-			}
-		} = response;
-		const cleanedETag = cleanAnyDoubleQuoteWrap(ETag);
+		const response = eTagGetter({ rawPath: assetPath });
+		const {headers} = response;
+		const lcHeaders = lcKeys(headers) as typeof headers;
+		const {etag} = lcHeaders; // Starts and ends with double quotes
+		const cleanedETag = cleanAnyDoubleQuoteWrap(etag);
 		//log.debug('getCachedETag(%s) --> %s (added to cache)', assetPath, ETag);
 		return cleanedETag;
 	}) as string;
 	/*if (fromCache) {
 		log.debug('getCachedETag(%s) --> %s (from cache)', assetPath, ETag);
 	}*/
-	return ETag;
+	return etag;
 } // getCachedETag
 
 
-export function getCachedAssetResponse(request :Request<{ETag? :string}>) {
+export function getCachedAssetResponse(request: Partial<Request>) {
 	//log.debug('getCachedAssetResponse() request:%s', toStr(request));
 	const {
 		contextPath = '',

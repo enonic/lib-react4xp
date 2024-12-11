@@ -1,0 +1,18 @@
+{
+    "include": [
+        "./tsup.config.ts",
+        // "./tsup/*.ts",
+    ],
+    "exclude": [
+        "./node_modules/**/*.ts",
+        "./**/*.d.ts",
+    ],
+    "compilerOptions": {
+        "declaration": false,
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "skipLibCheck": true,
+        "target": "ESNext",
+        "types": ["node"],
+    }
+}
