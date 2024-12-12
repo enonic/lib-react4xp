@@ -1,11 +1,11 @@
 import type {
+	PageContributions,
+	Request,
+} from '@enonic-types/core';
+import type {
 	AppConfig,
 	UrlType
 } from '@enonic-types/lib-react4xp';
-import type {
-	PageContributions,
-	Request
-} from '../../../../..';
 import type { React4xp } from '../../React4xp';
 import { isSet } from '@enonic/js-utils/value/isSet';
 //import {toStr} from '@enonic/js-utils/value/toStr';

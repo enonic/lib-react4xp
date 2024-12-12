@@ -1,6 +1,6 @@
 import type {
+	EntryName,
 	OneOrMore,
-	React4xp as React4xpNamespace
 } from '../../../../index.d';
 
 
@@ -24,7 +24,7 @@ let buildStatsEntrypoints :Object|undefined;
  *  ASSUMES that stats.json.entrypoints is an object where the keys are entry names without file extensions, mapping to values that are objects,
  *  which in turn have an "assets" key, under which are the full file names of the entry's dependencies.
  *  If the input array is empty or null, returns ALL dependency chunk names. */
-export function readComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.EntryName>) {
+export function readComponentChunkNames(entryNames: OneOrMore<EntryName>) {
 	//log.debug('readComponentChunkNames(%s)', toStr(entryNames));
 
     // Just verify that it exists and has a content:
@@ -39,7 +39,7 @@ export function readComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.
     const output = [];
     const missing = [];
 
-    (entryNames as Array<React4xpNamespace.EntryName>).forEach(entry => {
+    (entryNames as Array<EntryName>).forEach(entry => {
         try {
             let data = buildStatsEntrypoints[entry];
             if (!data) {

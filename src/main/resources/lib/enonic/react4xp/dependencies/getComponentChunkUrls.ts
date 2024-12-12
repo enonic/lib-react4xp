@@ -1,7 +1,7 @@
 import type { UrlType } from '@enonic-types/lib-react4xp';
 import type {
+	EntryName,
 	OneOrMore,
-	React4xp as React4xpNamespace
 } from '../../../../index.d';
 
 
@@ -11,7 +11,7 @@ import { getComponentChunkNames } from '/lib/enonic/react4xp/dependencies/getCom
 
 // NOTE: This function is exported in ..React4xp.ts, so a major release is needed to change it's signature.
 // TODO: Change to single param with two properties.
-export function getComponentChunkUrls(entries: OneOrMore<React4xpNamespace.EntryName>, {
+export function getComponentChunkUrls(entries: OneOrMore<EntryName>, {
 	urlType // default is app.config['react4xp.urlType'] || 'server'
 }: {
 	urlType?: UrlType
