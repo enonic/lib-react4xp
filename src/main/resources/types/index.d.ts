@@ -16,8 +16,6 @@ export {
 	React4xp,
 	UrlType
 } from './React4xp.d';
-export {Request} from './Request.d'
-export {Response} from './Response.d';
 export {Stats} from './Stats.d';
 
 export type OneOrMore<T> = T | T[];

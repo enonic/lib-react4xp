@@ -35,7 +35,7 @@ import type {
 	RenderableTextComponent,
 	RenderableWarning,
 	XpRunMode,
-} from '@enonic/react-components/nashorn';
+} from '@enonic/react-components/dist/nashorn';
 
 
 import {getIn} from '@enonic/js-utils/object/getIn';

@@ -1,7 +1,7 @@
+import type { Request } from '@enonic-types/core';
 import type {
 	Id,
 	React4xp,
-	Request
 } from '@enonic-types/lib-react4xp';
 //import type {React4xp} from './React4xp';
 
