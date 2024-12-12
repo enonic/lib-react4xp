@@ -1,7 +1,7 @@
 import type {
 	Request,
 	Response
-} from '../../../..';
+} from '@enonic-types/core';
 import {startsWith} from '@enonic/js-utils/string/startsWith';
 // import {toStr} from '@enonic/js-utils/value/toStr';
 import {eTagGetter} from '/lib/enonic/react4xp/asset/eTagGetter';

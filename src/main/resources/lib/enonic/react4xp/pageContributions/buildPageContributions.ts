@@ -1,8 +1,8 @@
+import type { PageContributions } from '@enonic-types/core';
 import type { UrlType } from '@enonic-types/lib-react4xp';
 import type {
+	EntryName,
 	OneOrMore,
-	PageContributions,
-	React4xp as React4xpNamespace
 } from '../../../../index.d';
 
 
@@ -24,7 +24,7 @@ export function buildPageContributions({
 	suppressJS,
 	urlType // default is app.config['react4xp.urlType'] || 'server'
 }: {
-	entries: OneOrMore<React4xpNamespace.EntryName>
+	entries: OneOrMore<EntryName>
 	suppressJS: boolean
 	urlType?: UrlType
 }) {

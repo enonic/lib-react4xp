@@ -1,13 +1,13 @@
 import type {
+	EntryName,
 	OneOrMore,
-	React4xp as React4xpNamespace
 } from '../../../../index.d';
 
 
 import {isString} from '@enonic/js-utils/value/isString';
 
 
-export function forceTrimmedArray(entryNames :OneOrMore<React4xpNamespace.EntryName> = []) :Array<React4xpNamespace.EntryName> {
+export function forceTrimmedArray(entryNames: OneOrMore<EntryName> = []): EntryName[] {
     if (isString(entryNames)) {
         const trimmed = entryNames.trim();
         return (trimmed === "")

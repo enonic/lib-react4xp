@@ -1,6 +1,6 @@
 import type {
+	EntryName,
 	OneOrMore,
-	React4xp as React4xpNamespace
 } from '../../../../index.d';
 
 
@@ -11,7 +11,7 @@ import {readComponentChunkNamesCached} from '/lib/enonic/react4xp/dependencies/r
 import {IS_PROD_MODE} from '/lib/enonic/react4xp/xp/appHelper';
 
 
-export function getComponentChunkNames(entryNames :OneOrMore<React4xpNamespace.EntryName>) {
+export function getComponentChunkNames(entryNames: OneOrMore<EntryName>) {
 	const componentChunkNames = IS_PROD_MODE
     	? readComponentChunkNamesCached(entryNames)
     	: readComponentChunkNames(forceTrimmedArray(entryNames));

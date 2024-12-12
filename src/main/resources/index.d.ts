@@ -1,12 +1,8 @@
 export {
 	Cache,
-	Component,
 	ComponentType,
+	EntryName,
 	OneOrMore,
-	PageContributions,
-	React4xp,
-	Request,
-	Response,
 	Stats,
 } from './types/index.d';
 

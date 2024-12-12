@@ -1,16 +1,15 @@
 import type { Request } from '@enonic-types/core';
 import type {
 	Id,
-	React4xp,
+	Instance,
 } from '@enonic-types/lib-react4xp';
-//import type {React4xp} from './React4xp';
 
 
 export function buildErrorContainer(
 	heading: string,
 	message: string,
 	request: Request,
-	react4xpObj: React4xp.Instance | {
+	react4xpObj: Instance | {
 		jsxPath: string|object
 		react4xpId: Id
 	},

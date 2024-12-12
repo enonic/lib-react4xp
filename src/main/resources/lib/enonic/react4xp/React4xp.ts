@@ -1,5 +1,6 @@
 import type {
 	Component,
+	PageContributions,
 	Request,
 	Response,
 } from '@enonic-types/core';
@@ -7,7 +8,6 @@ import type {
 	Entry,
 	Id,
 	Instance,
-	PageContributions,
 	// React4xp as React4xpNamespace,
 	UrlType
 } from '@enonic-types/lib-react4xp';

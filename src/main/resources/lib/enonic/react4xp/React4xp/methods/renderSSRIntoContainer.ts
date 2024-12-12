@@ -1,4 +1,4 @@
-import type {Request} from '../../../../..';
+import type {Request} from '@enonic-types/core';
 import type {React4xp} from '../../React4xp';
 
 

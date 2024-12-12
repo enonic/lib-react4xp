@@ -1,6 +1,4 @@
-import type {
-	Response,
-} from '../../..';
+import type { Response } from '@enonic-types/core';
 
 
 import {forceArray} from '@enonic/js-utils/array/forceArray';

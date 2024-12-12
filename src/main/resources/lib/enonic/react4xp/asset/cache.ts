@@ -1,7 +1,7 @@
 import type {
 	Request,
 	Response
-} from '../../../..';
+} from '@enonic-types/core';
 
 
 import {includes} from '@enonic/js-utils/array/includes';

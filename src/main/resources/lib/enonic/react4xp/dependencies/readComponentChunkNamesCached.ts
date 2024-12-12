@@ -1,6 +1,6 @@
 import type {
+	EntryName,
 	OneOrMore,
-	React4xp as React4xpNamespace
 } from '../../../../index.d';
 
 
@@ -14,7 +14,7 @@ import {readComponentChunkNames} from '/lib/enonic/react4xp/dependencies/readCom
 // WARNING: Do not cache anything that contains assetRoot, it changes per context!
 // But since this doesn't contain assetRoot, it's ok to cache :)
 // Cached version of readComponentChunkNames - used in prod mode
-export function readComponentChunkNamesCached(entryNames :OneOrMore<React4xpNamespace.EntryName>) :Array<string> {
+export function readComponentChunkNamesCached(entryNames: OneOrMore<EntryName>): string[] {
     entryNames = normalizeEntryNames(entryNames);
 
     const cacheKey = getSiteLocalCacheKey(entryNames.join("*"));

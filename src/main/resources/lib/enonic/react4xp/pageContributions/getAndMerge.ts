@@ -1,8 +1,8 @@
+import type { PageContributions } from '@enonic-types/core';
 import type { UrlType } from '@enonic-types/lib-react4xp';
 import type {
-	OneOrMore,
-	PageContributions,
-	React4xp as React4xpNamespace
+	EntryName,
+	OneOrMore
 } from '../../../../index.d';
 
 
@@ -30,7 +30,7 @@ export function getAndMerge({
 	suppressJS,
 	urlType // default is app.config['react4xp.urlType'] || 'server'
 }: {
-	entryNames: OneOrMore<React4xpNamespace.EntryName>
+	entryNames: OneOrMore<EntryName>
 	incomingPgContrib: PageContributions
 	newPgContrib: PageContributions
 	suppressJS: boolean
