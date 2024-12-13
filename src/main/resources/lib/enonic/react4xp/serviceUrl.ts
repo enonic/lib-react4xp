@@ -28,7 +28,7 @@ export function serviceUrl({
 	const bean: ServiceUrlBuilder = __.newBean('com.enonic.lib.react4xp.url.ServiceUrlBuilder');
 
 	bean.setApplication(application);
-	bean.setParams(params);
+	bean.setParams(__.toScriptValue(params ?? {}));
 	bean.setPath(path);
 	bean.setType(type);
 	bean.setServiceName(service);
