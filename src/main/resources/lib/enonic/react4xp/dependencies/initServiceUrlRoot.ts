@@ -14,10 +14,10 @@ export function initServiceUrlRoot({
 	serviceName?: string,
 	urlType?: UrlType
 } = {}) {
-	return serviceUrl({
+	return `${serviceUrl({
 		application: app.name,
 		path: '/',
 		service: serviceName,
 		type: urlType
-	});
+	})}/`;
 }
