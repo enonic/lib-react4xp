@@ -10,6 +10,7 @@ import type {
 	PageComponent,
 	PageComponentWhenAutomaticTemplate,
 	PageComponentWhenSpecificTemplate,
+	PageContributions,
 	PageDescriptor,
 	// Part,
 	PartComponent,
@@ -37,7 +38,7 @@ import type {
 	XpRunMode,
 } from '@enonic/react-components/dist/nashorn';
 
-
+import {forceArray} from '@enonic/js-utils/array/forceArray';
 import {getIn} from '@enonic/js-utils/object/getIn';
 import {setIn} from '@enonic/js-utils/object/setIn';
 import {toStr} from '@enonic/js-utils/value/toStr';
@@ -176,10 +177,12 @@ export interface ProcessResult<
 	COMPONENT extends RenderableComponent = RenderableComponent
 > {
 	component?: COMPONENT;
+	pageContributions?: PageContributions;
 	response?: Response;
 }
 
 export interface ProcessorResult {
+	pageContributions?: PageContributions
 	response?: Response;
 	props?: Record<string, unknown>;
 }
@@ -210,11 +213,31 @@ export type ShortcutContent = Content<{
 
 const RUN_MODE = IS_DEV_MODE ? 'development' : 'production';
 
+const EMPTY_PAGE_CONTRIBUTIONS: PageContributions = {
+	headBegin: [],
+	headEnd: [],
+	bodyBegin: [],
+	bodyEnd: [],
+};
+
+function unique(
+	arrayOfArrays: string[][],
+): string[] {
+  const uniqueEntries: string[] = [];
+  arrayOfArrays.forEach(arr => {
+    forceArray(arr).forEach(item => {
+        uniqueEntries.push(item);
+    });
+  });
+  return uniqueEntries;
+}
+
 export class DataFetcher {
 	private content: PageContent;
 	private contentTypes: Record<PageDescriptor, PageComponentProcessorFunction> = {};
 	private layouts: Record<LayoutDescriptor, LayoutComponentProcessorFunction> = {};
 	private mixinSchemas: Record<string, MixinSchema> = {}
+	private pageContributions: PageContributions = {...EMPTY_PAGE_CONTRIBUTIONS};
 	private pages: Record<PageDescriptor, PageComponentProcessorFunction> = {};
 	private parts: Record<PartDescriptor, PartComponentProcessorFunction> = {};
 	private request: Request;
@@ -337,6 +360,35 @@ export class DataFetcher {
 		return htmlAreas;
 	}
 
+	private mergePageContributions(pageContributions?: PageContributions) {
+		if (pageContributions) {
+			if (pageContributions.headBegin) {
+				this.pageContributions.headBegin = unique([
+					this.pageContributions.headBegin,
+					pageContributions.headBegin,
+				]);
+			}
+			if (pageContributions.headEnd) {
+				this.pageContributions.headEnd = unique([
+					this.pageContributions.headEnd,
+					pageContributions.headEnd,
+				]);
+			}
+			if (pageContributions.bodyBegin) {
+				this.pageContributions.bodyBegin = unique([
+					this.pageContributions.bodyBegin,
+					pageContributions.bodyBegin,
+				]);
+			}
+			if (pageContributions.bodyEnd) {
+				this.pageContributions.bodyEnd = unique([
+					this.pageContributions.bodyEnd,
+					pageContributions.bodyEnd,
+				]);
+			}
+		}
+	}
+
 	private processContentType({
 		contentType,
 		...passAlong
@@ -347,6 +399,7 @@ export class DataFetcher {
 		const processor = this.contentTypes[contentType];
 
 		const {
+			pageContributions,
 			props,
 			response,
 		} = processor({
@@ -355,6 +408,7 @@ export class DataFetcher {
 			request: this.request,
 			runMode: RUN_MODE,
 		});
+		this.mergePageContributions(pageContributions);
 
 		if (response) {
 			return { response };
@@ -369,7 +423,8 @@ export class DataFetcher {
 		};
 
 		return {
-			component: renderableContentType
+			component: renderableContentType,
+			pageContributions: this.pageContributions,
 		};
 	}
 
@@ -514,15 +569,18 @@ export class DataFetcher {
 			runMode: RUN_MODE,
 		});
 		const {
+			pageContributions,
 			props,
 			response,
 		} = processorResult;
+		this.mergePageContributions(pageContributions);
 		if (response) {
 			return { response };
 		}
 		renderableComponent.props = props;
 		return {
-			component: renderableComponent
+			component: renderableComponent,
+			pageContributions: this.pageContributions,
 		};
 	} // processLayout
 
@@ -661,15 +719,18 @@ export class DataFetcher {
 			runMode: RUN_MODE,
 		});
 		const {
+			pageContributions,
 			props,
 			response,
 		} = processorResult;
+		this.mergePageContributions(pageContributions);
 		if (response) {
 			return { response };
 		}
 		renderableComponent.props = props;
 		return {
-			component: renderableComponent
+			component: renderableComponent,
+			pageContributions: this.pageContributions,
 		};
 	} // processPage
 
@@ -742,13 +803,16 @@ export class DataFetcher {
 		const {
 			props,
 			response,
+			pageContributions,
 		} = processorResult;
+		this.mergePageContributions(pageContributions);
 		if (response) {
 			return { response };
 		}
 		renderableComponent.props = props;
 		return {
-			component: renderableComponent
+			component: renderableComponent,
+			pageContributions: this.pageContributions,
 		};
 	} // processPart
 
@@ -768,7 +832,7 @@ export class DataFetcher {
 		};
 		// log.debug('processTextComponent text renderableTextComponent:%s', toStr(renderableTextComponent));
 		return {
-			component: renderableTextComponent
+			component: renderableTextComponent,
 		};
 	}
 
@@ -932,6 +996,7 @@ export class DataFetcher {
 			}
 		}
 		this.content = content;
+		this.pageContributions = {...EMPTY_PAGE_CONTRIBUTIONS};
 
 		// const { method } = request;
 		const { type: contentType } = content;
