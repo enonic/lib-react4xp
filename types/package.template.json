@@ -4,11 +4,11 @@
       "url": "https://github.com/enonic/lib-react4xp/issues"
     },
     "dependencies": {
-        "@enonic-types/core": "^%XP_TYPES_VERSION%",
-        "@enonic-types/lib-io": "^%XP_TYPES_VERSION%",
-        "@enonic-types/lib-portal": "^%XP_TYPES_VERSION%",
-        "@enonic-types/lib-schema": "^%XP_TYPES_VERSION%",
-        "@enonic/react-components": "^%REACT_COMPONENTS_VERSION%"
+        "@enonic-types/core": "%XP_TYPES_VERSION%",
+        "@enonic-types/lib-io": "%XP_TYPES_VERSION%",
+        "@enonic-types/lib-portal": "%XP_TYPES_VERSION%",
+        "@enonic-types/lib-schema": "%XP_TYPES_VERSION%",
+        "@enonic/react-components": "%REACT_COMPONENTS_VERSION%"
     },
     "description": "Type definitions for lib-react4xp.",
     "files": [
