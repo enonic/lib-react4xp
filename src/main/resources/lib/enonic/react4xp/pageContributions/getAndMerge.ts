@@ -1,5 +1,5 @@
 import type { PageContributions } from '@enonic-types/core';
-import type { UrlType } from '@enonic-types/lib-react4xp';
+import type { UrlType } from '/types';
 import type {
 	EntryName,
 	OneOrMore

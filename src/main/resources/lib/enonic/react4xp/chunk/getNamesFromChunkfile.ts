@@ -1,5 +1,5 @@
 import {startsWith} from '@enonic/js-utils/string/startsWith';
-import {R4X_TARGETSUBDIR} from '@enonic/react4xp/constants.runtime';
+import {R4X_TARGETSUBDIR} from '@enonic/react4xp';
 
 import {getResource} from '/lib/enonic/react4xp/resource/getResource';
 import {readResourceAsJson} from '/lib/enonic/react4xp/resource/readResourceAsJson';

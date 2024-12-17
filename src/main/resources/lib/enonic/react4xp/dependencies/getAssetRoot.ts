@@ -1,4 +1,4 @@
-import type { UrlType } from '@enonic-types/lib-react4xp';
+import type { UrlType } from '/types';
 
 
 import { initServiceUrlRoot } from '/lib/enonic/react4xp/dependencies/initServiceUrlRoot';

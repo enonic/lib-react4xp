@@ -1,7 +1,7 @@
 import type {
 	AppConfig,
 	UrlType,
-} from '@enonic-types/lib-react4xp';
+} from '/types';
 
 
 import { isSet } from '@enonic/js-utils/value/isSet';

@@ -1,4 +1,4 @@
-import type { AppConfig } from '@enonic-types/lib-react4xp';
+import type { AppConfig } from '/types';
 import { isSet } from '@enonic/js-utils/value/isSet';
 
 

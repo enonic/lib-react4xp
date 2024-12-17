@@ -1,10 +1,10 @@
-import type { UrlType } from '@enonic-types/lib-react4xp';
+import type { UrlType } from '/types';
 
 
 import {
 	GLOBALS_FILENAME,
 	R4X_TARGETSUBDIR
-} from '@enonic/react4xp/constants.runtime';
+} from '@enonic/react4xp';
 import { getNamesFromChunkfile } from '/lib/enonic/react4xp/chunk/getNamesFromChunkfile';
 import { getAssetRoot } from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 

@@ -2,7 +2,7 @@ import type { Request } from '@enonic-types/core';
 import type {
 	Id,
 	Instance,
-} from '@enonic-types/lib-react4xp';
+} from '/types';
 
 
 export function buildErrorContainer(

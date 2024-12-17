@@ -5,7 +5,7 @@ import type {
 import type {
 	AppConfig,
 	UrlType
-} from '@enonic-types/lib-react4xp';
+} from '/types';
 import type { React4xp } from '../../React4xp';
 import { isSet } from '@enonic/js-utils/value/isSet';
 //import {toStr} from '@enonic/js-utils/value/toStr';

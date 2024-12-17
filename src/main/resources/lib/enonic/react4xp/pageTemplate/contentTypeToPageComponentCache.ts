@@ -1,4 +1,4 @@
-import type {Cache} from '@enonic-types/lib-react4xp';
+import type {Cache} from '/types';
 
 // @ts-expect-error No types available for this module
 import {newCache}  from '/lib/cache';
