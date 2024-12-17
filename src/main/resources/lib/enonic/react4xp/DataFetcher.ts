@@ -8,8 +8,6 @@ import type {
 	Merge,
 	// Page,
 	PageComponent,
-	PageComponentWhenAutomaticTemplate,
-	PageComponentWhenSpecificTemplate,
 	PageDescriptor,
 	// Part,
 	PartComponent,
@@ -167,7 +165,7 @@ export type PartComponentProcessorFunction<
 
 interface ProcessParams {
 	[passAlongKey: string]: unknown;
-	component?: Component | PageComponentWhenSpecificTemplate | PageComponentWhenAutomaticTemplate;
+	component?: Component;
 	content?: PageContent;
 	request: Request;
 }
@@ -530,7 +528,7 @@ export class DataFetcher {
 		component,
 		...passAlong
 	}: {
-		component: PageComponent | PageComponentWhenSpecificTemplate | PageComponentWhenAutomaticTemplate;
+		component: PageComponent;
 		siteConfig?: Record<string, unknown> | null; // In passAlong
 	}): ProcessResult<RenderablePageComponent | RenderableWarning> {
 		// log.debug('processPage component:', component);
@@ -973,7 +971,7 @@ export class DataFetcher {
 			// case 'page':
 			default: // Since componentType is undefined when using automatic page templates, we have to assume it's a page.
 				return this.processPage({
-					component: component as PageComponent | PageComponentWhenSpecificTemplate | PageComponentWhenAutomaticTemplate,
+					component: component as PageComponent,
 					...passAlong
 				});
 				// throw new Error(`processComponents: component type not supported: ${componentType}!`);
