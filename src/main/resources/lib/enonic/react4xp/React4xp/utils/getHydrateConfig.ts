@@ -1,4 +1,4 @@
-import type { AppConfig } from '/types/Application.d';
+import type { AppConfig } from '../../types/Application';
 import { isSet } from '@enonic/js-utils/value/isSet';
 
 

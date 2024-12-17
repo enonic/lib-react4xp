@@ -85,8 +85,6 @@
 
             "/lib/enonic/static": ["./node_modules/@enonic-types/lib-static"],
             "/lib/xp/*": ["./node_modules/@enonic-types/lib-*"],
-            "/types": ["./src/main/resources/types/index.d.ts"],
-            "/types/*": ["./src/main/resources/types/*"],
             "/*": ["./src/main/resources/*"],
         },
         "removeComments": true,

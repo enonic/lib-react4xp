@@ -1,4 +1,6 @@
-import {getResource as javaGetResource, type Resource} from '/lib/xp/io';
+import type { Resource } from '@enonic-types/lib-io';
+
+import {getResource as javaGetResource} from '/lib/xp/io';
 
 
 export function getResource(key: string) :Resource {

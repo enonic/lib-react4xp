@@ -1,0 +1,25 @@
+{
+	// "extends": "../tsconfig.json",
+	"files": [
+		"../src/main/resources/lib/enonic/react4xp/index.ts"
+	],
+	// "include": [
+	// 	"../src/main/resources/lib/enonic/react4xp/**/*.ts"
+	// ],
+	"compilerOptions": {
+		"emitDeclarationOnly": true,
+		"declaration": true,
+		"declarationDir": "../build/types",
+		"outDir": "../build/types",
+
+		// Note that this feature does not change how import paths are emitted by tsc
+		"paths": {
+			"/lib/enonic/react4xp/*": ["../src/main/resources/lib/enonic/react4xp/*"],
+			"/lib/xp/*": ["../node_modules/@enonic-types/lib-*"]
+		},
+		"skipLibCheck": true,
+		"types": [
+			"../node_modules/@enonic-types/global",
+		],
+	}
+}

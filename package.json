@@ -57,6 +57,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "lodash": "^4.17.21",
     "make-dir-cli": "^4.0.0",
+    "properties-reader": "^2.3.0",
     "rimraf": "^6.0.1",
     "rollup": "^4.28.1",
     "rollup-plugin-esbuild": "^6.1.1",
@@ -80,6 +81,7 @@
   "private": true,
   "scripts": {
     "build": "concurrently -c auto -g --timings npm:rollup:nodePolyfills npm:tsup:server",
+    "build:types": "tsc -p types/tsconfig.types.json && bun types/process.ts",
     "check:types": "concurrently -c auto -g --timings npm:check:types:*",
     "check:types:graal": "npx tsc --noEmit -p tsconfig.graal.json",
     "check:types:nashorn": "npx tsc --noEmit -p tsconfig.nashorn.json",

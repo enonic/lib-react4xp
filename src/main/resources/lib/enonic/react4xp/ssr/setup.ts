@@ -1,4 +1,4 @@
-import type { AppConfig } from '/types';
+import type { AppConfig } from '/lib/enonic/react4xp/types/Application';
 import {
 	COMPONENT_STATS_FILENAME,
 	ENTRIES_FILENAME,

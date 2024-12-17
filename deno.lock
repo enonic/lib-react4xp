@@ -58,6 +58,7 @@
         "npm:lodash@^4.17.21",
         "npm:make-dir-cli@4",
         "npm:node-fetch@^3.3.2",
+        "npm:properties-reader@^2.3.0",
         "npm:rimraf@^6.0.1",
         "npm:rollup-plugin-esbuild@^6.1.1",
         "npm:rollup-plugin-output-manifest@2",

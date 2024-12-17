@@ -1,4 +1,4 @@
-import type { UrlType } from '/React4xp.d';
+import type { UrlType } from './React4xp';
 
 
 export interface AppConfig {

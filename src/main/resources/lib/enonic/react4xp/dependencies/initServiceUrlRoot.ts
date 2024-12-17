@@ -1,4 +1,4 @@
-import type { UrlType } from '/types';
+import type { UrlType } from '/lib/enonic/react4xp/types/React4xp';
 
 import { getUrlType } from '/lib/enonic/react4xp/React4xp/utils/getUrlType';
 

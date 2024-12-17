@@ -1,0 +1,37 @@
+{
+    "author": "Christian Andreas Westgaard <cwe@enonic.com>",
+    "bugs": {
+      "url": "https://github.com/enonic/lib-react4xp/issues"
+    },
+    "dependencies": {
+        "@enonic-types/core": "^%XP_TYPES_VERSION%",
+        "@enonic-types/lib-io": "^%XP_TYPES_VERSION%",
+        "@enonic-types/lib-portal": "^%XP_TYPES_VERSION%",
+        "@enonic-types/lib-schema": "^%XP_TYPES_VERSION%",
+        "@enonic/react-components": "^%REACT_COMPONENTS_VERSION%"
+    },
+    "description": "Type definitions for lib-react4xp.",
+    "files": [
+      "*"
+    ],
+    "homepage": "https://github.com/enonic/lib-react4xp/tree/master#readme",
+    "keywords": [
+      "react4xp",
+      "enonic",
+      "enonic-xp",
+      "react",
+      "types",
+      "typescript"
+    ],
+    "license": "Apache-2.0",
+    "name": "@enonic-types/lib-react4xp",
+    "publishConfig": {
+      "access": "public"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/enonic/lib-react4xp.git#master"
+    },
+    "types": "index.d.ts",
+    "version": "%VERSION%"
+  }

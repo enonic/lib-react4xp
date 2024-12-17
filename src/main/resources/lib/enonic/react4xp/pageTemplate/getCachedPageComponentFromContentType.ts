@@ -1,5 +1,5 @@
 import type { PageComponent } from '@enonic-types/core';
-import type { PageTemplateContent } from '/types';
+import type { PageTemplateContent } from '/lib/enonic/react4xp/types/ContentTypes';
 
 import {
 	query as queryContent,

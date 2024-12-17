@@ -10,7 +10,7 @@ import type {
 	Instance,
 	// React4xp as React4xpNamespace,
 	UrlType
-} from '/types';
+} from '/lib/enonic/react4xp/types/React4xp';
 
 import { hasOwnProperty } from '@enonic/js-utils/object/hasOwnProperty';
 import { isObject } from '@enonic/js-utils/value/isObject';

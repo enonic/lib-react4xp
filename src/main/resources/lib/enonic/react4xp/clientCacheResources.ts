@@ -1,8 +1,8 @@
 import type { Response } from '@enonic-types/core';
-
+import type { Resource } from '@enonic-types/lib-io';
 
 import {forceArray} from '@enonic/js-utils/array/forceArray';
-import {readLines, type Resource} from '/lib/xp/io';
+import {readLines} from '/lib/xp/io';
 
 
 // Adjusted from https://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/

@@ -2,11 +2,10 @@ import type {
 	PageContributions,
 	Request,
 } from '@enonic-types/core';
-import type {
-	AppConfig,
-	UrlType
-} from '/types';
+import type { AppConfig } from '/lib/enonic/react4xp/types/Application';
+import type { UrlType } from '/lib/enonic/react4xp/types/React4xp';
 import type { React4xp } from '../../React4xp';
+
 import { isSet } from '@enonic/js-utils/value/isSet';
 //import {toStr} from '@enonic/js-utils/value/toStr';
 import { getAssetRoot } from '/lib/enonic/react4xp/dependencies/getAssetRoot';

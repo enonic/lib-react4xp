@@ -14,11 +14,8 @@ Add the corresponding types to your `tsconfig.json` file that is used for applic
 {
   "compilerOptions": {
     "paths": {
-      "/lib/enonic/react4xp": ["node_modules/@enonic-types/lib-react4xp"],
+      "/lib/enonic/react4xp": ["./node_modules/@enonic-types/lib-react4xp"],
     },
-    "types": [
-      "@enonic-types/lib-react4xp"
-    ]
   }
 }
 ```

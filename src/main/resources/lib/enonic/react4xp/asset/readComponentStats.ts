@@ -1,4 +1,4 @@
-import type {Stats} from '../../../..'
+import type {Stats} from '/lib/enonic/react4xp/types/Stats';
 
 
 import {

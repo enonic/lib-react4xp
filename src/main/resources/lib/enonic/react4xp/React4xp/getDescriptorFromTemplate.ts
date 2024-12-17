@@ -1,4 +1,4 @@
-import type {ComponentType} from '../../../..';
+import type {ComponentType} from '/lib/enonic/react4xp/types/Component';
 
 
 import {get as getContentByKey} from '/lib/xp/content';
