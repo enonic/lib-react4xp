@@ -1,5 +1,11 @@
-{ // https://www.typescriptlang.org/tsconfig
-	// This file is for building the @enonic-types/lib-reacvt4xp package
+{
+	// This file is for building the @enonic-types/lib-react4xp package
+	"include": [
+		// Make sure default types matches Nashorn
+		"node_modules/typescript/lib/lib.es5.d.ts",
+
+		"../../../src/main/resources/lib/enonic/react4xp/index.ts",
+	],
 	"compilerOptions": {
 		//──────────────────────────────────────────────────────────────────────
 		// Modules
@@ -10,12 +16,8 @@
 			"/lib/xp/*": ["../../../node_modules/@enonic-types/lib-*"],
 			"/*": ["../../../src/main/resources/*"],
 		},
-		"typeRoots": [
-			"../../../node_modules/@types",
-			"../../../node_modules/@enonic-types"
-		],
 		"types": [
-			"@enonic-types/global",
+			"../../../node_modules/@enonic-types/global",
 		],
 
 		//──────────────────────────────────────────────────────────────────────
@@ -34,11 +36,5 @@
 		// Completeness
 		//──────────────────────────────────────────────────────────────────────
 		"skipLibCheck": true,
-	},
-	"include": [
-		// Make sure default types matches Nashorn
-		"node_modules/typescript/lib/lib.es5.d.ts",
-
-		"../../../src/main/resources/lib/enonic/react4xp/index.ts",
-	]
+	}
 }
