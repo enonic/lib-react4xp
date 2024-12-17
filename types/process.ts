@@ -90,7 +90,12 @@ if (XP_TYPES_VERSION) {
 } else {
   	console.error('Unable to read XP_TYPES_VERSION from package.json!!!');
 	// console.error('Unable to read XP_VERSION from gradle.properties!!!');
-  exit(1);
+	exit(1);
 }
 
-
+if (REACT_COMPONENTS_VERSION) {
+	copyReplaceAndRename('build/types/package.json', 'build/types/package.json', '%REACT_COMPONENTS_VERSION%', REACT_COMPONENTS_VERSION);
+} else {
+	console.error('Unable to read REACT_COMPONENTS_VERSION from package.json!!!');
+	exit(1);
+}
