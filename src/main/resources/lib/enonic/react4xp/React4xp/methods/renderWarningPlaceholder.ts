@@ -1,4 +1,4 @@
-import type { React4xp } from '..';
+import type { React4xp } from '../../React4xp';
 
 
 export function renderWarningPlaceholder(this: React4xp) {
