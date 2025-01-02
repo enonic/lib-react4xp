@@ -216,7 +216,7 @@ export type ShortcutContent = Content<{
 const RUN_MODE = IS_DEV_MODE ? 'development' : 'production';
 
 const ADMIN_CONTEXT: ContextParams = {
-	principals: ['role:system.admin']
+	principals: ['role:system.schema.admin']
 }
 
 export class DataFetcher {
