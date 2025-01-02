@@ -5,6 +5,7 @@
     },
     "dependencies": {
         "@enonic-types/core": "%XP_TYPES_VERSION%",
+        "@enonic-types/lib-context": "%XP_TYPES_VERSION%",
         "@enonic-types/lib-io": "%XP_TYPES_VERSION%",
         "@enonic-types/lib-portal": "%XP_TYPES_VERSION%",
         "@enonic-types/lib-schema": "%XP_TYPES_VERSION%",
