@@ -13,6 +13,7 @@ jobs:
         with:
           repoUser: ci
           repoPassword: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          npmToken: ${{ secrets.NPM_TOKEN }}
 
   release:
     runs-on: ubuntu-latest
