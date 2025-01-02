@@ -13,6 +13,7 @@ jobs:
         with:
           repoUser: ci
           repoPassword: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          codecovToken: ${{ secrets.CODECOV_TOKEN }}
           npmToken: ${{ secrets.NPM_TOKEN }}
 
   release:
