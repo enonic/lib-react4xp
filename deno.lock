@@ -1,24 +1,24 @@
 {
   "version": "4",
   "specifiers": {
-    "jsr:@std/assert@*": "1.0.6",
-    "jsr:@std/internal@^1.0.4": "1.0.4"
+    "jsr:@std/assert@*": "1.0.10",
+    "jsr:@std/internal@^1.0.5": "1.0.5"
   },
   "jsr": {
-    "@std/assert@1.0.6": {
-      "integrity": "1904c05806a25d94fe791d6d883b685c9e2dcd60e4f9fc30f4fc5cf010c72207",
+    "@std/assert@1.0.10": {
+      "integrity": "59b5cbac5bd55459a19045d95cc7c2ff787b4f8527c0dd195078ff6f9481fbb3",
       "dependencies": [
         "jsr:@std/internal"
       ]
     },
-    "@std/internal@1.0.4": {
-      "integrity": "62e8e4911527e5e4f307741a795c0b0a9e6958d0b3790716ae71ce085f755422"
+    "@std/internal@1.0.5": {
+      "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
     }
   },
   "workspace": {
     "packageJson": {
       "dependencies": [
-        "npm:@babel/cli@^7.25.9",
+        "npm:@babel/cli@^7.26.4",
         "npm:@babel/core@^7.26.0",
         "npm:@babel/plugin-proposal-class-properties@^7.17.12",
         "npm:@babel/plugin-proposal-object-rest-spread@^7.20.7",
@@ -26,6 +26,7 @@
         "npm:@babel/register@^7.25.9",
         "npm:@enonic-types/global@^7.15.0-A2",
         "npm:@enonic-types/lib-content@^7.15.0-A2",
+        "npm:@enonic-types/lib-context@^7.15.0-A2",
         "npm:@enonic-types/lib-io@^7.15.0-A2",
         "npm:@enonic-types/lib-node@^7.15.0-A2",
         "npm:@enonic-types/lib-portal@^7.15.0-A2",

@@ -34,7 +34,9 @@ import type {
 	RenderableWarning,
 	XpRunMode,
 } from '@enonic/react-components/dist/nashorn';
-
+import type {
+	ContextParams
+} from '@enonic-types/lib-context';
 
 import {getIn} from '@enonic/js-utils/object/getIn';
 import {setIn} from '@enonic/js-utils/object/setIn';
@@ -53,6 +55,11 @@ import {
 	processHtml,
 	// pageUrl as getPageUrl,
 } from '/lib/xp/portal';
+
+import {
+	run as runInContext
+} from '/lib/xp/context';
+
 import {
 	REQUEST_METHOD,
 	REQUEST_MODE,
@@ -208,6 +215,10 @@ export type ShortcutContent = Content<{
 
 const RUN_MODE = IS_DEV_MODE ? 'development' : 'production';
 
+const ADMIN_CONTEXT: ContextParams = {
+	principals: ['role:system.admin']
+}
+
 export class DataFetcher {
 	private content: PageContent;
 	private contentTypes: Record<PageDescriptor, PageComponentProcessorFunction> = {};
@@ -273,10 +284,14 @@ export class DataFetcher {
 
 				if (!mixin) {
 					const [application] = name.split(':');
-					const mixinsList = listSchemas({
-						application,
-						type: 'MIXIN'
-					}) as MixinSchema[];
+					const mixinsList = runInContext(
+						ADMIN_CONTEXT,
+						() =>
+							listSchemas({
+								application,
+								type: 'MIXIN'
+							}) as MixinSchema[]
+					);
 					// log.debug('findHtmlAreasInFormItemArray mixinsList', mixinsList);
 
 					for (let j = 0; j < mixinsList.length; j++) {
@@ -441,19 +456,19 @@ export class DataFetcher {
 		const {type} = fragment;
 		// log.info('processFragment fragment:', fragment);
 
-		if(type === 'part') {
+		if (type === 'part') {
 			return this.processPart({
 				component: fragment,
 				...passAlong
 			});
 		}
-		if(type === 'layout') {
+		if (type === 'layout') {
 			return this.processLayout({
 				component: fragment,
 				...passAlong
 			});
 		}
-		if(type === 'text') {
+		if (type === 'text') {
 			return this.processTextComponent({
 				component: fragment as TextComponent,
 			});
@@ -493,10 +508,14 @@ export class DataFetcher {
 			};
 		}
 
-		const {form} = getComponentSchema({
-			key: descriptor,
-			type: 'LAYOUT',
-		}) as GetComponentReturnType;
+		const {form} = runInContext(
+			ADMIN_CONTEXT,
+			() =>
+				getComponentSchema({
+					key: descriptor,
+					type: 'LAYOUT',
+				}) as GetComponentReturnType
+		);
 
 		const processedLayoutComponent = this.processWithRegions({
 			component,
@@ -640,10 +659,14 @@ export class DataFetcher {
 			};
 		}
 
-		const {form} = getComponentSchema({
-			key: descriptor,
-			type: 'PAGE',
-		}) as GetComponentReturnType;
+		const {form} = runInContext(
+			ADMIN_CONTEXT,
+			() =>
+				getComponentSchema({
+					key: descriptor,
+					type: 'PAGE',
+				}) as GetComponentReturnType
+		);
 
 		const processedPageComponent = this.processWithRegions({
 			component,
@@ -700,10 +723,14 @@ export class DataFetcher {
 			};
 		}
 
-		const {form} = getComponentSchema({
-			key: descriptor,
-			type: 'PART',
-		}) as GetComponentReturnType;
+		const {form} = runInContext(
+			ADMIN_CONTEXT,
+			() =>
+				getComponentSchema({
+					key: descriptor,
+					type: 'PART',
+				}) as GetComponentReturnType
+		);
 
 		const htmlAreas = this.getHtmlAreas({
 			ancestor: 'config',

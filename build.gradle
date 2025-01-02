@@ -17,6 +17,7 @@ dependencies {
     compileOnly "com.enonic.xp:portal-api:${xpVersion}"
     compileOnly "com.enonic.xp:script-api:${xpVersion}"
 
+    implementation "com.enonic.xp:lib-context:${xpVersion}"
     implementation "com.enonic.xp:lib-io:${xpVersion}"
     implementation "com.enonic.xp:lib-portal:${xpVersion}"
     implementation "com.enonic.xp:lib-schema:${xpVersion}"
