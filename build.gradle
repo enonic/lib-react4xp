@@ -81,10 +81,18 @@ tasks.register('npmBuild', NpmTask) {
   outputs.dir 'build/resources/main'
   outputs.upToDateWhen { false }
 }
+
+tasks.register('publishToNpm', NpmTask ) {
+    onlyIf { !version.endsWith( '-SNAPSHOT' ) }
+    args = ['publish']
+    dependsOn npmBuild
+    workingDir = file('build/types')
+}
+
+publish.dependsOn publishToNpm
 compileTestJava.dependsOn npmBuild
 jar.dependsOn npmBuild
 javadoc.dependsOn npmBuild
-
 
 if ( BUILD_ENV == 'development' )
 {
