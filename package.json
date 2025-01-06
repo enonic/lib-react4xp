@@ -49,7 +49,7 @@
     "@typescript-eslint/parser": "^8.18.2",
     "babel-loader": "^9.2.1",
     "bun": "^1.1.42",
-    "concurrently": "^9.1.1",
+    "concurrently": "^9.1.2",
     "core-js-pure": "^3.39.0",
     "diffable-html": "^5.0.0",
     "esbuild-plugin-manifest": "^1.0.5",
