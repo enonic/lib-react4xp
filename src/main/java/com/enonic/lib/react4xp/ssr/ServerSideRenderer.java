@@ -11,7 +11,6 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.enonic.lib.react4xp.ssr.engine.EngineFactory;
 import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
 import com.enonic.lib.react4xp.ssr.renderer.Renderer;
 import com.enonic.lib.react4xp.ssr.renderer.RendererFactory;
@@ -43,8 +42,7 @@ public class ServerSideRenderer
     }
 
     public void setup( String appName, String scriptsHome, String libraryName, String chunkfilesHome, String entriesJsonFilename,
-                       String chunksGlobalsJsonFilename, String statsComponentsFilename, Integer ssrMaxThreads,
-                       String engineName )
+                       String chunksGlobalsJsonFilename, String statsComponentsFilename, Integer ssrMaxThreads )
     {
         if ( isInitialized.compareAndSet( false, true ) )
         {
@@ -59,8 +57,7 @@ public class ServerSideRenderer
                                 statsComponentsFilename );
 
                 final ResourceReader resourceReader = new ResourceReaderImpl( resourceServiceSupplier, ApplicationKey.from( config.APP_NAME ) );
-                final EngineFactory engineFactory = new EngineFactory( engineName );
-                final RendererFactory rendererFactory = new RendererFactory( engineFactory, resourceReader, config );
+                final RendererFactory rendererFactory = new RendererFactory( resourceReader, config );
 
                 rendererPool = new GenericObjectPool<>( rendererFactory, createPoolConfig( poolSize ) );
             }

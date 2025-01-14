@@ -13,7 +13,6 @@ const SSRreact4xp = __.newBean<{
 		chunksGlobalsJsonFilename: string,
 		statsComponentsFilename: string,
 		ssrMaxThreads: number,
-		engineName: string
 	) => void
 }>('com.enonic.lib.react4xp.ssr.ServerSideRenderer');
 
