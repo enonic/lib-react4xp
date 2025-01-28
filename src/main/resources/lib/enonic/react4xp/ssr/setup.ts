@@ -22,15 +22,6 @@ const appConfig = app.config as AppConfig;
 const SSR_MAX_THREADS = appConfig['react4xp.ssr.maxThreads'];
 // log.debug(`SSR_MAX_THREADS:%s`, SSR_MAX_THREADS);
 
-const SSR_ENGINE_SETTINGS = appConfig['react4xp.ssr.settings'];
-// log.debug(`SSR_ENGINE_SETTINGS:%s`, SSR_ENGINE_SETTINGS);
-
-const SSR_ENGINE_NAME = appConfig['react4xp.ssr.engineName'];
-
-// const resourceChunksGlobalsJson = getResource(FULL_GLOBALS_CHUNKS_FILENAME);
-// const booleanChunksGlobalsJsonExist = resourceChunksGlobalsJson && resourceChunksGlobalsJson.exists();
-
-
 export function setup({
 		ssrMaxThreads
 }: {
@@ -53,7 +44,6 @@ export function setup({
 		normalizeSSRMaxThreads(isSet(ssrMaxThreads)
 			? ssrMaxThreads
 			: SSR_MAX_THREADS
-		),
-		__.nullOrValue(SSR_ENGINE_NAME)
+		)
 	);
 }

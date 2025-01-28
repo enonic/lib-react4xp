@@ -1,13 +1,11 @@
 package com.enonic.lib.react4xp.ssr.renderer;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.script.Bindings;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -32,11 +30,7 @@ public class Renderer {
 
     private static final String POLYFILL_BASICS_FILE = "/lib/enonic/polyfill-react4xp/polyfillBasics.js";
 
-    private static final String POLYFILL_REACT4XP_NASHORN_FILE = "/lib/enonic/polyfill-react4xp/nashornPolyfills.js";
-
     private static final String POLYFILL_REACT4XP_NODE_FILE = "/lib/enonic/polyfill-react4xp/nodePolyfills.js";
-
-    private static final String POLYFILL_REACT4XP_USER_ADDED_FILE = "/lib/enonic/react4xp/nashornPolyfills.userAdded.js";
 
     private final long id;
 
@@ -46,26 +40,21 @@ public class Renderer {
 
     private final AssetLoader assetLoader;
 
-    public Renderer( final EngineFactory engineFactory, final ResourceReader resourceReader, final Config config, final long id )
+    public Renderer( final ResourceReader resourceReader, final Config config, final long id )
     {
         this.id = id;
         this.libraryName = config.LIBRARY_NAME;
 
         LOG.debug( "#{}:{} starting init...", this.id, this.libraryName );
 
-        this.engine = engineFactory.buildEngine();
+        this.engine = EngineFactory.buildEngine();
 
         this.assetLoader = new AssetLoader( resourceReader, config.SCRIPTS_HOME, id, engine );
 
         LOG.debug( "#{}:{} loading polyfills ...", this.id, this.libraryName );
 
         this.assetLoader.loadAssetIntoEngine( POLYFILL_BASICS_FILE, true );
-        if ( this.engine.getFactory().getEngineName().contains( "Nashorn" ) )
-        {
-            this.assetLoader.loadAssetIntoEngine( POLYFILL_REACT4XP_NASHORN_FILE, true );
-        }
         this.assetLoader.loadAssetIntoEngine( POLYFILL_REACT4XP_NODE_FILE, true );
-        this.assetLoader.loadAssetIntoEngine( POLYFILL_REACT4XP_USER_ADDED_FILE, false );
 
         LOG.debug( "#{}:{} loading globals...", this.id, this.libraryName );
 
@@ -114,17 +103,12 @@ public class Renderer {
 
             final Object propsJson = parseJson( props );
             final Object entryWithProps;
-            if ( entryObject.get( "default" ) instanceof Function )
-            {
                 // Graal.js fails to find "default" method when invokeMethod is used. Call directly
                 // Hopefully will be fixed in future versions of Graal.js
+                // entryWithProps = invocable.invokeMethod( entryObject, "default", propsJson );
+
                 final var defaultFunction = (Function<Object, Object[]>) entryObject.get( "default" );
                 entryWithProps = defaultFunction.apply( new Object[]{propsJson} );
-            }
-            else
-            {
-                entryWithProps = invocable.invokeMethod( entryObject, "default", propsJson );
-            }
 
             final String renderedHtml = (String) invocable.invokeMethod( this.engine.get( "ReactDOMServer" ), "renderToString", entryWithProps );
 
@@ -196,10 +180,6 @@ public class Renderer {
         if ( object instanceof List )
         {
             return (List<T>) object;
-        }
-        else if ( object instanceof Bindings ) // Nashorn case
-        {
-            return List.copyOf( (Collection<T>) ( (Bindings) object ).values() );
         }
         else
         {
