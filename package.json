@@ -30,7 +30,7 @@
     "@enonic-types/lib-context": "^7.15.0-B1",
     "@enonic-types/lib-io": "^7.15.0-B2",
     "@enonic-types/lib-node": "^7.15.0-B1",
-    "@enonic-types/lib-portal": "^7.15.0-B1",
+    "@enonic-types/lib-portal": "^7.15.0-B2",
     "@enonic-types/lib-schema": "^7.15.0-A2",
     "@enonic-types/lib-static": "^2.0.0",
     "@enonic/mock-xp": "^1.0.0",
