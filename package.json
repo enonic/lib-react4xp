@@ -27,7 +27,7 @@
     "@babel/register": "^7.25.9",
     "@enonic-types/global": "^7.15.0-B1",
     "@enonic-types/lib-content": "^7.15.0-B2",
-    "@enonic-types/lib-context": "^7.15.0-B1",
+    "@enonic-types/lib-context": "^7.15.0-B2",
     "@enonic-types/lib-io": "^7.15.0-B2",
     "@enonic-types/lib-node": "^7.15.0-B1",
     "@enonic-types/lib-portal": "^7.15.0-B2",
