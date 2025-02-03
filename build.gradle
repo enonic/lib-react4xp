@@ -30,7 +30,7 @@ dependencies {
     implementation 'com.enonic.lib:lib-static:2.0.0'
 
     implementation 'org.attoparser:attoparser:2.0.7.RELEASE'
-    implementation 'org.apache.commons:commons-pool2:2.12.0'
+    implementation 'org.apache.commons:commons-pool2:2.12.1'
 
     testImplementation "com.enonic.xp:testing:${xpVersion}"
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.11.4"
