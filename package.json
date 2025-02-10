@@ -62,7 +62,7 @@
     "properties-reader": "^2.3.0",
     "rimraf": "^6.0.1",
     "rollup": "^4.32.0",
-    "rollup-plugin-esbuild": "^6.1.1",
+    "rollup-plugin-esbuild": "^6.2.0",
     "rollup-plugin-output-manifest": "^2.0.0",
     "rollup-plugin-swc3": "^0.12.1",
     "ts-jest": "^29.2.5",
