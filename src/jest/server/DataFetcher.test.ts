@@ -1,4 +1,4 @@
-import type {Component, Request} from '@enonic-types/core';
+import type {Component, Request, PageComponent, LayoutComponent} from '@enonic-types/core';
 import type {RenderablePageComponent} from '@enonic/react-components';
 
 import {describe, expect, test as it} from '@jest/globals';
@@ -15,14 +15,13 @@ import {DEFAULT_PAGE_DESCRIPTOR, EXAMPLE_PART_DESCRIPTOR, PAGE_COMPONENT, PAGE_C
 
 const dataFetcher = new DataFetcher();
 dataFetcher.addLayout(TWO_COLUMNS_LAYOUT_DESCRIPTOR, {
-	toProps: ({
-		component,
-		content,
-		processedComponent,
-		processedConfig,
-		request,
-	}) => {
-		const {regions} = processedComponent;
+	processor: ({
+					component,
+					content,
+					siteConfig,
+					request,
+				}) => {
+		const {regions} = component as LayoutComponent;
 		// console.debug('layout toProps:', stringify({
 		// 	// component,
 		// 	// content,
@@ -37,13 +36,12 @@ dataFetcher.addLayout(TWO_COLUMNS_LAYOUT_DESCRIPTOR, {
 	},
 });
 dataFetcher.addPage(DEFAULT_PAGE_DESCRIPTOR, {
-	toProps: ({
-		component,
-		content,
-		processedComponent,
-		processedConfig,
-		request,
-	}) => {
+	processor: ({
+					component,
+					content,
+					siteConfig,
+					request,
+				}) => {
 		// console.debug('page toProps:', {
 		// 	// component,
 		// 	// content,
@@ -51,22 +49,22 @@ dataFetcher.addPage(DEFAULT_PAGE_DESCRIPTOR, {
 		// 	processedConfig,
 		// 	// request
 		// });
-		const {regions} = processedComponent;
+		const {regions} = component as PageComponent;
 		return {
 			regions
 		};
 	},
 });
 dataFetcher.addPart(EXAMPLE_PART_DESCRIPTOR, {
-	toProps: ({
-		component,
-		content,
-		processedConfig,
-		request,
-	}) => {
+	processor: ({
+					component,
+					content,
+					siteConfig,
+					request,
+				}) => {
 		// console.debug("part toProps:", { component, content, processedConfig, request });
 		return {
-			data: processedConfig.anHtmlArea
+			data: siteConfig.anHtmlArea
 		};
 	},
 });
@@ -99,19 +97,19 @@ describe('DataFetcher', () => {
 			data: {
 				processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
 				macros: [
-				  {
-					config: {
-					  info: {
-						header: 'Header',
-						body: 'Text'
-					  }
-					},
-					ref: '1',
-					name: 'info',
-					descriptor: 'whatever:info'
-				  }
+					{
+						config: {
+							info: {
+								header: 'Header',
+								body: 'Text'
+							}
+						},
+						ref: '1',
+						name: 'info',
+						descriptor: 'whatever:info'
+					}
 				]
-			  },
+			},
 			//   mode: 'edit' // TODO
 		});
 	});
@@ -122,19 +120,19 @@ describe('DataFetcher', () => {
 			data: {
 				processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
 				macros: [
-				  {
-					config: {
-					  info: {
-						header: 'Header',
-						body: 'Text'
-					  }
-					},
-					ref: '1',
-					name: 'info',
-					descriptor: 'whatever:info'
-				  }
+					{
+						config: {
+							info: {
+								header: 'Header',
+								body: 'Text'
+							}
+						},
+						ref: '1',
+						name: 'info',
+						descriptor: 'whatever:info'
+					}
 				]
-			  },
+			},
 			//   mode: 'edit' // TODO
 		});
 	});
@@ -145,19 +143,19 @@ describe('DataFetcher', () => {
 			data: {
 				processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
 				macros: [
-				  {
-					config: {
-					  info: {
-						header: 'Header',
-						body: 'Text'
-					  }
-					},
-					ref: '1',
-					name: 'info',
-					descriptor: 'whatever:info'
-				  }
+					{
+						config: {
+							info: {
+								header: 'Header',
+								body: 'Text'
+							}
+						},
+						ref: '1',
+						name: 'info',
+						descriptor: 'whatever:info'
+					}
 				]
-			  },
+			},
 			//   mode: 'edit' // TODO
 		});
 	});
@@ -172,19 +170,19 @@ describe('DataFetcher', () => {
 			data: {
 				processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
 				macros: [
-				  {
-					config: {
-					  info: {
-						header: 'Header',
-						body: 'Text'
-					  }
-					},
-					ref: '1',
-					name: 'info',
-					descriptor: 'whatever:info'
-				  }
+					{
+						config: {
+							info: {
+								header: 'Header',
+								body: 'Text'
+							}
+						},
+						ref: '1',
+						name: 'info',
+						descriptor: 'whatever:info'
+					}
 				]
-			  },
+			},
 			//   mode: 'edit' // TODO
 		});
 	});
@@ -197,111 +195,111 @@ describe('DataFetcher', () => {
 		// console.info('layoutComponent:%s', stringify(layoutComponent, { maxItems: Infinity }));
 		expect(layoutComponent.props).toEqual({
 			regions: {
-			  left: {
-				components: [
-				  {
-					path: '/main/4/left/0',
-					type: 'text',
-					text: '<p>[info header="Header"]Text[/info]</p>',
-					props: {
-					  data: {
-						processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
-						macros: [
-						  {
-							config: {
-							  info: {
-								header: 'Header',
-								body: 'Text'
-							  }
-							},
-							ref: '1',
-							name: 'info',
-							descriptor: 'whatever:info'
-						  }
-						]
-					  }
-					}
-				  },
-				  {
-					type: 'text',
-					text: '<p>[info header="Header"]Text[/info]</p>',
-					path: '/main/1',
-					props: {
-					  data: {
-						processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
-						macros: [
-						  {
-							config: {
-							  info: {
-								header: 'Header',
-								body: 'Text'
-							  }
-							},
-							ref: '1',
-							name: 'info',
-							descriptor: 'whatever:info'
-						  }
-						]
-					  },
-					  mode: undefined
-					}
-				  }
-				],
-				name: 'left'
-			  },
-			  right: {
-				components: [
-					{
-						descriptor: 'com.enonic.app.react4xp:example',
-						path: '/main/4/right/0',
-						type: 'part',
-						props: {
-						  data: {
-							processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
-							macros: [
-							  {
-								config: {
-								  info: {
-									header: 'Header',
-									body: 'Text'
-								  }
+				left: {
+					components: [
+						{
+							path: '/main/4/left/0',
+							type: 'text',
+							text: '<p>[info header="Header"]Text[/info]</p>',
+							props: {
+								data: {
+									processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
+									macros: [
+										{
+											config: {
+												info: {
+													header: 'Header',
+													body: 'Text'
+												}
+											},
+											ref: '1',
+											name: 'info',
+											descriptor: 'whatever:info'
+										}
+									]
+								}
+							}
+						},
+						{
+							type: 'text',
+							text: '<p>[info header="Header"]Text[/info]</p>',
+							path: '/main/1',
+							props: {
+								data: {
+									processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
+									macros: [
+										{
+											config: {
+												info: {
+													header: 'Header',
+													body: 'Text'
+												}
+											},
+											ref: '1',
+											name: 'info',
+											descriptor: 'whatever:info'
+										}
+									]
 								},
-								ref: '1',
-								name: 'info',
-								descriptor: 'whatever:info'
-							  }
-							]
-						  }
+								mode: undefined
+							}
 						}
-					  },
-					  {
-						descriptor: 'com.enonic.app.react4xp:example',
-						path: '/main/3',
-						type: 'part',
-						props: {
-						  data: {
-							processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
-							macros: [
-							  {
-								config: {
-								  info: {
-									header: 'Header',
-									body: 'Text'
-								  }
-								},
-								ref: '1',
-								name: 'info',
-								descriptor: 'whatever:info'
-							  }
-							]
-						  }
+					],
+					name: 'left'
+				},
+				right: {
+					components: [
+						{
+							descriptor: 'com.enonic.app.react4xp:example',
+							path: '/main/4/right/0',
+							type: 'part',
+							props: {
+								data: {
+									processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
+									macros: [
+										{
+											config: {
+												info: {
+													header: 'Header',
+													body: 'Text'
+												}
+											},
+											ref: '1',
+											name: 'info',
+											descriptor: 'whatever:info'
+										}
+									]
+								}
+							}
+						},
+						{
+							descriptor: 'com.enonic.app.react4xp:example',
+							path: '/main/3',
+							type: 'part',
+							props: {
+								data: {
+									processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
+									macros: [
+										{
+											config: {
+												info: {
+													header: 'Header',
+													body: 'Text'
+												}
+											},
+											ref: '1',
+											name: 'info',
+											descriptor: 'whatever:info'
+										}
+									]
+								}
+							}
 						}
-					  }
-				],
-				name: 'right'
-			  }
+					],
+					name: 'right'
+				}
 			}
-		  });
+		});
 	});
 
 	it('the layout component should not have a config property', () => {
