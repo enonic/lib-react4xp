@@ -23,7 +23,7 @@
     "@babel/core": "^7.26.8",
     "@babel/plugin-proposal-class-properties": "^7.17.12",
     "@babel/plugin-proposal-object-rest-spread": "^7.20.7",
-    "@babel/preset-env": "^7.26.8",
+    "@babel/preset-env": "^7.26.9",
     "@babel/register": "^7.25.9",
     "@enonic-types/global": "^7.15.0-RC1",
     "@enonic-types/lib-content": "^7.15.0-B2",
