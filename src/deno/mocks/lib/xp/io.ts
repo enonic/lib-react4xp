@@ -1,7 +1,4 @@
-import type {
-	ByteSource,
-	ResourceKey,
-} from '@enonic-types/lib-io';
+import type {ByteSource, ResourceKey} from '@enonic-types/lib-io';
 import type {App, DoubleUnderscore, Log} from '../../../global.d.ts';
 
 import {Resource} from '../../../mocks/Resource.ts';

@@ -1,10 +1,6 @@
-import type {
-	Component,
-	PageContributions,
-	Request
-} from '@enonic-types/core';
-import type { AssetUrlParams } from '@enonic-types/lib-portal'; // Might be deprecated in XP8.
-import type { Cache } from './Cache';
+import type {Component, PageContributions, Request} from '@enonic-types/core';
+import type {AssetUrlParams} from '@enonic-types/lib-portal'; // Might be deprecated in XP8.
+import type {Cache} from './Cache';
 
 type OneOrMore<T> = T | T[]
 

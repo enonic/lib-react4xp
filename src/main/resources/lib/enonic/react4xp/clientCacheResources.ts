@@ -1,5 +1,5 @@
-import type { Response } from '@enonic-types/core';
-import type { Resource } from '@enonic-types/lib-io';
+import type {Response} from '@enonic-types/core';
+import type {Resource} from '@enonic-types/lib-io';
 
 import {forceArray} from '@enonic/js-utils/array/forceArray';
 import {readLines} from '/lib/xp/io';

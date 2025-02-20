@@ -1,46 +1,17 @@
-import type {
-	Component,
-	Request,
-} from '@enonic-types/core';
-import type {
-	// RenderableLayoutComponent,
-	RenderablePageComponent,
-	// RenderablePartComponent
-} from '@enonic/react-components';
+import type {Component, Request} from '@enonic-types/core';
+import type {RenderablePageComponent} from '@enonic/react-components';
 
-import {
-	// beforeAll,
-	// afterAll,
-	describe,
-	expect,
-	test as it
-} from '@jest/globals';
-import {stringify} from 'q-i';
+import {describe, expect, test as it} from '@jest/globals';
 
 //──────────────────────────────────────────────────────────────────────────────
 // SRC imports
 //──────────────────────────────────────────────────────────────────────────────
-import { DataFetcher } from '/lib/enonic/react4xp/DataFetcher';
+import {DataFetcher} from '/lib/enonic/react4xp/DataFetcher';
 
 //──────────────────────────────────────────────────────────────────────────────
 // TEST imports
 //──────────────────────────────────────────────────────────────────────────────
-import {
-	DEFAULT_PAGE_DESCRIPTOR,
-	EXAMPLE_PART_DESCRIPTOR,
-	// LAYOUT_COMPONENT,
-	// LAYOUT_FRAGMENT_CONTENT_ID,
-	// LAYOUT_FRAGMENT_CONTENT,
-	PAGE_COMPONENT,
-	PAGE_CONTENT,
-	// PART_COMPONENT,
-	// PART_FRAGMENT_CONTENT_ID,
-	// PART_FRAGMENT_CONTENT,
-	// PROCESSED_HTML,
-	// TEXT_FRAGMENT_CONTENT_ID,
-	// TEXT_FRAGMENT_CONTENT,
-	TWO_COLUMNS_LAYOUT_DESCRIPTOR,
-} from './data';
+import {DEFAULT_PAGE_DESCRIPTOR, EXAMPLE_PART_DESCRIPTOR, PAGE_COMPONENT, PAGE_CONTENT, TWO_COLUMNS_LAYOUT_DESCRIPTOR} from './data';
 
 const dataFetcher = new DataFetcher();
 dataFetcher.addLayout(TWO_COLUMNS_LAYOUT_DESCRIPTOR, {

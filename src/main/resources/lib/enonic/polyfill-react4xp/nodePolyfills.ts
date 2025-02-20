@@ -1,8 +1,8 @@
 import type {ContextWithTimers} from './timers';
+import {polyfillTimers} from './timers';
 
 // @ts-ignore Could not find a declaration file for module '@sinonjs/text-encoding'
 import {TextEncoder} from '@sinonjs/text-encoding';
-import {polyfillTimers} from './timers';
 
 (function (context) {
 	//──────────────────────────────────────────────────────────────────────────

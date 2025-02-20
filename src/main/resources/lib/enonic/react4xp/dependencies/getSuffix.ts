@@ -1,8 +1,8 @@
-import type { UrlType } from '/lib/enonic/react4xp/types/React4xp';
+import type {UrlType} from '/lib/enonic/react4xp/types/React4xp';
 
 
-import { initServiceUrlRoot } from '/lib/enonic/react4xp/dependencies/initServiceUrlRoot';
-import { stripSlashes } from '/lib/enonic/react4xp/dependencies/stripSlashes';
+import {initServiceUrlRoot} from '/lib/enonic/react4xp/dependencies/initServiceUrlRoot';
+import {stripSlashes} from '/lib/enonic/react4xp/dependencies/stripSlashes';
 
 
 let LOGGEDWARNING = false;

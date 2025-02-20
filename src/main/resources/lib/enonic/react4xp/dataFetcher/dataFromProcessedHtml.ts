@@ -1,9 +1,4 @@
-import type {
-	ImageContent,
-	ImageData,
-	MacroData,
-	RichTextData
-} from '@enonic/react-components';
+import type {ImageContent, ImageData, MacroData, RichTextData} from '@enonic/react-components';
 import {get as getContentByKey} from '/lib/xp/content';
 
 

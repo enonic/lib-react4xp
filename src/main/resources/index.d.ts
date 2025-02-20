@@ -3,7 +3,7 @@ export {
 	ComponentType,
 	EntryName,
 	OneOrMore,
-	Stats,
+	Stats
 } from './types/index.d';
 
 declare global {

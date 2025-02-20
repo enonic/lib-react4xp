@@ -1,10 +1,8 @@
-import type { PageComponent } from '@enonic-types/core';
-import type { PageTemplateContent } from '/lib/enonic/react4xp/types/ContentTypes';
+import type {PageComponent} from '@enonic-types/core';
+import type {PageTemplateContent} from '/lib/enonic/react4xp/types/ContentTypes';
 
-import {
-	query as queryContent,
-} from '/lib/xp/content';
-import { contentTypeToPageComponentCache } from '/lib/enonic/react4xp/pageTemplate/contentTypeToPageComponentCache';
+import {query as queryContent} from '/lib/xp/content';
+import {contentTypeToPageComponentCache} from '/lib/enonic/react4xp/pageTemplate/contentTypeToPageComponentCache';
 
 
 export const getCachedPageComponentFromContentType = ({

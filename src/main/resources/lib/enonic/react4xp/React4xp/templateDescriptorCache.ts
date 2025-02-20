@@ -2,7 +2,7 @@ import type {Cache} from '../../../..';
 
 
 //@ts-ignore
-import {newCache}  from '/lib/cache';
+import {newCache} from '/lib/cache';
 
 // Key is templateId, value is the descriptor.
 export const templateDescriptorCache = newCache({

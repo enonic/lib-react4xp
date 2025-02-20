@@ -3,10 +3,7 @@ import type {React4xp} from '../../React4xp';
 
 import {buildContainer} from '/lib/enonic/react4xp/html/buildContainer';
 import {hasElementWithId} from '/lib/enonic/react4xp/html/hasElementWithId';
-import {
-	insertAtEndOfRoot,
-	insertInsideContainer
-} from '/lib/enonic/react4xp/html/inserter';
+import {insertAtEndOfRoot, insertInsideContainer} from '/lib/enonic/react4xp/html/inserter';
 
 
 interface RenderTargetContainerParams {

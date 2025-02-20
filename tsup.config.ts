@@ -1,5 +1,5 @@
 // import {print} from 'q-i';
-import { defineConfig } from 'tsup';
+import {defineConfig} from 'tsup';
 
 
 export default defineConfig((options) => {
@@ -22,14 +22,12 @@ export default defineConfig((options) => {
 				'/lib/openxp/file-system',
 				'/lib/xp/auth',
 				'/lib/xp/content',
-				'/lib/xp/context',
 				'/lib/xp/common',
 				'/lib/xp/io',
 				'/lib/xp/mail',
 				'/lib/xp/node',
 				'/lib/xp/portal',
 				'/lib/xp/repo',
-				'/lib/xp/schema',
 				'/lib/xp/task',
 				'/lib/xp/value',
 				'/lib/xp/vhost',

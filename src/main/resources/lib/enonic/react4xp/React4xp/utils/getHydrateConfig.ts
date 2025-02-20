@@ -1,5 +1,5 @@
-import type { AppConfig } from '../../types/Application';
-import { isSet } from '@enonic/js-utils/value/isSet';
+import type {AppConfig} from '../../types/Application';
+import {isSet} from '@enonic/js-utils/value/isSet';
 
 
 export default function getHydrateConfig(hydrate?: boolean) {

@@ -1,9 +1,8 @@
-import type { PageComponent } from '@enonic-types/core';
-import type { PageTemplateContent } from '/lib/enonic/react4xp/types/ContentTypes';
+import type {PageComponent} from '@enonic-types/core';
+import type {PageTemplateContent} from '/lib/enonic/react4xp/types/ContentTypes';
 
 import {get as getContentByKey} from '/lib/xp/content';
-import { pageTemplateContentIdToPageComponentCache } from '/lib/enonic/react4xp/pageTemplate/pageTemplateContentIdToPageComponentCache';
-
+import {pageTemplateContentIdToPageComponentCache} from '/lib/enonic/react4xp/pageTemplate/pageTemplateContentIdToPageComponentCache';
 
 
 export const getCachedPageComponentFromPageTemplateContentId = ({

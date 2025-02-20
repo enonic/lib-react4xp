@@ -1,7 +1,4 @@
-import type {
-	EntryName,
-	OneOrMore,
-} from '../../../../index.d';
+import type {EntryName, OneOrMore} from '../../../../index.d';
 
 
 import endsWith from '@enonic/js-utils/string/endsWith';

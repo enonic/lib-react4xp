@@ -1,8 +1,8 @@
-import type { AppConfig } from '/lib/enonic/react4xp/types/Application';
-import type { UrlType } from '/lib/enonic/react4xp/types/React4xp';
+import type {AppConfig} from '/lib/enonic/react4xp/types/Application';
+import type {UrlType} from '/lib/enonic/react4xp/types/React4xp';
 
 
-import { isSet } from '@enonic/js-utils/value/isSet';
+import {isSet} from '@enonic/js-utils/value/isSet';
 
 
 export function getUrlType(urlType?: UrlType) {

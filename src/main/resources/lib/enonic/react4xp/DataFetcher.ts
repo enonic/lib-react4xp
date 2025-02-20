@@ -2,27 +2,18 @@ import type {
 	Component,
 	Content,
 	FragmentComponent,
-	// Layout,
 	LayoutComponent,
 	LayoutDescriptor,
 	Merge,
-	// Page,
 	PageComponent,
 	PageDescriptor,
-	// Part,
 	PartComponent,
 	PartDescriptor,
 	Request,
 	Response,
-	TextComponent,
+	TextComponent
 } from '@enonic-types/core';
-import type {
-	// GetDynamicComponentParams,
-	FormItem,
-	FormItemOptionSet,
-	FormItemSet,
-	MixinSchema,
-} from '@enonic-types/lib-schema';
+import type {FormItem} from '@enonic-types/lib-schema';
 import type {
 	RenderableComponent,
 	RenderableContentType,
@@ -32,43 +23,23 @@ import type {
 	RenderablePartComponent,
 	RenderableTextComponent,
 	RenderableWarning,
-	XpRunMode,
+	XpRunMode
 } from '@enonic/react-components/dist/nashorn';
-import type {
-	ContextParams
-} from '@enonic-types/lib-context';
-
-import {getIn} from '@enonic/js-utils/object/getIn';
-import {setIn} from '@enonic/js-utils/object/setIn';
+import type {ContextParams} from '@enonic-types/lib-context';
 import {toStr} from '@enonic/js-utils/value/toStr';
-// import {stringify} from 'q-i';
 
-import {
-	get as getContentByKey
-} from '/lib/xp/content';
-import {
-	getComponent as getComponentSchema,
-	listSchemas
-} from '/lib/xp/schema';
-import {
-	getContent as getCurrentContent,
-	processHtml,
-	// pageUrl as getPageUrl,
-} from '/lib/xp/portal';
 
-import {
-	run as runInContext
-} from '/lib/xp/context';
+import {get as getContentByKey} from '/lib/xp/content';
+import {getContent as getCurrentContent} from '/lib/xp/portal';
 
-import {
-	REQUEST_METHOD,
-	REQUEST_MODE,
-} from '/lib/enonic/react4xp/constants';
-import { IS_DEV_MODE } from '/lib/enonic/react4xp/xp/appHelper';
-import { getCachedPageComponentFromContentType } from '/lib/enonic/react4xp/pageTemplate/getCachedPageComponentFromContentType';
-import { getCachedPageComponentFromPageTemplateContentId } from '/lib/enonic/react4xp/pageTemplate/getCachedPageComponentFromPageTemplateContentId';
 
-import { dataFromProcessedHtml } from './dataFetcher/dataFromProcessedHtml';
+import {REQUEST_METHOD, REQUEST_MODE} from '/lib/enonic/react4xp/constants';
+import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/appHelper';
+import {getCachedPageComponentFromContentType} from '/lib/enonic/react4xp/pageTemplate/getCachedPageComponentFromContentType';
+import {
+	getCachedPageComponentFromPageTemplateContentId
+} from '/lib/enonic/react4xp/pageTemplate/getCachedPageComponentFromPageTemplateContentId';
+import {processHtml} from '/lib/enonic/react4xp/dataFetcher/processHtml';
 
 export interface ContentTypeProcessorParams<
 	CONTENT extends Content = PageContent,
@@ -89,11 +60,12 @@ export type ContentTypeProcessorFunction<
 export type FragmentContent<
 	// Component extends LayoutComponent | PartComponent = Layout | Part
 	Component extends LayoutComponent | PartComponent = LayoutComponent | PartComponent
-> = Content<undefined,'portal:fragment',Component>;
+> = Content<undefined, 'portal:fragment', Component>;
 
 export type NestedPartial<T> = {
 	[K in keyof T]?: T[K] extends object ? NestedPartial<T[K]> : T[K];
 };
+
 export interface GetComponentReturnType {
 	componentPath: string;
 	config: Record<string, unknown>;
@@ -172,6 +144,7 @@ export type PartComponentProcessorFunction<
 
 interface ProcessParams {
 	[passAlongKey: string]: unknown;
+
 	component?: Component;
 	content?: PageContent;
 	request: Request;
@@ -223,7 +196,6 @@ export class DataFetcher {
 	private content: PageContent;
 	private contentTypes: Record<PageDescriptor, PageComponentProcessorFunction> = {};
 	private layouts: Record<LayoutDescriptor, LayoutComponentProcessorFunction> = {};
-	private mixinSchemas: Record<string, MixinSchema> = {}
 	private pages: Record<PageDescriptor, PageComponentProcessorFunction> = {};
 	private parts: Record<PartDescriptor, PartComponentProcessorFunction> = {};
 	private request: Request;
@@ -232,128 +204,13 @@ export class DataFetcher {
 		return ancestor ? `${ancestor}.${name}` : name;
 	}
 
-	constructor() {}
-
-	private findHtmlAreasInFormItemArray({
-		ancestor,
-		form,
-		htmlAreas, // get modified
-	}: {
-		ancestor?: string;
-		form:  NestedPartial<FormItem>[];
-		htmlAreas: string[];
-	}) {
-		for (let i = 0; i < form.length; i++) {
-			const formItem = form[i];
-			const {
-				formItemType,
-				name
-			} = formItem;
-			if (formItemType === 'Input') {
-				const {inputType} = formItem;
-				if (inputType === 'HtmlArea') {
-					htmlAreas.push(DataFetcher.getPath(name as string, ancestor));
-				}
-			} else if (formItemType === 'ItemSet') {
-				const {items} = formItem as FormItemSet;
-				this.findHtmlAreasInFormItemArray({ // recurse
-					ancestor: DataFetcher.getPath(name as string, ancestor),
-					form: items as NestedPartial<FormItem>[],
-					htmlAreas, // get modified
-				});
-			} else if (formItemType === 'OptionSet') {
-				const {options} = formItem as FormItemOptionSet;
-				for (let j = 0; j < options.length; j++) {
-					const option = options[j];
-					const {
-						name: optionName,
-						items
-					} = option;
-					this.findHtmlAreasInFormItemArray({ // recurse
-						ancestor: DataFetcher.getPath(`${name}.${j}.${optionName}`, ancestor),
-						form: items as NestedPartial<FormItem>[],
-						htmlAreas, // get modified
-					});
-					// log.info('findHtmlAreasInFormItemArray OptionSet htmlAreas', htmlAreas);
-				}
-			} else if (formItemType === 'InlineMixin') {
-				if (!name) {
-					throw new Error(`findHtmlAreasInFormItemArray: InlineMixin name not found!`);
-				}
-				let mixin = this.mixinSchemas[name];
-
-				if (!mixin) {
-					const [application] = name.split(':');
-					const mixinsList = runInContext(
-						ADMIN_CONTEXT,
-						() =>
-							listSchemas({
-								application,
-								type: 'MIXIN'
-							}) as MixinSchema[]
-					);
-					// log.debug('findHtmlAreasInFormItemArray mixinsList', mixinsList);
-
-					for (let j = 0; j < mixinsList.length; j++) {
-						const mixin = mixinsList[j];
-						const {name: mixinName} = mixin;
-						this.mixinSchemas[mixinName] = mixin;
-					}
-					// log.debug('findHtmlAreasInFormItemArray multiAppMixinsObj', multiAppMixinsObj);
-					mixin = this.mixinSchemas[name];
-					if (!mixin) {
-						throw new Error(`findHtmlAreasInFormItemArray: InlineMixin mixin not found for name: ${name}!`);
-					}
-					// log.debug('findHtmlAreasInFormItemArray mixin', mixin);
-				}
-
-				const {form} = mixin;
-				if (!form) {
-					throw new Error(`findHtmlAreasInFormItemArray: InlineMixin mixin form not found for name: ${name}!`);
-				}
-				// log.debug('findHtmlAreasInFormItemArray form', form);
-
-				this.findHtmlAreasInFormItemArray({ // recurse
-					ancestor,
-					form: form,
-					htmlAreas, // get modified
-				});
-			} else if (formItemType === 'Layout') {
-				// log.debug('findHtmlAreasInFormItemArray Layout formItem', formItem);
-				const {items} = formItem;
-				if (items) { // Avoid empty fieldsets
-					this.findHtmlAreasInFormItemArray({ // recurse
-						ancestor,
-						form: items as NestedPartial<FormItem>[],
-						htmlAreas, // get modified
-					});
-				}
-			}
-		}
-		// log.info('findHtmlAreasInFormItemArray htmlAreas', htmlAreas);
-	}
-
-	private getHtmlAreas({
-		ancestor,
-		form,
-	}: {
-		ancestor?: string;
-		form: NestedPartial<FormItem>[];
-	}): string[] {
-		const htmlAreas: string[] = [];
-		this.findHtmlAreasInFormItemArray({
-			ancestor,
-			form,
-			htmlAreas,
-		});
-		// log.info('getHtmlAreas htmlAreas', htmlAreas);
-		return htmlAreas;
+	constructor() {
 	}
 
 	private processContentType({
-		contentType,
-		...passAlong
-	}: {
+								   contentType,
+								   ...passAlong
+							   }: {
 		[key: string]: unknown
 		contentType: string
 	}): ProcessResult<RenderableContentType> {
@@ -370,7 +227,7 @@ export class DataFetcher {
 		});
 
 		if (response) {
-			return { response };
+			return {response};
 		}
 
 		const renderableContentType: RenderableContentType = {
@@ -387,9 +244,9 @@ export class DataFetcher {
 	}
 
 	private processFragment({
-		component,
-		...passAlong
-	}: {
+								component,
+								...passAlong
+							}: {
 		component: FragmentComponent;
 		siteConfig?: Record<string, unknown> | null; // In passAlong
 	}): ProcessResult<RenderablePartComponent | RenderableLayoutComponent | RenderableTextComponent | RenderableError> {
@@ -404,7 +261,8 @@ export class DataFetcher {
 		const fragmentContent = getContentByKey<FragmentContent>({key});
 		if (!fragmentContent) {
 			// This probably rarely happens, only if content is imported or manipulated:
-			log.error(`DataFetcher: processFragment: Fragment content NOT found for key:%s! Referenced in content:%s componentPath:%s`, key, this.content._id, path);
+			log.error(`DataFetcher: processFragment: Fragment content NOT found for key:%s! Referenced in content:%s componentPath:%s`, key,
+				this.content._id, path);
 
 			if (this.request.mode === REQUEST_MODE.LIVE) {
 				return {
@@ -428,7 +286,8 @@ export class DataFetcher {
 		const {fragment} = fragmentContent;
 		if (!fragment) {
 			// This probably never happens, only if content is b0rked:
-			log.error(`DataFetcher: processFragment: B0rked Fragment content key:%s! Referenced in content:%s componentPath:%s`, key, this.content._id, path);
+			log.error(`DataFetcher: processFragment: B0rked Fragment content key:%s! Referenced in content:%s componentPath:%s`, key,
+				this.content._id, path);
 
 			if (this.request.mode === REQUEST_MODE.LIVE) {
 				return {
@@ -478,9 +337,9 @@ export class DataFetcher {
 	}
 
 	private processLayout({
-		component,
-		...passAlong
-	}: {
+							  component,
+							  ...passAlong
+						  }: {
 		component: LayoutComponent;
 		siteConfig?: Record<string, unknown> | null; // In passAlong
 	}): ProcessResult<RenderableLayoutComponent> {
@@ -508,18 +367,8 @@ export class DataFetcher {
 			};
 		}
 
-		const {form} = runInContext(
-			ADMIN_CONTEXT,
-			() =>
-				getComponentSchema({
-					key: descriptor,
-					type: 'LAYOUT',
-				}) as GetComponentReturnType
-		);
-
 		const processedLayoutComponent = this.processWithRegions({
 			component,
-			form,
 		}) as ProcessedLayoutComponent;
 		// log.info('DataFetcher processLayout processedLayoutComponent:%s', toStr(processedLayoutComponent))
 
@@ -535,7 +384,7 @@ export class DataFetcher {
 			response,
 		} = processorResult;
 		if (response) {
-			return { response };
+			return {response};
 		}
 		renderableComponent.props = props;
 		return {
@@ -544,14 +393,12 @@ export class DataFetcher {
 	} // processLayout
 
 	private processPage({
-		component,
-		...passAlong
-	}: {
+							component,
+							...passAlong
+						}: {
 		component: PageComponent;
 		siteConfig?: Record<string, unknown> | null; // In passAlong
 	}): ProcessResult<RenderablePageComponent | RenderableWarning> {
-		// log.debug('processPage component:', component);
-		// log.debug('dataFetcher.processPage passAlong:%s', toStr(passAlong));
 
 		if (!component['descriptor']) { // No local page component, check page templates:
 			const pageTemplateContentId = component['pageTemplateContentId'];
@@ -563,7 +410,7 @@ export class DataFetcher {
 				}
 				// log.debug('processPage: No component.descriptor. contentType:%s', contentType);
 				try {
-					component = getCachedPageComponentFromContentType({ contentType });
+					component = getCachedPageComponentFromContentType({contentType});
 				} catch (e) {
 					if (
 						this.request.params['mode'] === REQUEST_MODE.EDIT
@@ -599,7 +446,7 @@ export class DataFetcher {
 				// log.debug('processPage: No descriptor. componentType:%s pageTemplateContentId:%s', componentType, pageTemplateContentId);
 				try {
 					component = getCachedPageComponentFromPageTemplateContentId({pageTemplateContentId});
-				// log.debug('processPage: No descriptor. componentType:%s pageTemplateContentId:%s component(from page template):%s', componentType, pageTemplateContentId, toStr(component));
+					// log.debug('processPage: No descriptor. componentType:%s pageTemplateContentId:%s component(from page template):%s', componentType, pageTemplateContentId, toStr(component));
 				} catch (e) {
 					if (
 						this.request.mode === REQUEST_MODE.INLINE
@@ -659,18 +506,8 @@ export class DataFetcher {
 			};
 		}
 
-		const {form} = runInContext(
-			ADMIN_CONTEXT,
-			() =>
-				getComponentSchema({
-					key: descriptor,
-					type: 'PAGE',
-				}) as GetComponentReturnType
-		);
-
 		const processedPageComponent = this.processWithRegions({
 			component,
-			form,
 		}) as ProcessedPageComponent;
 		// log.info('DataFetcher processPage processedPageComponent:%s', toStr(processedPageComponent));
 
@@ -686,7 +523,7 @@ export class DataFetcher {
 			response,
 		} = processorResult;
 		if (response) {
-			return { response };
+			return {response};
 		}
 		renderableComponent.props = props;
 		return {
@@ -695,9 +532,9 @@ export class DataFetcher {
 	} // processPage
 
 	private processPart({
-		component,
-		...passAlong
-	}: {
+							component,
+							...passAlong
+						}: {
 		component: PartComponent;
 		siteConfig?: Record<string, unknown> | null; // In passAlong
 	}): ProcessResult<RenderablePartComponent> {
@@ -723,39 +560,7 @@ export class DataFetcher {
 			};
 		}
 
-		const {form} = runInContext(
-			ADMIN_CONTEXT,
-			() =>
-				getComponentSchema({
-					key: descriptor,
-					type: 'PART',
-				}) as GetComponentReturnType
-		);
-
-		const htmlAreas = this.getHtmlAreas({
-			ancestor: 'config',
-			form,
-		});
-		// log.info('processPart htmlAreas:', htmlAreas);
-
 		const processedPartComponent: ProcessedPartComponent = JSON.parse(JSON.stringify(component));
-		for (let i = 0; i < htmlAreas.length; i++) {
-			// log.info('component:', component);
-
-			const path = htmlAreas[i];
-			// log.info('path:', path);
-
-			const html = getIn(component, path) as string;
-			// log.info('html:', html);
-
-			if (html) {
-				const processedHtml = processHtml({
-					value: html
-				});
-				const data = dataFromProcessedHtml(processedHtml);
-				setIn(processedPartComponent, path, data);
-			}
-		} // for
 
 		const processorResult = processor({
 			...passAlong,
@@ -769,7 +574,7 @@ export class DataFetcher {
 			response,
 		} = processorResult;
 		if (response) {
-			return { response };
+			return {response};
 		}
 		renderableComponent.props = props;
 		return {
@@ -778,18 +583,15 @@ export class DataFetcher {
 	} // processPart
 
 	private processTextComponent({
-		component,
-	}: {
+									 component,
+								 }: {
 		component: TextComponent
 	}): ProcessResult<RenderableTextComponent> {
 		const {text} = component;
-		const processedHtml = processHtml({
-			value: text
-		});
 		const renderableTextComponent: RenderableTextComponent = JSON.parse(JSON.stringify(component));
 		renderableTextComponent.mode = this.request.mode;
 		renderableTextComponent.props = {
-			data: dataFromProcessedHtml(processedHtml),
+			data: processHtml(text)
 		};
 		// log.debug('processTextComponent text renderableTextComponent:%s', toStr(renderableTextComponent));
 		return {
@@ -798,41 +600,13 @@ export class DataFetcher {
 	}
 
 	private processWithRegions({
-		component: layoutOrPageComponent,
-		form,
-	}: {
+								   component: layoutOrPageComponent,
+							   }: {
 		component: LayoutComponent | PageComponent;
-		form:  NestedPartial<FormItem>[];
 	}): ProcessedLayoutComponent | ProcessedPageComponent {
-		const htmlAreas = this.getHtmlAreas({
-			ancestor: 'config',
-			form,
-		});
-		// log.info('processWithRegions htmlAreas:', htmlAreas);
 
-		const processedLayoutOrPageComponent: ProcessedLayoutComponent | ProcessedPageComponent = JSON.parse(JSON.stringify(layoutOrPageComponent));
-
-		//──────────────────────────────────────────────────────────────────────
-		// This modifies layoutOrPage.config:
-		//──────────────────────────────────────────────────────────────────────
-		for (let i = 0; i < htmlAreas.length; i++) {
-			// log.info('component:', component);
-
-			const path = htmlAreas[i];
-			// log.debug('processWithRegions path:', path);
-
-			const html = getIn(layoutOrPageComponent, path) as string;
-			// log.info('html:', html);
-
-			if (html) {
-				const processedHtml = processHtml({
-					value: html
-				});
-				const data = dataFromProcessedHtml(processedHtml);
-				setIn(processedLayoutOrPageComponent, path, data);
-			}
-		} // for
-		// log.debug('processWithRegions config:', processedLayoutOrPageComponent.config);
+		const processedLayoutOrPageComponent: ProcessedLayoutComponent | ProcessedPageComponent = JSON.parse(
+			JSON.stringify(layoutOrPageComponent));
 
 		//──────────────────────────────────────────────────────────────────────
 		// This modifies layoutOrPage.regions:
@@ -934,11 +708,11 @@ export class DataFetcher {
 	}
 
 	public process({
-		component,
-		content,
-		request,
-		...passAlong
-	}: ProcessParams): ProcessResult {
+					   component,
+					   content,
+					   request,
+					   ...passAlong
+				   }: ProcessParams): ProcessResult {
 		if (!request) {
 			throw new Error(`process: request is required!`);
 		}
@@ -959,7 +733,7 @@ export class DataFetcher {
 		this.content = content;
 
 		// const { method } = request;
-		const { type: contentType } = content;
+		const {type: contentType} = content;
 
 		// if (method === REQUEST_METHOD.HEAD) {}
 
@@ -980,28 +754,32 @@ export class DataFetcher {
 			type: componentType // CAUTION: Is undefined when using page templates.
 		} = component;
 		switch (componentType) {
-			case 'part': return this.processPart({
+		case 'part':
+			return this.processPart({
 				component,
 				...passAlong
 			});
-			case 'layout': return this.processLayout({
+		case 'layout':
+			return this.processLayout({
 				component: component as LayoutComponent,
 				...passAlong
 			});
-			case 'text': return this.processTextComponent({
+		case 'text':
+			return this.processTextComponent({
 				component: component as TextComponent,
 			});
-			case 'fragment': return this.processFragment({
+		case 'fragment':
+			return this.processFragment({
 				component: component as FragmentComponent,
 				...passAlong
 			});
 			// case 'page':
-			default: // Since componentType is undefined when using automatic page templates, we have to assume it's a page.
-				return this.processPage({
-					component: component as PageComponent,
-					...passAlong
-				});
-				// throw new Error(`processComponents: component type not supported: ${componentType}!`);
+		default: // Since componentType is undefined when using automatic page templates, we have to assume it's a page.
+			return this.processPage({
+				component: component as PageComponent,
+				...passAlong
+			});
+			// throw new Error(`processComponents: component type not supported: ${componentType}!`);
 		}
 	}
 } // class DataFetcher

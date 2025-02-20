@@ -1,5 +1,6 @@
-import type { Id } from '/lib/enonic/react4xp/types/React4xp';
+import type {Id} from '/lib/enonic/react4xp/types/React4xp';
 import type {React4xp} from '../../React4xp';
+
 //import {toStr} from '@enonic/js-utils/value/toStr';
 
 

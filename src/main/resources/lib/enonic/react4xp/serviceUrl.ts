@@ -1,6 +1,5 @@
-import type { ServiceUrlParams } from '@enonic-types/lib-portal'; // Might be deprecated in XP8.
-
-import { getUrlType } from '/lib/enonic/react4xp/React4xp/utils/getUrlType';
+import type {ServiceUrlParams} from '@enonic-types/lib-portal'; // Might be deprecated in XP8.
+import {getUrlType} from '/lib/enonic/react4xp/React4xp/utils/getUrlType';
 
 
 interface ServiceUrlBuilder {

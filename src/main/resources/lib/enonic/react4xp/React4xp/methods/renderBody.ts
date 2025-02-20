@@ -1,5 +1,5 @@
-import type { Request } from '@enonic-types/core';
-import type { React4xp } from '../../React4xp';
+import type {Request} from '@enonic-types/core';
+import type {React4xp} from '../../React4xp';
 import isEditMode from '/lib/enonic/react4xp/React4xp/utils/isEditMode';
 import getSsrConfig from '/lib/enonic/react4xp/React4xp/utils/getSsrConfig';
 

@@ -1,6 +1,6 @@
 import type {React4xp} from '../../React4xp';
 //import {toStr} from '@enonic/js-utils/value/toStr';
-import {getComponentChunkNames}  from '/lib/enonic/react4xp/dependencies/getComponentChunkNames';
+import {getComponentChunkNames} from '/lib/enonic/react4xp/dependencies/getComponentChunkNames';
 import {render as renderSSRJava} from '/lib/enonic/react4xp/ssr/render';
 
 
