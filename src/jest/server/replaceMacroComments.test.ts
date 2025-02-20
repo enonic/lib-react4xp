@@ -1,10 +1,4 @@
-import {
-	// beforeAll,
-	// afterAll,
-	describe,
-	expect,
-	test as it
-} from '@jest/globals';
+import {describe, expect, test as it} from '@jest/globals';
 import toDiffableHtml from 'diffable-html';
 
 import {replaceMacroComments} from '/lib/enonic/react4xp/replaceMacroComments';

@@ -1,5 +1,5 @@
 import type {App, DoubleUnderscore, Log} from '../../../../global.d.ts';
-import { assertEquals } from "jsr:@std/assert";
+import {assertEquals} from "jsr:@std/assert";
 import '../../../../mocks/globals.ts';
 
 

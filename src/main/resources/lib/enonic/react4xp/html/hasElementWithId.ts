@@ -1,7 +1,4 @@
-import {
-	anyQuote,
-	beforeAttribute
-} from '/lib/enonic/react4xp/html/regexp'
+import {anyQuote, beforeAttribute} from '/lib/enonic/react4xp/html/regexp'
 
 
 const BEFORE_ID = beforeAttribute('id');

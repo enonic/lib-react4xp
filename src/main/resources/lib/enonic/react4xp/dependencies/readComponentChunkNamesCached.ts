@@ -1,7 +1,4 @@
-import type {
-	EntryName,
-	OneOrMore,
-} from '../../../../index.d';
+import type {EntryName, OneOrMore} from '../../../../index.d';
 
 
 //import {toStr} from '@enonic/js-utils/value/toStr';

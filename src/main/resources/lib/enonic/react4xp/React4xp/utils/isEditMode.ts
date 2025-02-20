@@ -1,4 +1,4 @@
-import type { Request } from '@enonic-types/core';
+import type {Request} from '@enonic-types/core';
 
 
 export default function isEditMode(request?: Request) {

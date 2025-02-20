@@ -1,8 +1,8 @@
-import type { UrlType } from '/lib/enonic/react4xp/types/React4xp';
+import type {UrlType} from '/lib/enonic/react4xp/types/React4xp';
 
-import { getUrlType } from '/lib/enonic/react4xp/React4xp/utils/getUrlType';
+import {getUrlType} from '/lib/enonic/react4xp/React4xp/utils/getUrlType';
 
-import { serviceUrl } from '/lib/enonic/react4xp/serviceUrl';
+import {serviceUrl} from '/lib/enonic/react4xp/serviceUrl';
 
 /*
 * Initialize the root path of a service URL for a site mount.

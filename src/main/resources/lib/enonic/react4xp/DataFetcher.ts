@@ -11,9 +11,9 @@ import type {
 	PartDescriptor,
 	Request,
 	Response,
-	TextComponent,
+	TextComponent
 } from '@enonic-types/core';
-import type {FormItem,} from '@enonic-types/lib-schema';
+import type {FormItem} from '@enonic-types/lib-schema';
 import type {
 	RenderableComponent,
 	RenderableContentType,
@@ -23,17 +23,17 @@ import type {
 	RenderablePartComponent,
 	RenderableTextComponent,
 	RenderableWarning,
-	XpRunMode,
+	XpRunMode
 } from '@enonic/react-components/dist/nashorn';
 import type {ContextParams} from '@enonic-types/lib-context';
 import {toStr} from '@enonic/js-utils/value/toStr';
 
 
 import {get as getContentByKey} from '/lib/xp/content';
-import {getContent as getCurrentContent,} from '/lib/xp/portal';
+import {getContent as getCurrentContent} from '/lib/xp/portal';
 
 
-import {REQUEST_METHOD, REQUEST_MODE,} from '/lib/enonic/react4xp/constants';
+import {REQUEST_METHOD, REQUEST_MODE} from '/lib/enonic/react4xp/constants';
 import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/appHelper';
 import {getCachedPageComponentFromContentType} from '/lib/enonic/react4xp/pageTemplate/getCachedPageComponentFromContentType';
 import {
@@ -60,11 +60,12 @@ export type ContentTypeProcessorFunction<
 export type FragmentContent<
 	// Component extends LayoutComponent | PartComponent = Layout | Part
 	Component extends LayoutComponent | PartComponent = LayoutComponent | PartComponent
-> = Content<undefined,'portal:fragment',Component>;
+> = Content<undefined, 'portal:fragment', Component>;
 
 export type NestedPartial<T> = {
 	[K in keyof T]?: T[K] extends object ? NestedPartial<T[K]> : T[K];
 };
+
 export interface GetComponentReturnType {
 	componentPath: string;
 	config: Record<string, unknown>;
@@ -143,6 +144,7 @@ export type PartComponentProcessorFunction<
 
 interface ProcessParams {
 	[passAlongKey: string]: unknown;
+
 	component?: Component;
 	content?: PageContent;
 	request: Request;
@@ -202,12 +204,13 @@ export class DataFetcher {
 		return ancestor ? `${ancestor}.${name}` : name;
 	}
 
-	constructor() {}
+	constructor() {
+	}
 
 	private processContentType({
-		contentType,
-		...passAlong
-	}: {
+								   contentType,
+								   ...passAlong
+							   }: {
 		[key: string]: unknown
 		contentType: string
 	}): ProcessResult<RenderableContentType> {
@@ -224,7 +227,7 @@ export class DataFetcher {
 		});
 
 		if (response) {
-			return { response };
+			return {response};
 		}
 
 		const renderableContentType: RenderableContentType = {
@@ -241,9 +244,9 @@ export class DataFetcher {
 	}
 
 	private processFragment({
-		component,
-		...passAlong
-	}: {
+								component,
+								...passAlong
+							}: {
 		component: FragmentComponent;
 		siteConfig?: Record<string, unknown> | null; // In passAlong
 	}): ProcessResult<RenderablePartComponent | RenderableLayoutComponent | RenderableTextComponent | RenderableError> {
@@ -258,7 +261,8 @@ export class DataFetcher {
 		const fragmentContent = getContentByKey<FragmentContent>({key});
 		if (!fragmentContent) {
 			// This probably rarely happens, only if content is imported or manipulated:
-			log.error(`DataFetcher: processFragment: Fragment content NOT found for key:%s! Referenced in content:%s componentPath:%s`, key, this.content._id, path);
+			log.error(`DataFetcher: processFragment: Fragment content NOT found for key:%s! Referenced in content:%s componentPath:%s`, key,
+				this.content._id, path);
 
 			if (this.request.mode === REQUEST_MODE.LIVE) {
 				return {
@@ -282,7 +286,8 @@ export class DataFetcher {
 		const {fragment} = fragmentContent;
 		if (!fragment) {
 			// This probably never happens, only if content is b0rked:
-			log.error(`DataFetcher: processFragment: B0rked Fragment content key:%s! Referenced in content:%s componentPath:%s`, key, this.content._id, path);
+			log.error(`DataFetcher: processFragment: B0rked Fragment content key:%s! Referenced in content:%s componentPath:%s`, key,
+				this.content._id, path);
 
 			if (this.request.mode === REQUEST_MODE.LIVE) {
 				return {
@@ -332,9 +337,9 @@ export class DataFetcher {
 	}
 
 	private processLayout({
-		component,
-		...passAlong
-	}: {
+							  component,
+							  ...passAlong
+						  }: {
 		component: LayoutComponent;
 		siteConfig?: Record<string, unknown> | null; // In passAlong
 	}): ProcessResult<RenderableLayoutComponent> {
@@ -379,7 +384,7 @@ export class DataFetcher {
 			response,
 		} = processorResult;
 		if (response) {
-			return { response };
+			return {response};
 		}
 		renderableComponent.props = props;
 		return {
@@ -388,9 +393,9 @@ export class DataFetcher {
 	} // processLayout
 
 	private processPage({
-		component,
-		...passAlong
-	}: {
+							component,
+							...passAlong
+						}: {
 		component: PageComponent;
 		siteConfig?: Record<string, unknown> | null; // In passAlong
 	}): ProcessResult<RenderablePageComponent | RenderableWarning> {
@@ -405,7 +410,7 @@ export class DataFetcher {
 				}
 				// log.debug('processPage: No component.descriptor. contentType:%s', contentType);
 				try {
-					component = getCachedPageComponentFromContentType({ contentType });
+					component = getCachedPageComponentFromContentType({contentType});
 				} catch (e) {
 					if (
 						this.request.params['mode'] === REQUEST_MODE.EDIT
@@ -441,7 +446,7 @@ export class DataFetcher {
 				// log.debug('processPage: No descriptor. componentType:%s pageTemplateContentId:%s', componentType, pageTemplateContentId);
 				try {
 					component = getCachedPageComponentFromPageTemplateContentId({pageTemplateContentId});
-				// log.debug('processPage: No descriptor. componentType:%s pageTemplateContentId:%s component(from page template):%s', componentType, pageTemplateContentId, toStr(component));
+					// log.debug('processPage: No descriptor. componentType:%s pageTemplateContentId:%s component(from page template):%s', componentType, pageTemplateContentId, toStr(component));
 				} catch (e) {
 					if (
 						this.request.mode === REQUEST_MODE.INLINE
@@ -518,7 +523,7 @@ export class DataFetcher {
 			response,
 		} = processorResult;
 		if (response) {
-			return { response };
+			return {response};
 		}
 		renderableComponent.props = props;
 		return {
@@ -527,9 +532,9 @@ export class DataFetcher {
 	} // processPage
 
 	private processPart({
-		component,
-		...passAlong
-	}: {
+							component,
+							...passAlong
+						}: {
 		component: PartComponent;
 		siteConfig?: Record<string, unknown> | null; // In passAlong
 	}): ProcessResult<RenderablePartComponent> {
@@ -569,7 +574,7 @@ export class DataFetcher {
 			response,
 		} = processorResult;
 		if (response) {
-			return { response };
+			return {response};
 		}
 		renderableComponent.props = props;
 		return {
@@ -578,8 +583,8 @@ export class DataFetcher {
 	} // processPart
 
 	private processTextComponent({
-		component,
-	}: {
+									 component,
+								 }: {
 		component: TextComponent
 	}): ProcessResult<RenderableTextComponent> {
 		const {text} = component;
@@ -595,12 +600,13 @@ export class DataFetcher {
 	}
 
 	private processWithRegions({
-		component: layoutOrPageComponent,
-	}: {
+								   component: layoutOrPageComponent,
+							   }: {
 		component: LayoutComponent | PageComponent;
 	}): ProcessedLayoutComponent | ProcessedPageComponent {
 
-		const processedLayoutOrPageComponent: ProcessedLayoutComponent | ProcessedPageComponent = JSON.parse(JSON.stringify(layoutOrPageComponent));
+		const processedLayoutOrPageComponent: ProcessedLayoutComponent | ProcessedPageComponent = JSON.parse(
+			JSON.stringify(layoutOrPageComponent));
 
 		//──────────────────────────────────────────────────────────────────────
 		// This modifies layoutOrPage.regions:
@@ -702,11 +708,11 @@ export class DataFetcher {
 	}
 
 	public process({
-		component,
-		content,
-		request,
-		...passAlong
-	}: ProcessParams): ProcessResult {
+					   component,
+					   content,
+					   request,
+					   ...passAlong
+				   }: ProcessParams): ProcessResult {
 		if (!request) {
 			throw new Error(`process: request is required!`);
 		}
@@ -727,7 +733,7 @@ export class DataFetcher {
 		this.content = content;
 
 		// const { method } = request;
-		const { type: contentType } = content;
+		const {type: contentType} = content;
 
 		// if (method === REQUEST_METHOD.HEAD) {}
 
@@ -748,28 +754,32 @@ export class DataFetcher {
 			type: componentType // CAUTION: Is undefined when using page templates.
 		} = component;
 		switch (componentType) {
-			case 'part': return this.processPart({
+		case 'part':
+			return this.processPart({
 				component,
 				...passAlong
 			});
-			case 'layout': return this.processLayout({
+		case 'layout':
+			return this.processLayout({
 				component: component as LayoutComponent,
 				...passAlong
 			});
-			case 'text': return this.processTextComponent({
+		case 'text':
+			return this.processTextComponent({
 				component: component as TextComponent,
 			});
-			case 'fragment': return this.processFragment({
+		case 'fragment':
+			return this.processFragment({
 				component: component as FragmentComponent,
 				...passAlong
 			});
 			// case 'page':
-			default: // Since componentType is undefined when using automatic page templates, we have to assume it's a page.
-				return this.processPage({
-					component: component as PageComponent,
-					...passAlong
-				});
-				// throw new Error(`processComponents: component type not supported: ${componentType}!`);
+		default: // Since componentType is undefined when using automatic page templates, we have to assume it's a page.
+			return this.processPage({
+				component: component as PageComponent,
+				...passAlong
+			});
+			// throw new Error(`processComponents: component type not supported: ${componentType}!`);
 		}
 	}
 } // class DataFetcher

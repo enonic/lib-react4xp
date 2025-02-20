@@ -1,5 +1,5 @@
-import type { AppConfig } from '/lib/enonic/react4xp/types/Application';
-import { isSet } from '@enonic/js-utils/value/isSet';
+import type {AppConfig} from '/lib/enonic/react4xp/types/Application';
+import {isSet} from '@enonic/js-utils/value/isSet';
 
 
 export default function getSsrConfig(ssr?: boolean) {

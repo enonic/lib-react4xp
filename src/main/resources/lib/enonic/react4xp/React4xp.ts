@@ -1,54 +1,40 @@
-import type {
-	Component,
-	PageContributions,
-	Request,
-	Response,
-} from '@enonic-types/core';
-import type {
-	Entry,
-	Id,
-	Instance,
-	// React4xp as React4xpNamespace,
-	UrlType
-} from '/lib/enonic/react4xp/types/React4xp';
+import type {Component, PageContributions, Request, Response} from '@enonic-types/core';
+import type {Entry, Id, Instance, UrlType} from '/lib/enonic/react4xp/types/React4xp';
 
-import { hasOwnProperty } from '@enonic/js-utils/object/hasOwnProperty';
-import { isObject } from '@enonic/js-utils/value/isObject';
-import { isString } from '@enonic/js-utils/value/isString';
-import { isNotSet } from '@enonic/js-utils/value/isNotSet';
+import {hasOwnProperty} from '@enonic/js-utils/object/hasOwnProperty';
+import {isObject} from '@enonic/js-utils/value/isObject';
+import {isString} from '@enonic/js-utils/value/isString';
+import {isNotSet} from '@enonic/js-utils/value/isNotSet';
 // import { toStr } from '@enonic/js-utils/value/toStr';
-import { jsxToAssetPath } from '/lib/enonic/react4xp/asset/jsxToAssetPath';
-import {
-	getContent,
-	getComponent
-} from '/lib/xp/portal';
-import { getDescriptorFromTemplate } from '/lib/enonic/react4xp/React4xp/getDescriptorFromTemplate';
+import {jsxToAssetPath} from '/lib/enonic/react4xp/asset/jsxToAssetPath';
+import {getContent, getComponent} from '/lib/xp/portal';
+import {getDescriptorFromTemplate} from '/lib/enonic/react4xp/React4xp/getDescriptorFromTemplate';
 
 // Import public methods
-import { checkIdLock } from '/lib/enonic/react4xp/React4xp/methods/checkIdLock';
-import { ensureAndLockId } from '/lib/enonic/react4xp/React4xp/methods/ensureAndLockId';
-import { ensureAndLockBeforeRendering } from '/lib/enonic/react4xp/React4xp/methods/ensureAndLockBeforeRendering';
-import { doRenderSSR } from '/lib/enonic/react4xp/React4xp/methods/doRenderSSR';
+import {checkIdLock} from '/lib/enonic/react4xp/React4xp/methods/checkIdLock';
+import {ensureAndLockId} from '/lib/enonic/react4xp/React4xp/methods/ensureAndLockId';
+import {ensureAndLockBeforeRendering} from '/lib/enonic/react4xp/React4xp/methods/ensureAndLockBeforeRendering';
+import {doRenderSSR} from '/lib/enonic/react4xp/React4xp/methods/doRenderSSR';
 import makeErrorMessage from "/lib/enonic/react4xp/React4xp/methods/makeErrorMessage";
-import { renderBody } from '/lib/enonic/react4xp/React4xp/methods/renderBody';
-import { renderPageContributions } from '/lib/enonic/react4xp/React4xp/methods/renderPageContributions';
-import { renderSSRIntoContainer } from '/lib/enonic/react4xp/React4xp/methods/renderSSRIntoContainer';
-import { renderTargetContainer } from '/lib/enonic/react4xp/React4xp/methods/renderTargetContainer';
-import { renderWarningPlaceholder } from '/lib/enonic/react4xp/React4xp/methods/renderWarningPlaceholder';
-import { setHasRegions } from '/lib/enonic/react4xp/React4xp/methods/setHasRegions';
-import { setId } from '/lib/enonic/react4xp/React4xp/methods/setId';
-import { setIsPage } from '/lib/enonic/react4xp/React4xp/methods/setIsPage';
-import { setJsxPath } from '/lib/enonic/react4xp/React4xp/methods/setJsxPath';
-import { setProps } from '/lib/enonic/react4xp/React4xp/methods/setProps';
-import { uniqueId } from '/lib/enonic/react4xp/React4xp/methods/uniqueId';
+import {renderBody} from '/lib/enonic/react4xp/React4xp/methods/renderBody';
+import {renderPageContributions} from '/lib/enonic/react4xp/React4xp/methods/renderPageContributions';
+import {renderSSRIntoContainer} from '/lib/enonic/react4xp/React4xp/methods/renderSSRIntoContainer';
+import {renderTargetContainer} from '/lib/enonic/react4xp/React4xp/methods/renderTargetContainer';
+import {renderWarningPlaceholder} from '/lib/enonic/react4xp/React4xp/methods/renderWarningPlaceholder';
+import {setHasRegions} from '/lib/enonic/react4xp/React4xp/methods/setHasRegions';
+import {setId} from '/lib/enonic/react4xp/React4xp/methods/setId';
+import {setIsPage} from '/lib/enonic/react4xp/React4xp/methods/setIsPage';
+import {setJsxPath} from '/lib/enonic/react4xp/React4xp/methods/setJsxPath';
+import {setProps} from '/lib/enonic/react4xp/React4xp/methods/setProps';
+import {uniqueId} from '/lib/enonic/react4xp/React4xp/methods/uniqueId';
 
 
-import { buildErrorContainer } from '/lib/enonic/react4xp/htmlHandling';
-import { setup as setupSSRJava } from '/lib/enonic/react4xp/ssr/index'
-import { templateDescriptorCache } from '/lib/enonic/react4xp/React4xp/templateDescriptorCache';
-import { getClientUrl } from '/lib/enonic/react4xp/asset/client/getClientUrl';
-import { getExecutorUrl } from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
-import { getComponentChunkUrls } from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
+import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
+import {setup as setupSSRJava} from '/lib/enonic/react4xp/ssr/index'
+import {templateDescriptorCache} from '/lib/enonic/react4xp/React4xp/templateDescriptorCache';
+import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
+import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
+import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
 
 
 interface RenderOptions {

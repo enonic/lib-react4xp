@@ -1,17 +1,17 @@
 // import type {
 // 	Content,
 // } from '@enonic-types/core';
-import type {get as getContentByKeyType,} from '@enonic-types/lib-content';
+import type {get as getContentByKeyType} from '@enonic-types/lib-content';
 import type {
 	SiteConfig,
 	assetUrl,
 	getContent as getCurrentContentType,
 	getSiteConfig,
 	imageUrl as imageUrlType,
-	processHtml,
+	processHtml
 } from '@enonic-types/lib-portal';
 import {App, LibContent, LibPortal, Request, Server} from '@enonic/mock-xp';
-import {CONTENT_TYPE_PORTAL_SITE,} from '@enonic/mock-xp/dist/constants';
+import {CONTENT_TYPE_PORTAL_SITE} from '@enonic/mock-xp/dist/constants';
 import {jest} from '@jest/globals';
 
 import {
@@ -21,7 +21,7 @@ import {
 	PART_FRAGMENT_CONTENT,
 	PROCESSED_HTML,
 	TEXT_FRAGMENT_CONTENT_ID,
-	TEXT_FRAGMENT_CONTENT,
+	TEXT_FRAGMENT_CONTENT
 } from './data';
 
 type AssetUrl = typeof assetUrl;

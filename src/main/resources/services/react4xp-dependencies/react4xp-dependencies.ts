@@ -2,14 +2,11 @@
 //   - 'dependencies/urls' returns an array of dependency URLS.
 //   - just 'dependencies' will return them as HTML script tags.
 
-import type {
-	Request,
-	Response
-} from '@enonic-types/core';
+import type {Request, Response} from '@enonic-types/core';
 
 
-import { getComponentChunkUrls } from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
-import { getSuffix } from '/lib/enonic/react4xp/dependencies/getSuffix';
+import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
+import {getSuffix} from '/lib/enonic/react4xp/dependencies/getSuffix';
 
 
 const SERVICE_NAME = 'react4xp-dependencies';

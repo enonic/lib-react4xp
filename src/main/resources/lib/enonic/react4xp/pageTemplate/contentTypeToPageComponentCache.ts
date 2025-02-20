@@ -1,7 +1,7 @@
 import type {Cache} from '/lib/enonic/react4xp/types/Cache';
 
 // @ts-expect-error No types available for this module
-import {newCache}  from '/lib/cache';
+import {newCache} from '/lib/cache';
 
 // Key is contentType, value is a page component.
 export const contentTypeToPageComponentCache = newCache({

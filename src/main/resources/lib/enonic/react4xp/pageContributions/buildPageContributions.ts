@@ -1,15 +1,12 @@
-import type { PageContributions } from '@enonic-types/core';
-import type { UrlType } from '/lib/enonic/react4xp/types/React4xp';
-import type {
-	EntryName,
-	OneOrMore,
-} from '../../../../index.d';
+import type {PageContributions} from '@enonic-types/core';
+import type {UrlType} from '/lib/enonic/react4xp/types/React4xp';
+import type {EntryName, OneOrMore} from '../../../../index.d';
 
 
 import endsWith from '@enonic/js-utils/string/endsWith';
-import { getClientUrl } from '/lib/enonic/react4xp/asset/client/getClientUrl';
-import { getGlobalsUrls } from '/lib/enonic/react4xp/asset/globals/getGlobalsUrls';
-import { getComponentChunkUrls } from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
+import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
+import {getGlobalsUrls} from '/lib/enonic/react4xp/asset/globals/getGlobalsUrls';
+import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
 
 /** Use the json files built by (@enonic/react4xp)
  *  to fetch items of <script src="url" /> for common chunks:

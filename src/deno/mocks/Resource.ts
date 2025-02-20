@@ -1,9 +1,7 @@
-import type {
-	ByteSource,
-	Resource as ResourceInterface,
-  } from '@enonic-types/lib-io';
+import type {ByteSource, Resource as ResourceInterface} from '@enonic-types/lib-io';
 
-  export class Resource implements ResourceInterface {
+export class Resource
+	implements ResourceInterface {
 	private readonly _bytes: string; // ByteSource
 	private readonly _exists: boolean;
 	private readonly _key: string;

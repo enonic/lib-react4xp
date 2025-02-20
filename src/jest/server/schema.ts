@@ -1,23 +1,7 @@
-import type {
-	// ContentSchemaType,
-	// FormItem,
-	FormItemInput,
-	FormItemOptionSet,
-	FormItemSet,
-	// ListDynamicSchemasParams,
-	MixinSchema,
-	// XDataSchema,
-} from '@enonic-types/lib-schema';
-import type {
-	GetComponentReturnType,
-	NestedPartial
-} from '../../main/resources/lib/enonic/react4xp/DataFetcher';
+import type {FormItemInput, FormItemOptionSet, FormItemSet, MixinSchema} from '@enonic-types/lib-schema';
+import type {GetComponentReturnType, NestedPartial} from '../../main/resources/lib/enonic/react4xp/DataFetcher';
 
-import {
-	HTML_AREA_KEY,
-	ITEM_SET_KEY,
-	OPTION_SET_KEY,
-} from './constants';
+import {HTML_AREA_KEY, ITEM_SET_KEY, OPTION_SET_KEY} from './constants';
 
 
 export const FORM_ITEM_INPUT: Partial<FormItemInput> = {

@@ -1,7 +1,4 @@
-import {
-	ENTRIES_FILENAME,
-	R4X_TARGETSUBDIR
-} from '@enonic/react4xp/constants.runtime';
+import {ENTRIES_FILENAME, R4X_TARGETSUBDIR} from '@enonic/react4xp/constants.runtime';
 import {readResourceLines} from '/lib/enonic/react4xp/resource/readResourceLines';
 
 

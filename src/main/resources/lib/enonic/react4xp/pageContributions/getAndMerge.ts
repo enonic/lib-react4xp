@@ -1,17 +1,14 @@
-import type { PageContributions } from '@enonic-types/core';
-import type { UrlType } from '/lib/enonic/react4xp/types/React4xp';
-import type {
-	EntryName,
-	OneOrMore
-} from '../../../../index.d';
+import type {PageContributions} from '@enonic-types/core';
+import type {UrlType} from '/lib/enonic/react4xp/types/React4xp';
+import type {EntryName, OneOrMore} from '../../../../index.d';
 
 
 //import { toStr } from '@enonic/js-utils/value/toStr';
-import { getExecutorUrl } from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
+import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
 //import { getSiteLocalCacheKey } from '/lib/enonic/react4xp/asset/getSiteLocalCacheKey';
-import { normalizeEntryNames } from '/lib/enonic/react4xp/dependencies/normalizeEntryNames';
-import { buildPageContributions } from '/lib/enonic/react4xp/pageContributions/buildPageContributions';
-import { getUniqueEntries } from '/lib/enonic/react4xp/pageContributions/getUniqueEntries';
+import {normalizeEntryNames} from '/lib/enonic/react4xp/dependencies/normalizeEntryNames';
+import {buildPageContributions} from '/lib/enonic/react4xp/pageContributions/buildPageContributions';
+import {getUniqueEntries} from '/lib/enonic/react4xp/pageContributions/getUniqueEntries';
 
 
 /** Adds page contributions for an (optional) set of entries.  Merges different pageContributions.js objects into one. Prevents duplicates: no single pageContribution entry is

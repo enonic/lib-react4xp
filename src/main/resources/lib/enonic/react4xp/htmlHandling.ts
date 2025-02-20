@@ -1,8 +1,5 @@
-import type { Request } from '@enonic-types/core';
-import type {
-	Id,
-	Instance,
-} from '/lib/enonic/react4xp/types/React4xp';
+import type {Request} from '@enonic-types/core';
+import type {Id, Instance} from '/lib/enonic/react4xp/types/React4xp';
 
 
 export function buildErrorContainer(

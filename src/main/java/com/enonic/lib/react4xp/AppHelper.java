@@ -1,7 +1,6 @@
 package com.enonic.lib.react4xp;
 
 import com.enonic.xp.server.RunMode;
-import java.lang.System;
 
 public class AppHelper
 {

@@ -1,11 +1,6 @@
-import {
-  readdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from 'fs';
+import {readdirSync, readFileSync, statSync, writeFileSync} from 'fs';
 import {join} from 'path';
-import { exit } from 'process';
+import {exit} from 'process';
 import propertiesReader from 'properties-reader';
 import packageJson from '../package.json';
 

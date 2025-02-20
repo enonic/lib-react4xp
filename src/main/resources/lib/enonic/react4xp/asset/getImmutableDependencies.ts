@@ -1,6 +1,6 @@
 import {includes} from '@enonic/js-utils/array/includes';
 import endsWith from '@enonic/js-utils/string/endsWith';
-import { startsWith } from '@enonic/js-utils/string/startsWith';
+import {startsWith} from '@enonic/js-utils/string/startsWith';
 // import {toStr} from '@enonic/js-utils/value/toStr';
 import {getComponentStats} from '/lib/enonic/react4xp/asset/getComponentStats';
 

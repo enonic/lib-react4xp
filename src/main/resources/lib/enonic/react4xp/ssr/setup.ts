@@ -1,11 +1,5 @@
-import type { AppConfig } from '/lib/enonic/react4xp/types/Application';
-import {
-	COMPONENT_STATS_FILENAME,
-	ENTRIES_FILENAME,
-	GLOBALS_FILENAME,
-	LIBRARY_NAME,
-	R4X_TARGETSUBDIR
-} from '@enonic/react4xp';
+import type {AppConfig} from '/lib/enonic/react4xp/types/Application';
+import {COMPONENT_STATS_FILENAME, ENTRIES_FILENAME, GLOBALS_FILENAME, LIBRARY_NAME, R4X_TARGETSUBDIR} from '@enonic/react4xp';
 import {camelize} from '@enonic/js-utils/string/camelize';
 import {ucFirst} from '@enonic/js-utils/string/ucFirst';
 import {isSet} from '@enonic/js-utils/value/isSet';

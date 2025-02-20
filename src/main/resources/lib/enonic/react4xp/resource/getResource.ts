@@ -1,4 +1,4 @@
-import type { Resource } from '@enonic-types/lib-io';
+import type {Resource} from '@enonic-types/lib-io';
 
 import {getResource as javaGetResource} from '/lib/xp/io';
 

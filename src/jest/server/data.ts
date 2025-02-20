@@ -1,19 +1,7 @@
-
-import type {
-	Content,
-	LayoutComponent,
-	PageComponent,
-	PartComponent,
-	FragmentComponent,
-	TextComponent,
-} from '@enonic-types/core';
+import type {LayoutComponent, PageComponent, PartComponent, FragmentComponent, TextComponent} from '@enonic-types/core';
 import type {PageContent} from '../../main/resources/lib/enonic/react4xp/DataFetcher';
 
-import {
-	HTML_AREA_KEY,
-	ITEM_SET_KEY,
-	OPTION_SET_KEY,
-} from './constants';
+import {HTML_AREA_KEY, ITEM_SET_KEY, OPTION_SET_KEY} from './constants';
 
 export const UNPROCESSED_HTML = '<p>[info header="Header"]Text[/info]</p>';
 export const PROCESSED_HTML = `<p><!--#MACRO _name="info" header="Header" _document="__macroDocument1" _body="Text"--></p>`

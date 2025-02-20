@@ -1,8 +1,8 @@
-import type { UrlType } from '/lib/enonic/react4xp/types/React4xp';
+import type {UrlType} from '/lib/enonic/react4xp/types/React4xp';
 
 
-import { readClientManifestJson } from '/lib/enonic/react4xp/asset/client/readClientManifestJson';
-import { getAssetRoot } from '/lib/enonic/react4xp/dependencies/getAssetRoot';
+import {readClientManifestJson} from '/lib/enonic/react4xp/asset/client/readClientManifestJson';
+import {getAssetRoot} from '/lib/enonic/react4xp/dependencies/getAssetRoot';
 
 
 // WARNING: Do not cache anything that contains assetRoot, it changes per context!
