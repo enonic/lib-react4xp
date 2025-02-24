@@ -51,7 +51,7 @@
     "bun": "^1.2.3",
     "concurrently": "^9.1.2",
     "core-js-pure": "^3.40.0",
-    "diffable-html": "^5.0.0",
+    "diffable-html": "^6.0.1",
     "esbuild-plugin-manifest": "^1.0.5",
     "eslint": "^9.21.0",
     "eslint-formatter-pretty": "^6.0.1",
