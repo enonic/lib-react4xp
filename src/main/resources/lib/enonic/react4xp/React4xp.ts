@@ -8,7 +8,6 @@ import {isNotSet} from '@enonic/js-utils/value/isNotSet';
 // import { toStr } from '@enonic/js-utils/value/toStr';
 import {jsxToAssetPath} from '/lib/enonic/react4xp/asset/jsxToAssetPath';
 import {getContent, getComponent} from '/lib/xp/portal';
-import {getDescriptorFromTemplate} from '/lib/enonic/react4xp/React4xp/getDescriptorFromTemplate';
 
 // Import public methods
 import {checkIdLock} from '/lib/enonic/react4xp/React4xp/methods/checkIdLock';
@@ -31,7 +30,6 @@ import {uniqueId} from '/lib/enonic/react4xp/React4xp/methods/uniqueId';
 
 import {buildErrorContainer} from '/lib/enonic/react4xp/htmlHandling';
 import {setup as setupSSRJava} from '/lib/enonic/react4xp/ssr/index'
-import {templateDescriptorCache} from '/lib/enonic/react4xp/React4xp/templateDescriptorCache';
 import {getClientUrl} from '/lib/enonic/react4xp/asset/client/getClientUrl';
 import {getExecutorUrl} from '/lib/enonic/react4xp/asset/executor/getExecutorUrl';
 import {getComponentChunkUrls} from '/lib/enonic/react4xp/dependencies/getComponentChunkUrls';
@@ -101,10 +99,6 @@ export class React4xp<
 		}
 
 		return react4xp;
-	}
-
-	static _clearCache() {
-		templateDescriptorCache.clear();
 	}
 
 	static render<
@@ -262,29 +256,10 @@ export class React4xp<
 			// log.debug('React4xp constructor this.component:%s', this.component);
 
 			const buildingBlockData = {
-				descriptor: this.component['descriptor'] || getDescriptorFromTemplate(this.component.type, this.component['template']),
+				descriptor: this.component['descriptor'],
 				type: BASE_PATHS[this.component.type],
 				path: this.component.path
 			};
-			// log.debug('React4xp constructor buildingBlockData:%s', buildingBlockData);
-
-			if (!this.component.path) {
-				const maybeFragmentContent = getContent();
-				// log.debug('React4xp constructor maybeFragmentContent:%s', toStr(maybeFragmentContent));
-				// The actual node stores components on a flattened array, while getContent has a nested structure under fragment.
-				// // @ts-expect-error TS2339: Property 'fragment' does not exist on type
-				if (
-					maybeFragmentContent
-					&& maybeFragmentContent.type === 'portal:fragment'
-					&& maybeFragmentContent.fragment
-				) {
-					// #51 Support rendering fragment content
-					// getComponent() inside Fragment Content doesn't contain path
-					// The path is used when creating react4xpId
-					// Since a Fragment Content only has a single component, the path really doesn't matter...
-					buildingBlockData.path = '/';
-				}
-			}
 			// log.debug('React4xp constructor buildingBlockData:%s', buildingBlockData);
 
 			Object.keys(buildingBlockData).forEach(attribute => {

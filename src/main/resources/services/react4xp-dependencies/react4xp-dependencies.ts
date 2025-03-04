@@ -36,21 +36,22 @@ export function get(req: Request): Response {
 	//   .../react4xp-dependencies?entry1&entry2&entry3
 	// Parameters that have values will not be interpreted as an entry name request.
 	const params = req.params || {};
-	const entryNames = Object.keys(params)
+	const entries = Object.keys(params)
 		.filter(key => params[key] != null
 			&& ((params[key] || "") + "").trim() === ""
 		);
 	relativePath.split("&").forEach(entryName => {
-		if (entryName.trim() !== "" && entryNames.indexOf(entryName) === -1) {
-			entryNames.push(entryName);
+		if (entryName.trim() !== "" && entries.indexOf(entryName) === -1) {
+			entries.push(entryName);
 		}
 	});
 
 	try {
 		return {
-			body: JSON.stringify(getComponentChunkUrls(
-				entryNames // ,
-				// { urlType } // NOTE: No way to select urlType in this service, will use app.config['react4xp.urlType'] || 'server'.
+			body: JSON.stringify(getComponentChunkUrls({
+					entries // ,
+					// urlType // NOTE: No way to select urlType in this service, will use app.config['react4xp.urlType'] || 'server'.
+				}
 			)),
 			contentType: 'application/json',
 			// FIXME: ETAG not working, using standard client cache instead, limited to 1 hour since it's not hashed
