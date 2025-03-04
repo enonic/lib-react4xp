@@ -38,7 +38,7 @@ export function buildPageContributions({
 		pageContributions.headEnd.push(`<script defer src="${getGlobalsUrls({ urlType })}"></script>\n`);
 	}
 
-	const componentChunkUrls = getComponentChunkUrls(entries, { urlType });
+	const componentChunkUrls = getComponentChunkUrls({entries, urlType});
 	for (let i = 0; i < componentChunkUrls.length; i++) {
 		const componentChunkUrl = componentChunkUrls[i];
 		if (endsWith(componentChunkUrl, '.css')) {

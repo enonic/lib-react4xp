@@ -14,9 +14,6 @@ type Asset = string|{name :string};
 const TOLERATED_ENTRY_EXTENSIONS = /([/ ]+|\.(tsx?|jsx?|es6?)[/ ]*)$/i;
 
 
-let buildStatsEntrypoints :Object|undefined;
-
-
 /** Takes entry names (array or a single string) and returns an array of (hashed) dependency file names, the complete set of chunks required for the set of entries to run.
  *  ASSUMES that stats.json.entrypoints is an object where the keys are entry names without file extensions, mapping to values that are objects,
  *  which in turn have an "assets" key, under which are the full file names of the entry's dependencies.
@@ -24,11 +21,7 @@ let buildStatsEntrypoints :Object|undefined;
 export function readComponentChunkNames(entryNames: OneOrMore<EntryName>) {
 	//log.debug('readComponentChunkNames(%s)', toStr(entryNames));
 
-    // Just verify that it exists and has a content:
-    let STATS = getComponentStats();
-
-    buildStatsEntrypoints = STATS.entrypoints;
-
+	let buildStatsEntrypoints = getComponentStats().entrypoints;
 
     if (entryNames.length === 0) {
         entryNames = Object.keys(buildStatsEntrypoints)// as Array<React4xpNamespace.EntryName>;
@@ -54,7 +47,6 @@ export function readComponentChunkNames(entryNames: OneOrMore<EntryName>) {
                 throw new Error(`Requested entry '${entry}' is missing assets`);
             }
 
-            const myself = entry + ".js";
             data.assets
                 // Each asset can be a string (webpack 4) or an object with a subattribute string .name (webpack 5)
                 .map((asset :Asset) => {

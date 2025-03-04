@@ -35,10 +35,7 @@ import {getContent as getCurrentContent} from '/lib/xp/portal';
 
 import {REQUEST_METHOD, REQUEST_MODE} from '/lib/enonic/react4xp/constants';
 import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/appHelper';
-import {getCachedPageComponentFromContentType} from '/lib/enonic/react4xp/pageTemplate/getCachedPageComponentFromContentType';
-import {
-	getCachedPageComponentFromPageTemplateContentId
-} from '/lib/enonic/react4xp/pageTemplate/getCachedPageComponentFromPageTemplateContentId';
+
 import {processHtml} from '/lib/enonic/react4xp/dataFetcher/processHtml';
 
 export type FragmentContent<
@@ -311,79 +308,6 @@ export class DataFetcher {
 		siteConfig?: Record<string, unknown> | null; // In passAlong
 	}): ProcessResult<RenderablePageComponent | RenderableWarning> {
 
-		if (!component['descriptor']) { // No local page component, check page templates:
-			const pageTemplateContentId = component['pageTemplateContentId'];
-			// const componentType = component['type']; // Is undefined when automatic page templage.
-			if (!pageTemplateContentId) { // Page Template: Automatic
-				const {type: contentType} = this.content;
-				if (!contentType) {
-					throw new Error(`processPage: Unable to determine descriptor! Both component.descriptor and content.type are missing!`);
-				}
-				// log.debug('processPage: No component.descriptor. contentType:%s', contentType);
-				try {
-					component = getCachedPageComponentFromContentType({contentType});
-				} catch (e) {
-					if (
-						this.request.params['mode'] === REQUEST_MODE.EDIT
-						&& this.request.mode === REQUEST_MODE.INLINE
-						&& this.request.method === REQUEST_METHOD.HEAD
-					) {
-						/*//TODO: needs to be handled in app.ts
-						return {
-							response: {
-								// So Content Studio knowns the page is NOT renderable,
-								// and the page selector dropdown is shown.
-								status: 418
-							}
-						};*/
-					}
-					return <RenderableWarning>{
-						mode: this.request.mode,
-						path: '/',
-						type: 'warning',
-						html: `<h1>Not renderable</h1>
-<p>Please do one of the following:</p>
-<ul>
-	<li>Setup a page template that supports content-type: "${contentType}".</li>
-	<li>Edit the page and select a Page Component.</li>
-	<li>Add special handling for content-type: "${contentType}" in DataFetcher.</li>
-</ul>`,
-					}
-				}
-
-				// log.debug('processPage: No component.descriptor. contentType:%s component(from page template):%s', contentType, toStr(component));
-			} else { // Page Template: Specific
-				// log.debug('processPage: No descriptor. componentType:%s pageTemplateContentId:%s', componentType, pageTemplateContentId);
-				try {
-					component = getCachedPageComponentFromPageTemplateContentId({pageTemplateContentId});
-					// log.debug('processPage: No descriptor. componentType:%s pageTemplateContentId:%s component(from page template):%s', componentType, pageTemplateContentId, toStr(component));
-				} catch (e) {
-					if (
-						this.request.mode === REQUEST_MODE.INLINE
-						&& this.request.method === REQUEST_METHOD.HEAD
-						&& this.request.params['mode'] === REQUEST_MODE.EDIT
-					) {
-						/*//TODO: needs to be handled in app.ts
-						return {
-							response: {
-								// So Content Studio knowns the page is NOT renderable,
-								// and the page selector dropdown is shown.
-								status: 418
-							}
-						};*/
-					}
-					return {
-						descriptor: 'unknown:unknown', // This might end up as: Page descriptor:unknown:unknown not registered in ComponentRegistry!
-						error: e.message,
-						mode: this.request.mode,
-						path: '/',
-						regions: {},
-						type: 'page',
-					};
-				}
-			}
-		}
-
 		const {
 			descriptor,
 			path, // Should always be '/'
@@ -392,6 +316,22 @@ export class DataFetcher {
 		// log.debug('processPage: regions:%s', toStr(regions));
 
 		if (!descriptor) { // This could probably only happen on b0rked template content, or some caching mistake.
+
+			if (
+				this.request.params['mode'] === REQUEST_MODE.EDIT
+				&& this.request.mode === REQUEST_MODE.INLINE
+				&& this.request.method === REQUEST_METHOD.HEAD
+			) {
+				/*//TODO: needs to be handled in app.ts
+				return {
+					response: {
+						// So Content Studio knowns the page is NOT renderable,
+						// and the page selector dropdown is shown.
+						status: 418
+					}
+				};*/
+			}
+
 			log.error(`processPage: descriptor not found for page component: ${toStr(component)} in content:${toStr(this.content)}!`);
 			throw new Error(`processPage: descriptor not found for page component!`);
 		}

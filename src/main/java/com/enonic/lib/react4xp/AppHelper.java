@@ -1,5 +1,6 @@
 package com.enonic.lib.react4xp;
 
+import com.enonic.xp.home.HomeDir;
 import com.enonic.xp.server.RunMode;
 
 public class AppHelper
@@ -11,6 +12,6 @@ public class AppHelper
 
   public String getXpHome()
   {
-    return System.getProperty("xp.home");
+      return HomeDir.get().toString();
   }
 }

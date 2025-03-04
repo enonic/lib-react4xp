@@ -17,7 +17,6 @@ export default defineConfig((options) => {
 				options.chunkNames = '_lib_r4x_chunks/[name]-[hash]';
 			},
 			external: [
-				'/lib/cache',
 				'/lib/enonic/static',
 				'/lib/openxp/file-system',
 				'/lib/xp/auth',
