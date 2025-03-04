@@ -13,7 +13,6 @@ import type {
 	Request,
 	TextComponent
 } from '@enonic-types/core';
-import type {FormItem} from '@enonic-types/lib-schema';
 import type {
 	RenderableComponent,
 	RenderableContentType,
@@ -60,26 +59,6 @@ export type PageContent<
 	// @ts-expect-error Does not satisfy the type constraint
 	Component
 >
-
-export type NestedPartial<T> = {
-	[K in keyof T]?: T[K] extends object ? NestedPartial<T[K]> : T[K];
-};
-
-export interface GetComponentReturnType {
-	componentPath: string;
-	config: Record<string, unknown>;
-	description?: string;
-	descriptionI18nKey?: string;
-	displayName: string;
-	displayNameI18nKey: string;
-	form: NestedPartial<FormItem>[];
-	key: string;
-	modifiedTime: string;
-	regions?: string[];
-	resource: string;
-	type: 'PART' | 'LAYOUT' | 'PAGE';
-};
-// type GetComponent = (params: GetDynamicComponentParams) => GetComponentReturnType;
 
 export type ComponentProcessorParams<
 	DESCRIPTOR extends ComponentDescriptor = ComponentDescriptor,
