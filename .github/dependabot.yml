@@ -15,12 +15,9 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 10
     assignees:
-      - "ComLock"
+      - "pmi"
     reviewers:
-      - "ComLock"
-    ignore:
-      - dependency-name: "@rollup/plugin-typescript"
-        versions: ["^11.0.0"]
+      - "pmi"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
