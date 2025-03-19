@@ -11,17 +11,8 @@ export function dataFromProcessedHtml(processedHtml: string): RichTextData {
 	};
 	let index = 0;
 	rv.processedHtml = processedHtml
-		.replace(
-			/<p>(<!--#MACRO (?:.*?\n?)*?-->)<\/p>/gm,
-			'$1'
-		)
-		.replace(
-			/<pre>(<!--#MACRO (?:.*?\n?)*?-->)<\/pre>/gm,
-			'$1'
-		)
-		.replace(
-			/<!--#MACRO ((?:.*?\n?)*?)-->/gm,
-			(_origHtmlMacroComment, attributesString) => {
+		.replace(/(?:<(p|pre)>)?<!--#MACRO ((?:.*?\n?)*?)-->(?:<\/\1>)?/gm,
+			(_origHtmlMacroComment, _tagName, attributesString) => {
 				// Replacer is executed once per match (macro comment)
 				index++;
 				const ref = index.toString();
@@ -30,8 +21,9 @@ export function dataFromProcessedHtml(processedHtml: string): RichTextData {
 					config: {},
 					ref,
 				};
+				let body = '';
 				const replacedAttributes = attributesString.replace(
-					/([^=]+)="([^"]*)"\s*/g,
+					/([^=\s]+)="([^"\\]*(?:\\.[^"\\]*)*)"/g,
 					(_kv, key, value) => {
 						// Replacer is executed once per match (attribute key/value)
 						if (key === '_name') {
@@ -45,6 +37,9 @@ export function dataFromProcessedHtml(processedHtml: string): RichTextData {
 						}
 						if (key === '_body') {
 							key = 'body';
+							// remove escaped quotes from body because it was stored in an attribute value
+							value = value.replace(/\\"/g, '"');
+							body = value;
 						}
 						if (macro.config && name) {
 							if (!macro.config[name]) {
@@ -55,11 +50,9 @@ export function dataFromProcessedHtml(processedHtml: string): RichTextData {
 						return '';
 					}
 				)
-				const replacedMacro = `<editor-macro ${replacedAttributes}></editor-macro>`;
-				if (rv.macros) {
-					rv.macros.push(macro as MacroData);
-				}
-				return replacedMacro;
+				rv.macros.push(macro as MacroData);
+
+				return `<editor-macro ${replacedAttributes}>${body}</editor-macro>`;
 			} // single macro replacer
 		);
 
@@ -93,15 +86,14 @@ export function dataFromProcessedHtml(processedHtml: string): RichTextData {
 			}
 			// (log||console).debug('imageContent:%s', imageContent);
 
-			const image = {
+			const image: ImageData = {
 				image: imageContent,
 				ref,
 				// style: null // TODO
 			};
-			rv.images.push(image as ImageData);
-			const replacedImage = `<img${imgAttributesString} data-image-ref="${ref}">`;
-			// (log||console).debug('replacedImage:%s', replacedImage);
-			return replacedImage;
+			rv.images.push(image);
+
+			return `<img${imgAttributesString} data-image-ref="${ref}">`;
 		});
 
 	// NOTE content-links seems to work fine without any special handling

@@ -10,7 +10,8 @@
     ]
   },
   "contributors": [
-    "Christian Andreas Westgaard <cwe@enonic.com>"
+    "Christian Andreas Westgaard <cwe@enonic.com>",
+    "Pavel Milkevich <pmi@enonic.com>"
   ],
   "dependencies": {
     "@enonic/js-utils": "^1.9.0",
