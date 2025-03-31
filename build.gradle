@@ -66,11 +66,9 @@ tasks.register('npmCheck', NpmTask) {
 }
 // check.dependsOn npmCheck
 
-def BUILD_ENV = "production"
-if ( project.hasProperty( "dev" ) || project.hasProperty( "development" ) )
-{
-    BUILD_ENV = "development"
-}
+def BUILD_ENV = (project.findProperty('env') == 'prod')
+    ? 'production'
+    : 'development'
 
 tasks.register('npmBuild', NpmTask) {
   args = [
@@ -80,7 +78,7 @@ tasks.register('npmBuild', NpmTask) {
   environment = [
     'FORCE_COLOR': 'true',
     'LOG_LEVEL_FROM_GRADLE': gradle.startParameter.logLevel.toString(),
-    'NODE_ENV': project.hasProperty('dev') || project.hasProperty('development') ? 'development' : 'production'
+    'NODE_ENV' : BUILD_ENV
   ]
   inputs.dir 'src/main/resources'
   outputs.dir 'build/resources/main'
