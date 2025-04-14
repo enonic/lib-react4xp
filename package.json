@@ -48,7 +48,7 @@
     "@typescript-eslint/eslint-plugin": "^8.29.0",
     "@typescript-eslint/parser": "^8.29.0",
     "babel-loader": "^10.0.0",
-    "bun": "^1.2.8",
+    "bun": "^1.2.9",
     "concurrently": "^9.1.2",
     "core-js-pure": "^3.41.0",
     "diffable-html": "^6.0.1",
