@@ -41,7 +41,7 @@
     "@rollup/plugin-alias": "^5.1.1",
     "@rollup/plugin-commonjs": "^28.0.3",
     "@sinonjs/text-encoding": "^0.7.3",
-    "@swc/core": "^1.11.18",
+    "@swc/core": "^1.11.21",
     "@swc/helpers": "^0.5.17",
     "@types/core-js": "^2.5.8",
     "@types/react": "^19",
