@@ -32,7 +32,7 @@
     "@enonic-types/lib-io": "^7.15.1",
     "@enonic-types/lib-node": "^7.15.1",
     "@enonic-types/lib-portal": "^7.15.1",
-    "@enonic-types/lib-static": "^2.0.0",
+    "@enonic-types/lib-static": "^2.1.0",
     "@enonic/mock-xp": "^1.0.0",
     "@enonic/react-components": "^6.0.0-B6",
     "@enonic/react4xp": "^6.0.0-B3",
