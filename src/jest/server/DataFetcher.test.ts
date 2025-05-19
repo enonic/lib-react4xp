@@ -1,5 +1,5 @@
 import type {Component, Request, PageComponent, LayoutComponent} from '@enonic-types/core';
-import type {RenderablePageComponent} from '@enonic/react-components';
+import type {ProcessedPage} from '@enonic/react-components';
 
 import {describe, expect, test as it} from '@jest/globals';
 
@@ -73,7 +73,7 @@ const renderablePageComponent = dataFetcher.process({
 	component: PAGE_COMPONENT as Component,
 	content: PAGE_CONTENT,
 	request: {} as Request,
-}) as RenderablePageComponent;
+}) as ProcessedPage;
 
 const {components} = renderablePageComponent.props.regions['main'];
 // console.info('components:%s', stringify(components, { maxItems: Infinity }));
