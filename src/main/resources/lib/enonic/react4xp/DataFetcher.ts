@@ -86,6 +86,10 @@ interface ProcessParams {
 	request: Request;
 }
 
+export type ProcessResult = Merge<ProcessedData, {
+	commonProps?: Record<string, unknown>;
+}>
+
 const RUN_MODE = IS_DEV_MODE ? 'development' : 'production';
 
 const ADMIN_CONTEXT: ContextParams = {
@@ -94,6 +98,7 @@ const ADMIN_CONTEXT: ContextParams = {
 
 export class DataFetcher {
 	private content: PageContent;
+	private common: ComponentProcessorFunction<PageDescriptor>;
 	private contentTypes: Record<PageDescriptor, ComponentProcessorFunction<PageDescriptor>> = {};
 	private layouts: Record<LayoutDescriptor, ComponentProcessorFunction<LayoutDescriptor>> = {};
 	private pages: Record<PageDescriptor, ComponentProcessorFunction<PageDescriptor>> = {};
@@ -112,9 +117,10 @@ export class DataFetcher {
 								   contentType,
 								   ...passAlong
 							   }: {
-		[key: string]: unknown
-		contentType: string
-	}): ProcessedContentType {
+								   [key: string]: unknown
+								   contentType: string
+							   }
+	): ProcessedContentType {
 		const processor = this.contentTypes[contentType];
 
 		const props = processor({
@@ -137,9 +143,10 @@ export class DataFetcher {
 								component,
 								...passAlong
 							}: {
-		component: FragmentComponent;
-		siteConfig?: Record<string, unknown> | null; // In passAlong
-	}): ProcessedPart | ProcessedLayout | ProcessedText | ProcessedError {
+								component: FragmentComponent;
+								siteConfig?: Record<string, unknown> | null; // In passAlong
+							}
+	): ProcessedPart | ProcessedLayout | ProcessedText | ProcessedError {
 		// log.debug('dataFetcher.processFragment passAlong:%s', toStr(passAlong));
 		const {
 			fragment: key,
@@ -228,9 +235,10 @@ export class DataFetcher {
 							  component,
 							  ...passAlong
 						  }: {
-		component: LayoutComponent;
-		siteConfig?: Record<string, unknown> | null; // In passAlong
-	}): ProcessedLayout {
+							  component: LayoutComponent;
+							  siteConfig?: Record<string, unknown> | null; // In passAlong
+						  }
+	): ProcessedLayout {
 		// log.debug('dataFetcher.processLayout passAlong:%s', toStr(passAlong));
 		const {
 			descriptor,
@@ -271,9 +279,10 @@ export class DataFetcher {
 							component,
 							...passAlong
 						}: {
-		component: PageComponent;
-		siteConfig?: Record<string, unknown> | null; // In passAlong
-	}): ProcessedPage | ProcessedWarning {
+							component: PageComponent;
+							siteConfig?: Record<string, unknown> | null; // In passAlong
+						}
+	): ProcessedPage | ProcessedWarning {
 
 		const {
 			descriptor,
@@ -338,9 +347,10 @@ export class DataFetcher {
 							component,
 							...passAlong
 						}: {
-		component: PartComponent;
-		siteConfig?: Record<string, unknown> | null; // In passAlong
-	}): ProcessedPart {
+							component: PartComponent;
+							siteConfig?: Record<string, unknown> | null; // In passAlong
+						}
+	): ProcessedPart {
 		// log.debug('dataFetcher.processPart passAlong:%s', toStr(passAlong));
 		const {
 			descriptor,
@@ -399,11 +409,8 @@ export class DataFetcher {
 			for (let j = 0; j < components.length; j++) {
 				const origComponent = components[j];
 				// log.info('processWithRegions i:%s, j:%s, component:%s', i, j, toStr(origComponent));
-				const processedComponent = this.process({
+				const processedComponent = this.doProcess({
 					component: origComponent,
-					// TODO This causes those instance properties to be written more than once.
-					content: this.content,
-					request: this.request,
 				});
 				if (processedComponent) {
 					regions[regionName].components[j] = processedComponent;
@@ -465,6 +472,18 @@ export class DataFetcher {
 		this.parts[descriptor] = processor as ComponentProcessorFunction<PART_DESCRIPTOR>;
 	}
 
+	public addCommon<
+		OVERRIDES extends Record<string, unknown> = Record<string, never>,
+		PAGE_DESCRIPTOR extends PageDescriptor = PageDescriptor,
+	>({
+		  processor
+	  }: {
+		processor: ComponentProcessorFunction<PAGE_DESCRIPTOR, OVERRIDES>
+	}) {
+
+		this.common = processor as ComponentProcessorFunction<PageDescriptor>;
+	}
+
 	public hasContentType(name: string): boolean {
 		return this.contentTypes[name] !== undefined;
 	}
@@ -481,12 +500,18 @@ export class DataFetcher {
 		return this.parts[name] !== undefined;
 	}
 
+	public hasCommon(): boolean {
+		return !!this.common;
+	}
+
 	public process({
 					   component,
 					   content,
 					   request,
 					   ...passAlong
-				   }: ProcessParams): ProcessedData {
+				   }: ProcessParams
+	): ProcessResult {
+
 		if (!request) {
 			throw new Error(`process: request is required!`);
 		}
@@ -497,6 +522,8 @@ export class DataFetcher {
 			content = getCurrentContent!() as PageContent;
 			if (!content) {
 				log.error(`process: getCurrentContent returned null!`);
+				throw new Error(`process: could not get content!`);
+				// throw new Error(`process: current content not be found!`);
 				/*// TODO: needs to be handled in app.ts
 				return {
 					response: {
@@ -507,8 +534,35 @@ export class DataFetcher {
 		}
 		this.content = content;
 
+		const result = this.doProcess({
+			...passAlong,
+			component,
+		});
+
+		if (this.hasCommon()) {
+			result.commonProps = this.common({
+				...passAlong,
+				component,
+				content,
+				request,
+				runMode: RUN_MODE,
+			});
+		}
+
+		return result;
+	}
+
+	private doProcess({
+						  component,
+						  ...passAlong
+					  }: {
+						  [key: string]: unknown;
+						  component: Component;
+					  }
+	): ProcessResult {
+
 		// const { method } = request;
-		const {type: contentType} = content;
+		const {type: contentType} = this.content;
 
 		// if (method === REQUEST_METHOD.HEAD) {}
 
@@ -520,7 +574,7 @@ export class DataFetcher {
 		}
 
 		if (!component) {
-			component = (content.page || content.fragment) as Component;
+			component = (this.content.page || this.content.fragment) as Component;
 			if (!component) {
 				throw new Error(`process: component not passed and neither content.page nor content.fragment is found!`);
 			}
@@ -531,7 +585,7 @@ export class DataFetcher {
 		switch (componentType) {
 		case 'part':
 			return this.processPart({
-				component,
+				component: component as PartComponent,
 				...passAlong
 			});
 		case 'layout':
