@@ -40,10 +40,13 @@ public class Renderer {
 
     private final AssetLoader assetLoader;
 
+    private final String appName;
+
     public Renderer( final ResourceReader resourceReader, final Config config, final long id )
     {
         this.id = id;
         this.libraryName = config.LIBRARY_NAME;
+        this.appName = config.APP_NAME;
 
         LOG.debug( "#{}:{} starting init...", this.id, this.libraryName );
 
@@ -110,7 +113,10 @@ public class Renderer {
                 final var defaultFunction = (Function<Object, Object[]>) entryObject.get( "default" );
                 entryWithProps = defaultFunction.apply( new Object[]{propsJson} );
 
-            final String renderedHtml = (String) invocable.invokeMethod( this.engine.get( "ReactDOMServer" ), "renderToString", entryWithProps );
+            final Object renderOpts = parseJson( "{\"identifierPrefix\": \"" + this.appName + "\"}" );
+
+            final String renderedHtml =
+                (String) invocable.invokeMethod( this.engine.get( "ReactDOMServer" ), "renderToString", entryWithProps, renderOpts );
 
             return Map.of( KEY_HTML, renderedHtml );
         }
