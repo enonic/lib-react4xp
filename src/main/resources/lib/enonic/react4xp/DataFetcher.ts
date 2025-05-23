@@ -86,9 +86,9 @@ interface ProcessParams {
 	request: Request;
 }
 
-export type ProcessResult = Merge<ProcessedData, {
+export type ProcessResult = ProcessedData & {
 	commonProps?: Record<string, unknown>;
-}>
+}
 
 const RUN_MODE = IS_DEV_MODE ? 'development' : 'production';
 
