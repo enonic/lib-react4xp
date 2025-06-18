@@ -25,14 +25,10 @@ import type {
 	XpRunMode
 } from '@enonic/react-components/dist/nashorn';
 import type {ContextParams} from '@enonic-types/lib-context';
-import {toStr} from '@enonic/js-utils/value/toStr';
 
 
 import {get as getContentByKey} from '/lib/xp/content';
 import {getContent as getCurrentContent} from '/lib/xp/portal';
-
-
-import {REQUEST_METHOD, REQUEST_MODE} from '/lib/enonic/react4xp/constants';
 import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/appHelper';
 
 import {processHtml} from '/lib/enonic/react4xp/dataFetcher/processHtml';
@@ -92,6 +88,7 @@ export type ProcessResult = ProcessedData & {
 
 const RUN_MODE = IS_DEV_MODE ? 'development' : 'production';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ADMIN_CONTEXT: ContextParams = {
 	principals: ['role:system.schema.admin']
 }
@@ -161,15 +158,6 @@ export class DataFetcher {
 			log.error(`DataFetcher: processFragment: Fragment content NOT found for key:%s! Referenced in content:%s componentPath:%s`, key,
 				this.content._id, path);
 
-			/*//TODO: needs to be handled in app.ts
-			if (this.request.mode === REQUEST_MODE.LIVE) {
-				return {
-					response: {
-						status: 500
-					}
-				};
-			}*/
-
 			return {
 				html: `<h1>Error</h1><p>Fragment content NOT found for key:${key}</p>`,
 				mode: this.request.mode,
@@ -184,15 +172,6 @@ export class DataFetcher {
 			// This probably never happens, only if content is b0rked:
 			log.error(`DataFetcher: processFragment: B0rked Fragment content key:%s! Referenced in content:%s componentPath:%s`, key,
 				this.content._id, path);
-
-			/*//TODO: needs to be handled in app.ts
-			if (this.request.mode === REQUEST_MODE.LIVE) {
-				return {
-					response: {
-						status: 500
-					}
-				};
-			}*/
 
 			return {
 				html: `<h1>Error</h1><p>Fragment NOT found in content with key:${key}</p>`,
@@ -245,14 +224,22 @@ export class DataFetcher {
 			path,
 			regions
 		} = component;
+
 		const processedLayout: ProcessedLayout = {
 			// Do not ass config, it should not be exposed to client-side
 			descriptor,
 			mode: this.request.mode,
 			path,
-			regions: JSON.parse(JSON.stringify(regions)), // TODO config should be stripped from child components?
+			regions: JSON.parse(JSON.stringify(regions || {})), // TODO config should be stripped from child components?
 			type: 'layout',
 		};
+
+		if (!descriptor) {
+			// Descriptor can be undefined until layout is initialized
+			log.debug(`DataFetcher: processLayout: No descriptor for layout [${path}] at: ${this.content._path}`);
+			return processedLayout;
+		}
+
 		const processor = this.layouts[descriptor];
 		if (!processor) {
 			const msg = `DataFetcher: processLayout: No processor function added for layout descriptor: ${descriptor}!`;
@@ -291,35 +278,20 @@ export class DataFetcher {
 		} = component;
 		// log.debug('processPage: regions:%s', toStr(regions));
 
-		if (!descriptor) { // This could probably only happen on b0rked template content, or some caching mistake.
-
-			if (
-				this.request.params['mode'] === REQUEST_MODE.EDIT
-				&& this.request.mode === REQUEST_MODE.INLINE
-				&& this.request.method === REQUEST_METHOD.HEAD
-			) {
-				/*//TODO: needs to be handled in app.ts
-				return {
-					response: {
-						// So Content Studio knowns the page is NOT renderable,
-						// and the page selector dropdown is shown.
-						status: 418
-					}
-				};*/
-			}
-
-			log.error(`processPage: descriptor not found for page component: ${toStr(component)} in content:${toStr(this.content)}!`);
-			throw new Error(`processPage: descriptor not found for page component!`);
-		}
-
 		const processedPage: ProcessedPage = {
 			// WARNING: Do NOT pass config, it should not be exposed to client-side.
 			descriptor,
 			mode: this.request.mode,
 			path,
-			regions: JSON.parse(JSON.stringify(regions)), // TODO config should be stripped from child components?
+			regions: JSON.parse(JSON.stringify(regions || {})), // TODO config should be stripped from child components?
 			type: 'page',
 		};
+
+		if (!descriptor) {
+			// Descriptor can be undefined until page is initialized
+			log.debug(`DataFetcher: processPage: No descriptor for page at: ${this.content._path}`);
+			return processedPage;
+		}
 
 		const processor = this.pages[descriptor];
 		if (!processor) {
@@ -363,6 +335,13 @@ export class DataFetcher {
 			path,
 			type: 'part',
 		}
+
+		if (!descriptor) {
+			// Descriptor can be undefined until part is initialized
+			log.debug(`DataFetcher: processPart: No descriptor for part [${path}] at: ${this.content._path}`);
+			return processedPart;
+		}
+
 		const processor = this.parts[descriptor];
 		if (!processor) {
 			const msg = `DataFetcher: processPart: No processor function added for part descriptor: ${descriptor}!`;
@@ -523,13 +502,6 @@ export class DataFetcher {
 			if (!content) {
 				log.error(`process: getCurrentContent returned null!`);
 				throw new Error(`process: could not get content!`);
-				// throw new Error(`process: current content not be found!`);
-				/*// TODO: needs to be handled in app.ts
-				return {
-					response: {
-						status: 404
-					}
-				}*/
 			}
 		}
 		this.content = content;
