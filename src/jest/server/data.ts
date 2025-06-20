@@ -1,5 +1,5 @@
 import type {LayoutComponent, PageComponent, PartComponent, FragmentComponent, TextComponent} from '@enonic-types/core';
-import type {PageContent} from '../../main/resources/lib/enonic/react4xp/DataFetcher';
+import type {PageContent} from '/lib/enonic/react4xp/DataFetcher';
 
 import {HTML_AREA_KEY, ITEM_SET_KEY, OPTION_SET_KEY} from './constants';
 
