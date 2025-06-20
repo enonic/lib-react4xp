@@ -83,7 +83,7 @@ interface ProcessParams {
 }
 
 export type ProcessResult = ProcessedData & {
-	commonProps?: Record<string, unknown>;
+	common?: Record<string, unknown>;
 }
 
 const RUN_MODE = IS_DEV_MODE ? 'development' : 'production';
@@ -240,24 +240,24 @@ export class DataFetcher {
 			return processedLayout;
 		}
 
+		processedLayout.regions = this.processRegions(component);
+
 		const processor = this.layouts[descriptor];
-		if (!processor) {
-			const msg = `DataFetcher: processLayout: No processor function added for layout descriptor: ${descriptor}!`;
-			log.warning(msg);
-			processedLayout.warning = msg;
-			return processedLayout;
+		if (processor) {
+
+			const layoutWithProcessedRegions = JSON.parse(JSON.stringify(component));
+			if (Object.keys(processedLayout.regions)?.length) {
+				layoutWithProcessedRegions.regions = JSON.parse(JSON.stringify(processedLayout.regions));
+			}
+
+			processedLayout.props = processor({
+				...passAlong,
+				component: layoutWithProcessedRegions,
+				content: this.content,
+				request: this.request,
+				runMode: RUN_MODE,
+			});
 		}
-
-		const layoutWithProcessedRegions = JSON.parse(JSON.stringify(component));
-		layoutWithProcessedRegions.regions = this.processRegions(component);
-
-		processedLayout.props = processor({
-			...passAlong,
-			component: layoutWithProcessedRegions,
-			content: this.content,
-			request: this.request,
-			runMode: RUN_MODE,
-		});
 
 		return processedLayout;
 	} // processLayout
@@ -293,24 +293,23 @@ export class DataFetcher {
 			return processedPage;
 		}
 
+		processedPage.regions = this.processRegions(component);
+
 		const processor = this.pages[descriptor];
-		if (!processor) {
-			const msg = `DataFetcher: processPage: No processor function added for page descriptor: ${descriptor}!`;
-			log.warning(msg);
-			processedPage.warning = msg;
-			return processedPage;
+		if (processor) {
+			const pageWithProcessedRegions = JSON.parse(JSON.stringify(component));
+			if (Object.keys(processedPage.regions)?.length) {
+				pageWithProcessedRegions.regions = JSON.parse(JSON.stringify(processedPage.regions));
+			}
+
+			processedPage.props = processor({
+				...passAlong,
+				component: pageWithProcessedRegions,
+				content: this.content,
+				request: this.request,
+				runMode: RUN_MODE,
+			});
 		}
-
-		const pageWithProcessedRegions = JSON.parse(JSON.stringify(component));
-		pageWithProcessedRegions.regions = this.processRegions(component);
-
-		processedPage.props = processor({
-			...passAlong,
-			component: pageWithProcessedRegions,
-			content: this.content,
-			request: this.request,
-			runMode: RUN_MODE,
-		});
 
 		return processedPage;
 	} // processPage
@@ -343,20 +342,15 @@ export class DataFetcher {
 		}
 
 		const processor = this.parts[descriptor];
-		if (!processor) {
-			const msg = `DataFetcher: processPart: No processor function added for part descriptor: ${descriptor}!`;
-			log.warning(msg);
-			processedPart.warning = msg;
-			return processedPart;
+		if (processor) {
+			processedPart.props = processor({
+				...passAlong,
+				component: JSON.parse(JSON.stringify(component)),
+				content: this.content,
+				request: this.request,
+				runMode: RUN_MODE,
+			});
 		}
-
-		processedPart.props = processor({
-			...passAlong,
-			component: JSON.parse(JSON.stringify(component)),
-			content: this.content,
-			request: this.request,
-			runMode: RUN_MODE,
-		});
 
 		return processedPart;
 	} // processPart
@@ -512,7 +506,7 @@ export class DataFetcher {
 		});
 
 		if (this.hasCommon()) {
-			result.commonProps = this.common({
+			result.common = this.common({
 				...passAlong,
 				component,
 				content,
