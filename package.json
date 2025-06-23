@@ -36,7 +36,7 @@
     "@enonic/mock-xp": "^1.0.0",
     "@enonic/react-components": "^6.0.0-B7",
     "@enonic/react4xp": "^6.0.0-B7",
-    "@jest/globals": "^30.0.0",
+    "@jest/globals": "^30.0.2",
     "@mrhenry/core-web": "^1.2.4",
     "@rollup/plugin-alias": "^5.1.1",
     "@rollup/plugin-commonjs": "^28.0.5",
