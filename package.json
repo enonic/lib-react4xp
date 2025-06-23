@@ -39,7 +39,7 @@
     "@jest/globals": "^30.0.0",
     "@mrhenry/core-web": "^1.2.4",
     "@rollup/plugin-alias": "^5.1.1",
-    "@rollup/plugin-commonjs": "^28.0.5",
+    "@rollup/plugin-commonjs": "^28.0.6",
     "@sinonjs/text-encoding": "^0.7.3",
     "@swc/core": "^1.12.1",
     "@swc/helpers": "^0.5.17",
