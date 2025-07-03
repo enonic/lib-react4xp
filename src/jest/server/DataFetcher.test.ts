@@ -1,12 +1,12 @@
 import type {Component, Request, PageComponent, LayoutComponent} from '@enonic-types/core';
-import type {ProcessedPage} from '@enonic/react-components';
+import type {PageData} from '@enonic/react-components';
 
 import {describe, expect, test as it} from '@jest/globals';
 
 //──────────────────────────────────────────────────────────────────────────────
 // SRC imports
 //──────────────────────────────────────────────────────────────────────────────
-import {DataFetcher} from '/lib/enonic/react4xp/DataFetcher';
+import {DataFetcher, ProcessResult} from '/lib/enonic/react4xp/DataFetcher';
 
 //──────────────────────────────────────────────────────────────────────────────
 // TEST imports
@@ -73,9 +73,9 @@ const renderablePageComponent = dataFetcher.process({
 	component: PAGE_COMPONENT as Component,
 	content: PAGE_CONTENT,
 	request: {} as Request,
-}) as ProcessedPage;
+}) as ProcessResult<PageData>;
 
-const {components} = renderablePageComponent.props.regions['main'];
+const {components} = renderablePageComponent.component.regions['main'];
 // console.info('components:%s', stringify(components, { maxItems: Infinity }));
 const textComponent = components[0];
 const textComponentFragment = components[1];
@@ -93,7 +93,7 @@ describe('DataFetcher', () => {
 
 	it('is able to process a text component', () => {
 		// console.info('textComponent:%s', stringify(textComponent, { maxItems: Infinity }));
-		expect(textComponent.props).toEqual({
+		expect(textComponent.data).toEqual({
 			data: {
 				processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
 				macros: [
@@ -116,7 +116,7 @@ describe('DataFetcher', () => {
 
 	it('is able to process a text fragment component', () => {
 		// console.info('textComponentFragment:%s', stringify(textComponentFragment, { maxItems: Infinity }));
-		expect(textComponentFragment.props).toEqual({
+		expect(textComponentFragment.data).toEqual({
 			data: {
 				processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
 				macros: [
@@ -139,7 +139,7 @@ describe('DataFetcher', () => {
 
 	it('is able to process a part component', () => {
 		// console.info('partComponent:%s', stringify(partComponent, { maxItems: Infinity }));
-		expect(partComponent.props).toEqual({
+		expect(partComponent.data).toEqual({
 			data: {
 				processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
 				macros: [
@@ -161,12 +161,12 @@ describe('DataFetcher', () => {
 	});
 
 	it('the part component should not have a config property', () => {
-		expect(partComponent.config).toBeUndefined();
+		expect(partComponent.component['config']).toBeUndefined();
 	});
 
 	it('is able to process a part fragment component', () => {
 		// console.info('partComponentFragment:%s', stringify(partComponentFragment, { maxItems: Infinity }));
-		expect(partComponentFragment.props).toEqual({
+		expect(partComponentFragment.data).toEqual({
 			data: {
 				processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
 				macros: [
@@ -188,12 +188,12 @@ describe('DataFetcher', () => {
 	});
 
 	it('the part fragment component should not have a config property', () => {
-		expect(partComponentFragment.config).toBeUndefined();
+		expect(partComponentFragment.data).toBeUndefined();
 	});
 
 	it('is able to process a layout component', () => {
 		// console.info('layoutComponent:%s', stringify(layoutComponent, { maxItems: Infinity }));
-		expect(layoutComponent.props).toEqual({
+		expect(layoutComponent.data).toEqual({
 			regions: {
 				left: {
 					components: [
@@ -304,12 +304,12 @@ describe('DataFetcher', () => {
 
 	it('the layout component should not have a config property', () => {
 		// console.info('layoutComponent:%s', stringify(layoutComponent, { maxItems: Infinity }));
-		expect(layoutComponent.config).toBeUndefined();
+		expect(layoutComponent.component['config']).toBeUndefined();
 	});
 
 	it("is able to process a layout component fragment", () => {
 		// console.info("layoutComponentFragment:%s", stringify(layoutComponentFragment, { maxItems: Infinity }));
-		expect(layoutComponentFragment.props).toEqual({
+		expect(layoutComponentFragment.data).toEqual({
 			regions: {
 				left: {
 					components: [
@@ -426,6 +426,6 @@ describe('DataFetcher', () => {
 	});
 
 	it('the layout component fragment should not have a config property', () => {
-		expect(layoutComponentFragment.config).toBeUndefined();
+		expect(layoutComponentFragment.component['config']).toBeUndefined();
 	});
 });
