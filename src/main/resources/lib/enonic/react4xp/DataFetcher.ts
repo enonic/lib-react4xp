@@ -15,23 +15,16 @@ import {
 	LiteralUnion,
 	RequestMode
 } from '@enonic-types/core';
-import {
-	ProcessedData,
-	ProcessedLayout,
-	ProcessedPage,
-	ProcessedText,
-	XpRunMode,
-	ProcessedProps
-} from '@enonic/react-components/dist/nashorn';
+import {LayoutData, PageData, TextData, XpRunMode, ComponentDataAndProps, ComponentData} from '@enonic/react-components/dist/nashorn';
 import type {ContextParams} from '@enonic-types/lib-context';
 
 
 import {get as getContentByKey} from '/lib/xp/content';
-import {getContent as getCurrentContent} from '/lib/xp/portal';
+import {getContent as getCurrentContent, sanitizeHtml} from '/lib/xp/portal';
 import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/appHelper';
 
 import {processHtml} from '/lib/enonic/react4xp/dataFetcher/processHtml';
-import {ProcessedRegions} from '@enonic/react-components/dist/types/ProcessedData';
+import {RegionsData} from '@enonic/react-components/dist/types/ComponentData';
 
 export type FragmentContent<
 	COMPONENT extends LayoutComponent | PartComponent = LayoutComponent | PartComponent
@@ -67,7 +60,7 @@ export type ComponentProcessorParams<
 	runMode: XpRunMode,
 }, OVERRIDES>
 
-export type ComponentProcessorFunction<
+export type ComponentProcessor<
 	DESCRIPTOR extends ComponentDescriptor = ComponentDescriptor,
 	OVERRIDES extends Record<string, unknown> = Record<string, never>
 > = (params: ComponentProcessorParams<DESCRIPTOR, OVERRIDES>) => Record<string, unknown>;
@@ -88,8 +81,8 @@ export type MetaData = {
 	mode: LiteralUnion<RequestMode>;
 }
 
-export type ProcessResult = ProcessedData & {
-	common?: ProcessedProps;
+export type ProcessResult<T extends ComponentData = ComponentData> = ComponentDataAndProps<T> & {
+	common?: Record<string, unknown>;
 	meta: MetaData;
 }
 
@@ -102,11 +95,11 @@ const ADMIN_CONTEXT: ContextParams = {
 
 export class DataFetcher {
 	private content: PageContent;
-	private common: ComponentProcessorFunction<PageDescriptor>;
-	private contentTypes: Record<PageDescriptor, ComponentProcessorFunction<PageDescriptor>> = {};
-	private layouts: Record<LayoutDescriptor, ComponentProcessorFunction<LayoutDescriptor>> = {};
-	private pages: Record<PageDescriptor, ComponentProcessorFunction<PageDescriptor>> = {};
-	private parts: Record<PartDescriptor, ComponentProcessorFunction<PartDescriptor>> = {};
+	private common: ComponentProcessor<PageDescriptor>;
+	private contentTypes: Record<PageDescriptor, ComponentProcessor<PageDescriptor>> = {};
+	private layouts: Record<LayoutDescriptor, ComponentProcessor<LayoutDescriptor>> = {};
+	private pages: Record<PageDescriptor, ComponentProcessor<PageDescriptor>> = {};
+	private parts: Record<PartDescriptor, ComponentProcessor<PartDescriptor>> = {};
 	private request: Request;
 
 	private static getPath(name: string, ancestor?: string) {
@@ -127,6 +120,52 @@ export class DataFetcher {
 		}
 	}
 
+	private invokeProcessor(passAlong: Record<string, unknown>,
+							result: ComponentDataAndProps,
+							processor: ComponentProcessor,
+							component?: Component,
+							dataField: 'data' | 'common' = 'data'): ComponentDataAndProps {
+		try {
+			result[dataField] = processor({
+				...passAlong,
+				component,
+				content: this.content,
+				request: this.request,
+				runMode: RUN_MODE,
+			});
+		} catch (err) {
+			let path = this.content._path;
+			let msg = '';
+			if (dataField === 'common') {
+				msg = `Error in common processor at: ${path}`;
+			}
+			if (dataField === 'data' && component) {
+				let descriptor = this.content.type;
+				switch (component?.type) {
+				case 'text':
+					// should never happen because text components are processed automatically
+					break;
+				case 'layout':
+				case 'part':
+				case 'page':
+					path = component.path;
+					descriptor = component.descriptor;
+					break;
+				}
+				msg = `Error in processor for ${result.component.type} "${descriptor}" at: ${path}`;
+			}
+			log.error(msg);
+			result = {
+				component: {
+					html: `<h1>Error</h1><p>${msg}</p>${err.message && `<pre>${sanitizeHtml(err.message)}</pre>`}`,
+					type: 'error',
+					path
+				}
+			}
+		}
+		return result;
+	}
+
 	private processContentType({
 								   contentType,
 								   ...passAlong
@@ -134,24 +173,17 @@ export class DataFetcher {
 								   [key: string]: unknown
 								   contentType: string
 							   }
-	): ProcessedData {
+	): ComponentDataAndProps {
 		const processor = this.contentTypes[contentType];
 
-		const data = processor({
-			...passAlong,
-			content: this.content,
-			request: this.request,
-			runMode: RUN_MODE,
-		});
-
-		return {
-			// WARNING: Do NOT pass config, it should not be exposed to client-side hydration.
+		const result: ComponentDataAndProps = {
 			component: {
 				contentType,
 				type: 'contentType',
 			},
-			data,
-		};
+		}
+
+		return this.invokeProcessor(passAlong, result, processor);
 	}
 
 	private processFragment({
@@ -161,7 +193,7 @@ export class DataFetcher {
 								component: FragmentComponent;
 								siteConfig?: Record<string, unknown> | null; // In passAlong
 							}
-	): ProcessedData {
+	): ComponentDataAndProps {
 		// log.debug('dataFetcher.processFragment passAlong:%s', toStr(passAlong));
 		const {
 			fragment: key,
@@ -237,7 +269,7 @@ export class DataFetcher {
 							  component: LayoutComponent;
 							  siteConfig?: Record<string, unknown> | null; // In passAlong
 						  }
-	): ProcessedData {
+	): ComponentDataAndProps {
 		// log.debug('dataFetcher.processLayout passAlong:%s', toStr(passAlong));
 		const {
 			descriptor,
@@ -245,7 +277,7 @@ export class DataFetcher {
 			regions
 		} = component;
 
-		const processedLayout: ProcessedLayout = {
+		const LayoutData: LayoutData = {
 			// Do not ass config, it should not be exposed to client-side
 			descriptor,
 			path,
@@ -254,8 +286,8 @@ export class DataFetcher {
 		};
 
 
-		const result: ProcessedData = {
-			component: processedLayout,
+		let result: ComponentDataAndProps = {
+			component: LayoutData,
 		}
 
 		if (!descriptor) {
@@ -264,23 +296,16 @@ export class DataFetcher {
 			return result;
 		}
 
-		processedLayout.regions = this.processRegions(component);
+		LayoutData.regions = this.processRegions(component);
 
 		const processor = this.layouts[descriptor];
 		if (processor) {
-
-			const layoutWithProcessedRegions = JSON.parse(JSON.stringify(component));
-			if (Object.keys(processedLayout.regions)?.length) {
-				layoutWithProcessedRegions.regions = JSON.parse(JSON.stringify(processedLayout.regions));
+			const layoutWithRegionsData = JSON.parse(JSON.stringify(component));
+			if (Object.keys(LayoutData.regions)?.length) {
+				layoutWithRegionsData.regions = JSON.parse(JSON.stringify(LayoutData.regions));
 			}
 
-			result.data = processor({
-				...passAlong,
-				component: layoutWithProcessedRegions,
-				content: this.content,
-				request: this.request,
-				runMode: RUN_MODE,
-			});
+			result = this.invokeProcessor(passAlong, result, processor, layoutWithRegionsData);
 		}
 
 		return result;
@@ -293,7 +318,7 @@ export class DataFetcher {
 							component: PageComponent;
 							siteConfig?: Record<string, unknown> | null; // In passAlong
 						}
-	): ProcessedData {
+	): ComponentDataAndProps {
 
 		const {
 			descriptor,
@@ -302,7 +327,7 @@ export class DataFetcher {
 		} = component;
 		// log.debug('processPage: regions:%s', toStr(regions));
 
-		const processedPage: ProcessedPage = {
+		const pageData: PageData = {
 			// WARNING: Do NOT pass config, it should not be exposed to client-side.
 			descriptor,
 			path,
@@ -310,8 +335,8 @@ export class DataFetcher {
 			type: 'page',
 		};
 
-		const result: ProcessedData = {
-			component: processedPage,
+		let result: ComponentDataAndProps = {
+			component: pageData,
 		}
 
 		if (!descriptor) {
@@ -320,22 +345,16 @@ export class DataFetcher {
 			return result;
 		}
 
-		processedPage.regions = this.processRegions(component);
+		pageData.regions = this.processRegions(component);
 
 		const processor = this.pages[descriptor];
 		if (processor) {
-			const pageWithProcessedRegions = JSON.parse(JSON.stringify(component));
-			if (Object.keys(processedPage.regions)?.length) {
-				pageWithProcessedRegions.regions = JSON.parse(JSON.stringify(processedPage.regions));
+			const pageWithRegionsData = JSON.parse(JSON.stringify(component));
+			if (Object.keys(pageData.regions)?.length) {
+				pageWithRegionsData.regions = JSON.parse(JSON.stringify(pageData.regions));
 			}
 
-			result.data = processor({
-				...passAlong,
-				component: pageWithProcessedRegions,
-				content: this.content,
-				request: this.request,
-				runMode: RUN_MODE,
-			});
+			result = this.invokeProcessor(passAlong, result, processor, pageWithRegionsData);
 		}
 
 		return result;
@@ -348,14 +367,14 @@ export class DataFetcher {
 							component: PartComponent;
 							siteConfig?: Record<string, unknown> | null; // In passAlong
 						}
-	): ProcessedData {
+	): ComponentDataAndProps {
 		// log.debug('dataFetcher.processPart passAlong:%s', toStr(passAlong));
 		const {
 			descriptor,
-			path
+			path,
 		} = component;
 
-		const result: ProcessedData = {
+		let result: ComponentDataAndProps = {
 			component: {
 				descriptor,
 				path,
@@ -371,13 +390,8 @@ export class DataFetcher {
 
 		const processor = this.parts[descriptor];
 		if (processor) {
-			result.data = processor({
-				...passAlong,
-				component: JSON.parse(JSON.stringify(component)),
-				content: this.content,
-				request: this.request,
-				runMode: RUN_MODE,
-			});
+			const partClone = JSON.parse(JSON.stringify(component));
+			result = this.invokeProcessor(passAlong, result, processor, partClone);
 		}
 
 		return result;
@@ -387,9 +401,9 @@ export class DataFetcher {
 									 component,
 								 }: {
 		component: TextComponent
-	}): ProcessedData {
+	}): ComponentDataAndProps {
 		const {text} = component;
-		const renderableTextComponent: ProcessedText = JSON.parse(JSON.stringify(component));
+		const renderableTextComponent: TextData = JSON.parse(JSON.stringify(component));
 
 		const data = {
 			data: processHtml(text)
@@ -401,7 +415,7 @@ export class DataFetcher {
 		};
 	}
 
-	private processRegions(component: PageComponent | LayoutComponent): ProcessedRegions {
+	private processRegions(component: PageComponent | LayoutComponent): RegionsData {
 
 		const regions = JSON.parse(JSON.stringify(component.regions || {}));
 		// log.debug('processWithRegions regions:', stringify(regions, {maxItems: Infinity}));
@@ -425,7 +439,7 @@ export class DataFetcher {
 				}*/
 			}
 		}
-		// log.debug('processWithRegions regions:', stringify(processedLayoutOrPageComponent.regions, {maxItems: Infinity}));
+		// log.debug('processWithRegions regions:', stringify(LayoutDataOrPageComponent.regions, {maxItems: Infinity}));
 		return regions;
 	} // processRegions
 
@@ -435,7 +449,7 @@ export class DataFetcher {
 	>(contentTypeName: string, {
 		processor
 	}: {
-		processor: ComponentProcessorFunction<PAGE_DESCRIPTOR, OVERRIDES>;
+		processor: ComponentProcessor<PAGE_DESCRIPTOR, OVERRIDES>;
 	}) {
 		this.contentTypes[contentTypeName] = processor // as PageComponentProcessorFunction;
 	}
@@ -446,10 +460,10 @@ export class DataFetcher {
 	>(descriptor: LAYOUT_DESCRIPTOR, {
 		processor
 	}: {
-		processor: ComponentProcessorFunction<LAYOUT_DESCRIPTOR, OVERRIDES>;
+		processor: ComponentProcessor<LAYOUT_DESCRIPTOR, OVERRIDES>;
 	}) {
 		// log.debug('addLayout:', descriptor);
-		this.layouts[descriptor] = processor as ComponentProcessorFunction<LAYOUT_DESCRIPTOR>;
+		this.layouts[descriptor] = processor as ComponentProcessor<LAYOUT_DESCRIPTOR>;
 	}
 
 	public addPage<
@@ -458,10 +472,10 @@ export class DataFetcher {
 	>(descriptor: PAGE_DESCRIPTOR, {
 		processor
 	}: {
-		processor: ComponentProcessorFunction<PAGE_DESCRIPTOR, OVERRIDES>;
+		processor: ComponentProcessor<PAGE_DESCRIPTOR, OVERRIDES>;
 	}) {
 		// log.debug('addPage:', descriptor);
-		this.pages[descriptor] = processor as ComponentProcessorFunction<PAGE_DESCRIPTOR>;
+		this.pages[descriptor] = processor as ComponentProcessor<PAGE_DESCRIPTOR>;
 	}
 
 	public addPart<
@@ -470,10 +484,10 @@ export class DataFetcher {
 	>(descriptor: PART_DESCRIPTOR, {
 		processor
 	}: {
-		processor: ComponentProcessorFunction<PART_DESCRIPTOR, OVERRIDES>;
+		processor: ComponentProcessor<PART_DESCRIPTOR, OVERRIDES>;
 	}) {
 		// log.debug('addPart:', descriptor);
-		this.parts[descriptor] = processor as ComponentProcessorFunction<PART_DESCRIPTOR>;
+		this.parts[descriptor] = processor as ComponentProcessor<PART_DESCRIPTOR>;
 	}
 
 	public addCommon<
@@ -482,10 +496,10 @@ export class DataFetcher {
 	>({
 		  processor
 	  }: {
-		processor: ComponentProcessorFunction<PAGE_DESCRIPTOR, OVERRIDES>
+		processor: ComponentProcessor<PAGE_DESCRIPTOR, OVERRIDES>
 	}) {
 
-		this.common = processor as ComponentProcessorFunction<PageDescriptor>;
+		this.common = processor as ComponentProcessor<PageDescriptor>;
 	}
 
 	public hasContentType(name: string): boolean {
@@ -539,26 +553,20 @@ export class DataFetcher {
 			}
 		}
 
-		const pData = this.doProcess({
+		let result = this.doProcess({
 			...passAlong,
 			component,
 		});
 
-		let common: ProcessedProps;
-		if (this.hasCommon()) {
-			common = this.common({
-				...passAlong,
-				component,
-				content,
-				request,
-				runMode: RUN_MODE,
-			});
+		if (result.component.type !== 'error' && this.hasCommon()) {
+			result = this.invokeProcessor(passAlong, result, this.common.bind(this), component, 'common');
 		}
 
+		const meta = this.createMetaData(request, content);
+
 		return {
-			...pData,
-			meta: this.createMetaData(request, content),
-			common,
+			...result,
+			meta
 		};
 	}
 
@@ -569,7 +577,7 @@ export class DataFetcher {
 						  [key: string]: unknown;
 						  component: Component;
 					  }
-	): ProcessedData {
+	): ComponentDataAndProps {
 
 		// const { method } = request;
 		const {type: contentType} = this.content;
