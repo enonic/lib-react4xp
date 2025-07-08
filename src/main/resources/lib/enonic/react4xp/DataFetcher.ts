@@ -201,6 +201,17 @@ export class DataFetcher {
 		} = component;
 		// log.info('processFragment fragment key:', key);
 
+		if (!key) {
+			// Key can be undefined until fragment is initialized
+			log.debug(`DataFetcher: processFragment: No key for fragment [${path}] at: ${this.content._path}`);
+			return {
+				component: {
+					path,
+					type: 'fragment'
+				}
+			};
+		}
+
 		// @ts-expect-error Too complex/strict type generics.
 		const fragmentContent = getContentByKey<FragmentContent>({key});
 		if (!fragmentContent) {
