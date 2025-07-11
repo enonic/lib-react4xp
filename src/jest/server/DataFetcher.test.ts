@@ -17,9 +17,6 @@ const dataFetcher = new DataFetcher();
 dataFetcher.addLayout(TWO_COLUMNS_LAYOUT_DESCRIPTOR, {
 	processor: ({
 					component,
-					content,
-					siteConfig,
-					request,
 				}) => {
 		const {regions} = component as LayoutComponent;
 		// console.debug('layout toProps:', stringify({
@@ -38,9 +35,6 @@ dataFetcher.addLayout(TWO_COLUMNS_LAYOUT_DESCRIPTOR, {
 dataFetcher.addPage(DEFAULT_PAGE_DESCRIPTOR, {
 	processor: ({
 					component,
-					content,
-					siteConfig,
-					request,
 				}) => {
 		// console.debug('page toProps:', {
 		// 	// component,
@@ -58,13 +52,10 @@ dataFetcher.addPage(DEFAULT_PAGE_DESCRIPTOR, {
 dataFetcher.addPart(EXAMPLE_PART_DESCRIPTOR, {
 	processor: ({
 					component,
-					content,
-					siteConfig,
-					request,
 				}) => {
-		// console.debug("part toProps:", { component, content, processedConfig, request });
+		// console.debug("part toProps:", { component });
 		return {
-			data: siteConfig.anHtmlArea
+			data: component
 		};
 	},
 });
@@ -106,7 +97,7 @@ describe('DataFetcher', () => {
 						},
 						ref: '1',
 						name: 'info',
-						descriptor: 'whatever:info'
+						descriptor: 'info'
 					}
 				]
 			},
@@ -129,7 +120,7 @@ describe('DataFetcher', () => {
 						},
 						ref: '1',
 						name: 'info',
-						descriptor: 'whatever:info'
+						descriptor: 'info'
 					}
 				]
 			},
@@ -152,7 +143,7 @@ describe('DataFetcher', () => {
 						},
 						ref: '1',
 						name: 'info',
-						descriptor: 'whatever:info'
+						descriptor: 'info'
 					}
 				]
 			},
@@ -179,7 +170,7 @@ describe('DataFetcher', () => {
 						},
 						ref: '1',
 						name: 'info',
-						descriptor: 'whatever:info'
+						descriptor: 'info'
 					}
 				]
 			},
@@ -214,7 +205,7 @@ describe('DataFetcher', () => {
 											},
 											ref: '1',
 											name: 'info',
-											descriptor: 'whatever:info'
+											descriptor: 'info'
 										}
 									]
 								}
@@ -237,7 +228,7 @@ describe('DataFetcher', () => {
 											},
 											ref: '1',
 											name: 'info',
-											descriptor: 'whatever:info'
+											descriptor: 'info'
 										}
 									]
 								},
@@ -266,7 +257,7 @@ describe('DataFetcher', () => {
 											},
 											ref: '1',
 											name: 'info',
-											descriptor: 'whatever:info'
+											descriptor: 'info'
 										}
 									]
 								}
@@ -289,7 +280,7 @@ describe('DataFetcher', () => {
 											},
 											ref: '1',
 											name: 'info',
-											descriptor: 'whatever:info'
+											descriptor: 'info'
 										}
 									]
 								}
@@ -331,7 +322,7 @@ describe('DataFetcher', () => {
 											},
 											ref: "1",
 											name: "info",
-											descriptor: "whatever:info",
+											descriptor: "info",
 										},
 									],
 								},
@@ -357,7 +348,7 @@ describe('DataFetcher', () => {
 											},
 											ref: "1",
 											name: "info",
-											descriptor: "whatever:info",
+											descriptor: "info",
 										},
 									],
 								},
@@ -387,7 +378,7 @@ describe('DataFetcher', () => {
 											},
 											ref: "1",
 											name: "info",
-											descriptor: "whatever:info",
+											descriptor: "info",
 										},
 									],
 								},
@@ -412,7 +403,7 @@ describe('DataFetcher', () => {
 											},
 											ref: "1",
 											name: "info",
-											descriptor: "whatever:info",
+											descriptor: "info",
 										},
 									],
 								},
