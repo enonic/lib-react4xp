@@ -29,7 +29,7 @@ export function dataFromProcessedHtml(processedHtml: string): RichTextData {
 						if (key === '_name') {
 							name = value;
 							macro.name = name;
-							macro.descriptor = `whatever:${name}`;
+							macro.descriptor = name;
 							return `data-macro-name="${value}" data-macro-ref="${ref}"`;
 						}
 						if (key === '_document') {

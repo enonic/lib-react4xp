@@ -15,7 +15,7 @@ import {
 	LiteralUnion,
 	RequestMode
 } from '@enonic-types/core';
-import {LayoutData, PageData, TextData, XpRunMode, ComponentDataAndProps, ComponentData} from '@enonic/react-components/dist/nashorn';
+import {LayoutData, PageData, XpRunMode, ComponentDataAndProps, ComponentData, TextData} from '@enonic/react-components/dist/nashorn';
 import type {ContextParams} from '@enonic-types/lib-context';
 
 
@@ -24,7 +24,7 @@ import {getContent as getCurrentContent, sanitizeHtml} from '/lib/xp/portal';
 import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/appHelper';
 
 import {processHtml} from '/lib/enonic/react4xp/dataFetcher/processHtml';
-import {RegionsData} from '@enonic/react-components/dist/types/ComponentData';
+import type {RegionsData, MacroData} from '@enonic/react-components/dist/types';
 
 export type FragmentContent<
 	COMPONENT extends LayoutComponent | PartComponent = LayoutComponent | PartComponent
@@ -53,11 +53,11 @@ export type ComponentProcessorParams<
 	DESCRIPTOR extends ComponentDescriptor = ComponentDescriptor,
 	OVERRIDES extends Record<string, unknown> = Record<string, never>
 > = Merge<{
-	component: Component<DESCRIPTOR>;
-	content?: PageContent;
-	siteConfig?: Record<string, unknown> | null; // In passAlong
+	dataFetcher: DataFetcher;
 	request: Request;
+	component?: Component<DESCRIPTOR>;
 	runMode: XpRunMode,
+	content: PageContent;
 }, OVERRIDES>
 
 export type ComponentProcessor<
@@ -65,6 +65,9 @@ export type ComponentProcessor<
 	OVERRIDES extends Record<string, unknown> = Record<string, never>
 > = (params: ComponentProcessorParams<DESCRIPTOR, OVERRIDES>) => Record<string, unknown>;
 
+export type MacroProcessorParams = Record<string, unknown> & {
+	macro: MacroData;
+}
 
 interface ProcessParams {
 	[passAlongKey: string]: unknown;
@@ -100,6 +103,7 @@ export class DataFetcher {
 	private layouts: Record<LayoutDescriptor, ComponentProcessor<LayoutDescriptor>> = {};
 	private pages: Record<PageDescriptor, ComponentProcessor<PageDescriptor>> = {};
 	private parts: Record<PartDescriptor, ComponentProcessor<PartDescriptor>> = {};
+	private macros: Record<string, ComponentProcessor> = {};
 	private request: Request;
 
 	private static getPath(name: string, ancestor?: string) {
@@ -120,14 +124,18 @@ export class DataFetcher {
 		}
 	}
 
-	private invokeProcessor(passAlong: Record<string, unknown>,
-							result: ComponentDataAndProps,
-							processor: ComponentProcessor,
-							component?: Component,
-							dataField: 'data' | 'common' = 'data'): ComponentDataAndProps {
+	invokeProcessor(
+		result: ComponentDataAndProps,
+		processor: ComponentProcessor,
+		passAlong: Record<string, unknown>,
+		component?: Component,
+		dataField: 'data' | 'common' = 'data'
+	): ComponentDataAndProps {
+
 		try {
 			result[dataField] = processor({
 				...passAlong,
+				dataFetcher: this,
 				component,
 				content: this.content,
 				request: this.request,
@@ -143,7 +151,12 @@ export class DataFetcher {
 				let descriptor = this.content.type;
 				switch (component?.type) {
 				case 'text':
-					// should never happen because text components are processed automatically
+					// happens when processing macros in text component
+					// in this case we pass 'macro' component in passAlong
+					// because it can not be passed as a regular component
+					path = component.path;
+					const macroData = passAlong['macro'] as MacroData;
+					descriptor = macroData.descriptor
 					break;
 				case 'layout':
 				case 'part':
@@ -155,12 +168,10 @@ export class DataFetcher {
 				msg = `Error in processor for ${result.component.type} "${descriptor}" at: ${path}`;
 			}
 			log.error(msg);
-			result = {
-				component: {
-					html: `<h1>Error</h1><p>${msg}</p>${err.message && `<pre>${sanitizeHtml(err.message)}</pre>`}`,
-					type: 'error',
-					path
-				}
+			result.component = {
+				html: `<h1>Error</h1><p>${msg}</p>${err.message && `<pre>${sanitizeHtml(err.message)}</pre>`}`,
+				type: 'error',
+				path
 			}
 		}
 		return result;
@@ -183,7 +194,7 @@ export class DataFetcher {
 			},
 		}
 
-		return this.invokeProcessor(passAlong, result, processor);
+		return this.invokeProcessor(result, processor, passAlong);
 	}
 
 	private processFragment({
@@ -191,7 +202,6 @@ export class DataFetcher {
 								...passAlong
 							}: {
 								component: FragmentComponent;
-								siteConfig?: Record<string, unknown> | null; // In passAlong
 							}
 	): ComponentDataAndProps {
 		// log.debug('dataFetcher.processFragment passAlong:%s', toStr(passAlong));
@@ -278,7 +288,6 @@ export class DataFetcher {
 							  ...passAlong
 						  }: {
 							  component: LayoutComponent;
-							  siteConfig?: Record<string, unknown> | null; // In passAlong
 						  }
 	): ComponentDataAndProps {
 		// log.debug('dataFetcher.processLayout passAlong:%s', toStr(passAlong));
@@ -316,7 +325,7 @@ export class DataFetcher {
 				layoutWithRegionsData.regions = JSON.parse(JSON.stringify(LayoutData.regions));
 			}
 
-			result = this.invokeProcessor(passAlong, result, processor, layoutWithRegionsData);
+			result = this.invokeProcessor(result, processor, passAlong, layoutWithRegionsData);
 		}
 
 		return result;
@@ -327,7 +336,6 @@ export class DataFetcher {
 							...passAlong
 						}: {
 							component: PageComponent;
-							siteConfig?: Record<string, unknown> | null; // In passAlong
 						}
 	): ComponentDataAndProps {
 
@@ -365,7 +373,7 @@ export class DataFetcher {
 				pageWithRegionsData.regions = JSON.parse(JSON.stringify(pageData.regions));
 			}
 
-			result = this.invokeProcessor(passAlong, result, processor, pageWithRegionsData);
+			result = this.invokeProcessor(result, processor, passAlong, pageWithRegionsData);
 		}
 
 		return result;
@@ -376,7 +384,6 @@ export class DataFetcher {
 							...passAlong
 						}: {
 							component: PartComponent;
-							siteConfig?: Record<string, unknown> | null; // In passAlong
 						}
 	): ComponentDataAndProps {
 		// log.debug('dataFetcher.processPart passAlong:%s', toStr(passAlong));
@@ -402,7 +409,7 @@ export class DataFetcher {
 		const processor = this.parts[descriptor];
 		if (processor) {
 			const partClone = JSON.parse(JSON.stringify(component));
-			result = this.invokeProcessor(passAlong, result, processor, partClone);
+			result = this.invokeProcessor(result, processor, passAlong, partClone);
 		}
 
 		return result;
@@ -410,19 +417,24 @@ export class DataFetcher {
 
 	private processTextComponent({
 									 component,
+									 ...passAlong
 								 }: {
 		component: TextComponent
-	}): ComponentDataAndProps {
+	}): ComponentDataAndProps<TextData> {
 		const {text} = component;
-		const renderableTextComponent: TextData = JSON.parse(JSON.stringify(component));
 
-		const data = {
-			data: processHtml(text)
-		};
+		const richTextData = processHtml({
+			...passAlong,
+			value: text,
+			dataFetcher: this,
+			component,
+		});
 		// log.debug('processTextComponent text renderableTextComponent:%s', toStr(renderableTextComponent));
 		return {
-			component: renderableTextComponent,
-			data
+			component: JSON.parse(JSON.stringify(component)),
+			data: {
+				data: richTextData
+			}
 		};
 	}
 
@@ -501,6 +513,18 @@ export class DataFetcher {
 		this.parts[descriptor] = processor as ComponentProcessor<PART_DESCRIPTOR>;
 	}
 
+	public addMacro<
+		OVERRIDES extends Record<string, unknown> = Record<string, never>,
+		MACRO_DESCRIPTOR extends ComponentDescriptor = ComponentDescriptor //
+	>(descriptor: MACRO_DESCRIPTOR, {
+		processor
+	}: {
+		processor: ComponentProcessor<ComponentDescriptor, OVERRIDES>;
+	}) {
+		// log.debug('addMacro:', descriptor);
+		this.macros[descriptor] = processor as ComponentProcessor<MACRO_DESCRIPTOR>;
+	}
+
 	public addCommon<
 		OVERRIDES extends Record<string, unknown> = Record<string, never>,
 		PAGE_DESCRIPTOR extends PageDescriptor = PageDescriptor,
@@ -527,6 +551,14 @@ export class DataFetcher {
 
 	public hasPart(name: string): boolean {
 		return this.parts[name] !== undefined;
+	}
+
+	public hasMacro(name: string): boolean {
+		return this.macros[name] !== undefined
+	}
+
+	public getMacro(descriptor: string): ComponentProcessor {
+		return this.macros[descriptor];
 	}
 
 	public hasCommon(): boolean {
@@ -570,7 +602,7 @@ export class DataFetcher {
 		});
 
 		if (result.component.type !== 'error' && this.hasCommon()) {
-			result = this.invokeProcessor(passAlong, result, this.common.bind(this), component, 'common');
+			result = this.invokeProcessor(result, this.common.bind(this), passAlong, component, 'common');
 		}
 
 		const meta = this.createMetaData(request, content);
