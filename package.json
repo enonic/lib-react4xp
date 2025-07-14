@@ -50,7 +50,7 @@
     "babel-loader": "^10.0.0",
     "bun": "^1.2.18",
     "concurrently": "^9.2.0",
-    "core-js-pure": "^3.43.0",
+    "core-js-pure": "^3.44.0",
     "diffable-html": "^6.0.1",
     "esbuild-plugin-manifest": "^1.0.5",
     "eslint": "^9.31.0",
