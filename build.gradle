@@ -29,7 +29,7 @@ dependencies {
     implementation 'org.attoparser:attoparser:2.0.7.RELEASE'
     implementation 'org.apache.commons:commons-pool2:2.12.1'
 
-    testImplementation(platform('org.junit:junit-bom:5.13.3'))
+    testImplementation(platform('org.junit:junit-bom:5.13.4'))
     testImplementation(platform("org.mockito:mockito-bom:5.18.0"))
 
     testImplementation "com.enonic.xp:testing:${xpVersion}"
