@@ -81,6 +81,7 @@ export function renderPageContributions(this: React4xp, {
 
 		// NOTE: rollup + typescript + babel doesn't like backslashed inside expression inside backticks.
 		let jsonString: string = '';
+		const assetRoot = getAssetRoot({urlType});
 		if (!suppressJS) {
 			jsonString = JSON.stringify({
 				command: finalSSR ? 'hydrate' : 'render',
@@ -88,6 +89,7 @@ export function renderPageContributions(this: React4xp, {
 				hasRegions: this.hasRegions,
 				isPage: this.isPage,
 				jsxPath: this.jsxPath,
+				publicPath: assetRoot,
 				props: this.props || {}
 			}).replace(/<(\/?script|!--)/gi, "\\u003C$1");
 		}
@@ -97,7 +99,7 @@ export function renderPageContributions(this: React4xp, {
 			? [] : [
 				// Browser-runnable script reference for the react4xp entry. Adds the entry to the browser (available as e.g. React4xp.CLIENT.<jsxPath>), ready to be rendered or hydrated in the browser:
 				// '<!-- asset -->',
-				`<script defer src="${getAssetRoot({urlType})}${this.assetPath}"></script>\n`,
+				`<script defer src="${assetRoot}${this.assetPath}"></script>\n`,
 
 				// What separates outcome 3 and 5? simply ssr
 				`<script data-react4xp-app-name="${app.name}" data-react4xp-ref="${this.react4xpId}" type="application/json">${jsonString}</script>`,

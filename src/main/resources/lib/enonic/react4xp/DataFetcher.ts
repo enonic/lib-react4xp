@@ -24,7 +24,7 @@ import {getContent as getCurrentContent, sanitizeHtml} from '/lib/xp/portal';
 import {IS_DEV_MODE} from '/lib/enonic/react4xp/xp/appHelper';
 
 import {processHtml} from '/lib/enonic/react4xp/dataFetcher/processHtml';
-import type {RegionsData, MacroData} from '@enonic/react-components/dist/types';
+import type {RegionsData, MacroData} from '@enonic/react-components';
 
 export type FragmentContent<
 	COMPONENT extends LayoutComponent | PartComponent = LayoutComponent | PartComponent
