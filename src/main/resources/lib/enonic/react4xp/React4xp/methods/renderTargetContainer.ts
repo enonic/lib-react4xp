@@ -10,6 +10,7 @@ interface RenderTargetContainerParams {
 	appendErrorContainer?: boolean
 	body?: string // '' is Falsy // Html string that usually contains the target container (a DOM node with correct ID).
 	content?: string // '' is Falsy // Html string to insert inside the target container.
+	wrapper?: boolean
 }
 
 
@@ -30,6 +31,7 @@ interface RenderTargetContainerParams {
  */
 export function renderTargetContainer(this: React4xp, params: RenderTargetContainerParams): string {
 	const {
+		wrapper = true,
 		appendErrorContainer = false,
 		body = '', // '' is Falsy
 		content = '' // '' is Falsy
@@ -40,49 +42,40 @@ export function renderTargetContainer(this: React4xp, params: RenderTargetContai
 	const hasBody = ((body) + "").replace(/(^\s+)|(\s+$)/g, "") !== "";
 	// log.debug('renderTargetContainer hasBody:%s jsxPath:%s', hasBody, this.jsxPath);
 
-	const hasContainerWithId = hasElementWithId({
+	const hasContainerWithId = hasBody && hasElementWithId({
 		id: this.react4xpId,
 		htmlString: body
 	});
 	// log.debug('renderTargetContainer hasBody:%s hasContainerWithId:%s jsxPath:%s', hasBody, hasContainerWithId, this.jsxPath);
 
-	const container = buildContainer({
-		id: this.react4xpId,
-		content
-	});
+	if (hasContainerWithId) {
 
-	const output = (hasBody && hasContainerWithId)
-		? undefined
-		: appendErrorContainer
-			? `<div id="${this.react4xpId}__error__" style="border:1px solid #8B0000; padding:15px; background-color:#FFB6C1">${
-				content}${container})
-			}</div>`
-			: container;
+		if (content) {
+			return insertInsideContainer(body, content, this.react4xpId, appendErrorContainer);
+		} else {
+			return body;
+		}
 
+	} else {
 
-	// If no (or empty) body is supplied: generate a minimal container body with only a target container element.
-	if (!hasBody) {
-		return output;
+		if (wrapper) {
+			const container = buildContainer({
+				id: this.react4xpId,
+				content
+			});
+
+			// WARNING: This can end up after the body tag, and gives W3C HTML validation error "Stray start tag"
+			return hasBody ? insertAtEndOfRoot(body, container) : container;
+
+		} else {
+
+			if (appendErrorContainer) {
+				return `<div id="${this.react4xpId}__error__" style="border:1px solid #8B0000; padding:15px; background-color:#FFB6C1">${content}</div>`;
+			} else {
+				return content;
+			}
+		}
+
 	}
 
-	// If there is a body but it's missing a target container element:
-	// Make a container and insert it right before the closing tag.
-	if (!hasContainerWithId) {
-		// log.debug(
-		// 	'renderTargetContainer hasBody:%s hasContainerWithId:%s jsxPath:%s id:%s body:%s output:%s',
-		// 	hasBody, hasContainerWithId, this.jsxPath, this.react4xpId, body, output
-		// );
-		// WARNING: This can end up after the body tag, and gives W3C HTML validation error "Stray start tag"
-		return insertAtEndOfRoot(body, output);
-	}
-
-	if (content) {
-		// log.debug(
-		// 	'renderTargetContainer hasBody:%s hasContainerWithId:%s jsxPath:%s id:%s body:%s content:%s',
-		// 	hasBody, hasContainerWithId, this.jsxPath, this.react4xpId, body, content
-		// );
-		return insertInsideContainer(body, content, this.react4xpId, appendErrorContainer);
-	}
-
-	return body;
 } // renderTargetContainer
