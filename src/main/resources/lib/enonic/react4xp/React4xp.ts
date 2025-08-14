@@ -41,6 +41,7 @@ interface RenderOptions {
 	id?: Id
 	pageContributions?: PageContributions
 	ssr?: boolean
+	wrapper?: boolean
 	urlType?: UrlType
 	uniqueId?: boolean|string
 }
@@ -143,6 +144,7 @@ export class React4xp<
 				hydrate,
 				pageContributions, // TODO deref?
 				ssr,
+				wrapper,
 				urlType // default is app.config['react4xp.urlType'] || 'server'
 			} = dereffedOptions || {};
 
@@ -156,6 +158,7 @@ export class React4xp<
 				body: react4xp.renderBody({
 					body,
 					request,
+					wrapper,
 					ssr
 				}),
 

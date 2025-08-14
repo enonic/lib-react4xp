@@ -40,6 +40,7 @@ export interface Instance<
 	renderBody: (params: {
 		body?: string
 		request?: Request
+		wrapper?: boolean
 		ssr?: boolean
 	}) => string
 	renderPageContributions: (params: {

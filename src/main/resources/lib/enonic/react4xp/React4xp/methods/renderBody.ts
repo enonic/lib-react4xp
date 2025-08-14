@@ -7,10 +7,12 @@ import getSsrConfig from '/lib/enonic/react4xp/React4xp/utils/getSsrConfig';
 export function renderBody(this: React4xp, {
 	body,
 	request,
+	wrapper,
 	ssr,
 }: {
 	body?: string
 	ssr?: boolean
+	wrapper?: boolean
 	request?: Request
 } = {}): string {
 	// log.debug('renderBody ssr:%s jsxPath:%s', ssr, this.jsxPath);
@@ -39,9 +41,11 @@ export function renderBody(this: React4xp, {
 		: finalSSR
 			? this.renderSSRIntoContainer({
 				body,
-				request
+				request,
+				wrapper
 			})
 			: this.renderTargetContainer({
-				body
+				body,
+				wrapper
 			});
 } // renderBody
