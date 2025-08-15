@@ -23,7 +23,7 @@ export function renderSSRIntoContainer(this: React4xp, {
 }): string {
 	//log.debug('renderSSRIntoContainer jsxPath:%s', this.jsxPath);
 	const { html, error } = this.doRenderSSR();
-	log.debug('renderSSRIntoContainer after doRenderSSR jsxPath:%s html:%s ', this.jsxPath, html);
+	//log.debug('renderSSRIntoContainer after doRenderSSR jsxPath:%s html:%s ', this.jsxPath, html);
 	return error
 		? this.renderTargetContainer({
 			appendErrorContainer: true,
