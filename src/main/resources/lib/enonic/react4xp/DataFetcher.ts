@@ -516,7 +516,7 @@ export class DataFetcher {
 	public addMacro<
 		OVERRIDES extends Record<string, unknown> = Record<string, never>,
 		MACRO_DESCRIPTOR extends ComponentDescriptor = ComponentDescriptor //
-	>(descriptor: MACRO_DESCRIPTOR, {
+	>(descriptor: string, {
 		processor
 	}: {
 		processor: ComponentProcessor<ComponentDescriptor, OVERRIDES>;
