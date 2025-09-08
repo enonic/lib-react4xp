@@ -56,7 +56,7 @@
     "eslint": "^9.34.0",
     "eslint-formatter-pretty": "^6.0.1",
     "glob": "^11",
-    "jest-environment-jsdom": "^30.0.5",
+    "jest-environment-jsdom": "^30.1.2",
     "lodash": "^4.17.21",
     "make-dir-cli": "^4.0.0",
     "properties-reader": "^2.3.0",
