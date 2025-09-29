@@ -46,7 +46,7 @@
     "@types/core-js": "^2.5.8",
     "@types/react": "^18.3.23",
     "@typescript-eslint/eslint-plugin": "^8.43.0",
-    "@typescript-eslint/parser": "^8.44.0",
+    "@typescript-eslint/parser": "^8.44.1",
     "babel-loader": "^10.0.0",
     "bun": "^1.2.22",
     "concurrently": "^9.2.1",
