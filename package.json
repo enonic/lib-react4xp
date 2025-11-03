@@ -38,7 +38,7 @@
     "@enonic/react4xp": "^6.0.2",
     "@jest/globals": "^30.2.0",
     "@mrhenry/core-web": "^1.2.4",
-    "@rollup/plugin-alias": "^5.1.1",
+    "@rollup/plugin-alias": "^6.0.0",
     "@rollup/plugin-commonjs": "^28.0.9",
     "@sinonjs/text-encoding": "^0.7.3",
     "@swc/core": "^1.13.5",
