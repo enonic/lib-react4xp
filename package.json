@@ -55,7 +55,7 @@
     "esbuild-plugin-manifest": "^1.0.5",
     "eslint": "^9.39.1",
     "eslint-formatter-pretty": "^7.0.0",
-    "glob": "^11",
+    "glob": "^13",
     "jest-environment-jsdom": "^30.2.0",
     "lodash": "^4.17.21",
     "make-dir-cli": "^4.0.0",
