@@ -27,7 +27,7 @@ dependencies {
     implementation 'com.enonic.lib:lib-static:2.1.0'
 
     implementation 'org.attoparser:attoparser:2.0.7.RELEASE'
-    implementation 'org.apache.commons:commons-pool2:2.12.1'
+    implementation 'org.apache.commons:commons-pool2:2.13.0'
 
     testImplementation(platform('org.junit:junit-bom:5.13.4'))
     testImplementation(platform("org.mockito:mockito-bom:5.20.0"))
