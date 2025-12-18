@@ -14,60 +14,40 @@
     "Pavel Milkevich <pmi@enonic.com>"
   ],
   "dependencies": {
-    "@enonic/js-utils": "^1.9.0",
-    "node-fetch": "^3.3.2",
-    "xxhashjs": "^0.2.2"
+    "@enonic/js-utils": "^1.9.0"
   },
   "description": "XP serverside runtime, handles the bulk of the React4xp work: server-side rendering, and handling and serving of client-side components and dependency chunks to the client, including the React4xp front-end rendering wrapper itself.\"",
   "devDependencies": {
-    "@babel/cli": "^7.28.3",
     "@babel/core": "^7.28.5",
     "@babel/plugin-proposal-class-properties": "^7.17.12",
     "@babel/plugin-proposal-object-rest-spread": "^7.20.7",
     "@babel/preset-env": "^7.28.5",
-    "@babel/register": "^7.28.3",
     "@enonic-types/global": "^7.16.1",
     "@enonic-types/lib-content": "^7.16.1",
     "@enonic-types/lib-context": "^7.16.1",
     "@enonic-types/lib-io": "^7.16.1",
-    "@enonic-types/lib-node": "^7.16.1",
     "@enonic-types/lib-portal": "^7.16.1",
-    "@enonic-types/lib-static": "^2.1.1",
     "@enonic/mock-xp": "^1.0.0",
     "@enonic/react-components": "^6.0.0",
-    "@enonic/react4xp": "^6.0.2",
+    "@enonic/react4xp": "6.1.0-beta.1",
     "@jest/globals": "^30.2.0",
-    "@mrhenry/core-web": "^1.2.4",
     "@rollup/plugin-alias": "^6.0.0",
     "@rollup/plugin-commonjs": "^29.0.0",
     "@sinonjs/text-encoding": "^0.7.3",
     "@swc/core": "^1.15.4",
-    "@swc/helpers": "^0.5.17",
-    "@types/core-js": "^2.5.8",
     "@types/react": "^18.3.23",
     "@typescript-eslint/eslint-plugin": "^8.49.0",
     "@typescript-eslint/parser": "^8.49.0",
-    "babel-loader": "^10.0.0",
     "bun": "^1.3.4",
     "concurrently": "^9.2.1",
-    "core-js-pure": "^3.47.0",
-    "diffable-html": "^6.0.1",
-    "esbuild-plugin-manifest": "^1.0.5",
     "eslint": "^9.39.1",
     "eslint-formatter-pretty": "^7.0.0",
-    "glob": "^13",
-    "jest-environment-jsdom": "^30.2.0",
-    "lodash": "^4.17.21",
     "make-dir-cli": "^4.0.0",
     "properties-reader": "^2.3.0",
     "rimraf": "^6.1.2",
     "rollup": "^4.53.3",
     "rollup-plugin-esbuild": "^6.2.1",
-    "rollup-plugin-output-manifest": "^2.0.0",
-    "rollup-plugin-swc3": "^0.12.1",
     "ts-jest": "^29.4.6",
-    "ts-node": "^10.9.2",
-    "tslib": "^2.8.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },
@@ -104,7 +84,7 @@
     "tsup:server": "npx tsup -d build/resources/main"
   },
   "engines": {
-    "node": ">= 20.13.1",
-    "npm": ">= 10.5.2"
+    "node": ">= 22.15.1",
+    "npm": ">= 10.9.2"
   }
 }
