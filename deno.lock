@@ -22,6 +22,7 @@
         "npm:@babel/plugin-proposal-class-properties@^7.17.12",
         "npm:@babel/plugin-proposal-object-rest-spread@^7.20.7",
         "npm:@babel/preset-env@^7.28.5",
+        "npm:@enonic-types/core@^7.16.1",
         "npm:@enonic-types/global@^7.16.1",
         "npm:@enonic-types/lib-content@^7.16.1",
         "npm:@enonic-types/lib-context@^7.16.1",
@@ -32,10 +33,12 @@
         "npm:@enonic/react-components@^6.1.0-A1",
         "npm:@enonic/react4xp@6.1.0-beta.2",
         "npm:@jest/globals@^30.2.0",
+        "npm:@jest/types@30",
         "npm:@rollup/plugin-alias@6",
         "npm:@rollup/plugin-commonjs@29",
         "npm:@sinonjs/text-encoding@~0.7.3",
         "npm:@swc/core@^1.15.4",
+        "npm:@types/jest@30",
         "npm:@types/react@^19.2.7",
         "npm:@typescript-eslint/eslint-plugin@^8.49.0",
         "npm:@typescript-eslint/parser@^8.49.0",
@@ -51,6 +54,7 @@
         "npm:rollup-plugin-esbuild@^6.2.1",
         "npm:rollup@^4.53.3",
         "npm:ts-jest@^29.4.6",
+        "npm:ts-node@^10.9.2",
         "npm:tsup@^8.5.1",
         "npm:typescript@^5.9.3"
       ]
