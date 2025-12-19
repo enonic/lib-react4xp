@@ -5,6 +5,7 @@ import type {App, Log} from './global.d';
 declare module globalThis {
     var app: App
     var log: Log
+    var __: any
 }
 
 
@@ -16,4 +17,17 @@ globalThis.log = {
     info: console.info,
     error: console.error,
     warning: console.warn
+}
+
+// Mock the __ global object for Enonic XP Java bean access
+globalThis.__ = {
+    newBean: (beanName: string) => {
+        if (beanName === 'com.enonic.lib.react4xp.AppHelper') {
+            return {
+                isDevMode: () => false,
+                getXpHome: () => '/mock/xp/home'
+            };
+        }
+        return {};
+    }
 }
