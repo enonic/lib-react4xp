@@ -86,7 +86,19 @@ describe('DataFetcher', () => {
 		// console.info('textComponent:%s', stringify(textComponent, { maxItems: Infinity }));
 		expect(textComponent.data).toEqual({
 			data: {
-				processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
+				images: [],
+				links: [],
+				macroComponents: [
+					{
+						component: {
+							descriptor: 'info',
+							name: 'info',
+							ref: '1',
+							type: 'macro'
+						}
+					}
+				],
+				processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"   >Text</editor-macro>',
 				macros: [
 					{
 						config: {
@@ -109,7 +121,19 @@ describe('DataFetcher', () => {
 		// console.info('textComponentFragment:%s', stringify(textComponentFragment, { maxItems: Infinity }));
 		expect(textComponentFragment.data).toEqual({
 			data: {
-				processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
+				images: [],
+				links: [],
+				macroComponents: [
+					{
+						component: {
+							descriptor: 'info',
+							name: 'info',
+							ref: '1',
+							type: 'macro'
+						}
+					}
+				],
+				processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"   >Text</editor-macro>',
 				macros: [
 					{
 						config: {
@@ -132,22 +156,28 @@ describe('DataFetcher', () => {
 		// console.info('partComponent:%s', stringify(partComponent, { maxItems: Infinity }));
 		expect(partComponent.data).toEqual({
 			data: {
-				processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
-				macros: [
-					{
-						config: {
-							info: {
-								header: 'Header',
-								body: 'Text'
-							}
+				config: {
+					anHtmlArea: '<p>[info header="Header"]Text[/info]</p>',
+					anItemSet: {
+						anHtmlArea: '<p>[info header="Header"]Text[/info]</p>'
+					},
+					anOptionSet: [
+						{
+							_selected: 'hr',
+							hr: {}
 						},
-						ref: '1',
-						name: 'info',
-						descriptor: 'info'
-					}
-				]
-			},
-			//   mode: 'edit' // TODO
+						{
+							_selected: 'text',
+							text: {
+								anHtmlArea: '<p>[info header="Header"]Text[/info]</p>'
+							}
+						}
+					]
+				},
+				descriptor: 'com.enonic.app.react4xp:example',
+				path: '/main/2',
+				type: 'part'
+			}
 		});
 	});
 
@@ -159,27 +189,33 @@ describe('DataFetcher', () => {
 		// console.info('partComponentFragment:%s', stringify(partComponentFragment, { maxItems: Infinity }));
 		expect(partComponentFragment.data).toEqual({
 			data: {
-				processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
-				macros: [
-					{
-						config: {
-							info: {
-								header: 'Header',
-								body: 'Text'
-							}
+				config: {
+					anHtmlArea: '<p>[info header="Header"]Text[/info]</p>',
+					anItemSet: {
+						anHtmlArea: '<p>[info header="Header"]Text[/info]</p>'
+					},
+					anOptionSet: [
+						{
+							_selected: 'hr',
+							hr: {}
 						},
-						ref: '1',
-						name: 'info',
-						descriptor: 'info'
-					}
-				]
-			},
-			//   mode: 'edit' // TODO
+						{
+							_selected: 'text',
+							text: {
+								anHtmlArea: '<p>[info header="Header"]Text[/info]</p>'
+							}
+						}
+					]
+				},
+				descriptor: 'com.enonic.app.react4xp:example',
+				path: '/main/3',
+				type: 'part'
+			}
 		});
 	});
 
 	it('the part fragment component should not have a config property', () => {
-		expect(partComponentFragment.data).toBeUndefined();
+		expect(partComponentFragment.component['config']).toBeUndefined();
 	});
 
 	it('is able to process a layout component', () => {
@@ -189,12 +225,26 @@ describe('DataFetcher', () => {
 				left: {
 					components: [
 						{
-							path: '/main/4/left/0',
-							type: 'text',
-							text: '<p>[info header="Header"]Text[/info]</p>',
-							props: {
+							component: {
+								path: '/main/4/left/0',
+								text: '<p>[info header="Header"]Text[/info]</p>',
+								type: 'text'
+							},
+							data: {
 								data: {
-									processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
+									images: [],
+									links: [],
+									macroComponents: [
+										{
+											component: {
+												descriptor: 'info',
+												name: 'info',
+												ref: '1',
+												type: 'macro'
+											}
+										}
+									],
+									processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"   >Text</editor-macro>',
 									macros: [
 										{
 											config: {
@@ -212,12 +262,26 @@ describe('DataFetcher', () => {
 							}
 						},
 						{
-							type: 'text',
-							text: '<p>[info header="Header"]Text[/info]</p>',
-							path: '/main/1',
-							props: {
+							component: {
+								path: '/main/1',
+								text: '<p>[info header="Header"]Text[/info]</p>',
+								type: 'text'
+							},
+							data: {
 								data: {
-									processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
+									images: [],
+									links: [],
+									macroComponents: [
+										{
+											component: {
+												descriptor: 'info',
+												name: 'info',
+												ref: '1',
+												type: 'macro'
+											}
+										}
+									],
+									processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"   >Text</editor-macro>',
 									macros: [
 										{
 											config: {
@@ -231,8 +295,7 @@ describe('DataFetcher', () => {
 											descriptor: 'info'
 										}
 									]
-								},
-								mode: undefined
+								}
 							}
 						}
 					],
@@ -241,48 +304,66 @@ describe('DataFetcher', () => {
 				right: {
 					components: [
 						{
-							descriptor: 'com.enonic.app.react4xp:example',
-							path: '/main/4/right/0',
-							type: 'part',
-							props: {
+							component: {
+								descriptor: 'com.enonic.app.react4xp:example',
+								path: '/main/4/right/0',
+								type: 'part'
+							},
+							data: {
 								data: {
-									processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
-									macros: [
-										{
-											config: {
-												info: {
-													header: 'Header',
-													body: 'Text'
-												}
+									config: {
+										anHtmlArea: '<p>[info header="Header"]Text[/info]</p>',
+										anItemSet: {
+											anHtmlArea: '<p>[info header="Header"]Text[/info]</p>'
+										},
+										anOptionSet: [
+											{
+												_selected: 'hr',
+												hr: {}
 											},
-											ref: '1',
-											name: 'info',
-											descriptor: 'info'
-										}
-									]
+											{
+												_selected: 'text',
+												text: {
+													anHtmlArea: '<p>[info header="Header"]Text[/info]</p>'
+												}
+											}
+										]
+									},
+									descriptor: 'com.enonic.app.react4xp:example',
+									path: '/main/4/right/0',
+									type: 'part'
 								}
 							}
 						},
 						{
-							descriptor: 'com.enonic.app.react4xp:example',
-							path: '/main/3',
-							type: 'part',
-							props: {
+							component: {
+								descriptor: 'com.enonic.app.react4xp:example',
+								path: '/main/3',
+								type: 'part'
+							},
+							data: {
 								data: {
-									processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
-									macros: [
-										{
-											config: {
-												info: {
-													header: 'Header',
-													body: 'Text'
-												}
+									config: {
+										anHtmlArea: '<p>[info header="Header"]Text[/info]</p>',
+										anItemSet: {
+											anHtmlArea: '<p>[info header="Header"]Text[/info]</p>'
+										},
+										anOptionSet: [
+											{
+												_selected: 'hr',
+												hr: {}
 											},
-											ref: '1',
-											name: 'info',
-											descriptor: 'info'
-										}
-									]
+											{
+												_selected: 'text',
+												text: {
+													anHtmlArea: '<p>[info header="Header"]Text[/info]</p>'
+												}
+											}
+										]
+									},
+									descriptor: 'com.enonic.app.react4xp:example',
+									path: '/main/3',
+									type: 'part'
 								}
 							}
 						}
@@ -305,114 +386,152 @@ describe('DataFetcher', () => {
 				left: {
 					components: [
 						{
-							path: "/left/0",
-							type: "text",
-							text: '<p>[info header="Header"]Text[/info]</p>',
-							props: {
+							component: {
+								path: "/left/0",
+								text: '<p>[info header="Header"]Text[/info]</p>',
+								type: "text"
+							},
+							data: {
 								data: {
-									processedHtml:
-										'<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
+									images: [],
+									links: [],
+									macroComponents: [
+										{
+											component: {
+												descriptor: "info",
+												name: "info",
+												ref: "1",
+												type: "macro"
+											}
+										}
+									],
+									processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"   >Text</editor-macro>',
 									macros: [
 										{
 											config: {
 												info: {
 													header: "Header",
-													body: "Text",
-												},
+													body: "Text"
+												}
 											},
 											ref: "1",
 											name: "info",
-											descriptor: "info",
-										},
-									],
-								},
-								mode: undefined,
-							},
+											descriptor: "info"
+										}
+									]
+								}
+							}
 						},
 						{
-							type: "text",
-							text: '<p>[info header="Header"]Text[/info]</p>',
-							// path: "/left/1", // TODO
-							path: "/main/1",
-							props: {
+							component: {
+								path: "/main/1",
+								text: '<p>[info header="Header"]Text[/info]</p>',
+								type: "text"
+							},
+							data: {
 								data: {
-									processedHtml:
-										'<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
+									images: [],
+									links: [],
+									macroComponents: [
+										{
+											component: {
+												descriptor: "info",
+												name: "info",
+												ref: "1",
+												type: "macro"
+											}
+										}
+									],
+									processedHtml: '<editor-macro data-macro-name="info" data-macro-ref="1"   >Text</editor-macro>',
 									macros: [
 										{
 											config: {
 												info: {
 													header: "Header",
-													body: "Text",
-												},
+													body: "Text"
+												}
 											},
 											ref: "1",
 											name: "info",
-											descriptor: "info",
-										},
-									],
-								},
-								mode: undefined,
-							},
-						},
+											descriptor: "info"
+										}
+									]
+								}
+							}
+						}
 					],
-					name: "left",
+					name: "left"
 				},
 				right: {
 					components: [
 						{
-							descriptor: "com.enonic.app.react4xp:example",
-							path: "/right/0",
-							type: "part",
-							props: {
-								data: {
-									processedHtml:
-										'<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
-									macros: [
-										{
-											config: {
-												info: {
-													header: "Header",
-													body: "Text",
-												},
-											},
-											ref: "1",
-											name: "info",
-											descriptor: "info",
-										},
-									],
-								},
+							component: {
+								descriptor: "com.enonic.app.react4xp:example",
+								path: "/right/0",
+								type: "part"
 							},
+							data: {
+								data: {
+									config: {
+										anHtmlArea: '<p>[info header="Header"]Text[/info]</p>',
+										anItemSet: {
+											anHtmlArea: '<p>[info header="Header"]Text[/info]</p>'
+										},
+										anOptionSet: [
+											{
+												_selected: "hr",
+												hr: {}
+											},
+											{
+												_selected: "text",
+												text: {
+													anHtmlArea: '<p>[info header="Header"]Text[/info]</p>'
+												}
+											}
+										]
+									},
+									descriptor: "com.enonic.app.react4xp:example",
+									path: "/right/0",
+									type: "part"
+								}
+							}
 						},
 						{
-							descriptor: "com.enonic.app.react4xp:example",
-							// path: "/right/1", // TODO
-							path: "/main/3",
-							type: "part",
-							props: {
-								data: {
-									processedHtml:
-										'<editor-macro data-macro-name="info" data-macro-ref="1"></editor-macro>',
-									macros: [
-										{
-											config: {
-												info: {
-													header: "Header",
-													body: "Text",
-												},
-											},
-											ref: "1",
-											name: "info",
-											descriptor: "info",
-										},
-									],
-								},
+							component: {
+								descriptor: "com.enonic.app.react4xp:example",
+								path: "/main/3",
+								type: "part"
 							},
-						},
+							data: {
+								data: {
+									config: {
+										anHtmlArea: '<p>[info header="Header"]Text[/info]</p>',
+										anItemSet: {
+											anHtmlArea: '<p>[info header="Header"]Text[/info]</p>'
+										},
+										anOptionSet: [
+											{
+												_selected: "hr",
+												hr: {}
+											},
+											{
+												_selected: "text",
+												text: {
+													anHtmlArea: '<p>[info header="Header"]Text[/info]</p>'
+												}
+											}
+										]
+									},
+									descriptor: "com.enonic.app.react4xp:example",
+									path: "/main/3",
+									type: "part"
+								}
+							}
+						}
 					],
-					name: "right",
-				},
-			},
+					name: "right"
+				}
+			}
 		});
 	});
 
