@@ -101,7 +101,7 @@ javadoc.dependsOn npmBuild
 
 if ( BUILD_ENV == 'development' )
 {
-    task nsiInstall( type: NpmTask ) {
+    tasks.register('nsiInstall', NpmTask ) {
         println "BUILD_ENV is set to '" + BUILD_ENV + "':\nOVERRIDING VANILLA npmInstall IN FAVOR OF node-safe-install (nsi)."
         // Because nsi retains 'npm link' symlinks!
         args = ['run', 'install:nsi']
