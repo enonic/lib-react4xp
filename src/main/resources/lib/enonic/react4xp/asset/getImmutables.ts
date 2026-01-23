@@ -32,8 +32,8 @@ export function getImmutables(entries: string[]) {
 
 	for (let i = 0; i < globals.length; i++) {
 		const global = globals[i];
-		if (global !== 'globals') {
-			immutables['globals'] = true; // without hash is not immutable
+		if (global !== 'globals') {  // without hash is not immutable
+			immutables[global] = true;
 		}
 	}
 
