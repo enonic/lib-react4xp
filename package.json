@@ -40,7 +40,7 @@
     "@rollup/plugin-commonjs": "^29.0.0",
     "@sinonjs/text-encoding": "^0.7.3",
     "@swc/core": "^1.15.10",
-    "@types/react": "^19.2.8",
+    "@types/react": "^19.2.9",
     "@typescript-eslint/eslint-plugin": "^8.53.1",
     "@typescript-eslint/parser": "^8.52.0",
     "bun": "^1.3.6",
