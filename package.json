@@ -50,7 +50,7 @@
     "make-dir-cli": "^4.0.0",
     "properties-reader": "^2.3.0",
     "rimraf": "^6.1.2",
-    "rollup": "^4.55.2",
+    "rollup": "^4.56.0",
     "rollup-plugin-esbuild": "^6.2.1",
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
