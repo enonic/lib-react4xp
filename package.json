@@ -1,5 +1,5 @@
 {
-  "author": "Espen Norderud",
+  "author": "Enonic",
   "babel": {
     "presets": [
       "@babel/preset-env"
@@ -10,6 +10,7 @@
     ]
   },
   "contributors": [
+    "Espen Norderud",
     "Christian Andreas Westgaard <cwe@enonic.com>",
     "Pavel Milkevich <pmi@enonic.com>"
   ],
