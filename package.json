@@ -28,7 +28,7 @@
     "@enonic-types/lib-content": "^7.16.1",
     "@enonic-types/lib-context": "^7.16.1",
     "@enonic-types/lib-io": "^7.16.1",
-    "@enonic-types/lib-portal": "^7.16.1",
+    "@enonic-types/lib-portal": "^7.16.2",
     "@enonic/mock-xp": "^1.0.0",
     "@enonic/react-components": "^6.1.1",
     "@enonic/react4xp": "6.1.0",
