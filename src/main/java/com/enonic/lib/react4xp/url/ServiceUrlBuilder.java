@@ -38,6 +38,8 @@ public class ServiceUrlBuilder
 
     private static final String ADMIN_SITE_PREFIX = "/admin/site/";
 
+    private static final Pattern ADMIN_APP_SITE_PREFIX_PATTERN = Pattern.compile( "^/admin/(?<adminApp>[^/]+)/site/" );
+
     private static final String SITE_PREFIX = "/site/";
 
     private Supplier<PortalRequest> requestSupplier;
@@ -95,13 +97,18 @@ public class ServiceUrlBuilder
         final PortalRequest portalRequest = requestSupplier.get();
         final String rawPath = portalRequest.getRawPath();
 
+        final Matcher adminAppSiteMatcher = ADMIN_APP_SITE_PREFIX_PATTERN.matcher( rawPath );
         if ( rawPath.startsWith( ADMIN_SITE_PREFIX ) )
         {
-            processSite( url, rawPath, true );
+            processSite( url, rawPath, ADMIN_SITE_PREFIX, null );
+        }
+        else if ( adminAppSiteMatcher.find() )
+        {
+            processSite( url, rawPath, adminAppSiteMatcher.group(), adminAppSiteMatcher.group( "adminApp" ) );
         }
         else if ( rawPath.startsWith( SITE_PREFIX ) )
         {
-            processSite( url, rawPath, false );
+            processSite( url, rawPath, SITE_PREFIX, null );
         }
         else
         {
@@ -144,9 +151,9 @@ public class ServiceUrlBuilder
         }
     }
 
-    private void processSite( final StringBuilder url, final String requestURI, final boolean isSiteAdmin )
+    private void processSite( final StringBuilder url, final String requestURI, final String sitePrefix, final String adminApp )
     {
-        final String sitePrefix = isSiteAdmin ? ADMIN_SITE_PREFIX : SITE_PREFIX;
+        final boolean isSiteAdmin = !SITE_PREFIX.equals( sitePrefix );
         final String subPath = subPath( requestURI, sitePrefix );
         final Pattern pattern = isSiteAdmin ? ADMIN_SITE_CTX_PATTERN : SITE_CTX_PATTERN;
         final Matcher matcher = pattern.matcher( subPath );
@@ -155,6 +162,10 @@ public class ServiceUrlBuilder
             if ( isSiteAdmin )
             {
                 appendPart( url, "admin" );
+                if ( adminApp != null )
+                {
+                    appendPart( url, adminApp );
+                }
             }
             appendPart( url, "site" );
             if ( isSiteAdmin )
