@@ -3,6 +3,8 @@ package com.enonic.lib.react4xp.url;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import com.enonic.xp.content.ContentPath;
 import com.enonic.xp.content.ContentService;
 import com.enonic.xp.portal.PortalRequest;
@@ -33,6 +35,7 @@ public class ServiceUrlBuilderTest
         beanContext = mock( BeanContext.class );
         instance = new ServiceUrlBuilder();
 
+        when( portalRequest.getRawRequest() ).thenReturn( mock( HttpServletRequest.class ) );
         when( beanContext.getBinding( PortalRequest.class ) ).thenReturn( () -> portalRequest );
         when( beanContext.getService( ContentService.class ) ).thenReturn( () -> contentService );
 
@@ -62,6 +65,33 @@ public class ServiceUrlBuilderTest
         final String result = instance.createUrl();
 
         assertEquals( "/admin/site/preview/myproject/master/mysite/_/service/myapp/myservice/mypath", result );
+    }
+
+    @Test
+    void testOnAdminAppSiteMount()
+    {
+        when( portalRequest.getRawPath() ).thenReturn(
+            "/admin/com.enonic.app.contentstudio/site/preview/myproject/master/mysite/content" );
+
+        final ContentPath contentPath = ContentPath.from( "/mysite/content" );
+        when( portalRequest.getContentPath() ).thenReturn( contentPath );
+
+        final Site site = mock( Site.class );
+        when( site.getPath() ).thenReturn( ContentPath.from( "/mysite" ) );
+
+        when( contentService.getByPath( eq( contentPath ) ) ).thenReturn( null );
+        when( contentService.findNearestSiteByPath( contentPath ) ).thenReturn( site );
+
+        instance.setApplication( "myapp" );
+        instance.setServiceName( "myservice" );
+        instance.setPath( "/mypath" );
+        instance.setType( "server" );
+
+        final String result = instance.createUrl();
+
+        assertEquals(
+            "/admin/com.enonic.app.contentstudio/site/preview/myproject/master/mysite/_/service/myapp/myservice/mypath",
+            result );
     }
 
     @Test
