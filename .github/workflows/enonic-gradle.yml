@@ -18,6 +18,9 @@ jobs:
           repoUser: ci
           repoPassword: ${{ secrets.ARTIFACTORY_PASSWORD }}
           codecovToken: ${{ secrets.CODECOV_TOKEN }}
+          releaseBranch: |
+              master
+              7.x
 
       - name: Upload npm package
         if: steps.build-and-publish.outputs.release == 'true'
