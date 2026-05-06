@@ -40,7 +40,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v6
         with:
-          node-version: '22.x'
+          node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
 
       - name: Set npm tag
@@ -54,9 +54,7 @@ jobs:
 
       - name: Publish to npm
         working-directory: build/types
-        run: |
-          npm install -g npm@latest
-          npm publish --tag $NPM_TAG
+        run: npm publish --tag $NPM_TAG
 
   release:
     runs-on: ubuntu-latest

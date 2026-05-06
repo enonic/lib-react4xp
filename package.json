@@ -94,7 +94,7 @@
     "tsup:server": "npx tsup -d build/resources/main"
   },
   "engines": {
-    "node": ">= 22.15.1",
+    "node": ">= 24.15.0",
     "npm": ">= 10.9.2"
   }
 }
