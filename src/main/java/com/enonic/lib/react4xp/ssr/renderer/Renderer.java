@@ -3,13 +3,11 @@ package com.enonic.lib.react4xp.ssr.renderer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
-
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Engine;
+import org.graalvm.polyglot.PolyglotException;
+import org.graalvm.polyglot.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,11 +17,13 @@ import com.enonic.lib.react4xp.ssr.engine.EngineFactory;
 import com.enonic.lib.react4xp.ssr.errors.ErrorHandler;
 import com.enonic.lib.react4xp.ssr.resources.AssetLoader;
 import com.enonic.lib.react4xp.ssr.resources.ResourceReader;
+import com.enonic.lib.react4xp.ssr.resources.SourceProvider;
 
 import static com.enonic.lib.react4xp.ssr.errors.ErrorHandler.KEY_ERROR;
 
 
-public class Renderer {
+public class Renderer
+{
     private final static Logger LOG = LoggerFactory.getLogger( Renderer.class );
 
     public static final String KEY_HTML = "html";
@@ -34,7 +34,7 @@ public class Renderer {
 
     private final long id;
 
-    private final ScriptEngine engine;
+    private final Context context;
 
     private final String libraryName;
 
@@ -42,7 +42,8 @@ public class Renderer {
 
     private final String appName;
 
-    public Renderer( final ResourceReader resourceReader, final Config config, final long id )
+    public Renderer( final ResourceReader resourceReader, final Config config, final long id, final Engine engine,
+                     final SourceProvider sourceProvider )
     {
         this.id = id;
         this.libraryName = config.LIBRARY_NAME;
@@ -50,9 +51,9 @@ public class Renderer {
 
         LOG.debug( "#{}:{} starting init...", this.id, this.libraryName );
 
-        this.engine = EngineFactory.buildEngine();
+        this.context = EngineFactory.buildContext( engine );
 
-        this.assetLoader = new AssetLoader( resourceReader, config.SCRIPTS_HOME, id, engine );
+        this.assetLoader = new AssetLoader( resourceReader, config.SCRIPTS_HOME, id, context, sourceProvider );
 
         LOG.debug( "#{}:{} loading polyfills ...", this.id, this.libraryName );
 
@@ -63,8 +64,7 @@ public class Renderer {
 
         final String globalsChunkFile = config.CHUNKFILES_HOME + config.CHUNKSGLOBALS_JSON_FILENAME;
 
-        final List<String> dependencies =
-            getScriptDependencyNames( (Map<String, Object>) parseJson( resourceReader.readResource( globalsChunkFile ) ) );
+        final List<String> dependencies = getScriptDependencyNames( parseJson( resourceReader.readResource( globalsChunkFile ) ) );
 
         this.assetLoader.loadAssetsIntoEngine( dependencies );
 
@@ -73,123 +73,96 @@ public class Renderer {
 
     /**
      * Renders an entry to an HTML string.
-     * @param entryName name of a transpiled JSX component, i.e. jsxPath: the filextension-less path to the compiled entry asset under assets/react4xp/, e.g: "site/parts/simple-reactive/simple-reactive"
-     * @param props valid stringified JSON object: the entry's react props, e.g. '{"insertedMessage": "this is a prop!"}'
+     *
+     * @param entryName       name of a transpiled JSX component, i.e. jsxPath: the filextension-less path to the compiled entry asset under assets/react4xp/, e.g: "site/parts/simple-reactive/simple-reactive"
+     * @param props           valid stringified JSON object: the entry's react props, e.g. '{"insertedMessage": "this is a prop!"}'
      * @param dependencyNames valid array: a set of file names to load into the engine (if not already done during initialization), needed by the entry before running it
      * @return {Map} Under the key 'html' (KEY_HTML), naked rendered HTML if successful. Under the key 'error' (KEY_ERROR), error message if failed.
      */
     public Map<String, String> render( final String entryName, final String props, final String[] dependencyNames )
     {
-        List<String> jsDependencies =
-            Arrays.stream( dependencyNames ).filter( fileName -> fileName.endsWith( ".js" ) ).collect( Collectors.toList() );
+        List<String> jsDependencies = Arrays.stream( dependencyNames ).filter( fileName -> fileName.endsWith( ".js" ) ).toList();
         LOG.debug( "#{}:{} render {}", this.id, this.libraryName, entryName );
         try
         {
             this.assetLoader.loadAssetsIntoEngine( jsDependencies );
 
-            final Invocable invocable = (Invocable) this.engine;
-            final var libObject = (Map<String, Object>) this.engine.get( libraryName );
-            if ( libObject == null )
+            final Value bindings = context.getBindings( "js" );
+            final Value libValue = bindings.getMember( libraryName );
+            if ( libValue == null || libValue.isNull() )
             {
                 throw new IllegalStateException( libraryName + " is not found in engine" );
             }
 
-            if ( LOG.isDebugEnabled() ) {
-                LOG.debug( "#{}:{} available entries {}", this.id, this.libraryName, libObject.keySet() );
+            if ( LOG.isDebugEnabled() )
+            {
+                LOG.debug( "#{}:{} available entries {}", this.id, this.libraryName, libValue.getMemberKeys() );
             }
 
-            final var entryObject = (Map<String, Object>) libObject.get( entryName );
-            if ( entryObject == null )
+            final Value entryValue = libValue.getMember( entryName );
+            if ( entryValue == null || entryValue.isNull() )
             {
                 throw new IllegalStateException( entryName + " is not found in " + libraryName );
             }
 
-            final Object propsJson = parseJson( props );
-            final Object entryWithProps;
-                // Graal.js fails to find "default" method when invokeMethod is used. Call directly
-                // Hopefully will be fixed in future versions of Graal.js
-                // entryWithProps = invocable.invokeMethod( entryObject, "default", propsJson );
+            final Value propsJson = parseJson( props );
+            final Value entryWithProps = entryValue.getMember( "default" ).execute( propsJson );
 
-                final var defaultFunction = (Function<Object, Object[]>) entryObject.get( "default" );
-                entryWithProps = defaultFunction.apply( new Object[]{propsJson} );
-
-            final Object renderOpts = parseJson( "{\"identifierPrefix\": \"" + this.appName + "\"}" );
+            final Value renderOpts = parseJson( "{\"identifierPrefix\": \"" + this.appName + "\"}" );
 
             final String renderedHtml =
-                (String) invocable.invokeMethod( this.engine.get( "ReactDOMServer" ), "renderToString", entryWithProps, renderOpts );
+                bindings.getMember( "ReactDOMServer" ).getMember( "renderToString" ).execute( entryWithProps, renderOpts ).asString();
 
             return Map.of( KEY_HTML, renderedHtml );
         }
-        catch ( ScriptException e )
+        catch ( PolyglotException e )
         {
             ErrorHandler errorHandler = new ErrorHandler();
             String cleanErrorMessage = errorHandler.getCleanErrorMessage( e );
             String call = libraryName + "['" + entryName + "'].default(" + props + ")";
-            LOG.error( e.getMessage() + "\n" + errorHandler.getLoggableStackTrace( e, cleanErrorMessage ) + "\n\n" +
-                           e.getClass().getSimpleName() + ": " + cleanErrorMessage + "\n" + "in " + ServerSideRenderer.class.getName() +
-                           ".runSSR\n" + "Entry: '" + entryName + "'\n" + "Assets involved:\n\t" +
-                           String.join( "\n\t", jsDependencies ) + "\n" + "Failing call: '" + call + "'\n" +
-                           errorHandler.getSolutionTips() );
+            LOG.error( "{}\n{}\n\n{}: {}\nin {}.runSSR\nEntry: '{}'\nAssets involved:\n\t{}\nFailing call: '{}'\n{}", e.getMessage(),
+                       errorHandler.getLoggableStackTrace( e, cleanErrorMessage ), e.getClass().getSimpleName(), cleanErrorMessage,
+                       ServerSideRenderer.class.getName(), entryName, String.join( "\n\t", jsDependencies ), call,
+                       errorHandler.getSolutionTips() );
 
             return Map.of( KEY_ERROR, cleanErrorMessage );
-        }
-        catch ( Exception e )
-        {
-            ErrorHandler errorHandler = new ErrorHandler();
-            LOG.error( errorHandler.getLoggableStackTrace( e, null ) );
-            return Map.of( KEY_ERROR, e.getClass().getName() + ": " + e.getMessage() );
         }
     }
 
     /**
      * Reads and parses file names from webpack-generated JSON files that list up content-hashed bundle chunk names.
-     * @param chunksData JSON-like map of chunk names
+     *
+     * @param chunksData parsed JSON value of chunk data
      * @return bundle chunk names
      */
-    private static List<String> getScriptDependencyNames( final Map<String, Object> chunksData )
+    private static List<String> getScriptDependencyNames( final Value chunksData )
     {
-        return chunksData.values().stream().map( value -> {
-            final Map<String, Object> chunk = (Map<String, Object>) value;
-            final Object fetchedChunk = chunk.get( "js" );
+        return chunksData.getMemberKeys().stream().map( key -> {
+            final Value chunk = chunksData.getMember( key );
+            final Value fetchedChunk = chunk.getMember( "js" );
 
-            if ( fetchedChunk instanceof String )
+            if ( fetchedChunk.isString() )
             {
-                return (String) fetchedChunk;
+                return fetchedChunk.asString();
             }
             else
             {
-                final List<String> arr = adaptList( fetchedChunk );
-                if ( arr.size() != 1 )
+                if ( fetchedChunk.getArraySize() != 1 )
                 {
                     throw new IllegalStateException( "Unexpected JSON chunk format, expected exactly 1 item in array. Chunk: " + chunk );
                 }
-                return arr.get( 0 );
+                return fetchedChunk.getArrayElement( 0 ).asString();
             }
-        } ).distinct().collect( Collectors.toList() );
+        } ).distinct().toList();
     }
 
-    private Object parseJson( String json )
+    private Value parseJson( String json )
     {
-        final Invocable invocable = (Invocable) engine;
-        try
-        {
-            return invocable.invokeMethod( engine.get( "JSON" ), "parse", json );
-        }
-        catch ( ScriptException | NoSuchMethodException e )
-        {
-            throw new RuntimeException( e );
-        }
+        return context.getBindings( "js" ).getMember( "JSON" ).getMember( "parse" ).execute( json );
     }
 
-    private static <T> List<T> adaptList( final Object object )
+    public void close()
     {
-        if ( object instanceof List )
-        {
-            return (List<T>) object;
-        }
-        else
-        {
-            throw new IllegalArgumentException( "object is not a list" );
-        }
+        context.close();
     }
 }

@@ -1,5 +1,6 @@
 package com.enonic.lib.react4xp.ssr;
 
+import java.lang.ref.Cleaner;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -26,6 +27,8 @@ public class ServerSideRenderer
     implements ScriptBean
 {
     private static final Logger LOG = LoggerFactory.getLogger( ServerSideRenderer.class );
+
+    private static final Cleaner CLEANER = Cleaner.create();
 
     private final AtomicBoolean isInitialized = new AtomicBoolean();
 
@@ -60,6 +63,8 @@ public class ServerSideRenderer
                 final RendererFactory rendererFactory = new RendererFactory( resourceReader, config );
 
                 rendererPool = new GenericObjectPool<>( rendererFactory, createPoolConfig( poolSize ) );
+
+                CLEANER.register( this, new ShutdownAction( rendererPool ) );
             }
             finally
             {
@@ -112,5 +117,30 @@ public class ServerSideRenderer
         }
 
         return result;
+    }
+
+    private record ShutdownAction(GenericObjectPool<Renderer> pool)
+        implements Runnable
+    {
+        @Override
+        public void run()
+        {
+            try
+            {
+                pool.close();
+            }
+            catch ( Exception e )
+            {
+                LOG.warn( "Error closing renderer pool", e );
+            }
+            try
+            {
+                ( (RendererFactory) pool.getFactory() ).close();
+            }
+            catch ( Exception e )
+            {
+                LOG.warn( "Error closing shared GraalJS engine", e );
+            }
+        }
     }
 }

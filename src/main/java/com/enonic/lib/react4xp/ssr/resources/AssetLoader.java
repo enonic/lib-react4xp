@@ -4,9 +4,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptException;
-
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.PolyglotException;
+import org.graalvm.polyglot.Source;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,16 +25,19 @@ public class AssetLoader
 
     private final String scriptsHome;
 
-    private final ScriptEngine engine;
+    private final Context context;
+
+    private final SourceProvider sourceProvider;
 
     private final Set<String> assetLoadedMarkers = new HashSet<>();
 
-    public AssetLoader( ResourceReader resourceReader, String scriptsHome, long id, ScriptEngine engine )
+    public AssetLoader( ResourceReader resourceReader, String scriptsHome, long id, Context context, SourceProvider sourceProvider )
     {
         this.id = id;
         this.resourceReader = resourceReader;
         this.scriptsHome = scriptsHome;
-        this.engine = engine;
+        this.context = context;
+        this.sourceProvider = sourceProvider;
     }
 
     public void loadAssetsIntoEngine( List<String> assets )
@@ -75,16 +78,14 @@ public class AssetLoader
         LOG.debug( "#{}: eval resource '{}'", id, asset );
         try
         {
-            eval( engine, assetContent );
+            eval( context, sourceProvider.get( asset, assetContent ) );
         }
         catch ( RenderException e )
         {
             ErrorHandler errorHandler = new ErrorHandler();
-            LOG.error(
-                ( e.getStacktraceString() == null ? "" : e.getStacktraceString() + "\n" ) + errorHandler.getLoggableStackTrace( e, null ) +
-                    "\n\n" + e.getClass().getSimpleName() + ": " + e.getMessage() + "\n" +
-                    "Engine #" + id + "\n" +
-                    "assetName = '" + asset + "'\n" + errorHandler.getSolutionTips() );
+            LOG.error( "{}{}\n\n{}: {}\nEngine #{}\nassetName = '{}'\n{}",
+                       e.getStacktraceString() == null ? "" : e.getStacktraceString() + "\n", errorHandler.getLoggableStackTrace( e, null ),
+                       e.getClass().getSimpleName(), e.getMessage(), id, asset, errorHandler.getSolutionTips() );
 
             throw e;
         }
@@ -95,16 +96,16 @@ public class AssetLoader
         LOG.debug( "#{}: ...'{}' loaded", id, asset );
     }
 
-    private static void eval( final ScriptEngine engine, final String callScript )
+    private static void eval( final Context context, final Source source )
         throws RenderException
     {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader( engine.getClass().getClassLoader() );
+        Thread.currentThread().setContextClassLoader( context.getClass().getClassLoader() );
         try
         {
-            engine.eval( callScript );
+            context.eval( source );
         }
-        catch ( ScriptException e )
+        catch ( PolyglotException e )
         {
             throw new RenderException( e );
         }
@@ -113,5 +114,4 @@ public class AssetLoader
             Thread.currentThread().setContextClassLoader( classLoader );
         }
     }
-
 }
