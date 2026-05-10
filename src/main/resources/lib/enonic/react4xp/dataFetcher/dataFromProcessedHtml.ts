@@ -71,7 +71,7 @@ export function dataFromProcessedHtml(processedHtml: string): RichTextData {
 			const [_fullSrc, src] = srcMatches;
 			// (log||console).debug('src:%s', src);
 
-			const idMatches = src.match(/_\/image\/([0-9a-f-]+)/);
+			const idMatches = src.match(/\/_\/media:(?:image|attachment)\/[^\/]+\/([0-9a-f-]+):/);
 			// (log||console).debug('idMatches:%s', idMatches);
 
 			if (!idMatches) {
