@@ -20,7 +20,7 @@ jobs:
           codecovToken: ${{ secrets.CODECOV_TOKEN }}
           releaseBranch: |
               master
-              7.x
+              6.x
 
       - name: Upload npm package
         if: steps.build-and-publish.outputs.release == 'true'
