@@ -1,0 +1,26 @@
+[versions]
+graalvm-polyglot = "25.0.3"
+junit = "6.0.3"
+mockito = "5.23.0"
+attoparser = "2.0.7.RELEASE"
+commons-pool2 = "2.13.1"
+enonic-lib-static = "2.1.1"
+enonic-defaults = "2.1.6"
+node-gradle = "7.1.0"
+
+[libraries]
+graalvm-polyglot = { module = "org.graalvm.polyglot:polyglot", version.ref = "graalvm-polyglot" }
+graalvm-js = { module = "org.graalvm.polyglot:js", version.ref = "graalvm-polyglot" }
+enonic-lib-static = { module = "com.enonic.lib:lib-static", version.ref = "enonic-lib-static" }
+attoparser = { module = "org.attoparser:attoparser", version.ref = "attoparser" }
+commons-pool2 = { module = "org.apache.commons:commons-pool2", version.ref = "commons-pool2" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+mockito-bom = { module = "org.mockito:mockito-bom", version.ref = "mockito" }
+mockito-core = { module = "org.mockito:mockito-core" }
+mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter" }
+
+[plugins]
+enonic-defaults = { id = "com.enonic.defaults", version.ref = "enonic-defaults" }
+node-gradle = { id = "com.github.node-gradle.node", version.ref = "node-gradle" }

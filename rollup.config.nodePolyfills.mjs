@@ -1,5 +1,6 @@
 import alias from '@rollup/plugin-alias';
 import commonjs from '@rollup/plugin-commonjs';
+import nodeResolve from '@rollup/plugin-node-resolve';
 import {dirname, join} from 'path';
 import esbuild from 'rollup-plugin-esbuild'
 import {fileURLToPath} from 'url';
@@ -24,6 +25,7 @@ export default {
 				{ find: '@sinonjs/text-encoding', replacement: join(__dirname,'./node_modules/@sinonjs/text-encoding/lib/encoding.js') },
 			]
 		}),
+		nodeResolve(), // Resolves modules from node_modules (e.g. core-js internals)
 		commonjs(), // A Rollup plugin to convert CommonJS modules to ES6, so they can be included in a Rollup bundle
 		esbuild({
 			minify: process.env.NODE_ENV === 'production',
