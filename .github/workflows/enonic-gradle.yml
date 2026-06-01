@@ -19,7 +19,7 @@ jobs:
           repoPassword: ${{ secrets.ARTIFACTORY_PASSWORD }}
           codecovToken: ${{ secrets.CODECOV_TOKEN }}
           releaseBranch: |
-              master
+              7.x
               6.x
 
       - name: Upload npm package

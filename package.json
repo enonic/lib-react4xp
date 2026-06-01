@@ -15,7 +15,7 @@
     "Pavel Milkevich <pmi@enonic.com>"
   ],
   "dependencies": {
-    "@enonic/js-utils": "^1.9.0"
+    "@enonic/js-utils": "^2.0.0-beta.1"
   },
   "description": "XP serverside runtime, handles the bulk of the React4xp work: server-side rendering, and handling and serving of client-side components and dependency chunks to the client, including the React4xp front-end rendering wrapper itself.\"",
   "devDependencies": {
@@ -29,7 +29,7 @@
     "@enonic-types/lib-context": "^8.0.0-B4",
     "@enonic-types/lib-io": "^8.0.0-B4",
     "@enonic-types/lib-portal": "^8.0.0-B4",
-    "@enonic/mock-xp": "^1.1.0-B4",
+    "@enonic/mock-xp": "^2.0.0-beta.2",
     "@enonic/react-components": "^7.0.0-B1",
     "@enonic/react4xp": "6.1.0",
     "@jest/globals": "^30.2.0",
@@ -98,7 +98,7 @@
     "tsup:server": "npx tsup -d build/resources/main"
   },
   "engines": {
-    "node": ">= 24.15.0",
-    "npm": ">= 10.9.2"
+    "node": ">= 24.16.0",
+    "npm": ">= 11.13.0"
   }
 }
