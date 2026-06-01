@@ -120,7 +120,7 @@ jest.mock('/lib/xp/content', () => ({
 }), { virtual: true });
 
 jest.mock('/lib/xp/portal', () => ({
-	assetUrl: jest.fn<AssetUrl>((params) => libPortal.assetUrl(params)),
+	assetUrl: jest.fn<AssetUrl>((params) => libPortal.assetUrl(typeof params === 'string' ? {path: params} : params)),
 	getContent: jest.fn<typeof getCurrentContentType>(() => libPortal.getContent()),
 	getSiteConfig: jest.fn<GetSiteConfig>(() => libPortal.getSiteConfig()),
 	imageUrl: jest.fn<typeof imageUrlType>((params) => libPortal.imageUrl(params)),
