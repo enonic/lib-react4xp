@@ -27,7 +27,7 @@
     "@enonic-types/global": "^8.0.0-B4",
     "@enonic-types/lib-content": "^8.0.0-B4",
     "@enonic-types/lib-context": "^8.0.0-B4",
-    "@enonic-types/lib-io": "^8.0.0-B4",
+    "@enonic-types/lib-io": "^8.0.0-RC2",
     "@enonic-types/lib-portal": "^8.0.0-B4",
     "@enonic/mock-xp": "^2.0.0-beta.2",
     "@enonic/react-components": "^7.0.0-B1",
