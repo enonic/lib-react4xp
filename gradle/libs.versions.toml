@@ -4,7 +4,7 @@ junit = "6.1.0"
 mockito = "5.23.0"
 attoparser = "2.0.7.RELEASE"
 commons-pool2 = "2.13.1"
-enonic-lib-static = "3.0.0-SNAPSHOT"
+enonic-lib-static = "3.0.0"
 enonic-defaults = "2.1.7"
 node-gradle = "7.1.0"
 
