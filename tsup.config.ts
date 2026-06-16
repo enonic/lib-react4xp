@@ -9,8 +9,7 @@ export default defineConfig((options) => {
 			bundle: true,
 			entry: {
 				'lib/enonic/react4xp/index': 'src/main/resources/lib/enonic/react4xp/index.ts',
-				'services/react4xp/react4xp': 'src/main/resources/services/react4xp/react4xp.ts',
-				'services/react4xp-dependencies/react4xp-dependencies': 'src/main/resources/services/react4xp-dependencies/react4xp-dependencies.ts'
+				'apis/react4xp/react4xp': 'src/main/resources/apis/react4xp/react4xp.ts'
 			},
 			esbuildOptions(options, context) {
 				// If you have libs with chunks, use this to avoid collisions

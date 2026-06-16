@@ -1,25 +1,24 @@
-import type {AssetUrlParams} from '@enonic-types/lib-portal'; // Might be deprecated in XP8.
+import type {UrlType} from '/lib/enonic/react4xp/types/React4xp';
+import {apiUrl} from '/lib/xp/portal';
 import {getUrlType} from '/lib/enonic/react4xp/React4xp/utils/getUrlType';
-import {serviceUrl} from '/lib/enonic/react4xp/serviceUrl';
 
 
-export interface R4xAssetUrlParams extends AssetUrlParams {
-	service?: string;
+export interface R4xAssetUrlParams {
+	params?: Record<string, string | string[]>;
+	path?: string | string[];
+	type?: UrlType;
 }
 
 
 export function assetUrl({
-	application = app.name,
 	params,
 	path = '/',
-	service = 'asset',
 	type = getUrlType()
-}: R4xAssetUrlParams): string {
-	return serviceUrl({
-		application,
+}: R4xAssetUrlParams = {}): string {
+	return apiUrl({
+		api: 'react4xp',
 		params,
 		path,
-		service,
 		type
 	});
 }
