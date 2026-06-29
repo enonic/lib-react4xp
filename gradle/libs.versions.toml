@@ -1,6 +1,6 @@
 [versions]
 graalvm-polyglot = "25.0.3"
-junit = "6.1.0"
+junit = "6.1.1"
 mockito = "5.23.0"
 attoparser = "2.0.8.RELEASE"
 commons-pool2 = "2.13.1"
