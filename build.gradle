@@ -121,17 +121,8 @@ tasks.register('bundleReactForTest', NpmTask) {
     environment = ['FORCE_COLOR': 'true']
 }
 
-tasks.register('bundleReactServerBrowserForTest', NpmTask) {
-    dependsOn npmInstall
-    args = ['run', 'build:react-server-browser-test-bundle']
-    inputs.file('src/test/js/react-bundle-server-browser-entry.js')
-    inputs.file('package-lock.json')
-    outputs.file('build/resources/test/test-fixtures/react-bundle-server-browser.js')
-    environment = ['FORCE_COLOR': 'true']
-}
-
 test {
-    dependsOn bundleReactForTest, bundleReactServerBrowserForTest
+    dependsOn bundleReactForTest
     useJUnitPlatform {
     }
 }
