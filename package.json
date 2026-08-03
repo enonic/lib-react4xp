@@ -38,7 +38,7 @@
     "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@sinonjs/text-encoding": "^0.7.3",
-    "@swc/core": "^1.15.46",
+    "@swc/core": "^1.15.47",
     "@types/jest": "^30.0.0",
     "@types/react": "^19.2.18",
     "@typescript-eslint/eslint-plugin": "^8.65.0",
