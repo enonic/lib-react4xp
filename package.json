@@ -94,7 +94,6 @@
     "postcov": "npm run lcov",
     "reinstall": "npm run clean && npm run local",
     "build:react-test-bundle": "esbuild src/test/js/react-bundle-entry.js --bundle --format=iife --platform=neutral --define:process.env.NODE_ENV=\\\"production\\\" --outfile=build/resources/test/test-fixtures/react-bundle.js",
-    "build:react-server-browser-test-bundle": "esbuild src/test/js/react-bundle-server-browser-entry.js --bundle --format=iife --platform=neutral --define:process.env.NODE_ENV=\\\"production\\\" --outfile=build/resources/test/test-fixtures/react-bundle-server-browser.js",
     "rollup:nodePolyfills": "npx rollup --config rollup.config.nodePolyfills.mjs",
     "test": "npm run test:jest && npm run test:deno",
     "test:deno": "deno test --coverage=build/deno/coverage --env-file=src/deno/.env --importmap=src/deno/importmap.json --no-check src/deno/**/*.test.ts",

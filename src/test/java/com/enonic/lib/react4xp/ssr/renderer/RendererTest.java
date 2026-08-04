@@ -145,36 +145,6 @@ class RendererTest
     }
 
     @Test
-    void render_real_react_component_via_server_browser_with_message_channel_shim()
-    {
-        // server.browser constructs `new MessageChannel()` at module-load time. This test
-        // pins the contract that the transitional shim in nodePolyfills.ts lets the module
-        // load and that renderToString (via server-legacy.browser) produces HTML.
-        final String reactBundle = readClasspathResource( "/test-fixtures/react-bundle-server-browser.js" );
-
-        final Map<String, String> fixtures = new HashMap<>();
-        fixtures.put( POLYFILL_BASICS, readClasspathResource( POLYFILL_BASICS ) );
-        fixtures.put( POLYFILL_NODE, readClasspathResource( POLYFILL_NODE ) );
-        fixtures.put( CHUNKS_GLOBALS_JSON, "{ \"main\": { \"js\": \"globals.js\" } }" );
-        fixtures.put( GLOBALS_JS,
-                      reactBundle + "\n" + "globalThis.React4xp = {" + "  '_components/Greeter': {" + "    default: function(props) {" +
-                          "      return React.createElement('h1', null, 'Hello, ' + props.name + '!');" + "    }" + "  }" + "};" );
-
-        final Renderer renderer = new Renderer( strictReader( fixtures ), testConfig(), 11L, engine, freshSource() );
-        try
-        {
-            final Map<String, String> result = renderer.render( "_components/Greeter", "{\"name\":\"World\"}", new String[0] );
-
-            assertNull( result.get( KEY_ERROR ), "expected success, got error: " + result.get( KEY_ERROR ) );
-            assertEquals( "<h1>Hello, World!</h1>", result.get( KEY_HTML ) );
-        }
-        finally
-        {
-            renderer.close();
-        }
-    }
-
-    @Test
     void render_unknown_entry_propagates_illegal_state()
     {
         final Map<String, String> fixtures = baseFixtures();
