@@ -40,6 +40,7 @@ public class EngineFactory
                 .engine( engine )
                 .allowExperimentalOptions( true )
                 .allowHostAccess( HostAccess.NONE )
+                .option( "js.text-encoding", "true" )
                 .build();
         }
         finally

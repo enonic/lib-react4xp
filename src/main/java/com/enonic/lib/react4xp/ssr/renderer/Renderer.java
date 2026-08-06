@@ -28,8 +28,6 @@ public class Renderer
 
     public static final String KEY_HTML = "html";
 
-    private static final String POLYFILL_BASICS_FILE = "/lib/enonic/polyfill-react4xp/polyfillBasics.js";
-
     private static final String POLYFILL_REACT4XP_NODE_FILE = "/lib/enonic/polyfill-react4xp/nodePolyfills.js";
 
     private final long id;
@@ -57,7 +55,6 @@ public class Renderer
 
         LOG.debug( "#{}:{} loading polyfills ...", this.id, this.libraryName );
 
-        this.assetLoader.loadAssetIntoEngine( POLYFILL_BASICS_FILE, true );
         this.assetLoader.loadAssetIntoEngine( POLYFILL_REACT4XP_NODE_FILE, true );
 
         LOG.debug( "#{}:{} loading globals...", this.id, this.libraryName );
