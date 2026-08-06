@@ -30,8 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @EnabledIf("graalJsExists")
 class RendererTest
 {
-    private static final String POLYFILL_BASICS = "/lib/enonic/polyfill-react4xp/polyfillBasics.js";
-
     private static final String POLYFILL_NODE = "/lib/enonic/polyfill-react4xp/nodePolyfills.js";
 
     private static final String CHUNKS_GLOBALS_JSON = "/react4xp/chunks.globals.json";
@@ -112,10 +110,7 @@ class RendererTest
     {
         final String reactBundle = readClasspathResource( "/test-fixtures/react-bundle.js" );
 
-        // Use the real production-compiled polyfills, so the React bundle finds globalThis.TextEncoder
-        // (and the SSR timer no-ops) the same way it does in production.
         final Map<String, String> fixtures = new HashMap<>();
-        fixtures.put( POLYFILL_BASICS, readClasspathResource( POLYFILL_BASICS ) );
         fixtures.put( POLYFILL_NODE, readClasspathResource( POLYFILL_NODE ) );
         fixtures.put( CHUNKS_GLOBALS_JSON, "{ \"main\": { \"js\": \"globals.js\" } }" );
         fixtures.put( GLOBALS_JS,
@@ -184,7 +179,6 @@ class RendererTest
     private static Map<String, String> baseFixtures()
     {
         final Map<String, String> fixtures = new HashMap<>();
-        fixtures.put( POLYFILL_BASICS, "" );
         fixtures.put( POLYFILL_NODE, "" );
         return fixtures;
     }
