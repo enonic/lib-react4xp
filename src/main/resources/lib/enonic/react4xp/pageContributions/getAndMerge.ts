@@ -60,6 +60,8 @@ export function getAndMerge({
 
 	const executorEntry = `<script defer src="${getExecutorUrl({ urlType })}"></script>\n`;
 
+	const keepExecutor = !suppressJS || (incomingPgContrib.bodyEnd || []).indexOf(executorEntry) !== -1;
+
 	// Keeps track of already-added entries across headBegin, headEnd, bodyBegin and bodyEnd
 	const controlSet = [
 		executorEntry // Skip until manually added, must be last...
@@ -97,6 +99,6 @@ export function getAndMerge({
 				newPgContrib.bodyEnd
 			],
 			controlSet
-		).concat(suppressJS ? [] : executorEntry) // Manually added last :)
+		).concat(keepExecutor ? executorEntry : []) // Manually added last :)
 	};
 }
