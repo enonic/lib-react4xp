@@ -18,6 +18,8 @@ jobs:
           repoUser: ci
           repoPassword: ${{ secrets.ARTIFACTORY_PASSWORD }}
           codecovToken: ${{ secrets.CODECOV_TOKEN }}
+          releaseBranch: |
+            6.x
 
       - name: Upload npm package
         if: steps.build-and-publish.outputs.release == 'true'
@@ -47,7 +49,7 @@ jobs:
         run: |
           VERSION=$(node -p "require('./build/types/package.json').version")
           if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "NPM_TAG=latest" >> $GITHUB_ENV
+            echo "NPM_TAG=latest-6" >> $GITHUB_ENV
           else
             echo "NPM_TAG=beta" >> $GITHUB_ENV
           fi
