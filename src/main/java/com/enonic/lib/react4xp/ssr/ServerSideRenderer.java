@@ -76,6 +76,7 @@ public class ServerSideRenderer
         poolConfig.setMaxIdle( poolSize );
         poolConfig.setMinIdle( poolSize );
         poolConfig.setMaxTotal( poolSize );
+        poolConfig.setJmxEnabled( false );
         return poolConfig;
     }
 
