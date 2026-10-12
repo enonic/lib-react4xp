@@ -42,7 +42,7 @@
     "@typescript-eslint/eslint-plugin": "^8.71.0",
     "@typescript-eslint/parser": "^8.70.1",
     "bun": "^1.4.2",
-    "concurrently": "^10.0.5",
+    "concurrently": "^10.0.6",
     "core-js": "3.50.0",
     "eslint": "^10.11.0",
     "eslint-formatter-pretty": "^7.1.0",
