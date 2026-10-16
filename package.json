@@ -39,7 +39,7 @@
     "@swc/core": "^1.16.13",
     "@types/jest": "^30.0.0",
     "@types/react": "^19.3.0",
-    "@typescript-eslint/eslint-plugin": "^8.71.0",
+    "@typescript-eslint/eslint-plugin": "^8.71.2",
     "@typescript-eslint/parser": "^8.71.1",
     "bun": "^1.4.3",
     "concurrently": "^10.0.6",
