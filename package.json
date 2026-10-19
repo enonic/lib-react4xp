@@ -55,7 +55,7 @@
     "rollup-plugin-esbuild": "^6.2.1",
     "ts-jest": "^29.4.14",
     "ts-node": "^10.9.2",
-    "tsup": "^8.5.1",
+    "tsup": "^9.0.0",
     "typescript": "^5.9.3"
   },
   "main": "src/main/resources/lib/enonic/react4xp/index.es6",
